@@ -109,32 +109,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildProgressIndicator() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingL,
+        vertical: AppConstants.spacingM,
+      ),
       child: Column(
         children: [
           Row(
             children: List.generate(_steps.length, (index) {
               return Expanded(
                 child: Container(
-                  height: 4,
+                  height: 3,
                   margin: EdgeInsets.only(
                     right:
-                        index < _steps.length - 1 ? AppConstants.spacingS : 0,
+                        index < _steps.length - 1 ? AppConstants.spacingXS : 0,
                   ),
                   decoration: BoxDecoration(
                     color: index <= _currentPage
                         ? _steps[index].color
-                        : AppConstants.textTertiary.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
+                        : AppConstants.textTertiary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),
               );
             }),
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          const SizedBox(height: AppConstants.spacingS),
           Text(
             '${_currentPage + 1} of ${_steps.length}',
-            style: AppTextStyles.caption,
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 11,
+              color: AppConstants.textTertiary,
+            ),
           ),
         ],
       ),
@@ -161,36 +167,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
             color: step.color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(AppConstants.radiusXL),
+            borderRadius: BorderRadius.circular(AppConstants.radiusL),
           ),
           child: Icon(
             step.icon,
-            size: 40,
+            size: 32,
             color: step.color,
           ),
         ),
-        const SizedBox(height: AppConstants.spacingL),
+        const SizedBox(height: AppConstants.spacingM),
         Text(
           step.title,
-          style: AppTextStyles.heading2,
+          style: AppTextStyles.heading3,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppConstants.spacingS),
+        const SizedBox(height: AppConstants.spacingXS),
         Text(
           step.subtitle,
-          style: AppTextStyles.bodyLarge.copyWith(
+          style: AppTextStyles.bodyMedium.copyWith(
             color: AppConstants.textSecondary,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppConstants.spacingM),
+        const SizedBox(height: AppConstants.spacingS),
         Text(
           step.description,
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.bodySmall.copyWith(
             color: AppConstants.textTertiary,
           ),
           textAlign: TextAlign.center,
@@ -223,26 +229,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: 200,
-          height: 200,
+          width: 140,
+          height: 140,
           decoration: BoxDecoration(
             gradient: AppConstants.primaryGradient,
-            borderRadius: BorderRadius.circular(AppConstants.radiusXL),
-            boxShadow: AppConstants.shadowL,
+            borderRadius: BorderRadius.circular(AppConstants.radiusL),
+            boxShadow: AppConstants.shadowM,
           ),
           child: const Icon(
             Icons.fitness_center,
-            size: 100,
+            size: 70,
             color: AppConstants.surfaceColor,
           ),
         ),
-        const SizedBox(height: AppConstants.spacingXL),
+        const SizedBox(height: AppConstants.spacingL),
         Text(
           'Ready to transform your fitness journey?',
           style: AppTextStyles.heading3,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppConstants.spacingM),
+        const SizedBox(height: AppConstants.spacingS),
         Text(
           'We\'ll create a personalized experience just for you with AI-powered meal plans and expert trainer guidance.',
           style: AppTextStyles.bodyMedium,
@@ -414,44 +420,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppConstants.radiusL),
+          borderRadius: BorderRadius.circular(AppConstants.radiusM),
           child: Container(
-            padding: const EdgeInsets.all(AppConstants.spacingL),
+            padding: const EdgeInsets.all(AppConstants.spacingM),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppConstants.primaryColor.withOpacity(0.1)
+                  ? AppConstants.primaryColor.withOpacity(0.08)
                   : AppConstants.surfaceColor,
               border: Border.all(
                 color: isSelected
-                    ? AppConstants.primaryColor
-                    : AppConstants.textTertiary.withOpacity(0.3),
-                width: isSelected ? 2 : 1,
+                    ? AppConstants.primaryColor.withOpacity(0.3)
+                    : AppConstants.textTertiary.withOpacity(0.2),
+                width: isSelected ? 1.5 : 1,
               ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusL),
-              boxShadow: isSelected ? AppConstants.shadowM : null,
+              borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              boxShadow: isSelected ? AppConstants.shadowS : null,
             ),
             child: Row(
               children: [
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppConstants.primaryColor
-                        : AppConstants.textTertiary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                        : AppConstants.textTertiary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Icon(
                     icon,
                     color: isSelected
                         ? AppConstants.surfaceColor
                         : AppConstants.textSecondary,
-                    size: 24,
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: AppConstants.spacingM),
@@ -461,7 +467,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       Text(
                         title,
-                        style: AppTextStyles.bodyLarge.copyWith(
+                        style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
                           color: isSelected
                               ? AppConstants.primaryColor
@@ -471,7 +477,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       const SizedBox(height: AppConstants.spacingXS),
                       Text(
                         subtitle,
-                        style: AppTextStyles.bodySmall.copyWith(
+                        style: AppTextStyles.caption.copyWith(
                           color: AppConstants.textSecondary,
                         ),
                       ),
@@ -484,7 +490,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ? Icons.check_box
                         : Icons.radio_button_checked,
                     color: AppConstants.primaryColor,
-                    size: 24,
+                    size: 20,
                   )
                 else
                   Icon(
@@ -492,7 +498,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ? Icons.check_box_outline_blank
                         : Icons.radio_button_unchecked,
                     color: AppConstants.textTertiary,
-                    size: 24,
+                    size: 20,
                   ),
               ],
             ),
@@ -504,36 +510,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildNavigationButtons() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingL,
+        vertical: AppConstants.spacingM,
+      ),
       child: Row(
         children: [
           if (_currentPage > 0)
             Expanded(
-              child: CustomButton(
-                text: 'Back',
-                type: ButtonType.outline,
-                onPressed: () {
-                  _pageController.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
+              child: SizedBox(
+                height: 44,
+                child: CustomButton(
+                  text: 'Back',
+                  type: ButtonType.outline,
+                  onPressed: () {
+                    _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                ),
               ),
             ),
-          if (_currentPage > 0) const SizedBox(width: AppConstants.spacingM),
+          if (_currentPage > 0) const SizedBox(width: AppConstants.spacingS),
           Expanded(
-            child: CustomButton(
-              text: _currentPage == _steps.length - 1 ? 'Get Started' : 'Next',
-              onPressed: () {
-                if (_currentPage == _steps.length - 1) {
-                  _completeOnboarding();
-                } else {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              },
+            child: SizedBox(
+              height: 44,
+              child: CustomButton(
+                text: _currentPage == _steps.length - 1 ? 'Get Started' : 'Next',
+                onPressed: () {
+                  if (_currentPage == _steps.length - 1) {
+                    _completeOnboarding();
+                  } else {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+              ),
             ),
           ),
         ],
@@ -548,36 +563,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     VoidCallback onTap,
   ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppConstants.radiusL),
+          borderRadius: BorderRadius.circular(AppConstants.radiusM),
           child: Container(
-            padding: const EdgeInsets.all(AppConstants.spacingL),
+            padding: const EdgeInsets.all(AppConstants.spacingM),
             decoration: BoxDecoration(
               color: AppConstants.surfaceColor,
               border: Border.all(
-                color: AppConstants.textTertiary.withOpacity(0.3),
+                color: AppConstants.textTertiary.withOpacity(0.2),
                 width: 1,
               ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusL),
+              borderRadius: BorderRadius.circular(AppConstants.radiusM),
               boxShadow: AppConstants.shadowS,
             ),
             child: Row(
               children: [
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                    color: AppConstants.primaryColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   child: Icon(
                     icon,
                     color: AppConstants.primaryColor,
-                    size: 24,
+                    size: 18,
                   ),
                 ),
                 const SizedBox(width: AppConstants.spacingM),
@@ -587,13 +602,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       Text(
                         title,
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: AppTextStyles.caption.copyWith(
                           color: AppConstants.textSecondary,
                         ),
                       ),
                       Text(
                         value,
-                        style: AppTextStyles.bodyLarge.copyWith(
+                        style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -603,6 +618,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Icon(
                   Icons.chevron_right,
                   color: AppConstants.textTertiary,
+                  size: 20,
                 ),
               ],
             ),
@@ -618,13 +634,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final bmiColor = _getBMIColor(bmiCategory);
 
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: bmiColor.withOpacity(0.1),
+        color: bmiColor.withOpacity(0.08),
         border: Border.all(
-          color: bmiColor.withOpacity(0.3),
+          color: bmiColor.withOpacity(0.2),
         ),
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
       ),
       child: Column(
         children: [
@@ -633,32 +649,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               Text(
                 'BMI',
-                style: AppTextStyles.bodyLarge.copyWith(
+                style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 bmiCategory,
-                style: AppTextStyles.bodyMedium.copyWith(
+                style: AppTextStyles.bodySmall.copyWith(
                   color: bmiColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: AppConstants.spacingXS),
           Text(
             bmi.toStringAsFixed(1),
-            style: AppTextStyles.heading3.copyWith(
+            style: AppTextStyles.heading4.copyWith(
               color: bmiColor,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: AppConstants.spacingXS),
           Text(
             '${_height.toStringAsFixed(0)}cm, ${_weight.toStringAsFixed(1)}kg',
             style: AppTextStyles.caption.copyWith(
               color: AppConstants.textSecondary,
+              fontSize: 11,
             ),
           ),
         ],

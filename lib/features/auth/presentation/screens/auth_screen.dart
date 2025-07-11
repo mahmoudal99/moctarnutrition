@@ -31,18 +31,26 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.spacingL),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
           child: Column(
             children: [
               const SizedBox(height: AppConstants.spacingXL),
               _buildHeader(),
-              const SizedBox(height: AppConstants.spacingXL),
-              _buildAuthForm(),
               const SizedBox(height: AppConstants.spacingL),
-              _buildSocialAuth(),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildAuthForm(),
+                    const SizedBox(height: AppConstants.spacingM),
+                    _buildSocialAuth(),
+                    const SizedBox(height: AppConstants.spacingM),
+                    _buildGuestOption(),
+                  ],
+                ),
+              ),
               const SizedBox(height: AppConstants.spacingL),
-              _buildGuestOption(),
             ],
           ),
         ),
@@ -54,31 +62,31 @@ class _AuthScreenState extends State<AuthScreen> {
     return Column(
       children: [
         Container(
-          width: 120,
-          height: 120,
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
             gradient: AppConstants.primaryGradient,
-            borderRadius: BorderRadius.circular(AppConstants.radiusXL),
-            boxShadow: AppConstants.shadowL,
+            borderRadius: BorderRadius.circular(AppConstants.radiusL),
+            boxShadow: AppConstants.shadowM,
           ),
           child: const Icon(
             Icons.fitness_center,
-            size: 60,
+            size: 40,
             color: AppConstants.surfaceColor,
           ),
         ),
-        const SizedBox(height: AppConstants.spacingL),
+        const SizedBox(height: AppConstants.spacingM),
         Text(
           'Almost there!',
-          style: AppTextStyles.heading2,
+          style: AppTextStyles.heading3,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppConstants.spacingS),
+        const SizedBox(height: AppConstants.spacingXS),
         Text(
           _isSignUp 
               ? 'Create your account to save your progress'
               : 'Welcome back! Sign in to continue',
-          style: AppTextStyles.bodyLarge.copyWith(
+          style: AppTextStyles.bodyMedium.copyWith(
             color: AppConstants.textSecondary,
           ),
           textAlign: TextAlign.center,
@@ -104,7 +112,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            const SizedBox(height: AppConstants.spacingS),
           ],
           _buildTextField(
             controller: _emailController,
@@ -121,7 +129,7 @@ class _AuthScreenState extends State<AuthScreen> {
               return null;
             },
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          const SizedBox(height: AppConstants.spacingS),
           _buildTextField(
             controller: _passwordController,
             label: 'Password',
@@ -131,6 +139,7 @@ class _AuthScreenState extends State<AuthScreen> {
               icon: Icon(
                 _obscurePassword ? Icons.visibility : Icons.visibility_off,
                 color: AppConstants.textTertiary,
+                size: 20,
               ),
               onPressed: () {
                 setState(() {
@@ -148,9 +157,9 @@ class _AuthScreenState extends State<AuthScreen> {
               return null;
             },
           ),
-          const SizedBox(height: AppConstants.spacingL),
-          _buildAuthButton(),
           const SizedBox(height: AppConstants.spacingM),
+          _buildAuthButton(),
+          const SizedBox(height: AppConstants.spacingS),
           _buildToggleAuth(),
         ],
       ),
@@ -169,9 +178,9 @@ class _AuthScreenState extends State<AuthScreen> {
     return Container(
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
         border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.3),
+          color: AppConstants.textTertiary.withOpacity(0.2),
         ),
         boxShadow: AppConstants.shadowS,
       ),
@@ -180,13 +189,24 @@ class _AuthScreenState extends State<AuthScreen> {
         obscureText: obscureText,
         keyboardType: keyboardType,
         validator: validator,
+        style: AppTextStyles.bodyMedium,
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon, color: AppConstants.primaryColor),
+          prefixIcon: Icon(icon, color: AppConstants.primaryColor, size: 20),
           suffixIcon: suffixIcon,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(AppConstants.spacingL),
-          labelStyle: TextStyle(color: AppConstants.textSecondary),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.spacingM,
+            vertical: AppConstants.spacingS,
+          ),
+          labelStyle: TextStyle(
+            color: AppConstants.textSecondary,
+            fontSize: 14,
+          ),
+          floatingLabelStyle: TextStyle(
+            color: AppConstants.primaryColor,
+            fontSize: 12,
+          ),
         ),
       ),
     );
@@ -195,6 +215,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildAuthButton() {
     return SizedBox(
       width: double.infinity,
+      height: 48,
       child: CustomButton(
         text: _isLoading 
             ? 'Please wait...' 
@@ -213,7 +234,7 @@ class _AuthScreenState extends State<AuthScreen> {
           _isSignUp 
               ? 'Already have an account? ' 
               : 'Don\'t have an account? ',
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.bodySmall.copyWith(
             color: AppConstants.textSecondary,
           ),
         ),
@@ -225,7 +246,7 @@ class _AuthScreenState extends State<AuthScreen> {
           },
           child: Text(
             _isSignUp ? 'Sign In' : 'Sign Up',
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppConstants.primaryColor,
               fontWeight: FontWeight.w600,
             ),
@@ -240,20 +261,20 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         Row(
           children: [
-            Expanded(child: Divider(color: AppConstants.textTertiary)),
+            Expanded(child: Divider(color: AppConstants.textTertiary.withOpacity(0.3))),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
+              padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
               child: Text(
-                'Or continue with',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppConstants.textSecondary,
+                'or',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textTertiary,
                 ),
               ),
             ),
-            Expanded(child: Divider(color: AppConstants.textTertiary)),
+            Expanded(child: Divider(color: AppConstants.textTertiary.withOpacity(0.3))),
           ],
         ),
-        const SizedBox(height: AppConstants.spacingL),
+        const SizedBox(height: AppConstants.spacingS),
         Row(
           children: [
             Expanded(
@@ -264,7 +285,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 () => _handleGoogleSignIn(),
               ),
             ),
-            const SizedBox(width: AppConstants.spacingM),
+            const SizedBox(width: AppConstants.spacingS),
             Expanded(
               child: _buildSocialButton(
                 'Apple',
@@ -286,12 +307,12 @@ class _AuthScreenState extends State<AuthScreen> {
     VoidCallback onPressed,
   ) {
     return Container(
-      height: 56,
+      height: 44,
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
         border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.3),
+          color: AppConstants.textTertiary.withOpacity(0.2),
         ),
         boxShadow: AppConstants.shadowS,
       ),
@@ -299,15 +320,15 @@ class _AuthScreenState extends State<AuthScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(AppConstants.radiusL),
+          borderRadius: BorderRadius.circular(AppConstants.radiusM),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: 24),
-              const SizedBox(width: AppConstants.spacingS),
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: AppConstants.spacingXS),
               Text(
                 text,
-                style: AppTextStyles.bodyMedium.copyWith(
+                style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -321,19 +342,21 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildGuestOption() {
     return Column(
       children: [
-        const SizedBox(height: AppConstants.spacingL),
         Text(
           'Want to try first?',
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.caption.copyWith(
             color: AppConstants.textSecondary,
           ),
         ),
-        const SizedBox(height: AppConstants.spacingS),
         TextButton(
           onPressed: _handleGuestAccess,
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
+            minimumSize: const Size(0, 32),
+          ),
           child: Text(
             'Continue as Guest',
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.caption.copyWith(
               color: AppConstants.primaryColor,
               fontWeight: FontWeight.w600,
             ),
