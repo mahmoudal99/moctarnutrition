@@ -64,36 +64,41 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 120,
-            height: 120,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               gradient: AppConstants.accentGradient,
-              borderRadius: BorderRadius.circular(AppConstants.radiusXL),
-              boxShadow: AppConstants.shadowL,
+              borderRadius: BorderRadius.circular(AppConstants.radiusL),
+              boxShadow: AppConstants.shadowM,
             ),
             child: const Icon(
               Icons.psychology,
-              size: 60,
+              size: 40,
               color: AppConstants.surfaceColor,
             ),
           ),
-          const SizedBox(height: AppConstants.spacingXL),
+          const SizedBox(height: AppConstants.spacingL),
           Text(
             'AI is crafting your meal plan...',
-            style: AppTextStyles.heading3,
+            style: AppTextStyles.heading4,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          const SizedBox(height: AppConstants.spacingS),
           Text(
             'Analyzing your preferences and creating personalized recipes',
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppConstants.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppConstants.spacingXL),
-          const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppConstants.accentColor),
+          const SizedBox(height: AppConstants.spacingL),
+          const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(AppConstants.accentColor),
+            ),
           ),
         ],
       ),
@@ -107,9 +112,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
-          const SizedBox(height: AppConstants.spacingXL),
-          _buildPreferencesCard(),
           const SizedBox(height: AppConstants.spacingL),
+          _buildPreferencesCard(),
+          const SizedBox(height: AppConstants.spacingM),
           _buildGenerateButton(),
         ],
       ),
@@ -118,31 +123,31 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
         gradient: AppConstants.primaryGradient,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        boxShadow: AppConstants.shadowM,
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        boxShadow: AppConstants.shadowS,
       ),
       child: Column(
         children: [
           const Icon(
             Icons.psychology,
-            size: 60,
+            size: 40,
             color: AppConstants.surfaceColor,
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          const SizedBox(height: AppConstants.spacingS),
           Text(
             'AI-Powered Meal Planning',
-            style: AppTextStyles.heading3.copyWith(
+            style: AppTextStyles.heading4.copyWith(
               color: AppConstants.surfaceColor,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: AppConstants.spacingXS),
           Text(
             'Get personalized meal plans tailored to your fitness goals, dietary restrictions, and preferences',
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppConstants.surfaceColor.withOpacity(0.9),
             ),
             textAlign: TextAlign.center,
@@ -155,7 +160,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   Widget _buildPreferencesCard() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingL),
+        padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -163,28 +168,28 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               'Meal Plan Settings',
               style: AppTextStyles.heading4,
             ),
-            const SizedBox(height: AppConstants.spacingL),
+            const SizedBox(height: AppConstants.spacingM),
             _buildSettingRow(
               'Plan Duration',
               '$_selectedDays days',
               Icons.calendar_today,
               () => _showDaysSelector(),
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            const SizedBox(height: AppConstants.spacingS),
             _buildSettingRow(
               'Target Calories',
               '$_targetCalories cal/day',
               Icons.local_fire_department,
               () => _showCaloriesSelector(),
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            const SizedBox(height: AppConstants.spacingS),
             _buildSettingRow(
               'Fitness Goal',
               _getFitnessGoalText(_userPreferences.fitnessGoal),
               Icons.track_changes,
               null,
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            const SizedBox(height: AppConstants.spacingS),
             _buildSettingRow(
               'Dietary Restrictions',
               _userPreferences.dietaryRestrictions.join(', '),
@@ -205,7 +210,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   ) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppConstants.radiusM),
+      borderRadius: BorderRadius.circular(AppConstants.radiusS),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: AppConstants.spacingS,
@@ -214,16 +219,16 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                color: AppConstants.primaryColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(AppConstants.radiusS),
               ),
               child: Icon(
                 icon,
                 color: AppConstants.primaryColor,
-                size: 20,
+                size: 18,
               ),
             ),
             const SizedBox(width: AppConstants.spacingM),
@@ -233,13 +238,13 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                 children: [
                   Text(
                     title,
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.caption.copyWith(
                       color: AppConstants.textSecondary,
                     ),
                   ),
                   Text(
                     value,
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -250,6 +255,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               Icon(
                 Icons.chevron_right,
                 color: AppConstants.textTertiary,
+                size: 20,
               ),
           ],
         ),
@@ -258,10 +264,14 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   }
 
   Widget _buildGenerateButton() {
-    return GradientButton(
-      text: 'Generate AI Meal Plan',
-      icon: Icons.psychology,
-      onPressed: _generateNewMealPlan,
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: GradientButton(
+        text: 'Generate AI Meal Plan',
+        icon: Icons.psychology,
+        onPressed: _generateNewMealPlan,
+      ),
     );
   }
 
@@ -274,9 +284,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildMealPlanHeader(),
-          const SizedBox(height: AppConstants.spacingL),
+          const SizedBox(height: AppConstants.spacingM),
           _buildNutritionSummary(),
-          const SizedBox(height: AppConstants.spacingL),
+          const SizedBox(height: AppConstants.spacingM),
           _buildMealDaysList(),
         ],
       ),
@@ -285,11 +295,11 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   Widget _buildMealPlanHeader() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
         gradient: AppConstants.accentGradient,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        boxShadow: AppConstants.shadowM,
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        boxShadow: AppConstants.shadowS,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,7 +309,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               const Icon(
                 Icons.psychology,
                 color: AppConstants.surfaceColor,
-                size: 30,
+                size: 24,
               ),
               const SizedBox(width: AppConstants.spacingS),
               Text(
@@ -307,21 +317,22 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                 style: AppTextStyles.caption.copyWith(
                   color: AppConstants.surfaceColor,
                   fontWeight: FontWeight.w600,
+                  fontSize: 11,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          const SizedBox(height: AppConstants.spacingS),
           Text(
             _currentMealPlan!.title,
-            style: AppTextStyles.heading3.copyWith(
+            style: AppTextStyles.heading4.copyWith(
               color: AppConstants.surfaceColor,
             ),
           ),
-          const SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: AppConstants.spacingXS),
           Text(
             _currentMealPlan!.description,
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppConstants.surfaceColor.withOpacity(0.9),
             ),
           ),
@@ -333,7 +344,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   Widget _buildNutritionSummary() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingL),
+        padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -341,7 +352,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               'Nutrition Summary',
               style: AppTextStyles.heading4,
             ),
-            const SizedBox(height: AppConstants.spacingM),
+            const SizedBox(height: AppConstants.spacingS),
             Row(
               children: [
                 Expanded(
@@ -352,7 +363,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                     AppConstants.warningColor,
                   ),
                 ),
-                const SizedBox(width: AppConstants.spacingM),
+                const SizedBox(width: AppConstants.spacingS),
                 Expanded(
                   child: _buildNutritionCard(
                     'Protein',
@@ -361,7 +372,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                     AppConstants.accentColor,
                   ),
                 ),
-                const SizedBox(width: AppConstants.spacingM),
+                const SizedBox(width: AppConstants.spacingS),
                 Expanded(
                   child: _buildNutritionCard(
                     'Carbs',
@@ -385,21 +396,21 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     Color color,
   ) {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: const EdgeInsets.all(AppConstants.spacingS),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(AppConstants.radiusS),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withOpacity(0.2),
         ),
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: AppConstants.spacingS),
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: AppConstants.spacingXS),
           Text(
             value,
-            style: AppTextStyles.bodyLarge.copyWith(
+            style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -408,6 +419,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             label,
             style: AppTextStyles.caption.copyWith(
               color: AppConstants.textSecondary,
+              fontSize: 10,
             ),
           ),
         ],
@@ -423,7 +435,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           'Your Meal Plan',
           style: AppTextStyles.heading4,
         ),
-        const SizedBox(height: AppConstants.spacingM),
+        const SizedBox(height: AppConstants.spacingS),
         ..._currentMealPlan!.mealDays.map((mealDay) {
           return _buildMealDayCard(mealDay);
         }).toList(),
@@ -433,17 +445,17 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   Widget _buildMealDayCard(MealDay mealDay) {
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
       child: ExpansionTile(
         title: Text(
           'Day ${_currentMealPlan!.mealDays.indexOf(mealDay) + 1}',
-          style: AppTextStyles.bodyLarge.copyWith(
+          style: AppTextStyles.bodyMedium.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         subtitle: Text(
           '${mealDay.totalCalories} calories',
-          style: AppTextStyles.bodySmall.copyWith(
+          style: AppTextStyles.caption.copyWith(
             color: AppConstants.textSecondary,
           ),
         ),
@@ -457,12 +469,12 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   Widget _buildMealCard(Meal meal) {
     return Container(
       margin: const EdgeInsets.all(AppConstants.spacingS),
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: const EdgeInsets.all(AppConstants.spacingS),
       decoration: BoxDecoration(
         color: AppConstants.backgroundColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderRadius: BorderRadius.circular(AppConstants.radiusS),
         border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.3),
+          color: AppConstants.textTertiary.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -471,16 +483,16 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: _getMealTypeColor(meal.type).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                  color: _getMealTypeColor(meal.type).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusS),
                 ),
                 child: Icon(
                   _getMealTypeIcon(meal.type),
                   color: _getMealTypeColor(meal.type),
-                  size: 20,
+                  size: 18,
                 ),
               ),
               const SizedBox(width: AppConstants.spacingM),
@@ -490,13 +502,13 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                   children: [
                     Text(
                       meal.name,
-                      style: AppTextStyles.bodyLarge.copyWith(
+                      style: AppTextStyles.bodyMedium.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
                       meal.description,
-                      style: AppTextStyles.bodySmall.copyWith(
+                      style: AppTextStyles.caption.copyWith(
                         color: AppConstants.textSecondary,
                       ),
                     ),
@@ -505,14 +517,14 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               ),
               Text(
                 '${meal.nutrition.calories} cal',
-                style: AppTextStyles.bodySmall.copyWith(
+                style: AppTextStyles.caption.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppConstants.accentColor,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          const SizedBox(height: AppConstants.spacingS),
           Row(
             children: [
               _buildNutritionChip('P', '${meal.nutrition.protein.toStringAsFixed(0)}g'),
@@ -525,6 +537,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                 '${meal.prepTime + meal.cookTime} min',
                 style: AppTextStyles.caption.copyWith(
                   color: AppConstants.textTertiary,
+                  fontSize: 10,
                 ),
               ),
             ],
@@ -537,18 +550,19 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   Widget _buildNutritionChip(String label, String value) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.spacingS,
+        horizontal: AppConstants.spacingXS,
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: AppConstants.primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppConstants.radiusS),
+        color: AppConstants.primaryColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(AppConstants.radiusXS),
       ),
       child: Text(
         '$label: $value',
         style: AppTextStyles.caption.copyWith(
           color: AppConstants.primaryColor,
           fontWeight: FontWeight.w600,
+          fontSize: 10,
         ),
       ),
     );
@@ -601,7 +615,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   Widget _buildDaysSelector() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -609,9 +623,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             'Select Plan Duration',
             style: AppTextStyles.heading4,
           ),
-          const SizedBox(height: AppConstants.spacingL),
+          const SizedBox(height: AppConstants.spacingM),
           Wrap(
-            spacing: AppConstants.spacingM,
+            spacing: AppConstants.spacingS,
             children: [3, 5, 7, 10, 14].map((days) {
               return ChoiceChip(
                 label: Text('$days days'),
@@ -632,7 +646,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   Widget _buildCaloriesSelector() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -640,7 +654,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             'Select Target Calories',
             style: AppTextStyles.heading4,
           ),
-          const SizedBox(height: AppConstants.spacingL),
+          const SizedBox(height: AppConstants.spacingM),
           Slider(
             value: _targetCalories.toDouble(),
             min: 1200,
@@ -653,17 +667,21 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               });
             },
           ),
-          const SizedBox(height: AppConstants.spacingM),
+          const SizedBox(height: AppConstants.spacingS),
           Text(
             '$_targetCalories calories per day',
-            style: AppTextStyles.bodyLarge.copyWith(
+            style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: AppConstants.spacingL),
-          CustomButton(
-            text: 'Confirm',
-            onPressed: () => Navigator.pop(context),
+          const SizedBox(height: AppConstants.spacingM),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: CustomButton(
+              text: 'Confirm',
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
         ],
       ),

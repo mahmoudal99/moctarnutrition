@@ -39,6 +39,7 @@ class AppConstants {
   static const double spacingXXL = 48.0;
   
   // Border Radius
+  static const double radiusXS = 4.0;
   static const double radiusS = 8.0;
   static const double radiusM = 12.0;
   static const double radiusL = 16.0;

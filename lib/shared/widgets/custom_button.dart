@@ -115,15 +115,19 @@ class CustomButton extends StatelessWidget {
       );
     }
 
+    final textColor = type == ButtonType.outline || type == ButtonType.text 
+        ? AppConstants.primaryColor 
+        : AppConstants.surfaceColor;
+
     if (icon != null) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 20),
+          Icon(icon, size: 20, color: textColor),
           const SizedBox(width: AppConstants.spacingS),
           Text(
             text,
-            style: AppTextStyles.button,
+            style: AppTextStyles.button.copyWith(color: textColor),
           ),
         ],
       );
@@ -131,7 +135,7 @@ class CustomButton extends StatelessWidget {
 
     return Text(
       text,
-      style: AppTextStyles.button,
+      style: AppTextStyles.button.copyWith(color: textColor),
     );
   }
 }
