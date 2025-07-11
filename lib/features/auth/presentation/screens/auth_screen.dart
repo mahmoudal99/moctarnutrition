@@ -215,7 +215,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildAuthButton() {
     return SizedBox(
       width: double.infinity,
-      height: 48,
+      height: 52,
       child: CustomButton(
         text: _isLoading 
             ? 'Please wait...' 
@@ -307,7 +307,7 @@ class _AuthScreenState extends State<AuthScreen> {
     VoidCallback onPressed,
   ) {
     return Container(
-      height: 44,
+      height: 52,
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
         borderRadius: BorderRadius.circular(AppConstants.radiusM),

@@ -519,7 +519,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           if (_currentPage > 0)
             Expanded(
               child: SizedBox(
-                height: 44,
+                height: 52,
                 child: CustomButton(
                   text: 'Back',
                   type: ButtonType.outline,
@@ -535,7 +535,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           if (_currentPage > 0) const SizedBox(width: AppConstants.spacingS),
           Expanded(
             child: SizedBox(
-              height: 44,
+              height: 52,
               child: CustomButton(
                 text: _currentPage == _steps.length - 1 ? 'Get Started' : 'Next',
                 onPressed: () {

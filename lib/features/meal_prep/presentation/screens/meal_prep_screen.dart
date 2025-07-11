@@ -266,7 +266,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   Widget _buildGenerateButton() {
     return SizedBox(
       width: double.infinity,
-      height: 48,
+      height: 52,
       child: GradientButton(
         text: 'Generate AI Meal Plan',
         icon: Icons.psychology,
@@ -677,7 +677,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           const SizedBox(height: AppConstants.spacingM),
           SizedBox(
             width: double.infinity,
-            height: 44,
+            height: 52,
             child: CustomButton(
               text: 'Confirm',
               onPressed: () => Navigator.pop(context),

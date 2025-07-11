@@ -32,14 +32,14 @@ class CustomButton extends StatelessWidget {
     if (isFullWidth) {
       return SizedBox(
         width: double.infinity,
-        height: height ?? 56,
+        height: height ?? 52,
         child: buttonWidget,
       );
     }
     
     return SizedBox(
       width: width,
-      height: height ?? 56,
+      height: height ?? 52,
       child: buttonWidget,
     );
   }
@@ -57,6 +57,10 @@ class CustomButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
             ),
             elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingM,
+              vertical: AppConstants.spacingS,
+            ),
           ),
           child: _buildButtonContent(),
         );
@@ -72,6 +76,10 @@ class CustomButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
             ),
             elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingM,
+              vertical: AppConstants.spacingS,
+            ),
           ),
           child: _buildButtonContent(),
         );
@@ -85,6 +93,10 @@ class CustomButton extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
             ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingM,
+              vertical: AppConstants.spacingS,
+            ),
           ),
           child: _buildButtonContent(),
         );
@@ -96,6 +108,10 @@ class CustomButton extends StatelessWidget {
             foregroundColor: AppConstants.primaryColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingM,
+              vertical: AppConstants.spacingS,
             ),
           ),
           child: _buildButtonContent(),
@@ -155,7 +171,7 @@ class GradientButton extends StatelessWidget {
     this.icon,
     this.isLoading = false,
     this.width,
-    this.height = 56,
+    this.height = 52,
   });
 
   @override
@@ -175,8 +191,8 @@ class GradientButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppConstants.radiusL),
           child: Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.spacingL,
-              vertical: AppConstants.spacingM,
+              horizontal: AppConstants.spacingM,
+              vertical: AppConstants.spacingS,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
