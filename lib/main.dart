@@ -7,13 +7,20 @@ import 'features/auth/presentation/screens/auth_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/subscription/presentation/screens/subscription_screen.dart';
 import 'features/meal_prep/presentation/screens/meal_prep_screen.dart';
+import 'features/profile/presentation/screens/profile_screen.dart';
 // import 'features/trainers/presentation/screens/trainers_screen.dart';
 // import 'features/workouts/presentation/screens/workouts_screen.dart';
 // import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'shared/widgets/main_navigation.dart';
+import 'shared/providers/user_provider.dart';
 
 void main() {
-  runApp(const ChampionsGymApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => UserProvider()..loadUser(),
+      child: const ChampionsGymApp(),
+    ),
+  );
 }
 
 class ChampionsGymApp extends StatelessWidget {
@@ -76,6 +83,10 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: '/admin',
           builder: (context, state) => const AdminDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(),
         ),
       ],
     ),

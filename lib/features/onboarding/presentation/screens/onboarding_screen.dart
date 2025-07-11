@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
+import '../../../../shared/providers/user_provider.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -894,7 +896,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  void _completeOnboarding() {
+  void _completeOnboarding() async {
     // Create user preferences
     final preferences = UserPreferences(
       fitnessGoal: _selectedFitnessGoal,
@@ -908,8 +910,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       gender: _gender,
     );
 
-    // TODO: Save user preferences temporarily and navigate to subscription screen
-    // After subscription, we'll collect auth info and save everything
+    // Create a UserModel (mock id/email for now)
+    final user = UserModel(
+      id: 'local-user',
+      email: 'user@example.com',
+      name: 'Mahmoud',
+      photoUrl: '',
+      preferences: preferences,
+      role: UserRole.user,
+      subscriptionStatus: SubscriptionStatus.free,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    // Save user to provider/local storage
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.setUser(user);
+
+    // Navigate to subscription screen
     context.go('/subscription');
   }
 

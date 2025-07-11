@@ -38,6 +38,11 @@ class _MainNavigationState extends State<MainNavigation> {
       label: 'Admin',
       route: '/admin',
     ),
+    NavigationItem(
+      icon: Icons.account_circle,
+      label: 'Profile',
+      route: '/profile',
+    ),
   ];
 
   @override
@@ -56,16 +61,17 @@ class _MainNavigationState extends State<MainNavigation> {
               vertical: AppConstants.spacingS,
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: _navigationItems.asMap().entries.map((entry) {
                 final index = entry.key;
                 final item = entry.value;
                 final isSelected = _currentIndex == index;
 
-                return _buildNavigationItem(
-                  item: item,
-                  index: index,
-                  isSelected: isSelected,
+                return Expanded(
+                  child: _buildNavigationItem(
+                    item: item,
+                    index: index,
+                    isSelected: isSelected,
+                  ),
                 );
               }).toList(),
             ),
@@ -179,6 +185,9 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
             case 3:
               context.go('/admin');
               break;
+            case 4:
+              context.go('/profile');
+              break;
           }
         },
         items: const [
@@ -197,6 +206,10 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
           BottomNavigationBarItem(
             icon: Icon(Icons.admin_panel_settings),
             label: 'Admin',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Profile',
           ),
         ],
       ),
