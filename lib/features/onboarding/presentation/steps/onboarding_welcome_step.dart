@@ -227,20 +227,45 @@ class _AvatarsRow extends StatelessWidget {
     _AvatarData(name: 'Mike', imageUrl: 'https://randomuser.me/api/portraits/men/3.jpg'),
   ];
 
+  // Fun pastel accent colors for borders
+  final List<Color> borderColors = const [
+    Color(0xFFB3E5FC), // Light Blue
+    Color(0xFFFFE0E6), // Light Pink
+    Color(0xFFC8E6C9), // Light Green
+  ];
+
   const _AvatarsRow();
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: avatars.map((avatar) {
+      children: List.generate(avatars.length, (i) {
+        final avatar = avatars[i];
+        final borderColor = borderColors[i % borderColors.length];
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
             children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundImage: NetworkImage(avatar.imageUrl),
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: borderColor,
+                    width: 4,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: borderColor.withOpacity(0.18),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 32,
+                  backgroundImage: NetworkImage(avatar.imageUrl),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -250,7 +275,7 @@ class _AvatarsRow extends StatelessWidget {
             ],
           ),
         );
-      }).toList(),
+      }),
     );
   }
 }
