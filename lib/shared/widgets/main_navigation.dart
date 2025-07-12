@@ -17,28 +17,23 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<NavigationItem> _navigationItems = [
-    NavigationItem(
+  final List<_NavItem> _items = [
+    _NavItem(
       icon: Icons.fitness_center,
       label: 'Workouts',
       route: '/workouts',
     ),
-    NavigationItem(
+    _NavItem(
       icon: Icons.restaurant_menu,
       label: 'Meal Prep',
       route: '/meal-prep',
     ),
-    NavigationItem(
+    _NavItem(
       icon: Icons.person,
       label: 'Trainers',
       route: '/trainers',
     ),
-    NavigationItem(
-      icon: Icons.admin_panel_settings,
-      label: 'Admin',
-      route: '/admin',
-    ),
-    NavigationItem(
+    _NavItem(
       icon: Icons.account_circle,
       label: 'Profile',
       route: '/profile',
@@ -46,118 +41,17 @@ class _MainNavigationState extends State<MainNavigation> {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: AppConstants.shadowM,
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.spacingM,
-              vertical: AppConstants.spacingS,
-            ),
-            child: Row(
-              children: _navigationItems.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-                final isSelected = _currentIndex == index;
-
-                return Expanded(
-                  child: _buildNavigationItem(
-                    item: item,
-                    index: index,
-                    isSelected: isSelected,
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-      ),
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set the current index based on the current route
+    final location = GoRouter.of(context).routeInformationProvider.value.uri;
+    final idx = _items.indexWhere((item) => location == item.route);
+    if (idx != -1 && idx != _currentIndex) {
+      setState(() {
+        _currentIndex = idx;
+      });
+    }
   }
-
-  Widget _buildNavigationItem({
-    required NavigationItem item,
-    required int index,
-    required bool isSelected,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
-        context.go(item.route);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.spacingM,
-          vertical: AppConstants.spacingS,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppConstants.primaryColor.withOpacity(0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              item.icon,
-              color: isSelected
-                  ? AppConstants.primaryColor
-                  : AppConstants.textTertiary,
-              size: 24,
-            ),
-            const SizedBox(height: AppConstants.spacingXS),
-            Text(
-              item.label,
-              style: AppTextStyles.caption.copyWith(
-                color: isSelected
-                    ? AppConstants.primaryColor
-                    : AppConstants.textTertiary,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class NavigationItem {
-  final IconData icon;
-  final String label;
-  final String route;
-
-  NavigationItem({
-    required this.icon,
-    required this.label,
-    required this.route,
-  });
-}
-
-// Alternative bottom navigation bar using Material Design
-class MainNavigationBar extends StatefulWidget {
-  final Widget child;
-
-  const MainNavigationBar({
-    super.key,
-    required this.child,
-  });
-
-  @override
-  State<MainNavigationBar> createState() => _MainNavigationBarState();
-}
-
-class _MainNavigationBarState extends State<MainNavigationBar> {
-  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -170,49 +64,29 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
           setState(() {
             _currentIndex = index;
           });
-          
-          // Navigate based on index
-          switch (index) {
-            case 0:
-              context.go('/workouts');
-              break;
-            case 1:
-              context.go('/meal-prep');
-              break;
-            case 2:
-              context.go('/trainers');
-              break;
-            case 3:
-              context.go('/admin');
-              break;
-            case 4:
-              context.go('/profile');
-              break;
-          }
+          context.go(_items[index].route);
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fitness_center),
-            label: 'Workouts',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant_menu),
-            label: 'Meal Prep',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Trainers',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.admin_panel_settings),
-            label: 'Admin',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'Profile',
-          ),
-        ],
+        selectedItemColor: AppConstants.primaryColor,
+        unselectedItemColor: AppConstants.textTertiary,
+        showUnselectedLabels: true,
+        items: _items
+            .map((item) => BottomNavigationBarItem(
+                  icon: Icon(item.icon),
+                  label: item.label,
+                ))
+            .toList(),
       ),
     );
   }
+}
+
+class _NavItem {
+  final IconData icon;
+  final String label;
+  final String route;
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.route,
+  });
 } 

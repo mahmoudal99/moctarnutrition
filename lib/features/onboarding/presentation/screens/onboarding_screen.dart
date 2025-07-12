@@ -5,6 +5,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/providers/user_provider.dart';
+import 'package:flutter/services.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -23,7 +24,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<String> _selectedDietaryRestrictions = [];
   final List<String> _selectedWorkoutStyles = [];
   int _targetCalories = 2000;
-  
+
   // User metrics
   int _age = 25;
   double _weight = 70.0; // in kg
@@ -214,12 +215,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       case 1:
         return _buildPersonalInfoStep();
       case 2:
-        return _buildFitnessGoalStep();
+        return _buildBMIStep();
       case 3:
-        return _buildActivityLevelStep();
+        return _buildFitnessGoalStep();
       case 4:
-        return _buildDietaryRestrictionsStep();
+        return _buildActivityLevelStep();
       case 5:
+        return _buildDietaryRestrictionsStep();
+      case 6:
         return _buildWorkoutStylesStep();
       default:
         return const SizedBox.shrink();
@@ -290,8 +293,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Icons.height,
           () => _showHeightSelector(),
         ),
-        const SizedBox(height: AppConstants.spacingL),
-        _buildBMICard(),
+        // Removed BMI card from here
       ],
     );
   }
@@ -539,7 +541,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: SizedBox(
               height: 52,
               child: CustomButton(
-                text: _currentPage == _steps.length - 1 ? 'Get Started' : 'Next',
+                text:
+                    _currentPage == _steps.length - 1 ? 'Get Started' : 'Next',
                 onPressed: () {
                   if (_currentPage == _steps.length - 1) {
                     _completeOnboarding();
@@ -630,58 +633,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildBMICard() {
+  Widget _buildBMIStep() {
     final bmi = _calculateBMI();
     final bmiCategory = _getBMICategory(bmi);
     final bmiColor = _getBMIColor(bmiCategory);
-
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: bmiColor.withOpacity(0.08),
-        border: Border.all(
-          color: bmiColor.withOpacity(0.2),
-        ),
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          decoration: BoxDecoration(
+            color: bmiColor.withOpacity(0.08),
+            border: Border.all(color: bmiColor.withOpacity(0.2)),
+            borderRadius: BorderRadius.circular(AppConstants.radiusL),
+          ),
+          child: Column(
             children: [
+              Text('Your BMI',
+                  style: AppTextStyles.heading3.copyWith(color: bmiColor)),
+              const SizedBox(height: AppConstants.spacingS),
+              Text(bmi.toStringAsFixed(1),
+                  style: AppTextStyles.heading1.copyWith(color: bmiColor)),
+              const SizedBox(height: AppConstants.spacingXS),
+              Text(bmiCategory,
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: bmiColor, fontWeight: FontWeight.bold)),
+              const SizedBox(height: AppConstants.spacingS),
               Text(
-                'BMI',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                bmiCategory,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: bmiColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+                  '${_height.toStringAsFixed(0)}cm, ${_weight.toStringAsFixed(1)}kg',
+                  style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.textSecondary, fontSize: 11)),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingXS),
-          Text(
-            bmi.toStringAsFixed(1),
-            style: AppTextStyles.heading4.copyWith(
-              color: bmiColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingXS),
-          Text(
-            '${_height.toStringAsFixed(0)}cm, ${_weight.toStringAsFixed(1)}kg',
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.textSecondary,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: AppConstants.spacingL),
+        const Text(
+            textAlign: TextAlign.center,
+            'BMI (Body Mass Index) is a measure of body fat based on height and weight.'),
+      ],
     );
   }
 
@@ -719,10 +708,108 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Widget _buildAgeSelector() {
+    int tempAge = _age;
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Container(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Select Age', style: AppTextStyles.heading4),
+              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(
+                height: 200,
+                child: ListWheelScrollView(
+                  itemExtent: 50,
+                  diameterRatio: 1.5,
+                  onSelectedItemChanged: (index) {
+                    setModalState(() {
+                      tempAge = 16 + index;
+                    });
+                  },
+                  children: List.generate(84, (index) {
+                    final age = 16 + index;
+                    return Center(
+                      child: Text(
+                        '$age years',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          fontWeight: tempAge == age
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: tempAge == age
+                              ? AppConstants.primaryColor
+                              : AppConstants.textPrimary,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingL),
+              CustomButton(
+                text: 'Confirm',
+                onPressed: () {
+                  setState(() {
+                    _age = tempAge;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showGenderSelector() {
     showModalBottomSheet(
       context: context,
       builder: (context) => _buildGenderSelector(),
+    );
+  }
+
+  Widget _buildGenderSelector() {
+    String tempGender = _gender;
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Container(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Select Gender', style: AppTextStyles.heading4),
+              const SizedBox(height: AppConstants.spacingL),
+              Wrap(
+                spacing: AppConstants.spacingM,
+                children: ['Male', 'Female', 'Other'].map((gender) {
+                  return ChoiceChip(
+                    label: Text(gender),
+                    selected: tempGender == gender,
+                    onSelected: (selected) {
+                      setModalState(() {
+                        tempGender = gender;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: AppConstants.spacingL),
+              CustomButton(
+                text: 'Confirm',
+                onPressed: () {
+                  setState(() {
+                    _gender = tempGender;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -740,160 +827,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildAgeSelector() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Select Age',
-            style: AppTextStyles.heading4,
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-          SizedBox(
-            height: 200,
-            child: ListWheelScrollView(
-              itemExtent: 50,
-              diameterRatio: 1.5,
-              onSelectedItemChanged: (index) {
-                setState(() {
-                  _age = 16 + index;
-                });
-              },
-              children: List.generate(84, (index) {
-                final age = 16 + index;
-                return Center(
-                  child: Text(
-                    '$age years',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: _age == age ? FontWeight.bold : FontWeight.normal,
-                      color: _age == age ? AppConstants.primaryColor : AppConstants.textPrimary,
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-          CustomButton(
-            text: 'Confirm',
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGenderSelector() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Select Gender',
-            style: AppTextStyles.heading4,
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-          Wrap(
-            spacing: AppConstants.spacingM,
-            children: ['Male', 'Female', 'Other'].map((gender) {
-              return ChoiceChip(
-                label: Text(gender),
-                selected: _gender == gender,
-                onSelected: (selected) {
-                  setState(() {
-                    _gender = gender;
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWeightSelector() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Select Weight',
-            style: AppTextStyles.heading4,
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-          Slider(
-            value: _weight,
-            min: 30.0,
-            max: 200.0,
-            divisions: 170,
-            label: '${_weight.toStringAsFixed(1)} kg',
-            onChanged: (value) {
-              setState(() {
-                _weight = value;
-              });
-            },
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          Text(
-            '${_weight.toStringAsFixed(1)} kg',
-            style: AppTextStyles.bodyLarge.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-          CustomButton(
-            text: 'Confirm',
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeightSelector() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Select Height',
-            style: AppTextStyles.heading4,
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-          Slider(
-            value: _height,
-            min: 120.0,
-            max: 220.0,
-            divisions: 100,
-            label: '${_height.toStringAsFixed(0)} cm',
-            onChanged: (value) {
-              setState(() {
-                _height = value;
-              });
-            },
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          Text(
-            '${_height.toStringAsFixed(0)} cm',
-            style: AppTextStyles.bodyLarge.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-          CustomButton(
-            text: 'Confirm',
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
+  // Add a new onboarding step for BMI after personal info
+  @override
+  void initState() {
+    super.initState();
+    _steps.insert(
+        2,
+        OnboardingStep(
+          title: 'Your BMI',
+          subtitle: 'Body Mass Index',
+          description: 'Here is your calculated BMI based on your info.',
+          icon: Icons.monitor_heart,
+          color: AppConstants.warningColor,
+        ));
   }
 
   void _completeOnboarding() async {
@@ -1143,6 +1089,102 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       default:
         return '';
     }
+  }
+
+  Widget _buildWeightSelector() {
+    double tempWeight = _weight;
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Container(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Select Weight', style: AppTextStyles.heading4),
+              const SizedBox(height: AppConstants.spacingL),
+              Slider(
+                value: tempWeight,
+                min: 30.0,
+                max: 200.0,
+                divisions: 170,
+                label: '${tempWeight.toStringAsFixed(1)} kg',
+                onChanged: (value) {
+                  setModalState(() {
+                    tempWeight = value;
+                  });
+                  HapticFeedback.selectionClick();
+                },
+              ),
+              const SizedBox(height: AppConstants.spacingM),
+              Text(
+                '${tempWeight.toStringAsFixed(1)} kg',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingL),
+              CustomButton(
+                text: 'Confirm',
+                onPressed: () {
+                  setState(() {
+                    _weight = tempWeight;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeightSelector() {
+    double tempHeight = _height;
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Container(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Select Height', style: AppTextStyles.heading4),
+              const SizedBox(height: AppConstants.spacingL),
+              Slider(
+                value: tempHeight,
+                min: 120.0,
+                max: 220.0,
+                divisions: 100,
+                label: '${tempHeight.toStringAsFixed(0)} cm',
+                onChanged: (value) {
+                  setModalState(() {
+                    tempHeight = value;
+                  });
+                  HapticFeedback.selectionClick();
+                },
+              ),
+              const SizedBox(height: AppConstants.spacingM),
+              Text(
+                '${tempHeight.toStringAsFixed(0)} cm',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingL),
+              CustomButton(
+                text: 'Confirm',
+                onPressed: () {
+                  setState(() {
+                    _height = tempHeight;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
