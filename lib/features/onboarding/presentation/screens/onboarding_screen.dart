@@ -6,6 +6,11 @@ import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/providers/user_provider.dart';
 import 'package:flutter/services.dart';
+import '../steps/onboarding_bmi_step.dart';
+import '../steps/onboarding_fitness_goal_step.dart';
+import '../steps/onboarding_activity_level_step.dart';
+import '../steps/onboarding_dietary_restrictions_step.dart';
+import '../steps/onboarding_workout_styles_step.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -299,42 +304,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildFitnessGoalStep() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: FitnessGoal.values.map((goal) {
-        final isSelected = _selectedFitnessGoal == goal;
-        return _buildSelectionCard(
-          title: _getFitnessGoalTitle(goal),
-          subtitle: _getFitnessGoalDescription(goal),
-          icon: _getFitnessGoalIcon(goal),
-          isSelected: isSelected,
-          onTap: () {
-            setState(() {
-              _selectedFitnessGoal = goal;
-            });
-          },
-        );
-      }).toList(),
+    return OnboardingFitnessGoalStep(
+      selectedFitnessGoal: _selectedFitnessGoal,
+      onSelect: (goal) {
+        setState(() {
+          _selectedFitnessGoal = goal;
+        });
+      },
     );
   }
 
   Widget _buildActivityLevelStep() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: ActivityLevel.values.map((level) {
-        final isSelected = _selectedActivityLevel == level;
-        return _buildSelectionCard(
-          title: _getActivityLevelTitle(level),
-          subtitle: _getActivityLevelDescription(level),
-          icon: _getActivityLevelIcon(level),
-          isSelected: isSelected,
-          onTap: () {
-            setState(() {
-              _selectedActivityLevel = level;
-            });
-          },
-        );
-      }).toList(),
+    return OnboardingActivityLevelStep(
+      selectedActivityLevel: _selectedActivityLevel,
+      onSelect: (level) {
+        setState(() {
+          _selectedActivityLevel = level;
+        });
+      },
     );
   }
 
@@ -350,32 +337,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'None',
     ];
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: restrictions.map((restriction) {
-        final isSelected = _selectedDietaryRestrictions.contains(restriction);
-        return _buildSelectionCard(
-          title: restriction,
-          subtitle: _getDietaryRestrictionDescription(restriction),
-          icon: Icons.restaurant,
-          isSelected: isSelected,
-          isMultiSelect: true,
-          onTap: () {
-            setState(() {
-              if (restriction == 'None') {
-                _selectedDietaryRestrictions.clear();
-              } else {
-                _selectedDietaryRestrictions.remove('None');
-                if (isSelected) {
-                  _selectedDietaryRestrictions.remove(restriction);
-                } else {
-                  _selectedDietaryRestrictions.add(restriction);
-                }
-              }
-            });
-          },
-        );
-      }).toList(),
+    return OnboardingDietaryRestrictionsStep(
+      selectedDietaryRestrictions: _selectedDietaryRestrictions,
+      restrictions: restrictions,
+      onSelect: (restriction) {
+        setState(() {
+          if (restriction == 'None') {
+            _selectedDietaryRestrictions.clear();
+          } else {
+            _selectedDietaryRestrictions.remove('None');
+            if (_selectedDietaryRestrictions.contains(restriction)) {
+              _selectedDietaryRestrictions.remove(restriction);
+            } else {
+              _selectedDietaryRestrictions.add(restriction);
+            }
+          }
+        });
+      },
     );
   }
 
@@ -391,126 +369,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'Swimming',
     ];
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: styles.map((style) {
-        final isSelected = _selectedWorkoutStyles.contains(style);
-        return _buildSelectionCard(
-          title: style,
-          subtitle: _getWorkoutStyleDescription(style),
-          icon: _getWorkoutStyleIcon(style),
-          isSelected: isSelected,
-          isMultiSelect: true,
-          onTap: () {
-            setState(() {
-              if (isSelected) {
-                _selectedWorkoutStyles.remove(style);
-              } else {
-                _selectedWorkoutStyles.add(style);
-              }
-            });
-          },
-        );
-      }).toList(),
+    return OnboardingWorkoutStylesStep(
+      selectedWorkoutStyles: _selectedWorkoutStyles,
+      styles: styles,
+      onSelect: (style) {
+        setState(() {
+          if (_selectedWorkoutStyles.contains(style)) {
+            _selectedWorkoutStyles.remove(style);
+          } else {
+            _selectedWorkoutStyles.add(style);
+          }
+        });
+      },
     );
   }
 
-  Widget _buildSelectionCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required bool isSelected,
-    bool isMultiSelect = false,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
-          child: Container(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? AppConstants.primaryColor.withOpacity(0.08)
-                  : AppConstants.surfaceColor,
-              border: Border.all(
-                color: isSelected
-                    ? AppConstants.primaryColor.withOpacity(0.3)
-                    : AppConstants.textTertiary.withOpacity(0.2),
-                width: isSelected ? 1.5 : 1,
-              ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              boxShadow: isSelected ? AppConstants.shadowS : null,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : AppConstants.textTertiary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isSelected
-                        ? AppConstants.surfaceColor
-                        : AppConstants.textSecondary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isSelected
-                              ? AppConstants.primaryColor
-                              : AppConstants.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: AppConstants.spacingXS),
-                      Text(
-                        subtitle,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppConstants.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isSelected)
-                  Icon(
-                    isMultiSelect
-                        ? Icons.check_box
-                        : Icons.radio_button_checked,
-                    color: AppConstants.primaryColor,
-                    size: 20,
-                  )
-                else
-                  Icon(
-                    isMultiSelect
-                        ? Icons.check_box_outline_blank
-                        : Icons.radio_button_unchecked,
-                    color: AppConstants.textTertiary,
-                    size: 20,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildNavigationButtons() {
     return Container(
@@ -620,7 +494,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ],
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.chevron_right,
                   color: AppConstants.textTertiary,
                   size: 20,
@@ -637,40 +511,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final bmi = _calculateBMI();
     final bmiCategory = _getBMICategory(bmi);
     final bmiColor = _getBMIColor(bmiCategory);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(AppConstants.spacingL),
-          decoration: BoxDecoration(
-            color: bmiColor.withOpacity(0.08),
-            border: Border.all(color: bmiColor.withOpacity(0.2)),
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
-          ),
-          child: Column(
-            children: [
-              Text('Your BMI',
-                  style: AppTextStyles.heading3.copyWith(color: bmiColor)),
-              const SizedBox(height: AppConstants.spacingS),
-              Text(bmi.toStringAsFixed(1),
-                  style: AppTextStyles.heading1.copyWith(color: bmiColor)),
-              const SizedBox(height: AppConstants.spacingXS),
-              Text(bmiCategory,
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: bmiColor, fontWeight: FontWeight.bold)),
-              const SizedBox(height: AppConstants.spacingS),
-              Text(
-                  '${_height.toStringAsFixed(0)}cm, ${_weight.toStringAsFixed(1)}kg',
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppConstants.textSecondary, fontSize: 11)),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingL),
-        const Text(
-            textAlign: TextAlign.center,
-            'BMI (Body Mass Index) is a measure of body fat based on height and weight.'),
-      ],
+    return OnboardingBMIStep(
+      bmi: bmi,
+      bmiCategory: bmiCategory,
+      bmiColor: bmiColor,
+      height: _height,
+      weight: _weight,
     );
   }
 
@@ -930,166 +776,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return tdee.round();
   }
 
-  // Helper methods for fitness goals
-  String _getFitnessGoalTitle(FitnessGoal goal) {
-    switch (goal) {
-      case FitnessGoal.weightLoss:
-        return 'Weight Loss';
-      case FitnessGoal.muscleGain:
-        return 'Muscle Gain';
-      case FitnessGoal.maintenance:
-        return 'Maintenance';
-      case FitnessGoal.endurance:
-        return 'Endurance';
-      case FitnessGoal.strength:
-        return 'Strength';
-    }
-  }
 
-  String _getFitnessGoalDescription(FitnessGoal goal) {
-    switch (goal) {
-      case FitnessGoal.weightLoss:
-        return 'Lose weight and improve body composition';
-      case FitnessGoal.muscleGain:
-        return 'Build muscle mass and strength';
-      case FitnessGoal.maintenance:
-        return 'Maintain current fitness level';
-      case FitnessGoal.endurance:
-        return 'Improve cardiovascular fitness';
-      case FitnessGoal.strength:
-        return 'Increase overall strength';
-    }
-  }
-
-  IconData _getFitnessGoalIcon(FitnessGoal goal) {
-    switch (goal) {
-      case FitnessGoal.weightLoss:
-        return Icons.trending_down;
-      case FitnessGoal.muscleGain:
-        return Icons.fitness_center;
-      case FitnessGoal.maintenance:
-        return Icons.balance;
-      case FitnessGoal.endurance:
-        return Icons.directions_run;
-      case FitnessGoal.strength:
-        return Icons.bolt;
-    }
-  }
-
-  // Helper methods for activity levels
-  String _getActivityLevelTitle(ActivityLevel level) {
-    switch (level) {
-      case ActivityLevel.sedentary:
-        return 'Sedentary';
-      case ActivityLevel.lightlyActive:
-        return 'Lightly Active';
-      case ActivityLevel.moderatelyActive:
-        return 'Moderately Active';
-      case ActivityLevel.veryActive:
-        return 'Very Active';
-      case ActivityLevel.extremelyActive:
-        return 'Extremely Active';
-    }
-  }
-
-  String _getActivityLevelDescription(ActivityLevel level) {
-    switch (level) {
-      case ActivityLevel.sedentary:
-        return 'Little to no exercise';
-      case ActivityLevel.lightlyActive:
-        return 'Light exercise 1-3 days/week';
-      case ActivityLevel.moderatelyActive:
-        return 'Moderate exercise 3-5 days/week';
-      case ActivityLevel.veryActive:
-        return 'Hard exercise 6-7 days/week';
-      case ActivityLevel.extremelyActive:
-        return 'Very hard exercise, physical job';
-    }
-  }
-
-  IconData _getActivityLevelIcon(ActivityLevel level) {
-    switch (level) {
-      case ActivityLevel.sedentary:
-        return Icons.weekend;
-      case ActivityLevel.lightlyActive:
-        return Icons.directions_walk;
-      case ActivityLevel.moderatelyActive:
-        return Icons.directions_run;
-      case ActivityLevel.veryActive:
-        return Icons.sports_soccer;
-      case ActivityLevel.extremelyActive:
-        return Icons.fitness_center;
-    }
-  }
-
-  String _getDietaryRestrictionDescription(String restriction) {
-    switch (restriction) {
-      case 'Vegetarian':
-        return 'No meat, but includes dairy and eggs';
-      case 'Vegan':
-        return 'No animal products';
-      case 'Gluten-Free':
-        return 'No gluten-containing foods';
-      case 'Dairy-Free':
-        return 'No dairy products';
-      case 'Keto':
-        return 'Low-carb, high-fat diet';
-      case 'Paleo':
-        return 'Whole foods, no processed foods';
-      case 'Low-Carb':
-        return 'Reduced carbohydrate intake';
-      case 'None':
-        return 'No dietary restrictions';
-      default:
-        return '';
-    }
-  }
-
-  IconData _getWorkoutStyleIcon(String style) {
-    switch (style) {
-      case 'Strength Training':
-        return Icons.fitness_center;
-      case 'Cardio':
-        return Icons.favorite;
-      case 'Yoga':
-        return Icons.self_improvement;
-      case 'HIIT':
-        return Icons.timer;
-      case 'Pilates':
-        return Icons.accessibility_new;
-      case 'CrossFit':
-        return Icons.sports_gymnastics;
-      case 'Running':
-        return Icons.directions_run;
-      case 'Swimming':
-        return Icons.pool;
-      default:
-        return Icons.fitness_center;
-    }
-  }
-
-  String _getWorkoutStyleDescription(String style) {
-    switch (style) {
-      case 'Strength Training':
-        return 'Build muscle and strength';
-      case 'Cardio':
-        return 'Improve cardiovascular health';
-      case 'Yoga':
-        return 'Flexibility and mindfulness';
-      case 'HIIT':
-        return 'High-intensity interval training';
-      case 'Pilates':
-        return 'Core strength and flexibility';
-      case 'CrossFit':
-        return 'Functional fitness training';
-      case 'Running':
-        return 'Endurance and cardiovascular';
-      case 'Swimming':
-        return 'Low-impact full-body workout';
-      default:
-        return '';
-    }
-  }
 
   Widget _buildWeightSelector() {
     double tempWeight = _weight;
