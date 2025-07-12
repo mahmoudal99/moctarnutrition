@@ -47,7 +47,7 @@ class _ActivityCardsStack extends StatelessWidget {
       ],
     ),
     _ActivityCardData(
-      title: 'Coffee with Techno Team',
+      title: 'Cardio with Mokhtar',
       time: '10:00am - 11:00am',
       color: Color(0xFFD6F5FF),
       accent: Color(0xFF4FC3F7),
@@ -176,7 +176,6 @@ class _ActivityCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      // Overlapping avatars
                       SizedBox(
                         height: 28,
                         child: Stack(
@@ -185,6 +184,7 @@ class _ActivityCard extends StatelessWidget {
                               left: i * 20.0,
                               child: CircleAvatar(
                                 radius: 14,
+                                foregroundColor: Colors.green,
                                 backgroundColor: Colors.white,
                                 backgroundImage: NetworkImage(card.avatars[i]),
                               ),
@@ -197,8 +197,8 @@ class _ActivityCard extends StatelessWidget {
                 ),
               ),
               // Three-dot menu
-              Padding(
-                padding: const EdgeInsets.only(top: 8, right: 12),
+              const Padding(
+                padding: EdgeInsets.only(top: 8, right: 12),
                 child: Icon(Icons.more_horiz, color: AppConstants.textTertiary),
               ),
             ],
