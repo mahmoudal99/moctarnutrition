@@ -106,6 +106,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 itemBuilder: (context, index) {
                   return _buildStepPage(index);
                 },
+                physics: const BouncingScrollPhysics(),
               ),
             ),
             _buildNavigationButtons(),
@@ -126,7 +127,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Row(
             children: List.generate(_steps.length, (index) {
               return Expanded(
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
                   height: 3,
                   margin: EdgeInsets.only(
                     right:
@@ -143,11 +146,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             }),
           ),
           const SizedBox(height: AppConstants.spacingS),
-          Text(
-            '${_currentPage + 1} of ${_steps.length}',
-            style: AppTextStyles.caption.copyWith(
-              fontSize: 11,
-              color: AppConstants.textTertiary,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Text(
+              '${_currentPage + 1} of ${_steps.length}',
+              key: ValueKey(_currentPage),
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 11,
+                color: AppConstants.textTertiary,
+              ),
             ),
           ),
         ],
@@ -160,56 +167,87 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.spacingL),
-      child: Column(
-        children: [
-          _buildStepHeader(step),
-          const SizedBox(height: AppConstants.spacingXL),
-          _buildStepContent(stepIndex),
-          const SizedBox(height: AppConstants.spacingL),
-        ],
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.1, 0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              )),
+              child: child,
+            ),
+          );
+        },
+        child: Column(
+          key: ValueKey(stepIndex),
+          children: [
+            _buildStepHeader(step),
+            const SizedBox(height: AppConstants.spacingXL),
+            _buildStepContent(stepIndex),
+            const SizedBox(height: AppConstants.spacingL),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildStepHeader(OnboardingStep step) {
-    return Column(
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: step.color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 600),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, 20 * (1 - value)),
+          child: Opacity(
+            opacity: value,
+            child: Column(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: step.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(AppConstants.radiusL),
+                  ),
+                  child: Icon(
+                    step.icon,
+                    size: 32,
+                    color: step.color,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                Text(
+                  step.title,
+                  style: AppTextStyles.heading3,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppConstants.spacingXS),
+                Text(
+                  step.subtitle,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppConstants.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                Text(
+                  step.description,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppConstants.textTertiary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-          child: Icon(
-            step.icon,
-            size: 32,
-            color: step.color,
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingM),
-        Text(
-          step.title,
-          style: AppTextStyles.heading3,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppConstants.spacingXS),
-        Text(
-          step.subtitle,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppConstants.textSecondary,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppConstants.spacingS),
-        Text(
-          step.description,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppConstants.textTertiary,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -235,36 +273,60 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildWelcomeStep() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 140,
-          height: 140,
-          decoration: BoxDecoration(
-            gradient: AppConstants.primaryGradient,
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
-            boxShadow: AppConstants.shadowM,
-          ),
-          child: const Icon(
-            Icons.fitness_center,
-            size: 70,
-            color: AppConstants.surfaceColor,
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingL),
-        Text(
-          'Ready to transform your fitness journey?',
-          style: AppTextStyles.heading3,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppConstants.spacingS),
-        Text(
-          'We\'ll create a personalized experience just for you with AI-powered meal plans and expert trainer guidance.',
-          style: AppTextStyles.bodyMedium,
-          textAlign: TextAlign.center,
-        ),
-      ],
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 800),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Transform.scale(
+              scale: 0.8 + (0.2 * value),
+              child: Transform.translate(
+                offset: Offset(0, 30 * (1 - value)),
+                child: Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    gradient: AppConstants.primaryGradient,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusL),
+                    boxShadow: AppConstants.shadowM,
+                  ),
+                  child: const Icon(
+                    Icons.fitness_center,
+                    size: 70,
+                    color: AppConstants.surfaceColor,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingL),
+            Transform.translate(
+              offset: Offset(0, 20 * (1 - value)),
+              child: Opacity(
+                opacity: value,
+                child: Text(
+                  'Ready to transform your fitness journey?',
+                  style: AppTextStyles.heading3,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingS),
+            Transform.translate(
+              offset: Offset(0, 15 * (1 - value)),
+              child: Opacity(
+                opacity: value,
+                child: Text(
+                  'We\'ll create a personalized experience just for you with AI-powered meal plans and expert trainer guidance.',
+                  style: AppTextStyles.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -387,7 +449,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 
   Widget _buildNavigationButtons() {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingL,
         vertical: AppConstants.spacingM,
@@ -396,37 +459,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           if (_currentPage > 0)
             Expanded(
-              child: SizedBox(
-                height: 52,
-                child: CustomButton(
-                  text: 'Back',
-                  type: ButtonType.outline,
-                  onPressed: () {
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _currentPage > 0 ? 1.0 : 0.0,
+                child: SizedBox(
+                  height: 52,
+                  child: CustomButton(
+                    text: 'Back',
+                    type: ButtonType.outline,
+                    onPressed: () {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
           if (_currentPage > 0) const SizedBox(width: AppConstants.spacingS),
           Expanded(
-            child: SizedBox(
-              height: 52,
-              child: CustomButton(
-                text:
-                    _currentPage == _steps.length - 1 ? 'Get Started' : 'Next',
-                onPressed: () {
-                  if (_currentPage == _steps.length - 1) {
-                    _completeOnboarding();
-                  } else {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: SizedBox(
+                key: ValueKey(_currentPage),
+                height: 52,
+                child: CustomButton(
+                  text:
+                      _currentPage == _steps.length - 1 ? 'Get Started' : 'Next',
+                  onPressed: () {
+                    if (_currentPage == _steps.length - 1) {
+                      _completeOnboarding();
+                    } else {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                ),
               ),
             ),
           ),
@@ -441,69 +512,82 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     IconData icon,
     VoidCallback onTap,
   ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
-          child: Container(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
-            decoration: BoxDecoration(
-              color: AppConstants.surfaceColor,
-              border: Border.all(
-                color: AppConstants.textTertiary.withOpacity(0.2),
-                width: 1,
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 400),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, animValue, child) {
+        return Transform.translate(
+          offset: Offset(0, 20 * (1 - animValue)),
+          child: Opacity(
+            opacity: animValue,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onTap,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.all(AppConstants.spacingM),
+                    decoration: BoxDecoration(
+                      color: AppConstants.surfaceColor,
+                      border: Border.all(
+                        color: AppConstants.textTertiary.withOpacity(0.2),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                      boxShadow: AppConstants.shadowS,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: AppConstants.primaryColor.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                          ),
+                          child: Icon(
+                            icon,
+                            color: AppConstants.primaryColor,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: AppConstants.spacingM),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppConstants.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                value,
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right,
+                          color: AppConstants.textTertiary,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              boxShadow: AppConstants.shadowS,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: AppConstants.primaryColor,
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppConstants.textSecondary,
-                        ),
-                      ),
-                      Text(
-                        value,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right,
-                  color: AppConstants.textTertiary,
-                  size: 20,
-                ),
-              ],
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
