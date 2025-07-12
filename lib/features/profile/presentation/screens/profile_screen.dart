@@ -251,7 +251,7 @@ class _QuickAccessTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(item.label,
-                        style: AppTextStyles.bodyMedium
+                        style: AppTextStyles.bodySmall
                             .copyWith(fontWeight: FontWeight.w600)),
                     // if (item.badge != null)
                     //   Container(
