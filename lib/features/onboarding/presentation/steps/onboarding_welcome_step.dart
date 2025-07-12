@@ -8,34 +8,255 @@ class OnboardingWelcomeStep extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          width: 140,
-          height: 140,
-          decoration: BoxDecoration(
-            gradient: AppConstants.primaryGradient,
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
-            boxShadow: AppConstants.shadowM,
+        // Stacked activity cards
+        _ActivityCardsStack(),
+        const SizedBox(height: 24),
+        // Avatars row
+        _AvatarsRow(),
+        const SizedBox(height: 28),
+        // Motivational text
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            children: [
+              Text(
+                'Crush Your Goals, Together',
+                style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Plan your workouts, sync with friends, and stay motivated.',
+                style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          child: const Icon(
-            Icons.fitness_center,
-            size: 70,
-            color: AppConstants.surfaceColor,
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingL),
-        Text(
-          'Ready to transform your fitness journey?',
-          style: AppTextStyles.heading3,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppConstants.spacingS),
-        Text(
-          'We\'ll create a personalized experience just for you with AI-powered meal plans and expert trainer guidance.',
-          style: AppTextStyles.bodyMedium,
-          textAlign: TextAlign.center,
         ),
       ],
     );
   }
+}
+
+class _ActivityCardsStack extends StatelessWidget {
+  final List<_ActivityCardData> cards = const [
+    _ActivityCardData(
+      title: 'Work mode',
+      time: '10:00am - 11:00am',
+      color: Color(0xFFFFF4D6),
+      accent: Color(0xFFFFB74D),
+      titleColor: Color(0xFFE65100),
+      emoji: '💻',
+      avatars: [
+        'https://randomuser.me/api/portraits/men/11.jpg',
+        'https://randomuser.me/api/portraits/women/12.jpg',
+      ],
+    ),
+    _ActivityCardData(
+      title: 'Gym with Mike',
+      time: '10:00am - 11:00am',
+      color: Color(0xFFFFE0E6),
+      accent: Color(0xFFFF80AB),
+      titleColor: Color(0xFFD81B60),
+      emoji: '💪',
+      avatars: [
+        'https://randomuser.me/api/portraits/men/13.jpg',
+        'https://randomuser.me/api/portraits/women/14.jpg',
+      ],
+    ),
+    _ActivityCardData(
+      title: 'Coffee with Techno Team',
+      time: '10:00am - 11:00am',
+      color: Color(0xFFD6F5FF),
+      accent: Color(0xFF4FC3F7),
+      titleColor: Color(0xFF0277BD),
+      emoji: '☕',
+      avatars: [
+        'https://randomuser.me/api/portraits/men/15.jpg',
+        'https://randomuser.me/api/portraits/women/16.jpg',
+      ],
+    ),
+  ];
+
+  const _ActivityCardsStack();
+
+  @override
+  Widget build(BuildContext context) {
+    final List<double> angles = [-0.08, 0.0, 0.08];
+    return SizedBox(
+      height: 200,
+      child: Stack(
+        alignment: Alignment.center,
+        children: List.generate(cards.length, (i) {
+          final card = cards[i];
+          return Positioned(
+            top: 28.0 * i,
+            left: 0,
+            right: 0,
+            child: Transform.rotate(
+              angle: angles[i],
+              child: _ActivityCard(card: card, elevation: (cards.length - i) * 2.0),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _ActivityCardData {
+  final String title;
+  final String time;
+  final Color color;
+  final Color accent;
+  final Color titleColor;
+  final String emoji;
+  final List<String> avatars;
+  const _ActivityCardData({
+    required this.title,
+    required this.time,
+    required this.color,
+    required this.accent,
+    required this.titleColor,
+    required this.emoji,
+    required this.avatars,
+  });
+}
+
+class _ActivityCard extends StatelessWidget {
+  final _ActivityCardData card;
+  final double elevation;
+  const _ActivityCard({required this.card, this.elevation = 2});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: card.color,
+      elevation: elevation,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+      child: Stack(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left accent bar
+              Container(
+                width: 8,
+                height: 90,
+                margin: const EdgeInsets.only(left: 0, top: 0, bottom: 0, right: 12),
+                decoration: BoxDecoration(
+                  color: card.accent,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              card.title,
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: card.titleColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(card.emoji, style: const TextStyle(fontSize: 18)),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time, size: 16, color: AppConstants.textTertiary),
+                          const SizedBox(width: 4),
+                          Text(card.time, style: AppTextStyles.caption.copyWith(color: AppConstants.textTertiary)),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Overlapping avatars
+                      SizedBox(
+                        height: 28,
+                        child: Stack(
+                          children: List.generate(card.avatars.length, (i) {
+                            return Positioned(
+                              left: i * 20.0,
+                              child: CircleAvatar(
+                                radius: 14,
+                                backgroundColor: Colors.white,
+                                backgroundImage: NetworkImage(card.avatars[i]),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Three-dot menu
+              Padding(
+                padding: const EdgeInsets.only(top: 8, right: 12),
+                child: Icon(Icons.more_horiz, color: AppConstants.textTertiary),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AvatarsRow extends StatelessWidget {
+  final List<_AvatarData> avatars = const [
+    _AvatarData(name: 'You', imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg'),
+    _AvatarData(name: 'Lisa', imageUrl: 'https://randomuser.me/api/portraits/women/2.jpg'),
+    _AvatarData(name: 'Mike', imageUrl: 'https://randomuser.me/api/portraits/men/3.jpg'),
+  ];
+
+  const _AvatarsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: avatars.map((avatar) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 32,
+                backgroundImage: NetworkImage(avatar.imageUrl),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                avatar.name,
+                style: AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _AvatarData {
+  final String name;
+  final String imageUrl;
+  const _AvatarData({required this.name, required this.imageUrl});
 } 

@@ -11,6 +11,7 @@ import '../steps/onboarding_fitness_goal_step.dart';
 import '../steps/onboarding_activity_level_step.dart';
 import '../steps/onboarding_dietary_restrictions_step.dart';
 import '../steps/onboarding_workout_styles_step.dart';
+import '../steps/onboarding_welcome_step.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -254,7 +255,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildStepContent(int stepIndex) {
     switch (stepIndex) {
       case 0:
-        return _buildWelcomeStep();
+        return const OnboardingWelcomeStep();
       case 1:
         return _buildPersonalInfoStep();
       case 2:
