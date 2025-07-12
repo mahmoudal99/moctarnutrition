@@ -72,55 +72,55 @@ class AppConstants {
 }
 
 class AppTextStyles {
-  static TextStyle get heading1 => GoogleFonts.inter(
+  static TextStyle get heading1 => GoogleFonts.nunitoSans(
     fontSize: 32,
     fontWeight: FontWeight.bold,
     color: AppConstants.textPrimary,
   );
   
-  static TextStyle get heading2 => GoogleFonts.inter(
+  static TextStyle get heading2 => GoogleFonts.nunitoSans(
     fontSize: 28,
     fontWeight: FontWeight.w600,
     color: AppConstants.textPrimary,
   );
   
-  static TextStyle get heading3 => GoogleFonts.inter(
+  static TextStyle get heading3 => GoogleFonts.nunitoSans(
     fontSize: 24,
     fontWeight: FontWeight.w600,
     color: AppConstants.textPrimary,
   );
   
-  static TextStyle get heading4 => GoogleFonts.inter(
+  static TextStyle get heading4 => GoogleFonts.nunitoSans(
     fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppConstants.textPrimary,
   );
   
-  static TextStyle get bodyLarge => GoogleFonts.inter(
+  static TextStyle get bodyLarge => GoogleFonts.nunitoSans(
     fontSize: 18,
     fontWeight: FontWeight.normal,
     color: AppConstants.textPrimary,
   );
   
-  static TextStyle get bodyMedium => GoogleFonts.inter(
+  static TextStyle get bodyMedium => GoogleFonts.nunitoSans(
     fontSize: 16,
     fontWeight: FontWeight.normal,
     color: AppConstants.textPrimary,
   );
   
-  static TextStyle get bodySmall => GoogleFonts.inter(
+  static TextStyle get bodySmall => GoogleFonts.nunitoSans(
     fontSize: 14,
     fontWeight: FontWeight.normal,
     color: AppConstants.textSecondary,
   );
   
-  static TextStyle get caption => GoogleFonts.inter(
+  static TextStyle get caption => GoogleFonts.nunitoSans(
     fontSize: 12,
     fontWeight: FontWeight.normal,
     color: AppConstants.textTertiary,
   );
   
-  static TextStyle get button => GoogleFonts.inter(
+  static TextStyle get button => GoogleFonts.nunitoSans(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: AppConstants.surfaceColor,
