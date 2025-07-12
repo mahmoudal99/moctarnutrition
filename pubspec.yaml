@@ -76,6 +76,9 @@ dependencies:
   # Charts & Analytics
   fl_chart: ^0.66.0
   google_sign_in: ^6.2.2
+  
+  # UI Effects
+  magnifying_glass: ^2.1.1
 
 dev_dependencies:
   flutter_test:
