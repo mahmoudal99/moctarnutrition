@@ -12,6 +12,7 @@ import '../steps/onboarding_activity_level_step.dart';
 import '../steps/onboarding_dietary_restrictions_step.dart';
 import '../steps/onboarding_workout_styles_step.dart';
 import '../steps/onboarding_welcome_step.dart';
+import '../steps/onboarding_schedule_step.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -47,6 +48,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       color: AppConstants.primaryColor,
     ),
     OnboardingStep(
+      title: 'Sync Your Schedule',
+      subtitle: 'See everyone\'s availability',
+      description:
+          'Connect your calendar and view your friends\' and trainers\' schedules in real-time.',
+      icon: Icons.calendar_today,
+      color: AppConstants.secondaryColor,
+    ),
+    OnboardingStep(
       title: 'Tell us about yourself',
       subtitle: 'Basic information for accurate calculations',
       description:
@@ -54,6 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.person,
       color: AppConstants.accentColor,
     ),
+    // BMI step will be inserted in initState
     OnboardingStep(
       title: 'What\'s your fitness goal?',
       subtitle: 'Choose your primary objective',
@@ -257,16 +267,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       case 0:
         return const OnboardingWelcomeStep();
       case 1:
-        return _buildPersonalInfoStep();
+        return const OnboardingScheduleStep();
       case 2:
-        return _buildBMIStep();
+        return _buildPersonalInfoStep();
       case 3:
-        return _buildFitnessGoalStep();
+        return _buildBMIStep();
       case 4:
-        return _buildActivityLevelStep();
+        return _buildFitnessGoalStep();
       case 5:
-        return _buildDietaryRestrictionsStep();
+        return _buildActivityLevelStep();
       case 6:
+        return _buildDietaryRestrictionsStep();
+      case 7:
         return _buildWorkoutStylesStep();
       default:
         return const SizedBox.shrink();
@@ -762,8 +774,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
+    // Insert BMI step after personal info (now index 3)
     _steps.insert(
-        2,
+        3,
         OnboardingStep(
           title: 'Your BMI',
           subtitle: 'Body Mass Index',
