@@ -463,7 +463,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           ...pricingTiers.map((tier) => Expanded(
                 child: Text(
                   tier.name,
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.w600,
                     color: tier.isPopular ? AppConstants.accentColor : null,
                   ),

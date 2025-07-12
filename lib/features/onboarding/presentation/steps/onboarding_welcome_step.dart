@@ -6,35 +6,15 @@ class OnboardingWelcomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Stacked activity cards
         _ActivityCardsStack(),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
         // Avatars row
         _AvatarsRow(),
-        const SizedBox(height: 28),
-        // Motivational text
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            children: [
-              Text(
-                'Crush Your Goals, Together',
-                style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Plan your workouts, sync with friends, and stay motivated.',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -97,7 +77,8 @@ class _ActivityCardsStack extends StatelessWidget {
             right: 0,
             child: Transform.rotate(
               angle: angles[i],
-              child: _ActivityCard(card: card, elevation: (cards.length - i) * 2.0),
+              child: _ActivityCard(
+                  card: card, elevation: (cards.length - i) * 2.0),
             ),
           );
         }),
@@ -114,6 +95,7 @@ class _ActivityCardData {
   final Color titleColor;
   final String emoji;
   final List<String> avatars;
+
   const _ActivityCardData({
     required this.title,
     required this.time,
@@ -128,6 +110,7 @@ class _ActivityCardData {
 class _ActivityCard extends StatelessWidget {
   final _ActivityCardData card;
   final double elevation;
+
   const _ActivityCard({required this.card, this.elevation = 2});
 
   @override
@@ -146,7 +129,8 @@ class _ActivityCard extends StatelessWidget {
               Container(
                 width: 8,
                 height: 90,
-                margin: const EdgeInsets.only(left: 0, top: 0, bottom: 0, right: 12),
+                margin: const EdgeInsets.only(
+                    left: 0, top: 0, bottom: 0, right: 12),
                 decoration: BoxDecoration(
                   color: card.accent,
                   borderRadius: const BorderRadius.only(
@@ -157,7 +141,8 @@ class _ActivityCard extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -175,15 +160,19 @@ class _ActivityCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          Text(card.emoji, style: const TextStyle(fontSize: 18)),
+                          Text(card.emoji,
+                              style: const TextStyle(fontSize: 18)),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.access_time, size: 16, color: AppConstants.textTertiary),
+                          const Icon(Icons.access_time,
+                              size: 16, color: AppConstants.textTertiary),
                           const SizedBox(width: 4),
-                          Text(card.time, style: AppTextStyles.caption.copyWith(color: AppConstants.textTertiary)),
+                          Text(card.time,
+                              style: AppTextStyles.caption
+                                  .copyWith(color: AppConstants.textTertiary)),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -222,9 +211,14 @@ class _ActivityCard extends StatelessWidget {
 
 class _AvatarsRow extends StatelessWidget {
   final List<_AvatarData> avatars = const [
-    _AvatarData(name: 'You', imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg'),
-    _AvatarData(name: 'Lisa', imageUrl: 'https://randomuser.me/api/portraits/women/2.jpg'),
-    _AvatarData(name: 'Mike', imageUrl: 'https://randomuser.me/api/portraits/men/3.jpg'),
+    _AvatarData(
+        name: 'You', imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg'),
+    _AvatarData(
+        name: 'Lisa',
+        imageUrl: 'https://randomuser.me/api/portraits/women/2.jpg'),
+    _AvatarData(
+        name: 'Mike',
+        imageUrl: 'https://randomuser.me/api/portraits/men/3.jpg'),
   ];
 
   // Fun pastel accent colors for borders
@@ -270,7 +264,8 @@ class _AvatarsRow extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 avatar.name,
-                style: AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic),
+                style:
+                    AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic),
               ),
             ],
           ),
@@ -283,5 +278,6 @@ class _AvatarsRow extends StatelessWidget {
 class _AvatarData {
   final String name;
   final String imageUrl;
+
   const _AvatarData({required this.name, required this.imageUrl});
-} 
+}
