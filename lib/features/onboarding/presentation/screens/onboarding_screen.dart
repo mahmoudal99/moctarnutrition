@@ -988,3 +988,4 @@ class OnboardingStep {
     required this.color,
   });
 }
+ 

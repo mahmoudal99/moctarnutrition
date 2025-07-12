@@ -31,13 +31,19 @@ class OnboardingBMIStep extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Text('Your BMI', style: AppTextStyles.heading3.copyWith(color: bmiColor)),
-              const SizedBox(height: AppConstants.spacingS),
-              Text(bmi.toStringAsFixed(1), style: AppTextStyles.heading1.copyWith(color: bmiColor)),
+              // Text('Your BMI', style: AppTextStyles.heading4.copyWith(color: bmiColor)),
+              // const SizedBox(height: AppConstants.spacingS),
+              Text(bmi.toStringAsFixed(1),
+                  style: AppTextStyles.heading1.copyWith(color: bmiColor)),
               const SizedBox(height: AppConstants.spacingXS),
-              Text(bmiCategory, style: AppTextStyles.bodyMedium.copyWith(color: bmiColor, fontWeight: FontWeight.bold)),
+              Text(bmiCategory,
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: bmiColor, fontWeight: FontWeight.bold)),
               const SizedBox(height: AppConstants.spacingS),
-              Text('${height.toStringAsFixed(0)}cm, ${weight.toStringAsFixed(1)}kg', style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary, fontSize: 11)),
+              Text(
+                  '${height.toStringAsFixed(0)}cm, ${weight.toStringAsFixed(1)}kg',
+                  style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.textSecondary, fontSize: 11)),
             ],
           ),
         ),
@@ -49,4 +55,4 @@ class OnboardingBMIStep extends StatelessWidget {
       ],
     );
   }
-} 
+}
