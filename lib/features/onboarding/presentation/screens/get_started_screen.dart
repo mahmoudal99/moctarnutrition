@@ -30,7 +30,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
       title: 'Meal Prepping',
       description:
           'Plan and prepare your meals for optimal nutrition and convenience',
-      icon: "weights.png",
+      icon: "calendar.png",
       color: const Color(0xFF4CAF50),
       gradient: const LinearGradient(
         begin: Alignment.topLeft,

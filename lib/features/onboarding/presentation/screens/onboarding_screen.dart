@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
@@ -44,7 +45,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle: 'Your journey to a healthier lifestyle starts here',
       description:
           'Let\'s personalize your experience by understanding your fitness goals and preferences.',
-      icon: Icons.fitness_center,
+      icon: "run.json",
       color: AppConstants.primaryColor,
     ),
     OnboardingStep(
@@ -52,16 +53,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle: 'Sync with your Coach',
       description:
           'Choose from our handpicked personal trainers and start training with the right expert for your goals.',
-      icon: Icons.calendar_today,
+      icon: "calendar.json",
       color: AppConstants.secondaryColor,
+      showIconColor: false
     ),
     OnboardingStep(
       title: 'Tell us about yourself',
       subtitle: 'Basic information for accurate calculations',
       description:
           'This helps us calculate your precise calorie needs and create personalized plans.',
-      icon: Icons.person,
+      icon: "weight.json",
       color: AppConstants.accentColor,
+      showIconColor: false
     ),
     // BMI step will be inserted in initState
     OnboardingStep(
@@ -69,15 +72,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle: 'Choose your primary objective',
       description:
           'This helps us create personalized workout and meal plans for you.',
-      icon: Icons.track_changes,
+      icon: "target.json",
       color: AppConstants.secondaryColor,
+      showIconColor: false
     ),
     OnboardingStep(
       title: 'How active are you?',
       subtitle: 'Select your activity level',
       description:
           'This helps us calculate your daily calorie needs and workout intensity.',
-      icon: Icons.directions_run,
+      icon: "run.json",
       color: AppConstants.warningColor,
     ),
     OnboardingStep(
@@ -85,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle: 'Select all that apply',
       description:
           'We\'ll customize your meal plans to match your dietary needs.',
-      icon: Icons.restaurant,
+      icon: "diet.json",
       color: AppConstants.successColor,
     ),
     OnboardingStep(
@@ -93,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle: 'Choose your favorites',
       description:
           'We\'ll prioritize these types of workouts in your recommendations.',
-      icon: Icons.sports_gymnastics,
+      icon: "run.json",
       color: AppConstants.primaryColor,
     ),
   ];
@@ -220,16 +224,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Column(
               children: [
                 Container(
-                  width: 64,
-                  height: 64,
+                  width: step.icon.contains("calendar") ? 64 : 64,
+                  height: step.icon.contains("calendar") ? 64 : 64,
                   decoration: BoxDecoration(
-                    color: step.color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusL),
+                    // color: step.color.withOpacity(0.1),
+                    // borderRadius: BorxderRadius.circular(AppConstants.radiusL),
                   ),
-                  child: Icon(
-                    step.icon,
-                    size: 32,
-                    color: step.color,
+                  child: Lottie.asset(
+                    "assets/animations/${step.icon}",
+                    delegates: LottieDelegates(
+                      values: step.showIconColor
+                          ? [
+                              ValueDelegate.color(
+                                const ['**', 'Fill 1'],
+                                // Change this based on your animation
+                                value: step.color,
+                              ),
+                            ]
+                          : [
+                              // ValueDelegate.color(
+                              //   const ['**', 'Fill 1'], // Change this based on your animation
+                              //   value: step.color,
+                              // ),
+                            ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingM),
@@ -459,8 +477,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-
-
   Widget _buildNavigationButtons() {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -498,8 +514,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 key: ValueKey(_currentPage),
                 height: 52,
                 child: CustomButton(
-                  text:
-                      _currentPage == _steps.length - 1 ? 'Get Started' : 'Next',
+                  text: _currentPage == _steps.length - 1
+                      ? 'Get Started'
+                      : 'Next',
                   onPressed: () {
                     if (_currentPage == _steps.length - 1) {
                       _completeOnboarding();
@@ -559,7 +576,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           height: 36,
                           decoration: BoxDecoration(
                             color: AppConstants.primaryColor.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusS),
                           ),
                           child: Icon(
                             icon,
@@ -781,7 +799,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           title: 'Your BMI',
           subtitle: 'Body Mass Index',
           description: 'Here is your calculated BMI based on your info.',
-          icon: Icons.monitor_heart,
+          icon: "heartbeat.json",
           color: AppConstants.warningColor,
         ));
   }
@@ -873,8 +891,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return tdee.round();
   }
-
-
 
   Widget _buildWeightSelector() {
     double tempWeight = _weight;
@@ -977,15 +993,15 @@ class OnboardingStep {
   final String title;
   final String subtitle;
   final String description;
-  final IconData icon;
+  final String icon;
   final Color color;
+  bool showIconColor = true;
 
-  OnboardingStep({
-    required this.title,
-    required this.subtitle,
-    required this.description,
-    required this.icon,
-    required this.color,
-  });
+  OnboardingStep(
+      {required this.title,
+      required this.subtitle,
+      required this.description,
+      required this.icon,
+      required this.color,
+      this.showIconColor = true});
 }
- 

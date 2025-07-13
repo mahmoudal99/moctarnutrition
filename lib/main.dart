@@ -32,8 +32,6 @@ class ChampionsGymApp extends StatelessWidget {
       title: 'Champions Gym',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
       routerConfig: _router,
     );
   }
