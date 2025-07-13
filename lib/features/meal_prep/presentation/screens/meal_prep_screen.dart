@@ -21,10 +21,54 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   // Mock user preferences (in real app, this would come from user profile)
   late UserPreferences _userPreferences;
 
+  // Diet Plan Setup Flow State
+  bool _showDietSetup = false;
+  int _setupStep = 0;
+  NutritionGoal? _selectedNutritionGoal;
+  final List<String> _preferredCuisines = [];
+  final List<String> _foodsToAvoid = [];
+  final List<String> _favoriteFoods = [];
+  MealFrequencyOption? _mealFrequency;
+  bool _weeklyRotation = true;
+  bool _remindersEnabled = false;
+  // Controllers for text input
+  final TextEditingController _cuisineController = TextEditingController();
+  final TextEditingController _avoidController = TextEditingController();
+  final TextEditingController _favoriteController = TextEditingController();
+
+  // For AI preview step
+  bool _isPreviewLoading = false;
+  Map<String, List<String>> _sampleDayPlan = {
+    'Breakfast': ['Scrambled eggs with spinach', '1 slice whole-grain toast'],
+    'Snack': ['Greek yogurt with berries'],
+    'Lunch': ['Grilled chicken salad'],
+    'Snack 2': ['Apple slices with almond butter'],
+    'Dinner': ['Baked salmon', 'Quinoa', 'Steamed broccoli'],
+  };
+
+  void _regeneratePreview() async {
+    setState(() => _isPreviewLoading = true);
+    // Simulate AI call delay
+    await Future.delayed(const Duration(seconds: 1));
+    // For now, just shuffle the plan for demo
+    _sampleDayPlan = Map.fromEntries(_sampleDayPlan.entries.toList()..shuffle());
+    setState(() => _isPreviewLoading = false);
+  }
+
+  @override
+  void dispose() {
+    _cuisineController.dispose();
+    _avoidController.dispose();
+    _favoriteController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
     _initializeUserPreferences();
+    // Show setup if no meal plan exists
+    _showDietSetup = _currentMealPlan == null;
   }
 
   void _initializeUserPreferences() {
@@ -38,8 +82,139 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     );
   }
 
+  void _completeDietSetup() {
+    // Here, you would generate and save the actual meal plan based on user selections
+    // For now, just simulate saving and show the regular meal prep UI
+    final List<MealDay> days = List.generate(7, (i) {
+      final date = DateTime.now().add(Duration(days: i));
+      final meals = _sampleDayPlan.entries.map((entry) {
+        return Meal(
+          id: '${entry.key}_${i + 1}',
+          name: entry.key,
+          description: entry.value.join(', '),
+          type: _getMealTypeForName(entry.key),
+          cuisineType: CuisineType.other,
+          ingredients: entry.value.map((ingredient) => RecipeIngredient(
+            name: ingredient,
+            amount: 1,
+            unit: '',
+            notes: null,
+          )).toList(),
+          instructions: ['See description'],
+          prepTime: 10,
+          cookTime: 10,
+          servings: 1,
+          nutrition: NutritionInfo(
+            calories: 400,
+            protein: 25,
+            carbs: 40,
+            fat: 12,
+            fiber: 5,
+            sugar: 5,
+            sodium: 200,
+          ),
+          tags: [],
+        );
+      }).toList();
+      return MealDay(
+        id: 'day_${i + 1}',
+        date: date,
+        meals: meals,
+        totalCalories: meals.fold(0, (int sum, m) => sum + m.nutrition.calories),
+        totalProtein: meals.fold(0.0, (sum, m) => sum + m.nutrition.protein),
+        totalCarbs: meals.fold(0.0, (sum, m) => sum + m.nutrition.carbs),
+        totalFat: meals.fold(0.0, (sum, m) => sum + m.nutrition.fat),
+      );
+    });
+    setState(() {
+      _showDietSetup = false;
+      _currentMealPlan = MealPlanModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: 'current_user',
+        title: 'My AI Meal Plan',
+        description: 'Personalized meal plan based on your preferences',
+        startDate: DateTime.now(),
+        endDate: DateTime.now().add(const Duration(days: 6)),
+        mealDays: days,
+        totalCalories: days.fold(0, (int sum, d) => sum + d.totalCalories),
+        totalProtein: days.fold(0.0, (sum, d) => sum + d.totalProtein),
+        totalCarbs: days.fold(0.0, (sum, d) => sum + d.totalCarbs),
+        totalFat: days.fold(0.0, (sum, d) => sum + d.totalFat),
+        dietaryTags: _foodsToAvoid,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+    });
+  }
+
+  MealType _getMealTypeForName(String name) {
+    switch (name.toLowerCase()) {
+      case 'breakfast':
+        return MealType.breakfast;
+      case 'lunch':
+        return MealType.lunch;
+      case 'dinner':
+        return MealType.dinner;
+      case 'snack':
+      case 'snack 2':
+        return MealType.snack;
+      default:
+        return MealType.snack;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_showDietSetup) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Set Up My Diet Plan'),
+        ),
+        body: DietPlanSetupFlow(
+          step: _setupStep,
+          onNext: _nextSetupStep,
+          onBack: _prevSetupStep,
+          selectedNutritionGoal: _selectedNutritionGoal,
+          onSelectNutritionGoal: (goal) => setState(() => _selectedNutritionGoal = goal),
+          preferredCuisines: _preferredCuisines,
+          onAddCuisine: (cuisine) => setState(() {
+            if (cuisine.isNotEmpty && !_preferredCuisines.contains(cuisine)) {
+              _preferredCuisines.add(cuisine);
+            }
+          }),
+          onRemoveCuisine: (cuisine) => setState(() => _preferredCuisines.remove(cuisine)),
+          foodsToAvoid: _foodsToAvoid,
+          onAddAvoid: (food) => setState(() {
+            if (food.isNotEmpty && !_foodsToAvoid.contains(food)) {
+              _foodsToAvoid.add(food);
+            }
+          }),
+          onRemoveAvoid: (food) => setState(() => _foodsToAvoid.remove(food)),
+          favoriteFoods: _favoriteFoods,
+          onAddFavorite: (food) => setState(() {
+            if (food.isNotEmpty && !_favoriteFoods.contains(food)) {
+              _favoriteFoods.add(food);
+            }
+          }),
+          onRemoveFavorite: (food) => setState(() => _favoriteFoods.remove(food)),
+          mealFrequency: _mealFrequency,
+          onSelectMealFrequency: (freq) => setState(() => _mealFrequency = freq),
+          cuisineController: _cuisineController,
+          avoidController: _avoidController,
+          favoriteController: _favoriteController,
+          isPreviewLoading: _isPreviewLoading,
+          sampleDayPlan: _sampleDayPlan,
+          onRegeneratePreview: _regeneratePreview,
+          onLooksGood: () => _nextSetupStep(),
+          onCustomize: () {/* TODO: Implement customization */},
+          weeklyRotation: _weeklyRotation,
+          onToggleWeeklyRotation: (val) => setState(() => _weeklyRotation = val),
+          remindersEnabled: _remindersEnabled,
+          onToggleReminders: (val) => setState(() => _remindersEnabled = val),
+          onSavePlan: _completeDietSetup,
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Meal Prep'),
@@ -664,6 +839,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             onChanged: (value) {
               setState(() {
                 _targetCalories = value.round();
+                // Update user preferences with new target calories
+                _userPreferences = _userPreferences.copyWith(
+                  targetCalories: _targetCalories,
+                );
               });
             },
           ),
@@ -727,5 +906,824 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       case MealType.snack:
         return Icons.coffee;
     }
+  }
+
+  // Diet Plan Setup Flow Methods
+  void _nextSetupStep() {
+    setState(() {
+      _setupStep++;
+    });
+  }
+
+  void _prevSetupStep() {
+    setState(() {
+      _setupStep--;
+    });
+  }
+}
+
+// --- Diet Plan Setup Flow ---
+
+enum NutritionGoal { loseFat, buildMuscle, improveEnergy, maintainWeight }
+
+extension NutritionGoalExt on NutritionGoal {
+  String get label {
+    switch (this) {
+      case NutritionGoal.loseFat:
+        return 'Lose fat';
+      case NutritionGoal.buildMuscle:
+        return 'Build muscle';
+      case NutritionGoal.improveEnergy:
+        return 'Improve energy';
+      case NutritionGoal.maintainWeight:
+        return 'Maintain weight';
+    }
+  }
+  IconData get icon {
+    switch (this) {
+      case NutritionGoal.loseFat:
+        return Icons.trending_down;
+      case NutritionGoal.buildMuscle:
+        return Icons.fitness_center;
+      case NutritionGoal.improveEnergy:
+        return Icons.bolt;
+      case NutritionGoal.maintainWeight:
+        return Icons.track_changes;
+    }
+  }
+}
+
+enum MealFrequencyOption { threeMeals, threeMealsTwoSnacks, intermittentFasting }
+
+class DietPlanSetupFlow extends StatelessWidget {
+  final int step;
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+  final NutritionGoal? selectedNutritionGoal;
+  final ValueChanged<NutritionGoal> onSelectNutritionGoal;
+  final List<String> preferredCuisines;
+  final ValueChanged<String> onAddCuisine;
+  final ValueChanged<String> onRemoveCuisine;
+  final List<String> foodsToAvoid;
+  final ValueChanged<String> onAddAvoid;
+  final ValueChanged<String> onRemoveAvoid;
+  final List<String> favoriteFoods;
+  final ValueChanged<String> onAddFavorite;
+  final ValueChanged<String> onRemoveFavorite;
+  final MealFrequencyOption? mealFrequency;
+  final ValueChanged<MealFrequencyOption> onSelectMealFrequency;
+  final TextEditingController cuisineController;
+  final TextEditingController avoidController;
+  final TextEditingController favoriteController;
+  final bool isPreviewLoading;
+  final Map<String, List<String>> sampleDayPlan;
+  final VoidCallback onRegeneratePreview;
+  final VoidCallback onLooksGood;
+  final VoidCallback onCustomize;
+  final bool weeklyRotation;
+  final ValueChanged<bool> onToggleWeeklyRotation;
+  final bool remindersEnabled;
+  final ValueChanged<bool> onToggleReminders;
+  final VoidCallback onSavePlan;
+
+  const DietPlanSetupFlow({
+    super.key,
+    required this.step,
+    required this.onNext,
+    required this.onBack,
+    required this.selectedNutritionGoal,
+    required this.onSelectNutritionGoal,
+    required this.preferredCuisines,
+    required this.onAddCuisine,
+    required this.onRemoveCuisine,
+    required this.foodsToAvoid,
+    required this.onAddAvoid,
+    required this.onRemoveAvoid,
+    required this.favoriteFoods,
+    required this.onAddFavorite,
+    required this.onRemoveFavorite,
+    required this.mealFrequency,
+    required this.onSelectMealFrequency,
+    required this.cuisineController,
+    required this.avoidController,
+    required this.favoriteController,
+    required this.isPreviewLoading,
+    required this.sampleDayPlan,
+    required this.onRegeneratePreview,
+    required this.onLooksGood,
+    required this.onCustomize,
+    required this.weeklyRotation,
+    required this.onToggleWeeklyRotation,
+    required this.remindersEnabled,
+    required this.onToggleReminders,
+    required this.onSavePlan,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.spacingL),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (step > 0)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: onBack,
+                tooltip: 'Back',
+              ),
+            ),
+          Expanded(child: _buildStepContent(context)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepContent(BuildContext context) {
+    switch (step) {
+      case 0:
+        return _GoalSelectionStep(
+          selected: selectedNutritionGoal,
+          onSelect: onSelectNutritionGoal,
+          onNext: onNext,
+        );
+      case 1:
+        return _FoodPreferencesStep(
+          preferredCuisines: preferredCuisines,
+          onAddCuisine: onAddCuisine,
+          onRemoveCuisine: onRemoveCuisine,
+          foodsToAvoid: foodsToAvoid,
+          onAddAvoid: onAddAvoid,
+          onRemoveAvoid: onRemoveAvoid,
+          favoriteFoods: favoriteFoods,
+          onAddFavorite: onAddFavorite,
+          onRemoveFavorite: onRemoveFavorite,
+          cuisineController: cuisineController,
+          avoidController: avoidController,
+          favoriteController: favoriteController,
+          onNext: onNext,
+        );
+      case 2:
+        return _MealFrequencyStep(
+          selected: mealFrequency,
+          onSelect: onSelectMealFrequency,
+          onNext: onNext,
+        );
+      case 3:
+        return _AIPreviewStep(
+          isLoading: isPreviewLoading,
+          sampleDayPlan: sampleDayPlan,
+          onRegenerate: onRegeneratePreview,
+          onNext: onLooksGood,
+          onCustomize: onCustomize,
+        );
+      case 4:
+        return _PersonalizationConfirmationStep(
+          onLooksGood: onNext,
+          onCustomize: onCustomize,
+        );
+      case 5:
+        return _PlanDurationStep(
+          weeklyRotation: weeklyRotation,
+          onToggleWeeklyRotation: onToggleWeeklyRotation,
+          remindersEnabled: remindersEnabled,
+          onToggleReminders: onToggleReminders,
+          onNext: onNext,
+        );
+      case 6:
+        return _FinalReviewStep(
+          sampleDayPlan: sampleDayPlan,
+          onSavePlan: onSavePlan,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+}
+
+class _GoalSelectionStep extends StatelessWidget {
+  final NutritionGoal? selected;
+  final ValueChanged<NutritionGoal> onSelect;
+  final VoidCallback onNext;
+
+  const _GoalSelectionStep({
+    required this.selected,
+    required this.onSelect,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          "What's your primary nutrition goal?",
+          style: AppTextStyles.heading4,
+        ),
+        const SizedBox(height: AppConstants.spacingL),
+        Wrap(
+          spacing: AppConstants.spacingM,
+          runSpacing: AppConstants.spacingM,
+          children: NutritionGoal.values.map((goal) {
+            final isSelected = selected == goal;
+            return ChoiceChip(
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(goal.icon, size: 18, color: isSelected ? AppConstants.surfaceColor : AppConstants.primaryColor),
+                  const SizedBox(width: 8),
+                  Text(goal.label),
+                ],
+              ),
+              selected: isSelected,
+              selectedColor: AppConstants.primaryColor,
+              backgroundColor: AppConstants.primaryColor.withOpacity(0.08),
+              labelStyle: AppTextStyles.bodyMedium.copyWith(
+                color: isSelected ? AppConstants.surfaceColor : AppConstants.primaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+              onSelected: (_) => onSelect(goal),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: AppConstants.spacingL),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: CustomButton(
+            text: 'Next',
+            onPressed: selected != null ? onNext : null,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FoodPreferencesStep extends StatelessWidget {
+  final List<String> preferredCuisines;
+  final ValueChanged<String> onAddCuisine;
+  final ValueChanged<String> onRemoveCuisine;
+  final List<String> foodsToAvoid;
+  final ValueChanged<String> onAddAvoid;
+  final ValueChanged<String> onRemoveAvoid;
+  final List<String> favoriteFoods;
+  final ValueChanged<String> onAddFavorite;
+  final ValueChanged<String> onRemoveFavorite;
+  final TextEditingController cuisineController;
+  final TextEditingController avoidController;
+  final TextEditingController favoriteController;
+  final VoidCallback onNext;
+
+  const _FoodPreferencesStep({
+    required this.preferredCuisines,
+    required this.onAddCuisine,
+    required this.onRemoveCuisine,
+    required this.foodsToAvoid,
+    required this.onAddAvoid,
+    required this.onRemoveAvoid,
+    required this.favoriteFoods,
+    required this.onAddFavorite,
+    required this.onRemoveFavorite,
+    required this.cuisineController,
+    required this.avoidController,
+    required this.favoriteController,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Tell us what you like and don’t like.', style: AppTextStyles.heading4),
+          const SizedBox(height: AppConstants.spacingL),
+          _buildInputSection(
+            context,
+            label: 'Preferred Cuisines',
+            hint: 'e.g. Mediterranean, Asian',
+            items: preferredCuisines,
+            controller: cuisineController,
+            onAdd: onAddCuisine,
+            onRemove: onRemoveCuisine,
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+          _buildInputSection(
+            context,
+            label: 'Foods to Avoid',
+            hint: 'e.g. pork, dairy, spicy',
+            items: foodsToAvoid,
+            controller: avoidController,
+            onAdd: onAddAvoid,
+            onRemove: onRemoveAvoid,
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+          _buildInputSection(
+            context,
+            label: 'Favorites',
+            hint: 'e.g. oats, chicken, tofu',
+            items: favoriteFoods,
+            controller: favoriteController,
+            onAdd: onAddFavorite,
+            onRemove: onRemoveFavorite,
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: CustomButton(
+              text: 'Next',
+              onPressed: onNext,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputSection(
+    BuildContext context, {
+    required String label,
+    required String hint,
+    required List<String> items,
+    required TextEditingController controller,
+    required ValueChanged<String> onAdd,
+    required ValueChanged<String> onRemove,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: AppConstants.spacingS),
+        Wrap(
+          spacing: AppConstants.spacingS,
+          runSpacing: AppConstants.spacingS,
+          children: items.map((item) => Chip(
+            label: Text(item),
+            onDeleted: () => onRemove(item),
+            backgroundColor: AppConstants.primaryColor.withOpacity(0.08),
+            labelStyle: AppTextStyles.bodyMedium,
+          )).toList(),
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  hintText: hint,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                onSubmitted: (value) {
+                  onAdd(value.trim());
+                  controller.clear();
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                onAdd(controller.text.trim());
+                controller.clear();
+              },
+              tooltip: 'Add',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MealFrequencyStep extends StatelessWidget {
+  final MealFrequencyOption? selected;
+  final ValueChanged<MealFrequencyOption> onSelect;
+  final VoidCallback onNext;
+
+  const _MealFrequencyStep({
+    required this.selected,
+    required this.onSelect,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('How many meals would you like per day?', style: AppTextStyles.heading4),
+        const SizedBox(height: AppConstants.spacingL),
+        Column(
+          children: [
+            _buildOptionCard(
+              context,
+              label: '3 main meals',
+              value: MealFrequencyOption.threeMeals,
+              selected: selected == MealFrequencyOption.threeMeals,
+              onTap: () => onSelect(MealFrequencyOption.threeMeals),
+            ),
+            const SizedBox(height: AppConstants.spacingM),
+            _buildOptionCard(
+              context,
+              label: '3 meals + 2 snacks',
+              value: MealFrequencyOption.threeMealsTwoSnacks,
+              selected: selected == MealFrequencyOption.threeMealsTwoSnacks,
+              onTap: () => onSelect(MealFrequencyOption.threeMealsTwoSnacks),
+            ),
+            const SizedBox(height: AppConstants.spacingM),
+            _buildOptionCard(
+              context,
+              label: 'Intermittent fasting (e.g., 16:8)',
+              value: MealFrequencyOption.intermittentFasting,
+              selected: selected == MealFrequencyOption.intermittentFasting,
+              onTap: () => onSelect(MealFrequencyOption.intermittentFasting),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.spacingL),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: CustomButton(
+            text: 'Next',
+            onPressed: selected != null ? onNext : null,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOptionCard(
+    BuildContext context, {
+    required String label,
+    required MealFrequencyOption value,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        color: selected ? AppConstants.primaryColor : Colors.white,
+        elevation: selected ? 2 : 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+          side: BorderSide(
+            color: selected ? AppConstants.primaryColor : AppConstants.textTertiary.withOpacity(0.15),
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          child: Row(
+            children: [
+              Icon(
+                selected ? Icons.check_circle : Icons.circle_outlined,
+                color: selected ? AppConstants.surfaceColor : AppConstants.primaryColor,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: selected ? AppConstants.surfaceColor : AppConstants.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AIPreviewStep extends StatelessWidget {
+  final bool isLoading;
+  final Map<String, List<String>> sampleDayPlan;
+  final VoidCallback onRegenerate;
+  final VoidCallback onNext;
+  final VoidCallback onCustomize;
+
+  const _AIPreviewStep({
+    required this.isLoading,
+    required this.sampleDayPlan,
+    required this.onRegenerate,
+    required this.onNext,
+    required this.onCustomize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('AI-Generated Preview', style: AppTextStyles.heading4),
+          const SizedBox(height: AppConstants.spacingL),
+          if (isLoading)
+            Center(child: CircularProgressIndicator())
+          else
+            Card(
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(AppConstants.spacingM),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: sampleDayPlan.entries.map((entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(entry.key, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                        ...entry.value.map((item) => Text('• $item', style: AppTextStyles.bodyMedium)),
+                      ],
+                    ),
+                  )).toList(),
+                ),
+              ),
+            ),
+          const SizedBox(height: AppConstants.spacingL),
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                  text: 'Regenerate',
+                  onPressed: onRegenerate,
+                  icon: Icons.refresh,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CustomButton(
+                  text: 'Customize',
+                  onPressed: onCustomize,
+                  icon: Icons.edit,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: CustomButton(
+              text: 'Looks good',
+              onPressed: onNext,
+              icon: Icons.check_circle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PersonalizationConfirmationStep extends StatelessWidget {
+  final VoidCallback onLooksGood;
+  final VoidCallback onCustomize;
+
+  const _PersonalizationConfirmationStep({
+    required this.onLooksGood,
+    required this.onCustomize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Personalization Confirmation', style: AppTextStyles.heading4),
+          const SizedBox(height: AppConstants.spacingL),
+          Text('Would you like to proceed or further customize your plan?', style: AppTextStyles.bodyMedium),
+          const SizedBox(height: AppConstants.spacingL),
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                  text: 'Looks good',
+                  onPressed: onLooksGood,
+                  icon: Icons.check_circle,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CustomButton(
+                  text: 'Customize',
+                  onPressed: onCustomize,
+                  icon: Icons.edit,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlanDurationStep extends StatelessWidget {
+  final bool weeklyRotation;
+  final ValueChanged<bool> onToggleWeeklyRotation;
+  final bool remindersEnabled;
+  final ValueChanged<bool> onToggleReminders;
+  final VoidCallback onNext;
+
+  const _PlanDurationStep({
+    required this.weeklyRotation,
+    required this.onToggleWeeklyRotation,
+    required this.remindersEnabled,
+    required this.onToggleReminders,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Plan Duration & Reminders', style: AppTextStyles.heading4),
+          const SizedBox(height: AppConstants.spacingL),
+          Row(
+            children: [
+              Expanded(
+                child: Card(
+                  color: weeklyRotation ? AppConstants.primaryColor : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                    side: BorderSide(
+                      color: weeklyRotation ? AppConstants.primaryColor : AppConstants.textTertiary.withOpacity(0.15),
+                      width: weeklyRotation ? 2 : 1,
+                    ),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                    onTap: () => onToggleWeeklyRotation(true),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                      child: Column(
+                        children: [
+                          Icon(Icons.calendar_month, color: weeklyRotation ? AppConstants.surfaceColor : AppConstants.primaryColor),
+                          const SizedBox(height: 8),
+                          Text('Weekly rotating plan',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: weeklyRotation ? AppConstants.surfaceColor : AppConstants.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Card(
+                  color: !weeklyRotation ? AppConstants.primaryColor : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                    side: BorderSide(
+                      color: !weeklyRotation ? AppConstants.primaryColor : AppConstants.textTertiary.withOpacity(0.15),
+                      width: !weeklyRotation ? 2 : 1,
+                    ),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                    onTap: () => onToggleWeeklyRotation(false),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                      child: Column(
+                        children: [
+                          Icon(Icons.repeat_one, color: !weeklyRotation ? AppConstants.surfaceColor : AppConstants.primaryColor),
+                          const SizedBox(height: 8),
+                          Text('Repeat daily plan',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: !weeklyRotation ? AppConstants.surfaceColor : AppConstants.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+          Row(
+            children: [
+              Switch(
+                value: remindersEnabled,
+                onChanged: onToggleReminders,
+                activeColor: AppConstants.primaryColor,
+              ),
+              const SizedBox(width: 8),
+              Text('Enable reminders', style: AppTextStyles.bodyMedium),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: CustomButton(
+              text: 'Next',
+              onPressed: onNext,
+              icon: Icons.arrow_forward,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FinalReviewStep extends StatelessWidget {
+  final Map<String, List<String>> sampleDayPlan;
+  final VoidCallback onSavePlan;
+
+  const _FinalReviewStep({
+    required this.sampleDayPlan,
+    required this.onSavePlan,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Final Review', style: AppTextStyles.heading4),
+          const SizedBox(height: AppConstants.spacingL),
+          Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.radiusM),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.spacingM),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: sampleDayPlan.entries.map((entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(entry.key, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                      ...entry.value.map((item) => Text('• $item', style: AppTextStyles.bodyMedium)),
+                    ],
+                  ),
+                )).toList(),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                  text: 'View Grocery List',
+                  onPressed: () {/* TODO: Implement grocery list */},
+                  icon: Icons.shopping_cart,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CustomButton(
+                  text: 'Edit Preferences',
+                  onPressed: () {/* TODO: Implement edit preferences */},
+                  icon: Icons.tune,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: CustomButton(
+              text: 'Save Plan',
+              onPressed: onSavePlan,
+              icon: Icons.save,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 } 

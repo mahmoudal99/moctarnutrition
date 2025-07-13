@@ -141,9 +141,13 @@ class CustomButton extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: textColor),
           const SizedBox(width: AppConstants.spacingS),
-          Text(
-            text,
-            style: AppTextStyles.button.copyWith(color: textColor),
+          Flexible(
+            child: Text(
+              text,
+              style: AppTextStyles.button.copyWith(color: textColor),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
           ),
         ],
       );
@@ -152,6 +156,8 @@ class CustomButton extends StatelessWidget {
     return Text(
       text,
       style: AppTextStyles.button.copyWith(color: textColor),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
     );
   }
 }
@@ -216,10 +222,14 @@ class GradientButton extends StatelessWidget {
                   ),
                   const SizedBox(width: AppConstants.spacingS),
                 ],
-                Text(
-                  text,
-                  style: AppTextStyles.button.copyWith(
-                    color: AppConstants.surfaceColor,
+                Flexible(
+                  child: Text(
+                    text,
+                    style: AppTextStyles.button.copyWith(
+                      color: AppConstants.surfaceColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],
