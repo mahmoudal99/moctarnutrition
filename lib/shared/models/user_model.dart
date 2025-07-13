@@ -194,3 +194,47 @@ class UserPreferences {
     );
   }
 } 
+
+class DietPlanPreferences {
+  // Onboarding info
+  final int age;
+  final String gender;
+  final double weight;
+  final double height;
+  final FitnessGoal fitnessGoal;
+  final ActivityLevel activityLevel;
+  final List<String> dietaryRestrictions;
+  final List<String> preferredWorkoutStyles;
+
+  // Nutrition onboarding
+  final String nutritionGoal; // e.g. "Lose fat", "Build muscle"
+  final List<String> preferredCuisines;
+  final List<String> foodsToAvoid;
+  final List<String> favoriteFoods;
+
+  // Meal prep preferences
+  final String mealFrequency; // e.g. "3 meals", "3 meals + 2 snacks", "16:8 fasting"
+  final bool weeklyRotation;
+  final bool remindersEnabled;
+
+  final int targetCalories;
+
+  DietPlanPreferences({
+    required this.age,
+    required this.gender,
+    required this.weight,
+    required this.height,
+    required this.fitnessGoal,
+    required this.activityLevel,
+    required this.dietaryRestrictions,
+    required this.preferredWorkoutStyles,
+    required this.nutritionGoal,
+    required this.preferredCuisines,
+    required this.foodsToAvoid,
+    required this.favoriteFoods,
+    required this.mealFrequency,
+    required this.weeklyRotation,
+    required this.remindersEnabled,
+    required this.targetCalories,
+  });
+} 
