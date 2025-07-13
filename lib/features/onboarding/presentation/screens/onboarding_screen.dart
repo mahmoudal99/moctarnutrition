@@ -48,10 +48,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       color: AppConstants.primaryColor,
     ),
     OnboardingStep(
-      title: 'Sync Your Schedule',
-      subtitle: 'See everyone\'s availability',
+      title: 'Choose Your Coach',
+      subtitle: 'Sync with your Coach',
       description:
-          'Connect your calendar and view your friends\' and trainers\' schedules in real-time.',
+          'Choose from our handpicked personal trainers and start training with the right expert for your goals.',
       icon: Icons.calendar_today,
       color: AppConstants.secondaryColor,
     ),

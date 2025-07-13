@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart'   ;
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/screens/auth_screen.dart';
+import 'features/onboarding/presentation/screens/get_started_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/subscription/presentation/screens/subscription_screen.dart';
 import 'features/meal_prep/presentation/screens/meal_prep_screen.dart';
@@ -39,8 +40,14 @@ class ChampionsGymApp extends StatelessWidget {
 }
 
 final GoRouter _router = GoRouter(
-  initialLocation: '/onboarding',
+  initialLocation: '/get-started',
   routes: [
+    // Get Started Route
+    GoRoute(
+      path: '/get-started',
+      builder: (context, state) => const GetStartedScreen(),
+    ),
+
     // Auth Route
     GoRoute(
       path: '/auth',
