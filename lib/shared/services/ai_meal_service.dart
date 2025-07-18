@@ -13,64 +13,222 @@ class AIMealService {
     required int days,
   }) async {
     try {
-      final prompt = _buildMealPlanPrompt(preferences, days);
-
-      final requestBody = {
-        'model': 'gpt-3.5-turbo', // Use cheaper model for testing
-        'messages': [
-          {
-            'role': 'system',
-            'content':
-                'You are a professional nutritionist and meal planner. Generate detailed, personalized meal plans in JSON format. ALWAYS respect dietary restrictions - this is the most critical requirement. Never include foods that violate the user\'s dietary restrictions.',
+      print('Generating $days-day meal plan using chunking approach...');
+      
+      // Generate each day individually to avoid truncation
+      final List<MealDay> mealDays = [];
+      
+      for (int dayIndex = 1; dayIndex <= days; dayIndex++) {
+        print('Generating day $dayIndex of $days...');
+        
+        final dayPrompt = _buildSingleDayPrompt(preferences, dayIndex);
+        
+        final requestBody = {
+          'model': 'gpt-4o',
+          'messages': [
+            {
+              'role': 'system',
+              'content':
+                  'You are a professional nutritionist and meal planner. Generate detailed, personalized meal plans in JSON format. ALWAYS respect dietary restrictions - this is the most critical requirement. Never include foods that violate the user\'s dietary restrictions.',
+            },
+            {
+              'role': 'user',
+              'content': dayPrompt,
+            },
+          ],
+          'temperature': 0.7,
+          'max_tokens': 4000, // Reduced since we're only generating one day
+        };
+        
+        final response = await http.post(
+          Uri.parse(_baseUrl),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $_apiKey',
           },
-          {
-            'role': 'user',
-            'content': prompt,
-          },
-        ],
-        'temperature': 0.7,
-        'max_tokens': 4096, // Maximum allowed for GPT-3.5-turbo
-      };
-      
-      print('Making API request to OpenAI...');
-      print('Request body: ${jsonEncode(requestBody)}');
-      final response = await http.post(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_apiKey',
-        },
-        body: jsonEncode(requestBody),
-      );
+          body: jsonEncode(requestBody),
+        );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final content = data['choices'][0]['message']['content'];
-        print('AI Response received successfully');
-        print('AI Content length: ${content.length}');
-        return _parseMealPlanFromAI(content, preferences, days);
-      } else {
-        print('API Error: ${response.statusCode} - ${response.body}');
-        throw Exception('Failed to generate meal plan: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      print('AI Service Error: $e');
-      
-      // If it's a truncation error and we're trying more than 3 days, try with fewer days
-      if (e.toString().contains('truncated') && days > 3) {
-        print('Attempting to generate a shorter meal plan with ${days - 1} days...');
-        try {
-          return await generateMealPlan(preferences: preferences, days: days - 1);
-        } catch (retryError) {
-          print('Retry also failed: $retryError');
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final content = data['choices'][0]['message']['content'];
+          print('Day $dayIndex response received successfully');
+          
+          final mealDay = _parseSingleDayFromAI(content, preferences, dayIndex);
+          mealDays.add(mealDay);
+        } else {
+          print('API Error for day $dayIndex: ${response.statusCode} - ${response.body}');
+          throw Exception('Failed to generate day $dayIndex: ${response.statusCode}');
         }
       }
       
+      // Calculate overall meal plan totals
+      double totalProtein = 0;
+      double totalCarbs = 0;
+      double totalFat = 0;
+      
+      for (final day in mealDays) {
+        totalProtein += day.totalProtein;
+        totalCarbs += day.totalCarbs;
+        totalFat += day.totalFat;
+      }
+      
+      return MealPlanModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: 'current_user',
+        title: 'AI-Generated $days-Day Meal Plan',
+        description: 'Personalized meal plan based on your preferences',
+        startDate: DateTime.now(),
+        endDate: DateTime.now().add(Duration(days: days - 1)),
+        mealDays: mealDays,
+        totalCalories: preferences.targetCalories * days,
+        totalProtein: totalProtein,
+        totalCarbs: totalCarbs,
+        totalFat: totalFat,
+        dietaryTags: preferences.dietaryRestrictions,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      
+    } catch (e) {
+      print('AI Service Error: $e');
       throw Exception('Failed to generate meal plan: $e');
     }
+  }
+
+  /// Build a prompt for generating a single day
+  static String _buildSingleDayPrompt(
+    DietPlanPreferences preferences,
+    int dayIndex,
+  ) {
+    final fitnessGoal = _getFitnessGoalDescription(preferences.fitnessGoal);
+    final activityLevel = _getActivityLevelDescription(preferences.activityLevel);
+    final restrictions = preferences.dietaryRestrictions.join(', ');
+    final workoutStyles = preferences.preferredWorkoutStyles.join(', ');
+    final cuisines = preferences.preferredCuisines.join(', ');
+    final avoid = preferences.foodsToAvoid.join(', ');
+    final favorites = preferences.favoriteFoods.join(', ');
+    final mealFrequency = preferences.mealFrequency;
+    final nutritionGoal = preferences.nutritionGoal;
+    final weeklyRotation = preferences.weeklyRotation ? 'Yes' : 'No';
+    final reminders = preferences.remindersEnabled ? 'Yes' : 'No';
+    final targetCalories = preferences.targetCalories;
+
+    return '''
+Generate Day $dayIndex of a personalized meal plan in JSON format with the following requirements:
+
+User Profile:
+- Age: ${preferences.age} years
+- Gender: ${preferences.gender}
+- Weight: ${preferences.weight} kg
+- Height: ${preferences.height} cm
+- BMI: ${(preferences.weight / ((preferences.height / 100) * (preferences.height / 100))).toStringAsFixed(1)}
+- Fitness Goal: $fitnessGoal
+- Activity Level: $activityLevel
+- Nutrition Goal: $nutritionGoal
+- Target Calories: $targetCalories per day
+- Dietary Restrictions: $restrictions
+- Preferred Workout Styles: $workoutStyles
+
+Nutrition Preferences:
+- Preferred Cuisines: $cuisines
+- Foods to Avoid: $avoid
+- Favorite Foods: $favorites
+
+Meal Prep Preferences:
+- Meal Frequency: $mealFrequency
+- Weekly Rotation: $weeklyRotation
+- Reminders Enabled: $reminders
+
+CRITICAL DIETARY RESTRICTIONS:
+- The user has the following dietary restrictions: $restrictions
+- If the user is Vegan: DO NOT include any animal products (meat, fish, dairy, eggs, honey)
+- If the user is Vegetarian: DO NOT include any meat or fish, but dairy and eggs are allowed
+- If the user is Gluten-Free: DO NOT include wheat, barley, rye, or any gluten-containing ingredients
+- If the user is Dairy-Free: DO NOT include milk, cheese, yogurt, or any dairy products
+- ALWAYS respect these restrictions - this is the most important requirement
+
+Requirements:
+1. Create Day $dayIndex with meals (breakfast, lunch, dinner, snacks)
+2. Each meal should include:
+   - Name
+   - Description
+   - Ingredients with amounts
+   - Step-by-step instructions
+   - Nutritional info (calories, protein, carbs, fat, fiber, sugar, sodium)
+   - Prep time and cook time
+   - Servings
+   - Cuisine type
+   - Tags (vegetarian, vegan, gluten-free, etc.)
+   - Meal type (breakfast, lunch, dinner, snack)
+
+3. Ensure the total daily calories match $targetCalories
+4. Consider the fitness goal, nutrition goal, dietary restrictions, and personal metrics
+5. Include variety in cuisines and flavors
+6. Make recipes practical and easy to follow
+7. Consider age-appropriate nutrition needs
+8. Adjust portion sizes based on weight and activity level
+9. Use the user's meal frequency and preferences for meal timing
+10. CRITICAL: Double-check that ALL meals respect the dietary restrictions
+
+Return the response in this exact JSON format, but replace all placeholder values with actual meal data:
+
+{
+  "mealDay": {
+    "id": "day_$dayIndex",
+    "date": "2024-01-0$dayIndex",
+    "totalCalories": $targetCalories,
+    "totalProtein": [CALCULATE_DAY_PROTEIN_FROM_MEALS],
+    "totalCarbs": [CALCULATE_DAY_CARBS_FROM_MEALS],
+    "totalFat": [CALCULATE_DAY_FAT_FROM_MEALS],
+    "meals": [
+      {
+        "id": "meal_1",
+        "name": "[ACTUAL_MEAL_NAME]",
+        "description": "[ACTUAL_MEAL_DESCRIPTION]",
+        "type": "breakfast",
+        "cuisineType": "[ACTUAL_CUISINE]",
+        "prepTime": [ACTUAL_PREP_TIME],
+        "cookTime": [ACTUAL_COOK_TIME],
+        "servings": 1,
+        "ingredients": [
+          {
+            "name": "[ACTUAL_INGREDIENT_NAME]",
+            "amount": [ACTUAL_AMOUNT],
+            "unit": "[ACTUAL_UNIT]",
+            "notes": "[OPTIONAL_NOTES]"
+          }
+        ],
+        "instructions": [
+          "[ACTUAL_STEP_1]",
+          "[ACTUAL_STEP_2]"
+        ],
+        "nutrition": {
+          "calories": [ACTUAL_CALORIES],
+          "protein": [ACTUAL_PROTEIN],
+          "carbs": [ACTUAL_CARBS],
+          "fat": [ACTUAL_FAT],
+          "fiber": [ACTUAL_FIBER],
+          "sugar": [ACTUAL_SUGAR],
+          "sodium": [ACTUAL_SODIUM]
+        },
+        "tags": ["[ACTUAL_TAGS]"],
+        "isVegetarian": [TRUE_OR_FALSE_BASED_ON_MEAL],
+        "isVegan": [TRUE_OR_FALSE_BASED_ON_MEAL],
+        "isGlutenFree": [TRUE_OR_FALSE_BASED_ON_MEAL],
+        "isDairyFree": [TRUE_OR_FALSE_BASED_ON_MEAL]
+      }
+    ]
+  }
+}
+
+IMPORTANT: 
+- Replace ALL placeholder values in [BRACKETS] with actual data
+- Calculate nutrition totals by summing all meals
+- Generate unique meal names for each meal
+- Ensure all nutrition values are realistic numbers, not 0
+- Create Day $dayIndex with breakfast, lunch, dinner, and snacks
+''';
   }
 
   /// Build a detailed prompt for the AI
@@ -220,6 +378,144 @@ IMPORTANT:
 - Ensure all nutrition values are realistic numbers, not 0
 - Create $days days of meals, not just one day
 ''';
+  }
+
+  /// Parse single day AI response into MealDay
+  static MealDay _parseSingleDayFromAI(
+    String aiResponse,
+    DietPlanPreferences preferences,
+    int dayIndex,
+  ) {
+    try {
+      print('Parsing single day AI response for day $dayIndex...');
+      print('AI Response length: ${aiResponse.length}');
+      print('AI Response preview: ${aiResponse.substring(0, aiResponse.length > 200 ? 200 : aiResponse.length)}...');
+      
+      // Remove markdown code fences if present
+      String cleanResponse = aiResponse.trim();
+      if (cleanResponse.startsWith('```')) {
+        int firstNewline = cleanResponse.indexOf('\n');
+        if (firstNewline != -1) {
+          cleanResponse = cleanResponse.substring(firstNewline + 1);
+        }
+        if (cleanResponse.endsWith('```')) {
+          cleanResponse = cleanResponse.substring(0, cleanResponse.length - 3);
+        }
+      }
+      
+      // Extract JSON from AI response
+      final jsonStart = cleanResponse.indexOf('{');
+      final jsonEnd = cleanResponse.lastIndexOf('}') + 1;
+      if (jsonStart == -1 || jsonEnd == 0) {
+        print('No JSON found in AI response');
+        throw Exception('No JSON found in AI response');
+      }
+      
+      // Check if the JSON appears to be truncated
+      final jsonString = cleanResponse.substring(jsonStart, jsonEnd);
+      final openBraces = '{'.allMatches(jsonString).length;
+      final closeBraces = '}'.allMatches(jsonString).length;
+      final openBrackets = '['.allMatches(jsonString).length;
+      final closeBrackets = ']'.allMatches(jsonString).length;
+      
+      if (openBraces != closeBraces || openBrackets != closeBrackets) {
+        print('JSON appears to be truncated. Open braces: $openBraces, Close braces: $closeBraces');
+        print('Open brackets: $openBrackets, Close brackets: $closeBrackets');
+        throw Exception('AI response was truncated. Please try again.');
+      }
+      
+      // Remove comments and other non-JSON content
+      String cleanedJson = jsonString;
+      
+      // Remove single-line comments (// ...)
+      cleanedJson = cleanedJson.replaceAll(RegExp(r'//.*$', multiLine: true), '');
+      
+      // Remove multi-line comments (/* ... */)
+      cleanedJson = cleanedJson.replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '');
+      
+      // Remove empty lines and extra whitespace
+      cleanedJson = cleanedJson.split('\n')
+          .where((line) => line.trim().isNotEmpty)
+          .join('\n');
+      
+      // Remove trailing commas before closing brackets/braces
+      cleanedJson = cleanedJson.replaceAllMapped(
+        RegExp(r',(\s*[}\]])'),
+        (match) => match.group(1) ?? '',
+      );
+      
+      // Fix common JSON issues from AI responses
+      String fixedJsonString = cleanedJson;
+      
+      // Fix fractions like 1/2, 1/4, etc.
+      fixedJsonString = fixedJsonString.replaceAllMapped(
+        RegExp(r':\s*(\d+)/(\d+)'),
+        (match) {
+          final numerator = double.parse(match.group(1) ?? '0');
+          final denominator = double.parse(match.group(2) ?? '1');
+          final result = numerator / denominator;
+          return ': $result';
+        },
+      );
+      
+      // Fix quoted fractions like "1/2"
+      fixedJsonString = fixedJsonString.replaceAllMapped(
+        RegExp(r':\s*"(\d+)/(\d+)"'),
+        (match) {
+          final numerator = double.parse(match.group(1) ?? '0');
+          final denominator = double.parse(match.group(2) ?? '1');
+          final result = numerator / denominator;
+          return ': $result';
+        },
+      );
+      
+      final data = jsonDecode(fixedJsonString);
+      final mealDayData = data['mealDay'];
+      
+      // Calculate nutrition totals from meals if they're missing or 0
+      if (mealDayData['meals'] != null) {
+        final meals = (mealDayData['meals'] as List).map((mealData) {
+          final mealMap = Map<String, dynamic>.from(mealData);
+          if (mealMap['nutrition'] != null &&
+              mealMap['nutrition']['calories'] is double) {
+            mealMap['nutrition']['calories'] =
+                (mealMap['nutrition']['calories'] as double).toInt();
+          }
+          return mealMap;
+        }).toList();
+        mealDayData['meals'] = meals;
+        
+        // Calculate day totals from meals
+        double dayProtein = 0;
+        double dayCarbs = 0;
+        double dayFat = 0;
+        
+        for (final meal in meals) {
+          if (meal['nutrition'] != null) {
+            final nutrition = meal['nutrition'] as Map<String, dynamic>;
+            dayProtein += (nutrition['protein'] as num?)?.toDouble() ?? 0;
+            dayCarbs += (nutrition['carbs'] as num?)?.toDouble() ?? 0;
+            dayFat += (nutrition['fat'] as num?)?.toDouble() ?? 0;
+          }
+        }
+        
+        // Update day totals if they're missing or 0
+        if ((mealDayData['totalProtein'] as num?)?.toDouble() == 0 || mealDayData['totalProtein'] == null) {
+          mealDayData['totalProtein'] = dayProtein;
+        }
+        if ((mealDayData['totalCarbs'] as num?)?.toDouble() == 0 || mealDayData['totalCarbs'] == null) {
+          mealDayData['totalCarbs'] = dayCarbs;
+        }
+        if ((mealDayData['totalFat'] as num?)?.toDouble() == 0 || mealDayData['totalFat'] == null) {
+          mealDayData['totalFat'] = dayFat;
+        }
+      }
+      
+      return MealDay.fromJson(mealDayData);
+    } catch (e) {
+      print('JSON parsing failed for day $dayIndex: $e');
+      throw Exception('Failed to parse AI response for day $dayIndex: $e');
+    }
   }
 
   /// Parse AI response into MealPlanModel

@@ -4,6 +4,7 @@ import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/ai_meal_service.dart';
+import '../../../../shared/services/meal_plan_storage_service.dart';
 import '../../../../shared/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
@@ -57,8 +58,43 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   @override
   void initState() {
     super.initState();
-    // Show setup if no meal plan exists
-    _showDietSetup = _currentMealPlan == null;
+    _loadSavedData();
+  }
+
+  /// Load saved meal plan and diet preferences from storage
+  Future<void> _loadSavedData() async {
+    try {
+      // Load saved meal plan
+      final savedMealPlan = await MealPlanStorageService.loadMealPlan();
+      if (savedMealPlan != null) {
+        setState(() {
+          _currentMealPlan = savedMealPlan;
+          _showDietSetup = false;
+        });
+        print('Loaded saved meal plan: ${savedMealPlan.title}');
+      }
+
+      // Load saved diet preferences
+      final savedDietPreferences = await MealPlanStorageService.loadDietPreferences();
+      if (savedDietPreferences != null) {
+        setState(() {
+          _dietPlanPreferences = savedDietPreferences;
+        });
+        print('Loaded saved diet preferences');
+      }
+
+      // Show setup if no meal plan exists
+      if (_currentMealPlan == null) {
+        setState(() {
+          _showDietSetup = true;
+        });
+      }
+    } catch (e) {
+      print('Error loading saved data: $e');
+      setState(() {
+        _showDietSetup = true;
+      });
+    }
   }
 
   void _completeDietSetup() async {
@@ -101,6 +137,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       );
 
       print('Meal plan generated successfully: ${mealPlan.title}');
+      // Save meal plan and diet preferences to storage
+      await MealPlanStorageService.saveMealPlan(mealPlan);
+      await MealPlanStorageService.saveDietPreferences(_dietPlanPreferences!);
+      
       setState(() {
         _showDietSetup = false;
         _currentMealPlan = mealPlan;
@@ -745,6 +785,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         days: _selectedDays,
       );
 
+      // Save the new meal plan to storage
+      await MealPlanStorageService.saveMealPlan(mealPlan);
+      
       setState(() {
         _currentMealPlan = mealPlan;
         _isLoading = false;
