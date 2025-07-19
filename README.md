@@ -1,4 +1,4 @@
-# champions_gym_app
+# Muktar Nutrition
 
 A new Flutter project.
 
