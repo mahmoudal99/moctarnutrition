@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart'   ;
 import 'core/theme/app_theme.dart';
@@ -14,8 +15,31 @@ import 'features/profile/presentation/screens/profile_screen.dart';
 // import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'shared/widgets/main_navigation.dart';
 import 'shared/providers/user_provider.dart';
+import 'shared/services/config_service.dart';
 
-void main() {
+void main() async {
+  // Load environment variables
+  try {
+    await dotenv.load(fileName: '.env');
+    print('Environment file loaded successfully');
+  } catch (e) {
+    print('Warning: Could not load .env file: $e');
+    print('Please ensure you have copied .env.example to .env and configured your API key');
+    // Continue with default configuration
+  }
+  
+  // Validate environment configuration
+  try {
+    ConfigService.validateEnvironment();
+    print('Environment configuration validated successfully');
+    print('Config summary: ${ConfigService.getConfigSummary()}');
+  } catch (e) {
+    print('Environment configuration error: $e');
+    print('Please check your .env file and ensure OPENAI_API_KEY is set');
+    // In production, you might want to show a user-friendly error
+    // or fall back to a safe default configuration
+  }
+  
   runApp(
     ChangeNotifierProvider(
       create: (_) => UserProvider()..loadUser(),
