@@ -15,6 +15,7 @@ import 'features/profile/presentation/screens/profile_screen.dart';
 // import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'shared/widgets/main_navigation.dart';
 import 'shared/providers/user_provider.dart';
+import 'shared/providers/meal_plan_provider.dart';
 import 'shared/services/config_service.dart';
 
 void main() async {
@@ -41,8 +42,11 @@ void main() async {
   }
   
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => UserProvider()..loadUser(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
+        ChangeNotifierProvider(create: (_) => MealPlanProvider()),
+      ],
       child: const ChampionsGymApp(),
     ),
   );

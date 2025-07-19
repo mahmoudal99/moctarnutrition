@@ -6,6 +6,7 @@ import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/ai_meal_service.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
 import '../../../../shared/providers/user_provider.dart';
+import '../../../../shared/providers/meal_plan_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'meal_detail_screen.dart';
@@ -22,7 +23,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   MealPlanModel? _currentMealPlan;
   int _selectedDays = 7;
   int _targetCalories = 0;
-  
+
   // Progress tracking
   int _completedDays = 0;
   int _totalDays = 0;
@@ -76,6 +77,11 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           _currentMealPlan = savedMealPlan;
           _showDietSetup = false;
         });
+        
+        // Update the provider with the loaded meal plan
+        final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+        mealPlanProvider.setMealPlan(savedMealPlan);
+        
         print('Loaded saved meal plan: ${savedMealPlan.title}');
       }
 
@@ -186,9 +192,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     if (_totalDays == 0) {
       return 'We are cooking up your personalized meal plan…';
     }
-    
+
     final progress = _completedDays / _totalDays;
-    
+
     if (progress < 0.25) {
       return 'Analyzing your preferences and dietary needs…';
     } else if (progress < 0.5) {
@@ -325,7 +331,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           ),
           const SizedBox(height: AppConstants.spacingL),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
               _getLoadingMessage(),
               style: AppTextStyles.heading4,
@@ -334,7 +341,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           ),
           const SizedBox(height: AppConstants.spacingS),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
               'Hang tight while we craft delicious, healthy recipes just for you!',
               style: AppTextStyles.bodyMedium
@@ -345,7 +353,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           const SizedBox(height: AppConstants.spacingL),
           // Progress bar and status
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Column(
               children: [
                 // Progress bar
@@ -358,8 +367,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                   builder: (context, value, child) {
                     return LinearProgressIndicator(
                       value: value,
-                      backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
+                      backgroundColor:
+                          AppConstants.textTertiary.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          AppConstants.primaryColor),
                       minHeight: 8,
                     );
                   },
@@ -367,9 +378,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                 const SizedBox(height: AppConstants.spacingS),
                 // Progress text
                 Text(
-                  _totalDays > 0 
-                    ? 'Generated $_completedDays of $_totalDays days (${((_completedDays / _totalDays) * 100).toInt()}%)'
-                    : 'Preparing your meal plan...',
+                  _totalDays > 0
+                      ? 'Generated $_completedDays of $_totalDays days (${((_completedDays / _totalDays) * 100).toInt()}%)'
+                      : 'Preparing your meal plan...',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppConstants.textSecondary,
                     fontWeight: FontWeight.w500,
@@ -758,9 +769,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   }
 
   Widget _buildMealCard(Meal meal) {
-    final dayIndex = _currentMealPlan!.mealDays.indexWhere((day) => day.meals.contains(meal));
+    final dayIndex = _currentMealPlan!.mealDays
+        .indexWhere((day) => day.meals.contains(meal));
     final dayTitle = dayIndex >= 0 ? 'Day ${dayIndex + 1}' : 'Unknown Day';
-    
+
     return InkWell(
       onTap: () => _navigateToMealDetail(meal, dayTitle),
       borderRadius: BorderRadius.circular(AppConstants.radiusS),
@@ -833,11 +845,37 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                 _buildNutritionChip(
                     'F', '${meal.nutrition.fat.toStringAsFixed(0)}g'),
                 const Spacer(),
-                Text(
-                  '${meal.prepTime + meal.cookTime} min',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppConstants.textTertiary,
-                    fontSize: 10,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppConstants.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppConstants.primaryColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.visibility,
+                        size: 12,
+                        color: AppConstants.primaryColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'View Recipe',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppConstants.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -861,7 +899,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       child: Text(
         '$label: $value',
         style: AppTextStyles.caption.copyWith(
-          color: AppConstants.primaryColor,
+          color: AppConstants.textSecondary,
           fontWeight: FontWeight.w600,
           fontSize: 10,
         ),

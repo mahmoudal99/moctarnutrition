@@ -592,7 +592,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     if (_selectedPlan == null) return;
 
     // TODO: Implement subscription logic
-    // Navigate to auth screen to collect user credentials
-    context.go('/auth');
+    // Temporarily skip auth and go directly to home
+    context.go('/home');
   }
 }

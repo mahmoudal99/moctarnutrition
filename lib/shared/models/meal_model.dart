@@ -1,5 +1,14 @@
 enum MealType { breakfast, lunch, dinner, snack }
-enum CuisineType { american, italian, mexican, asian, mediterranean, indian, other }
+
+enum CuisineType {
+  american,
+  italian,
+  mexican,
+  asian,
+  mediterranean,
+  indian,
+  other
+}
 
 class MealPlanModel {
   final String id;
@@ -9,7 +18,7 @@ class MealPlanModel {
   final DateTime startDate;
   final DateTime endDate;
   final List<MealDay> mealDays;
-  final int totalCalories;
+  final double totalCalories;
   final double totalProtein;
   final double totalCarbs;
   final double totalFat;
@@ -47,7 +56,7 @@ class MealPlanModel {
       mealDays: (json['mealDays'] as List<dynamic>)
           .map((e) => MealDay.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalCalories: json['totalCalories'] as int,
+      totalCalories: (json['totalCalories'] as num).toDouble(),
       totalProtein: (json['totalProtein'] as num).toDouble(),
       totalCarbs: (json['totalCarbs'] as num).toDouble(),
       totalFat: (json['totalFat'] as num).toDouble(),
@@ -83,10 +92,10 @@ class MealDay {
   final String id;
   final DateTime date;
   final List<Meal> meals;
-  final int totalCalories;
-  final double totalProtein;
-  final double totalCarbs;
-  final double totalFat;
+  double totalCalories; // Made mutable for corrections and changed to double
+  double totalProtein; // Made mutable for corrections
+  double totalCarbs; // Made mutable for corrections
+  double totalFat; // Made mutable for corrections
 
   MealDay({
     required this.id,
@@ -105,7 +114,7 @@ class MealDay {
       meals: (json['meals'] as List<dynamic>)
           .map((e) => Meal.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalCalories: json['totalCalories'] as int,
+      totalCalories: (json['totalCalories'] as num).toDouble(),
       totalProtein: (json['totalProtein'] as num).toDouble(),
       totalCarbs: (json['totalCarbs'] as num).toDouble(),
       totalFat: (json['totalFat'] as num).toDouble(),
@@ -138,8 +147,9 @@ class Meal {
   final int prepTime; // in minutes
   final int cookTime; // in minutes
   final int servings;
-  final NutritionInfo nutrition;
+  NutritionInfo nutrition; // Made mutable for corrections
   final List<String> tags;
+  final List<String> dietaryTags; // Added for dietary restriction checking
   final bool isVegetarian;
   final bool isVegan;
   final bool isGlutenFree;
@@ -162,6 +172,7 @@ class Meal {
     required this.servings,
     required this.nutrition,
     required this.tags,
+    this.dietaryTags = const [],
     this.isVegetarian = false,
     this.isVegan = false,
     this.isGlutenFree = false,
@@ -192,8 +203,10 @@ class Meal {
       prepTime: json['prepTime'] as int,
       cookTime: json['cookTime'] as int,
       servings: json['servings'] as int,
-      nutrition: NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>),
+      nutrition:
+          NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>),
       tags: List<String>.from(json['tags'] ?? []),
+      dietaryTags: List<String>.from(json['dietaryTags'] ?? []),
       isVegetarian: json['isVegetarian'] as bool? ?? false,
       isVegan: json['isVegan'] as bool? ?? false,
       isGlutenFree: json['isGlutenFree'] as bool? ?? false,
@@ -219,6 +232,7 @@ class Meal {
       'servings': servings,
       'nutrition': nutrition.toJson(),
       'tags': tags,
+      'dietaryTags': dietaryTags,
       'isVegetarian': isVegetarian,
       'isVegan': isVegan,
       'isGlutenFree': isGlutenFree,
@@ -250,7 +264,7 @@ class RecipeIngredient {
       amount: (json['amount'] as num).toDouble(),
       unit: json['unit'] as String,
       notes: json['notes'] as String?,
-      nutrition: json['nutrition'] != null 
+      nutrition: json['nutrition'] != null
           ? NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>)
           : null,
     );
@@ -268,7 +282,7 @@ class RecipeIngredient {
 }
 
 class NutritionInfo {
-  final int calories;
+  final double calories; // Changed to double for USDA corrections
   final double protein; // in grams
   final double carbs; // in grams
   final double fat; // in grams
@@ -288,7 +302,7 @@ class NutritionInfo {
 
   factory NutritionInfo.fromJson(Map<String, dynamic> json) {
     return NutritionInfo(
-      calories: json['calories'] as int,
+      calories: (json['calories'] as num).toDouble(),
       protein: (json['protein'] as num).toDouble(),
       carbs: (json['carbs'] as num).toDouble(),
       fat: (json['fat'] as num).toDouble(),
@@ -309,4 +323,4 @@ class NutritionInfo {
       'sodium': sodium,
     };
   }
-} 
+}

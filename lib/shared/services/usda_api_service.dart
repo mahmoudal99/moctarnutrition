@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'config_service.dart';
+import '../models/meal_model.dart';
 
 /// Service for verifying nutritional data against USDA FoodData Central API
 class USDAApiService {
@@ -57,19 +58,21 @@ class USDAApiService {
     String ingredientName,
     double amount,
     String unit,
-    Map<String, double> claimedNutrition,
-  ) async {
+    Map<String, double> claimedNutrition, {
+    List<String> dietaryRestrictions = const [],
+  }) async {
     try {
       // Search for the ingredient
       final searchResults = await searchFood(ingredientName);
       
       if (searchResults.isEmpty) {
-        return NutritionVerificationResult(
-          isVerified: false,
-          confidence: 0.0,
-          message: 'Ingredient not found in USDA database',
-          suggestedCorrection: null,
-        );
+              return NutritionVerificationResult(
+        isVerified: false,
+        confidence: 0.0,
+        message: 'Ingredient not found in USDA database',
+        suggestedCorrection: null,
+        suggestedReplacement: null,
+      );
       }
 
       // Get the best match (first result)
@@ -77,12 +80,13 @@ class USDAApiService {
       final foodDetails = await getFoodDetails(bestMatch.fdcId);
       
       if (foodDetails == null) {
-        return NutritionVerificationResult(
-          isVerified: false,
-          confidence: 0.0,
-          message: 'Could not retrieve nutritional details',
-          suggestedCorrection: null,
-        );
+              return NutritionVerificationResult(
+        isVerified: false,
+        confidence: 0.0,
+        message: 'Could not retrieve nutritional details',
+        suggestedCorrection: null,
+        suggestedReplacement: null,
+      );
       }
 
       // Calculate expected nutrition based on amount
@@ -100,6 +104,7 @@ class USDAApiService {
         confidence: verification.confidence,
         message: verification.message,
         suggestedCorrection: verification.suggestedCorrection,
+        suggestedReplacement: null,
         usdaData: expectedNutrition,
         usdaSource: foodDetails.description,
       );
@@ -110,6 +115,7 @@ class USDAApiService {
         confidence: 0.0,
         message: 'Verification failed: $e',
         suggestedCorrection: null,
+        suggestedReplacement: null,
       );
     }
   }
@@ -307,6 +313,7 @@ class NutritionVerificationResult {
   final double confidence;
   final String message;
   final Map<String, double>? suggestedCorrection;
+  final RecipeIngredient? suggestedReplacement; // Added for dietary restrictions
   final Map<String, double>? usdaData;
   final String? usdaSource;
 
@@ -315,6 +322,7 @@ class NutritionVerificationResult {
     required this.confidence,
     required this.message,
     this.suggestedCorrection,
+    this.suggestedReplacement,
     this.usdaData,
     this.usdaSource,
   });

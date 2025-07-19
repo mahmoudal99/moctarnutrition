@@ -159,7 +159,7 @@ class ParserService {
         startDate: DateTime.parse(mealPlanData['startDate']),
         endDate: DateTime.parse(mealPlanData['endDate']),
         mealDays: mealDays,
-        totalCalories: JsonUtils.safeToInt(mealPlanData['totalCalories']),
+        totalCalories: JsonUtils.safeToDouble(mealPlanData['totalCalories']),
         totalProtein: totalProtein,
         totalCarbs: totalCarbs,
         totalFat: totalFat,

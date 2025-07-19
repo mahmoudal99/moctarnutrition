@@ -18,7 +18,7 @@ class MockDataService {
         id: const Uuid().v4(),
         date: date,
         meals: _generateMockMeals(preferences, daySeed),
-        totalCalories: preferences.targetCalories,
+        totalCalories: preferences.targetCalories.toDouble(),
         totalProtein: preferences.targetCalories * 0.3 / 4, // 30% protein
         totalCarbs: preferences.targetCalories * 0.4 / 4, // 40% carbs
         totalFat: preferences.targetCalories * 0.3 / 9, // 30% fat
@@ -33,7 +33,7 @@ class MockDataService {
       startDate: DateTime.now(),
       endDate: DateTime.now().add(Duration(days: days - 1)),
       mealDays: mealDays,
-      totalCalories: preferences.targetCalories * days,
+      totalCalories: (preferences.targetCalories * days).toDouble(),
       totalProtein: preferences.targetCalories * days * 0.3 / 4,
       totalCarbs: preferences.targetCalories * days * 0.4 / 4,
       totalFat: preferences.targetCalories * days * 0.3 / 9,
@@ -192,7 +192,7 @@ class MockDataService {
       cookTime: 20,
       servings: 1,
       nutrition: NutritionInfo(
-        calories: calories,
+        calories: calories.toDouble(),
         protein: calories * 0.3 / 4,
         carbs: calories * 0.4 / 4,
         fat: calories * 0.3 / 9,

@@ -18,8 +18,8 @@ class AIMealService {
     List<MealDay> previousDays,
   ) async {
     final dayPrompt = PromptService.buildSingleDayPromptWithContext(
-      preferences, 
-      dayIndex, 
+      preferences,
+      dayIndex,
       previousDays.isNotEmpty ? previousDays : null,
     );
 
@@ -64,8 +64,6 @@ class AIMealService {
     }
   }
 
-
-
   /// Generate a personalized meal plan using AI with caching and parallel processing
   static Future<MealPlanModel> generateMealPlan({
     required DietPlanPreferences preferences,
@@ -103,9 +101,11 @@ class AIMealService {
         // Create futures for parallel processing within the batch
         final futures = <Future<MealDay>>[];
         int batchCompletedDays = 0;
-        
+
         for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
-          futures.add(_generateSingleDayWithContext(preferences, dayIndex, mealDays).then((mealDay) {
+          futures.add(
+              _generateSingleDayWithContext(preferences, dayIndex, mealDays)
+                  .then((mealDay) {
             // Report individual day completion
             batchCompletedDays++;
             final totalCompleted = mealDays.length + batchCompletedDays;
@@ -146,7 +146,7 @@ class AIMealService {
         startDate: DateTime.now(),
         endDate: DateTime.now().add(Duration(days: days - 1)),
         mealDays: mealDays,
-        totalCalories: preferences.targetCalories * days,
+        totalCalories: (preferences.targetCalories * days).toDouble(),
         totalProtein: totalProtein,
         totalCarbs: totalCarbs,
         totalFat: totalFat,
@@ -181,7 +181,8 @@ class AIMealService {
   }) async {
     try {
       // For preview, we don't need context since it's just one day
-      final previewPlan = await generateMealPlan(preferences: preferences, days: 1);
+      final previewPlan =
+          await generateMealPlan(preferences: preferences, days: 1);
       // Convert the first day to a simple map for preview UI
       final day = previewPlan.mealDays.first;
       final Map<String, List<String>> preview = {};

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/nutrition_verification_service.dart';
 import '../../../../shared/services/config_service.dart';
+import '../../../../shared/providers/meal_plan_provider.dart';
 
 class MealDetailScreen extends StatefulWidget {
   final Meal meal;
@@ -50,68 +52,87 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppConstants.backgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppConstants.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.meal.name,
-          style: AppTextStyles.heading4.copyWith(
-            color: AppConstants.textPrimary,
-          ),
-        ),
-        actions: [
-          if (_isVerifying)
-            Container(
-              margin: const EdgeInsets.only(right: AppConstants.spacingM),
-              child: const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+    return Consumer<MealPlanProvider>(
+      builder: (context, mealPlanProvider, child) {
+        // Get the updated meal from the provider
+        Meal? updatedMeal;
+        if (mealPlanProvider.mealPlan != null) {
+          for (final mealDay in mealPlanProvider.mealPlan!.mealDays) {
+            final foundMeal = mealDay.meals.where((m) => m.id == widget.meal.id).firstOrNull;
+            if (foundMeal != null) {
+              updatedMeal = foundMeal;
+              break;
+            }
+          }
+        }
+        
+        // Use updated meal if available, otherwise use original
+        final currentMeal = updatedMeal ?? widget.meal;
+        
+        return Scaffold(
+          backgroundColor: AppConstants.backgroundColor,
+          appBar: AppBar(
+            backgroundColor: AppConstants.backgroundColor,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: AppConstants.textPrimary),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              currentMeal.name,
+              style: AppTextStyles.heading4.copyWith(
+                color: AppConstants.textPrimary,
               ),
             ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildMealHeader(),
-            const SizedBox(height: AppConstants.spacingL),
-            _buildNutritionOverview(),
-            const SizedBox(height: AppConstants.spacingL),
-            _buildIngredientsSection(),
-            const SizedBox(height: AppConstants.spacingL),
-            _buildInstructionsSection(),
-            const SizedBox(height: AppConstants.spacingL),
-            _buildMealInfo(),
-          ],
-        ),
-      ),
+            actions: [
+              if (_isVerifying)
+                Container(
+                  margin: const EdgeInsets.only(right: AppConstants.spacingM),
+                  child: const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppConstants.spacingM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMealHeader(currentMeal),
+                const SizedBox(height: AppConstants.spacingL),
+                _buildNutritionOverview(currentMeal),
+                const SizedBox(height: AppConstants.spacingL),
+                _buildIngredientsSection(currentMeal),
+                const SizedBox(height: AppConstants.spacingL),
+                _buildInstructionsSection(currentMeal),
+                const SizedBox(height: AppConstants.spacingL),
+                _buildMealInfo(currentMeal),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildMealHeader() {
+  Widget _buildMealHeader(Meal meal) {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            _getMealTypeColor(widget.meal.type).withOpacity(0.1),
-            _getMealTypeColor(widget.meal.type).withOpacity(0.05),
+            _getMealTypeColor(meal.type).withOpacity(0.1),
+            _getMealTypeColor(meal.type).withOpacity(0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppConstants.radiusM),
         border: Border.all(
-          color: _getMealTypeColor(widget.meal.type).withOpacity(0.2),
+          color: _getMealTypeColor(meal.type).withOpacity(0.2),
         ),
       ),
       child: Row(
@@ -120,12 +141,12 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: _getMealTypeColor(widget.meal.type).withOpacity(0.15),
+              color: _getMealTypeColor(meal.type).withOpacity(0.15),
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
             ),
             child: Icon(
-              _getMealTypeIcon(widget.meal.type),
-              color: _getMealTypeColor(widget.meal.type),
+              _getMealTypeIcon(meal.type),
+              color: _getMealTypeColor(meal.type),
               size: 28,
             ),
           ),
@@ -135,14 +156,14 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.meal.name,
+                  meal.name,
                   style: AppTextStyles.heading4.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingXS),
                 Text(
-                  widget.meal.description,
+                  meal.description,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppConstants.textSecondary,
                   ),
@@ -172,7 +193,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     );
   }
 
-  Widget _buildNutritionOverview() {
+  Widget _buildNutritionOverview(Meal meal) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -199,7 +220,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                   Expanded(
                     child: _buildNutritionCard(
                       'Calories',
-                      '${widget.meal.nutrition.calories}',
+                      '${meal.nutrition.calories}',
                       'cal',
                       AppConstants.accentColor,
                     ),
@@ -208,7 +229,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                   Expanded(
                     child: _buildNutritionCard(
                       'Protein',
-                      '${widget.meal.nutrition.protein.toStringAsFixed(1)}',
+                      '${meal.nutrition.protein.toStringAsFixed(1)}',
                       'g',
                       AppConstants.successColor,
                     ),
@@ -221,7 +242,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                   Expanded(
                     child: _buildNutritionCard(
                       'Carbs',
-                      '${widget.meal.nutrition.carbs.toStringAsFixed(1)}',
+                      '${meal.nutrition.carbs.toStringAsFixed(1)}',
                       'g',
                       AppConstants.warningColor,
                     ),
@@ -230,7 +251,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                   Expanded(
                     child: _buildNutritionCard(
                       'Fat',
-                      '${widget.meal.nutrition.fat.toStringAsFixed(1)}',
+                      '${meal.nutrition.fat.toStringAsFixed(1)}',
                       'g',
                       AppConstants.errorColor,
                     ),
@@ -305,18 +326,18 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     );
   }
 
-  Widget _buildIngredientsSection() {
+  Widget _buildIngredientsSection(Meal meal) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-                    Text(
-          'Ingredients',
-          style: AppTextStyles.heading4.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+            Text(
+              'Ingredients',
+              style: AppTextStyles.heading4.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const Spacer(),
             if (_verificationResult != null)
               _buildVerificationBadge(),
@@ -332,8 +353,8 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             ),
           ),
           child: Column(
-            children: widget.meal.ingredients.map((ingredient) {
-              return _buildIngredientTile(ingredient);
+            children: meal.ingredients.map((ingredient) {
+              return _buildIngredientTile(ingredient, meal);
             }).toList(),
           ),
         ),
@@ -388,14 +409,14 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     );
   }
 
-  Widget _buildIngredientTile(RecipeIngredient ingredient) {
+  Widget _buildIngredientTile(RecipeIngredient ingredient, Meal meal) {
     final hasNutrition = ingredient.nutrition != null;
     final verificationDetail = _verificationResult?.ingredientVerifications
         .firstWhere(
           (v) => v.ingredientName == ingredient.name,
           orElse: () => IngredientVerificationDetail(
             ingredientName: ingredient.name,
-            mealName: widget.meal.name,
+            mealName: meal.name,
             dayIndex: 'unknown',
             isVerified: false,
             confidence: 0.0,
@@ -517,33 +538,91 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
               : AppConstants.warningColor.withOpacity(0.2),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            detail.isVerified ? Icons.check_circle : Icons.info,
-            size: 16,
-            color: detail.isVerified 
-                ? AppConstants.successColor
-                : AppConstants.warningColor,
-          ),
-          const SizedBox(width: AppConstants.spacingS),
-          Expanded(
-            child: Text(
-              detail.message,
-              style: AppTextStyles.caption.copyWith(
+          Row(
+            children: [
+              Icon(
+                detail.isVerified ? Icons.check_circle : Icons.info,
+                size: 16,
                 color: detail.isVerified 
                     ? AppConstants.successColor
                     : AppConstants.warningColor,
-                fontWeight: FontWeight.w500,
+              ),
+              const SizedBox(width: AppConstants.spacingS),
+              Expanded(
+                child: Text(
+                  detail.message,
+                  style: AppTextStyles.caption.copyWith(
+                    color: detail.isVerified 
+                        ? AppConstants.successColor
+                        : AppConstants.warningColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Show correction buttons for non-verified ingredients
+          if (!detail.isVerified && (detail.suggestedCorrection != null || detail.suggestedReplacement != null))
+            Padding(
+              padding: const EdgeInsets.only(top: AppConstants.spacingS),
+              child: Row(
+                children: [
+                  if (detail.suggestedCorrection != null)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _applyNutritionCorrection(detail),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppConstants.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                          ),
+                        ),
+                        child: Text(
+                          'Apply USDA Data',
+                          style: AppTextStyles.caption.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (detail.suggestedCorrection != null && detail.suggestedReplacement != null)
+                    const SizedBox(width: AppConstants.spacingS),
+                  if (detail.suggestedReplacement != null)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _replaceIngredient(detail),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppConstants.accentColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                          ),
+                        ),
+                        child: Text(
+                          'Replace Ingredient',
+                          style: AppTextStyles.caption.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildInstructionsSection() {
+  Widget _buildInstructionsSection(Meal meal) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -564,7 +643,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             ),
           ),
           child: Column(
-            children: widget.meal.instructions.asMap().entries.map((entry) {
+            children: meal.instructions.asMap().entries.map((entry) {
               final index = entry.key;
               final instruction = entry.value;
               return Padding(
@@ -606,7 +685,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     );
   }
 
-  Widget _buildMealInfo() {
+  Widget _buildMealInfo(Meal meal) {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
@@ -619,19 +698,19 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-                  Text(
-          'Meal Information',
-          style: AppTextStyles.heading4.copyWith(
-            fontWeight: FontWeight.bold,
+          Text(
+            'Meal Information',
+            style: AppTextStyles.heading4.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
           const SizedBox(height: AppConstants.spacingM),
-          _buildInfoRow('Prep Time', '${widget.meal.prepTime} min', Icons.timer),
-          _buildInfoRow('Cook Time', '${widget.meal.cookTime} min', Icons.restaurant),
-          _buildInfoRow('Servings', '${widget.meal.servings}', Icons.people),
-          _buildInfoRow('Cuisine', _getCuisineName(widget.meal.cuisineType), Icons.flag),
-          if (widget.meal.tags.isNotEmpty)
-            _buildInfoRow('Tags', widget.meal.tags.join(', '), Icons.label),
+          _buildInfoRow('Prep Time', '${meal.prepTime} min', Icons.timer),
+          _buildInfoRow('Cook Time', '${meal.cookTime} min', Icons.restaurant),
+          _buildInfoRow('Servings', '${meal.servings}', Icons.people),
+          _buildInfoRow('Cuisine', _getCuisineName(meal.cuisineType), Icons.flag),
+          if (meal.tags.isNotEmpty)
+            _buildInfoRow('Tags', meal.tags.join(', '), Icons.label),
         ],
       ),
     );
@@ -710,6 +789,142 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         return 'Indian';
       case CuisineType.other:
         return 'Other';
+    }
+  }
+
+  void _applyNutritionCorrection(IngredientVerificationDetail detail) async {
+    try {
+      final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+      
+      // Create a verification result with just this correction
+      final correctionResult = MealVerificationResult(
+        isVerified: false,
+        confidence: detail.confidence,
+        message: 'Applied USDA correction for ${detail.ingredientName}',
+        ingredientVerifications: [detail],
+      );
+
+      await mealPlanProvider.applyMealCorrections(widget.meal.id, correctionResult);
+      
+      // Re-verify the meal after applying corrections
+      setState(() {
+        _isVerifying = true;
+      });
+      
+      try {
+        // Get the updated meal from the provider
+        Meal? updatedMeal;
+        if (mealPlanProvider.mealPlan != null) {
+          for (final mealDay in mealPlanProvider.mealPlan!.mealDays) {
+            final foundMeal = mealDay.meals.where((m) => m.id == widget.meal.id).firstOrNull;
+            if (foundMeal != null) {
+              updatedMeal = foundMeal;
+              break;
+            }
+          }
+        }
+        
+        if (updatedMeal != null) {
+          final newVerificationResult = await NutritionVerificationService.verifyMeal(updatedMeal);
+          setState(() {
+            _verificationResult = newVerificationResult;
+            _isVerifying = false;
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _isVerifying = false;
+        });
+        print('Error re-verifying meal: $e');
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Nutrition data updated for ${detail.ingredientName}'),
+            backgroundColor: AppConstants.successColor,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isVerifying = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to apply correction: $e'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
+  void _replaceIngredient(IngredientVerificationDetail detail) async {
+    if (detail.suggestedReplacement == null) return;
+
+    try {
+      final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+      
+      await mealPlanProvider.replaceNonCompliantIngredient(
+        widget.meal.id,
+        detail.ingredientName,
+        detail.suggestedReplacement!,
+      );
+      
+      // Re-verify the meal after replacing ingredient
+      setState(() {
+        _isVerifying = true;
+      });
+      
+      try {
+        // Get the updated meal from the provider
+        Meal? updatedMeal;
+        if (mealPlanProvider.mealPlan != null) {
+          for (final mealDay in mealPlanProvider.mealPlan!.mealDays) {
+            final foundMeal = mealDay.meals.where((m) => m.id == widget.meal.id).firstOrNull;
+            if (foundMeal != null) {
+              updatedMeal = foundMeal;
+              break;
+            }
+          }
+        }
+        
+        if (updatedMeal != null) {
+          final newVerificationResult = await NutritionVerificationService.verifyMeal(updatedMeal);
+          setState(() {
+            _verificationResult = newVerificationResult;
+            _isVerifying = false;
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _isVerifying = false;
+        });
+        print('Error re-verifying meal: $e');
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Replaced ${detail.ingredientName} with ${detail.suggestedReplacement!.name}'),
+            backgroundColor: AppConstants.successColor,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isVerifying = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to replace ingredient: $e'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+      }
     }
   }
 } 
