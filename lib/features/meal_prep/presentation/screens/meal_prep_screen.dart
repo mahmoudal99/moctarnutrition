@@ -75,7 +75,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       }
 
       // Load saved diet preferences
-      final savedDietPreferences = await MealPlanStorageService.loadDietPreferences();
+      final savedDietPreferences =
+          await MealPlanStorageService.loadDietPreferences();
       if (savedDietPreferences != null) {
         setState(() {
           _dietPlanPreferences = savedDietPreferences;
@@ -98,10 +99,13 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   }
 
   void _completeDietSetup() async {
-    final userPrefs = _userPreferences ?? Provider.of<UserProvider>(context, listen: false).user?.preferences;
+    final userPrefs = _userPreferences ??
+        Provider.of<UserProvider>(context, listen: false).user?.preferences;
     if (userPrefs == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User preferences not found.'), backgroundColor: AppConstants.errorColor),
+        SnackBar(
+            content: Text('User preferences not found.'),
+            backgroundColor: AppConstants.errorColor),
       );
       return;
     }
@@ -140,7 +144,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       // Save meal plan and diet preferences to storage
       await MealPlanStorageService.saveMealPlan(mealPlan);
       await MealPlanStorageService.saveDietPreferences(_dietPlanPreferences!);
-      
+
       setState(() {
         _showDietSetup = false;
         _currentMealPlan = mealPlan;
@@ -179,7 +183,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userPrefs = _userPreferences ?? Provider.of<UserProvider>(context).user?.preferences;
+    final userPrefs = _userPreferences ??
+        Provider.of<UserProvider>(context).user?.preferences;
     if (_showDietSetup) {
       return Scaffold(
         appBar: AppBar(
@@ -188,60 +193,70 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         body: _isLoading
             ? _buildLoadingState()
             : DietPlanSetupFlow(
-          step: _setupStep,
-          onNext: _nextSetupStep,
-          onBack: _prevSetupStep,
-          selectedNutritionGoal: _selectedNutritionGoal,
-          onSelectNutritionGoal: (goal) => setState(() => _selectedNutritionGoal = goal),
-          preferredCuisines: _preferredCuisines,
-          onAddCuisine: (cuisine) => setState(() {
-            if (cuisine.isNotEmpty && !_preferredCuisines.contains(cuisine)) {
-              _preferredCuisines.add(cuisine);
-            }
-          }),
-          onRemoveCuisine: (cuisine) => setState(() => _preferredCuisines.remove(cuisine)),
-          foodsToAvoid: _foodsToAvoid,
-          onAddAvoid: (food) => setState(() {
-            if (food.isNotEmpty && !_foodsToAvoid.contains(food)) {
-              _foodsToAvoid.add(food);
-            }
-          }),
-          onRemoveAvoid: (food) => setState(() => _foodsToAvoid.remove(food)),
-          favoriteFoods: _favoriteFoods,
-          onAddFavorite: (food) => setState(() {
-            if (food.isNotEmpty && !_favoriteFoods.contains(food)) {
-              _favoriteFoods.add(food);
-            }
-          }),
-          onRemoveFavorite: (food) => setState(() => _favoriteFoods.remove(food)),
-          mealFrequency: _mealFrequency,
-          onSelectMealFrequency: (freq) => setState(() => _mealFrequency = freq),
-          cuisineController: _cuisineController,
-          avoidController: _avoidController,
-          favoriteController: _favoriteController,
-          isPreviewLoading: false,
-          sampleDayPlan: {},
-          onRegeneratePreview: () {},
-          onLooksGood: () => _nextSetupStep(),
-          onCustomize: () {/* TODO: Implement customization */},
-          weeklyRotation: _weeklyRotation,
-          onToggleWeeklyRotation: (val) => setState(() => _weeklyRotation = val),
-          remindersEnabled: _remindersEnabled,
-          onToggleReminders: (val) => setState(() => _remindersEnabled = val),
-          onSavePlan: _completeDietSetup,
-          userPreferences: userPrefs!,
-          selectedDays: _selectedDays,
-        ),
+                step: _setupStep,
+                onNext: _nextSetupStep,
+                onBack: _prevSetupStep,
+                selectedNutritionGoal: _selectedNutritionGoal,
+                onSelectNutritionGoal: (goal) =>
+                    setState(() => _selectedNutritionGoal = goal),
+                preferredCuisines: _preferredCuisines,
+                onAddCuisine: (cuisine) => setState(() {
+                  if (cuisine.isNotEmpty &&
+                      !_preferredCuisines.contains(cuisine)) {
+                    _preferredCuisines.add(cuisine);
+                  }
+                }),
+                onRemoveCuisine: (cuisine) =>
+                    setState(() => _preferredCuisines.remove(cuisine)),
+                foodsToAvoid: _foodsToAvoid,
+                onAddAvoid: (food) => setState(() {
+                  if (food.isNotEmpty && !_foodsToAvoid.contains(food)) {
+                    _foodsToAvoid.add(food);
+                  }
+                }),
+                onRemoveAvoid: (food) =>
+                    setState(() => _foodsToAvoid.remove(food)),
+                favoriteFoods: _favoriteFoods,
+                onAddFavorite: (food) => setState(() {
+                  if (food.isNotEmpty && !_favoriteFoods.contains(food)) {
+                    _favoriteFoods.add(food);
+                  }
+                }),
+                onRemoveFavorite: (food) =>
+                    setState(() => _favoriteFoods.remove(food)),
+                mealFrequency: _mealFrequency,
+                onSelectMealFrequency: (freq) =>
+                    setState(() => _mealFrequency = freq),
+                cuisineController: _cuisineController,
+                avoidController: _avoidController,
+                favoriteController: _favoriteController,
+                isPreviewLoading: false,
+                sampleDayPlan: {},
+                onRegeneratePreview: () {},
+                onLooksGood: () => _nextSetupStep(),
+                onCustomize: () {
+                  /* TODO: Implement customization */
+                },
+                weeklyRotation: _weeklyRotation,
+                onToggleWeeklyRotation: (val) =>
+                    setState(() => _weeklyRotation = val),
+                remindersEnabled: _remindersEnabled,
+                onToggleReminders: (val) =>
+                    setState(() => _remindersEnabled = val),
+                onSavePlan: _completeDietSetup,
+                userPreferences: userPrefs!,
+                selectedDays: _selectedDays,
+              ),
       );
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Meal Prep'),
+        title: const Text('My Meal Plan'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _generateNewMealPlan,
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.refresh),
+          //   onPressed: _generateNewMealPlan,
+          // ),
         ],
       ),
       body: _isLoading
@@ -265,7 +280,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             width: 160,
             height: 160,
             child: Lottie.asset(
-              'assets/animations/loading.json', // Make sure this file exists or use another fun animation
+              'assets/animations/loading.json',
+              // Make sure this file exists or use another fun animation
               repeat: true,
               fit: BoxFit.contain,
             ),
@@ -279,7 +295,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           const SizedBox(height: AppConstants.spacingS),
           Text(
             'Hang tight while we craft delicious, healthy recipes just for you!',
-            style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
+            style: AppTextStyles.bodyMedium
+                .copyWith(color: AppConstants.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppConstants.spacingL),
@@ -297,7 +314,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   }
 
   Widget _buildWelcomeState() {
-    final userPrefs = _userPreferences ?? Provider.of<UserProvider>(context, listen: false).user?.preferences;
+    final userPrefs = _userPreferences ??
+        Provider.of<UserProvider>(context, listen: false).user?.preferences;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.spacingL),
       child: Column(
@@ -377,7 +395,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             const SizedBox(height: AppConstants.spacingS),
             _buildSettingRow(
               'Fitness Goal',
-              _getFitnessGoalText(userPrefs?.fitnessGoal ?? FitnessGoal.maintenance),
+              _getFitnessGoalText(
+                  userPrefs?.fitnessGoal ?? FitnessGoal.maintenance),
               Icons.track_changes,
               null,
             ),
@@ -444,7 +463,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               ),
             ),
             if (onTap != null)
-              Icon(
+              const Icon(
                 Icons.chevron_right,
                 color: AppConstants.textTertiary,
                 size: 20,
@@ -475,8 +494,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildMealPlanHeader(),
-          const SizedBox(height: AppConstants.spacingM),
+          // _buildMealPlanHeader(),
+          // const SizedBox(height: AppConstants.spacingM),
           _buildNutritionSummary(),
           const SizedBox(height: AppConstants.spacingM),
           _buildMealDaysList(),
@@ -787,7 +806,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
       // Save the new meal plan to storage
       await MealPlanStorageService.saveMealPlan(mealPlan);
-      
+
       setState(() {
         _currentMealPlan = mealPlan;
         _isLoading = false;
@@ -1140,6 +1159,7 @@ class DietPlanSetupFlow extends StatelessWidget {
 class _ProgressDots extends StatelessWidget {
   final int current;
   final int total;
+
   const _ProgressDots({required this.current, required this.total});
 
   static const List<Color> _stepColors = [
@@ -1731,12 +1751,16 @@ class _FinalReviewStep extends StatelessWidget {
       color: AppConstants.surfaceColor.withOpacity(0.98),
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: AppConstants.spacingL),
-              Text('Final Review', style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              Text('Final Review',
+                  style: AppTextStyles.heading3
+                      .copyWith(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center),
               const SizedBox(height: AppConstants.spacingL),
               Card(
                 elevation: 4,
@@ -1764,7 +1788,10 @@ class _FinalReviewStep extends StatelessWidget {
                         icon: _iconFor('restrictions'),
                         label: 'Dietary Restrictions',
                         value: (userPreferences.dietaryRestrictions.isEmpty ||
-                                (userPreferences.dietaryRestrictions.length == 1 && userPreferences.dietaryRestrictions.first == 'None'))
+                                (userPreferences.dietaryRestrictions.length ==
+                                        1 &&
+                                    userPreferences.dietaryRestrictions.first ==
+                                        'None'))
                             ? 'None'
                             : userPreferences.dietaryRestrictions.join(', '),
                       ),
@@ -1772,7 +1799,8 @@ class _FinalReviewStep extends StatelessWidget {
                       _reviewRow(
                         icon: _iconFor('workout'),
                         label: 'Preferred Workouts',
-                        value: userPreferences.preferredWorkoutStyles.join(', '),
+                        value:
+                            userPreferences.preferredWorkoutStyles.join(', '),
                       ),
                       // Add more fields as needed
                     ],
@@ -1797,7 +1825,8 @@ class _FinalReviewStep extends StatelessWidget {
     );
   }
 
-  Widget _reviewRow({required IconData icon, required String label, required String value}) {
+  Widget _reviewRow(
+      {required IconData icon, required String label, required String value}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1814,9 +1843,13 @@ class _FinalReviewStep extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary)),
+              Text(label,
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: AppConstants.textSecondary)),
               const SizedBox(height: 2),
-              Text(value, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
+              Text(value,
+                  style: AppTextStyles.bodyLarge
+                      .copyWith(fontWeight: FontWeight.w600)),
             ],
           ),
         ),
