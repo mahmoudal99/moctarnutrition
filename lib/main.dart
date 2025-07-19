@@ -67,7 +67,7 @@ class ChampionsGymApp extends StatelessWidget {
 }
 
 final GoRouter _router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/meal-prep',
   routes: [
     // Splash Screen Route
     GoRoute(

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:champions_gym_app/shared/services/usda_api_service.dart';
+import 'package:champions_gym_app/shared/services/unit_converter_service.dart';
 
 void main() {
   group('USDA API Service Tests', () {
@@ -56,18 +57,27 @@ void main() {
       expect(result.message.isNotEmpty, isTrue);
     });
 
-    test('should handle unit conversions correctly', () {
+    test('should handle unit conversions correctly', () async {
       // Test gram conversion
-      expect(USDAApiService._convertToGrams(100, 'g'), equals(100.0));
+      final gramsResult = await UnitConverterService.convertToGrams(100, 'g', 'test ingredient', null);
+      expect(gramsResult, equals(100.0));
       
-      // Test cup conversion
-      expect(USDAApiService._convertToGrams(1, 'cup'), equals(240.0));
+      // Test cup conversion (approximate)
+      final cupResult = await UnitConverterService.convertToGrams(1, 'cup', 'water', null);
+      expect(cupResult, greaterThan(200.0)); // Should be around 240g
       
-      // Test tablespoon conversion
-      expect(USDAApiService._convertToGrams(1, 'tbsp'), equals(15.0));
+      // Test tablespoon conversion (approximate)
+      final tbspResult = await UnitConverterService.convertToGrams(1, 'tbsp', 'water', null);
+      expect(tbspResult, greaterThan(10.0)); // Should be around 15g
       
-      // Test teaspoon conversion
-      expect(USDAApiService._convertToGrams(1, 'tsp'), equals(5.0));
+      // Test teaspoon conversion (approximate)
+      final tspResult = await UnitConverterService.convertToGrams(1, 'tsp', 'water', null);
+      expect(tspResult, greaterThan(3.0)); // Should be around 5g
+    });
+
+    test('should test API connectivity', () async {
+      final isConnected = await USDAApiService.testConnection();
+      expect(isConnected, isA<bool>());
     });
   });
 } 

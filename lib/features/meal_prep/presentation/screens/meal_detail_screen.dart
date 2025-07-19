@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
-import '../../../../shared/services/nutrition_verification_service.dart';
-import '../../../../shared/services/config_service.dart';
 import '../../../../shared/providers/meal_plan_provider.dart';
 
 class MealDetailScreen extends StatefulWidget {
@@ -21,8 +19,6 @@ class MealDetailScreen extends StatefulWidget {
 }
 
 class _MealDetailScreenState extends State<MealDetailScreen> {
-  MealVerificationResult? _verificationResult;
-  bool _isVerifying = false;
 
   @override
   void initState() {
@@ -31,32 +27,8 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   }
 
   Future<void> _loadVerificationResult() async {
-    if (!ConfigService.isUsdaApiEnabled) return;
-
-    setState(() {
-      _isVerifying = true;
-    });
-
-    try {
-      final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
-      final verificationResult = await mealPlanProvider.getMealVerification(widget.meal);
-      setState(() {
-        _verificationResult = verificationResult;
-        _isVerifying = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isVerifying = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load verification result: $e'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
-    }
+    // USDA verification temporarily disabled
+    return;
   }
 
   @override
@@ -67,17 +39,18 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         Meal? updatedMeal;
         if (mealPlanProvider.mealPlan != null) {
           for (final mealDay in mealPlanProvider.mealPlan!.mealDays) {
-            final foundMeal = mealDay.meals.where((m) => m.id == widget.meal.id).firstOrNull;
+            final foundMeal =
+                mealDay.meals.where((m) => m.id == widget.meal.id).firstOrNull;
             if (foundMeal != null) {
               updatedMeal = foundMeal;
               break;
             }
           }
         }
-        
+
         // Use updated meal if available, otherwise use original
         final currentMeal = updatedMeal ?? widget.meal;
-        
+
         return Scaffold(
           backgroundColor: AppConstants.backgroundColor,
           appBar: AppBar(
@@ -93,17 +66,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                 color: AppConstants.textPrimary,
               ),
             ),
-            actions: [
-              if (_isVerifying)
-                Container(
-                  margin: const EdgeInsets.only(right: AppConstants.spacingM),
-                  child: const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-            ],
+            actions: [],
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(AppConstants.spacingM),
@@ -296,7 +259,8 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     );
   }
 
-  Widget _buildNutritionCard(String label, String value, String unit, Color color) {
+  Widget _buildNutritionCard(
+      String label, String value, String unit, Color color) {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingS),
       decoration: BoxDecoration(
@@ -339,25 +303,14 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              'Ingredients',
-              style: AppTextStyles.heading4.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Spacer(),
-            if (_verificationResult != null)
-              _buildVerificationBadge(),
-          ],
+        Text(
+          'Ingredients',
+          style: AppTextStyles.heading4.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: AppConstants.spacingM),
-        
-        // Automatic correction summary
-        if (_verificationResult != null)
-          _buildAutomaticCorrectionSummary(),
-        
+
         Container(
           decoration: BoxDecoration(
             color: AppConstants.surfaceColor,
@@ -376,67 +329,10 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     );
   }
 
-  Widget _buildVerificationBadge() {
-    if (_verificationResult == null) return const SizedBox.shrink();
 
-    final isVerified = _verificationResult!.isVerified;
-    final confidence = _verificationResult!.confidence;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.spacingS,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: isVerified 
-            ? AppConstants.successColor.withOpacity(0.1)
-            : AppConstants.warningColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppConstants.radiusS),
-        border: Border.all(
-          color: isVerified 
-              ? AppConstants.successColor.withOpacity(0.3)
-              : AppConstants.warningColor.withOpacity(0.3),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isVerified ? Icons.verified : Icons.warning,
-            size: 14,
-            color: isVerified 
-                ? AppConstants.successColor
-                : AppConstants.warningColor,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            '${(confidence * 100).toInt()}% verified',
-            style: AppTextStyles.caption.copyWith(
-              color: isVerified 
-                  ? AppConstants.successColor
-                  : AppConstants.warningColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildIngredientTile(RecipeIngredient ingredient, Meal meal) {
     final hasNutrition = ingredient.nutrition != null;
-    final verificationDetail = _verificationResult?.ingredientVerifications
-        .firstWhere(
-          (v) => v.ingredientName == ingredient.name,
-          orElse: () => IngredientVerificationDetail(
-            ingredientName: ingredient.name,
-            mealName: meal.name,
-            dayIndex: 'unknown',
-            isVerified: false,
-            confidence: 0.0,
-            message: 'Not verified',
-          ),
-        );
 
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
@@ -447,45 +343,39 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           ),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ingredient.name,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${ingredient.amount} ${ingredient.unit}',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppConstants.textSecondary,
-                      ),
-                    ),
-                    if (ingredient.notes != null && ingredient.notes!.isNotEmpty)
-                      Text(
-                        ingredient.notes!,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppConstants.textTertiary,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                  ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ingredient.name,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              if (hasNutrition)
-                _buildIngredientNutrition(ingredient.nutrition!),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  '${ingredient.amount} ${ingredient.unit}',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.textSecondary,
+                  ),
+                ),
+                if (ingredient.notes != null &&
+                    ingredient.notes!.isNotEmpty)
+                  Text(
+                    ingredient.notes!,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.textTertiary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+              ],
+            ),
           ),
-          if (verificationDetail != null && ConfigService.isUsdaApiEnabled)
-            _buildIngredientVerification(verificationDetail),
+          if (hasNutrition)
+            _buildIngredientNutrition(ingredient.nutrition!),
         ],
       ),
     );
@@ -537,144 +427,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     );
   }
 
-  Widget _buildIngredientVerification(IngredientVerificationDetail detail) {
-    return Container(
-      margin: const EdgeInsets.only(top: AppConstants.spacingS),
-      padding: const EdgeInsets.all(AppConstants.spacingS),
-      decoration: BoxDecoration(
-        color: detail.isVerified 
-            ? AppConstants.successColor.withOpacity(0.05)
-            : AppConstants.warningColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(AppConstants.radiusS),
-        border: Border.all(
-          color: detail.isVerified 
-              ? AppConstants.successColor.withOpacity(0.2)
-              : AppConstants.warningColor.withOpacity(0.2),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                detail.isVerified ? Icons.check_circle : Icons.info,
-                size: 16,
-                color: detail.isVerified 
-                    ? AppConstants.successColor
-                    : AppConstants.warningColor,
-              ),
-              const SizedBox(width: AppConstants.spacingS),
-              Expanded(
-                child: Text(
-                  detail.message,
-                  style: AppTextStyles.caption.copyWith(
-                    color: detail.isVerified 
-                        ? AppConstants.successColor
-                        : AppConstants.warningColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          // Show correction buttons for non-verified ingredients
-          if (!detail.isVerified && (detail.suggestedCorrection != null || detail.suggestedReplacement != null))
-            Padding(
-              padding: const EdgeInsets.only(top: AppConstants.spacingS),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Show automatic application status
-                  if (detail.suggestedCorrection != null && detail.confidence > 0.6)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppConstants.successColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                        border: Border.all(
-                          color: AppConstants.successColor.withOpacity(0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            size: 14,
-                            color: AppConstants.successColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Auto-applied USDA data',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppConstants.successColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (detail.suggestedCorrection != null && detail.confidence <= 0.6)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppConstants.warningColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                        border: Border.all(
-                          color: AppConstants.warningColor.withOpacity(0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 14,
-                            color: AppConstants.warningColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Manual review needed',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppConstants.warningColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: AppConstants.spacingS),
-                  // Keep manual replacement button for dietary restrictions
-                  if (detail.suggestedReplacement != null)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _replaceIngredient(detail),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstants.accentColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                          ),
-                        ),
-                        child: Text(
-                          'Replace Ingredient',
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildInstructionsSection(Meal meal) {
     return Column(
@@ -762,7 +515,8 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           _buildInfoRow('Prep Time', '${meal.prepTime} min', Icons.timer),
           _buildInfoRow('Cook Time', '${meal.cookTime} min', Icons.restaurant),
           _buildInfoRow('Servings', '${meal.servings}', Icons.people),
-          _buildInfoRow('Cuisine', _getCuisineName(meal.cuisineType), Icons.flag),
+          _buildInfoRow(
+              'Cuisine', _getCuisineName(meal.cuisineType), Icons.flag),
           if (meal.tags.isNotEmpty)
             _buildInfoRow('Tags', meal.tags.join(', '), Icons.label),
         ],
@@ -846,227 +600,5 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     }
   }
 
-  Widget _buildAutomaticCorrectionSummary() {
-    // Calculate automatic correction stats
-    final autoAppliedCount = _verificationResult!.ingredientVerifications
-        .where((v) => v.suggestedCorrection != null && v.confidence > 0.6)
-        .length;
-    final manualReviewCount = _verificationResult!.ingredientVerifications
-        .where((v) => v.suggestedCorrection != null && v.confidence <= 0.6)
-        .length;
 
-    if (autoAppliedCount == 0 && manualReviewCount == 0) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: AppConstants.primaryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(
-          color: AppConstants.primaryColor.withOpacity(0.2),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.auto_awesome,
-                size: 16,
-                color: AppConstants.primaryColor,
-              ),
-              const SizedBox(width: AppConstants.spacingS),
-              Text(
-                'Automatic Verification Summary',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppConstants.primaryColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          if (autoAppliedCount > 0)
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  size: 14,
-                  color: AppConstants.successColor,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '$autoAppliedCount ingredients auto-corrected with USDA data',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppConstants.successColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          if (manualReviewCount > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 14,
-                    color: AppConstants.warningColor,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$manualReviewCount ingredients need manual review',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppConstants.warningColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _applyNutritionCorrection(IngredientVerificationDetail detail) async {
-    try {
-      final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
-      
-      // Create a verification result with just this correction
-      final correctionResult = MealVerificationResult(
-        isVerified: false,
-        confidence: detail.confidence,
-        message: 'Applied USDA correction for ${detail.ingredientName}',
-        ingredientVerifications: [detail],
-      );
-
-      await mealPlanProvider.applyMealCorrections(widget.meal.id, correctionResult);
-      
-      // Re-verify the meal after applying corrections
-      setState(() {
-        _isVerifying = true;
-      });
-      
-      try {
-        // Get the updated meal from the provider
-        Meal? updatedMeal;
-        if (mealPlanProvider.mealPlan != null) {
-          for (final mealDay in mealPlanProvider.mealPlan!.mealDays) {
-            final foundMeal = mealDay.meals.where((m) => m.id == widget.meal.id).firstOrNull;
-            if (foundMeal != null) {
-              updatedMeal = foundMeal;
-              break;
-            }
-          }
-        }
-        
-        if (updatedMeal != null) {
-          final newVerificationResult = await mealPlanProvider.getMealVerification(updatedMeal);
-          setState(() {
-            _verificationResult = newVerificationResult;
-            _isVerifying = false;
-          });
-        }
-      } catch (e) {
-        setState(() {
-          _isVerifying = false;
-        });
-        print('Error re-verifying meal: $e');
-      }
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Nutrition data updated for ${detail.ingredientName}'),
-            backgroundColor: AppConstants.successColor,
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _isVerifying = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to apply correction: $e'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
-    }
-  }
-
-  void _replaceIngredient(IngredientVerificationDetail detail) async {
-    if (detail.suggestedReplacement == null) return;
-
-    try {
-      final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
-      
-      await mealPlanProvider.replaceNonCompliantIngredient(
-        widget.meal.id,
-        detail.ingredientName,
-        detail.suggestedReplacement!,
-      );
-      
-      // Re-verify the meal after replacing ingredient
-      setState(() {
-        _isVerifying = true;
-      });
-      
-      try {
-        // Get the updated meal from the provider
-        Meal? updatedMeal;
-        if (mealPlanProvider.mealPlan != null) {
-          for (final mealDay in mealPlanProvider.mealPlan!.mealDays) {
-            final foundMeal = mealDay.meals.where((m) => m.id == widget.meal.id).firstOrNull;
-            if (foundMeal != null) {
-              updatedMeal = foundMeal;
-              break;
-            }
-          }
-        }
-        
-        if (updatedMeal != null) {
-          final newVerificationResult = await mealPlanProvider.getMealVerification(updatedMeal);
-          setState(() {
-            _verificationResult = newVerificationResult;
-            _isVerifying = false;
-          });
-        }
-      } catch (e) {
-        setState(() {
-          _isVerifying = false;
-        });
-        print('Error re-verifying meal: $e');
-      }
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Replaced ${detail.ingredientName} with ${detail.suggestedReplacement!.name}'),
-            backgroundColor: AppConstants.successColor,
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _isVerifying = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to replace ingredient: $e'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
-    }
-  }
-} 
+}
