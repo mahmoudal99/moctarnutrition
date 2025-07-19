@@ -21,6 +21,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   MealPlanModel? _currentMealPlan;
   int _selectedDays = 7;
   int _targetCalories = 0;
+  
+  // Progress tracking
+  int _completedDays = 0;
+  int _totalDays = 0;
 
   UserPreferences? _userPreferences;
 
@@ -130,6 +134,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     // Generate the actual meal plan using AI
     setState(() {
       _isLoading = true;
+      _completedDays = 0;
+      _totalDays = _selectedDays;
     });
 
     try {
@@ -138,6 +144,12 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       final mealPlan = await AIMealService.generateMealPlan(
         preferences: _dietPlanPreferences!,
         days: _selectedDays, // Use the user's selected duration
+        onProgress: (completedDays, totalDays) {
+          setState(() {
+            _completedDays = completedDays;
+            _totalDays = totalDays;
+          });
+        },
       );
 
       print('Meal plan generated successfully: ${mealPlan.title}');
@@ -149,11 +161,15 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         _showDietSetup = false;
         _currentMealPlan = mealPlan;
         _isLoading = false;
+        _completedDays = 0;
+        _totalDays = 0;
       });
     } catch (e) {
       print('Error generating meal plan: $e');
       setState(() {
         _isLoading = false;
+        _completedDays = 0;
+        _totalDays = 0;
       });
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -287,25 +303,57 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             ),
           ),
           const SizedBox(height: AppConstants.spacingL),
-          Text(
-            'AI is cooking up your personalized meal plan…',
-            style: AppTextStyles.heading4,
-            textAlign: TextAlign.center,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            child: Text(
+              'We are cooking up your personalized meal plan…',
+              style: AppTextStyles.heading4,
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: AppConstants.spacingS),
-          Text(
-            'Hang tight while we craft delicious, healthy recipes just for you!',
-            style: AppTextStyles.bodyMedium
-                .copyWith(color: AppConstants.textSecondary),
-            textAlign: TextAlign.center,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            child: Text(
+              'Hang tight while we craft delicious, healthy recipes just for you!',
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: AppConstants.textSecondary),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: AppConstants.spacingL),
-          const SizedBox(
-            width: 36,
-            height: 36,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              color: AppConstants.primaryColor,
+          // Progress bar and status
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            child: Column(
+              children: [
+                // Progress bar
+                LinearProgressIndicator(
+                  value: _totalDays > 0 ? _completedDays / _totalDays : 0.0,
+                  backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
+                  minHeight: 8,
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                // Progress text
+                Text(
+                  'Generated $_completedDays of $_totalDays days',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppConstants.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                // Loading indicator
+                const SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: AppConstants.primaryColor,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

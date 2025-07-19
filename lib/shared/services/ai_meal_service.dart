@@ -11,6 +11,7 @@ class AIMealService {
   static Future<MealPlanModel> generateMealPlan({
     required DietPlanPreferences preferences,
     required int days,
+    Function(int completedDays, int totalDays)? onProgress,
   }) async {
     try {
       print('Generating $days-day meal plan using chunking approach...');
@@ -56,6 +57,9 @@ class AIMealService {
           
           final mealDay = _parseSingleDayFromAI(content, preferences, dayIndex);
           mealDays.add(mealDay);
+          
+          // Report progress after each day is completed
+          onProgress?.call(dayIndex, days);
         } else {
           print('API Error for day $dayIndex: ${response.statusCode} - ${response.body}');
           throw Exception('Failed to generate day $dayIndex: ${response.statusCode}');
