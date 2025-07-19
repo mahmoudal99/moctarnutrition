@@ -27,10 +27,10 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _verifyMeal();
+    _loadVerificationResult();
   }
 
-  Future<void> _verifyMeal() async {
+  Future<void> _loadVerificationResult() async {
     if (!ConfigService.isUsdaApiEnabled) return;
 
     setState(() {
@@ -38,15 +38,24 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     });
 
     try {
-      final result = await NutritionVerificationService.verifyMeal(widget.meal);
+      final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+      final verificationResult = await mealPlanProvider.getMealVerification(widget.meal);
       setState(() {
-        _verificationResult = result;
+        _verificationResult = verificationResult;
         _isVerifying = false;
       });
     } catch (e) {
       setState(() {
         _isVerifying = false;
       });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load verification result: $e'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+      }
     }
   }
 
@@ -344,6 +353,11 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           ],
         ),
         const SizedBox(height: AppConstants.spacingM),
+        
+        // Automatic correction summary
+        if (_verificationResult != null)
+          _buildAutomaticCorrectionSummary(),
+        
         Container(
           decoration: BoxDecoration(
             color: AppConstants.surfaceColor,
@@ -568,33 +582,73 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           if (!detail.isVerified && (detail.suggestedCorrection != null || detail.suggestedReplacement != null))
             Padding(
               padding: const EdgeInsets.only(top: AppConstants.spacingS),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (detail.suggestedCorrection != null)
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => _applyNutritionCorrection(detail),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstants.primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                          ),
-                        ),
-                        child: Text(
-                          'Apply USDA Data',
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                  // Show automatic application status
+                  if (detail.suggestedCorrection != null && detail.confidence > 0.6)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppConstants.successColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                        border: Border.all(
+                          color: AppConstants.successColor.withOpacity(0.3),
                         ),
                       ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 14,
+                            color: AppConstants.successColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Auto-applied USDA data',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppConstants.successColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  if (detail.suggestedCorrection != null && detail.suggestedReplacement != null)
-                    const SizedBox(width: AppConstants.spacingS),
+                  if (detail.suggestedCorrection != null && detail.confidence <= 0.6)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppConstants.warningColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                        border: Border.all(
+                          color: AppConstants.warningColor.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: AppConstants.warningColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Manual review needed',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppConstants.warningColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: AppConstants.spacingS),
+                  // Keep manual replacement button for dietary restrictions
                   if (detail.suggestedReplacement != null)
-                    Expanded(
+                    SizedBox(
+                      width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () => _replaceIngredient(detail),
                         style: ElevatedButton.styleFrom(
@@ -792,6 +846,94 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     }
   }
 
+  Widget _buildAutomaticCorrectionSummary() {
+    // Calculate automatic correction stats
+    final autoAppliedCount = _verificationResult!.ingredientVerifications
+        .where((v) => v.suggestedCorrection != null && v.confidence > 0.6)
+        .length;
+    final manualReviewCount = _verificationResult!.ingredientVerifications
+        .where((v) => v.suggestedCorrection != null && v.confidence <= 0.6)
+        .length;
+
+    if (autoAppliedCount == 0 && manualReviewCount == 0) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      decoration: BoxDecoration(
+        color: AppConstants.primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        border: Border.all(
+          color: AppConstants.primaryColor.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.auto_awesome,
+                size: 16,
+                color: AppConstants.primaryColor,
+              ),
+              const SizedBox(width: AppConstants.spacingS),
+              Text(
+                'Automatic Verification Summary',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppConstants.primaryColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingS),
+          if (autoAppliedCount > 0)
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  size: 14,
+                  color: AppConstants.successColor,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$autoAppliedCount ingredients auto-corrected with USDA data',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.successColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          if (manualReviewCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: AppConstants.warningColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$manualReviewCount ingredients need manual review',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.warningColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   void _applyNutritionCorrection(IngredientVerificationDetail detail) async {
     try {
       final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
@@ -825,7 +967,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         }
         
         if (updatedMeal != null) {
-          final newVerificationResult = await NutritionVerificationService.verifyMeal(updatedMeal);
+          final newVerificationResult = await mealPlanProvider.getMealVerification(updatedMeal);
           setState(() {
             _verificationResult = newVerificationResult;
             _isVerifying = false;
@@ -892,7 +1034,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         }
         
         if (updatedMeal != null) {
-          final newVerificationResult = await NutritionVerificationService.verifyMeal(updatedMeal);
+          final newVerificationResult = await mealPlanProvider.getMealVerification(updatedMeal);
           setState(() {
             _verificationResult = newVerificationResult;
             _isVerifying = false;

@@ -197,14 +197,19 @@ class USDAApiService {
       }
     }
     
-    final confidence = totalNutrients > 0 ? matches / totalNutrients : 0.0;
-    final isWithinTolerance = confidence >= 0.7; // 70% of nutrients within tolerance
+    final toleranceConfidence = totalNutrients > 0 ? matches / totalNutrients : 0.0;
+    final isWithinTolerance = toleranceConfidence >= 0.7; // 70% of nutrients within tolerance
+    
+    // Calculate confidence based on USDA data quality and availability
+    // High confidence if we have good USDA data, regardless of tolerance
+    final usdaDataQuality = expected.values.where((v) => v > 0).length / expected.length;
+    final confidence = usdaDataQuality * 0.8 + toleranceConfidence * 0.2; // Weight USDA data quality more heavily
     
     String message;
     if (isWithinTolerance) {
-      message = 'Nutrition data verified with ${(confidence * 100).toInt()}% confidence';
+      message = 'Nutrition data verified with ${(toleranceConfidence * 100).toInt()}% tolerance match';
     } else {
-      message = 'Nutrition data may need adjustment. ${(confidence * 100).toInt()}% of nutrients within tolerance.';
+      message = 'Nutrition data may need adjustment. ${(toleranceConfidence * 100).toInt()}% of nutrients within tolerance.';
     }
     
     return NutritionComparison(
