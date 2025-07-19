@@ -379,7 +379,7 @@ class _AuthScreenState extends State<AuthScreen> {
       
       // Navigate to main app
       if (mounted) {
-        context.go('/');
+        context.go('/home');
       }
     } catch (e) {
       // Show error message
@@ -410,7 +410,7 @@ class _AuthScreenState extends State<AuthScreen> {
       await Future.delayed(const Duration(seconds: 2));
       
       if (mounted) {
-        context.go('/');
+        context.go('/home');
       }
     } catch (e) {
       if (mounted) {
@@ -440,7 +440,7 @@ class _AuthScreenState extends State<AuthScreen> {
       await Future.delayed(const Duration(seconds: 2));
       
       if (mounted) {
-        context.go('/');
+        context.go('/home');
       }
     } catch (e) {
       if (mounted) {
@@ -462,6 +462,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void _handleGuestAccess() {
     // TODO: Save user preferences and continue as guest
-    context.go('/');
+    context.go('/home');
   }
 } 
