@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -98,8 +99,8 @@ class _SplashScreenState extends State<SplashScreen>
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
-                      'Muktar Nutrition',
-                      style: AppTextStyles.heading1.copyWith(
+                      'MUKTAR NUTRITION',
+                      style: GoogleFonts.leagueSpartan(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: 36,
