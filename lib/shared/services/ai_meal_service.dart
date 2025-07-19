@@ -95,16 +95,22 @@ class AIMealService {
 
         // Create futures for parallel processing within the batch
         final futures = <Future<MealDay>>[];
+        final batchSize = batchEnd - batchStart + 1;
+        int batchCompletedDays = 0;
+        
         for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
-          futures.add(_generateSingleDay(preferences, dayIndex));
+          futures.add(_generateSingleDay(preferences, dayIndex).then((mealDay) {
+            // Report individual day completion
+            batchCompletedDays++;
+            final totalCompleted = mealDays.length + batchCompletedDays;
+            onProgress?.call(totalCompleted, days);
+            return mealDay;
+          }));
         }
 
         // Wait for all days in the batch to complete
         final batchResults = await Future.wait(futures);
         mealDays.addAll(batchResults);
-
-        // Report progress for the completed batch
-        onProgress?.call(batchEnd, days);
 
         // Small delay between batches to be respectful to the API
         if (batchEnd < days) {

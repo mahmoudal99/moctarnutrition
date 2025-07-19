@@ -181,6 +181,26 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     }
   }
 
+  String _getLoadingMessage() {
+    if (_totalDays == 0) {
+      return 'We are cooking up your personalized meal plan…';
+    }
+    
+    final progress = _completedDays / _totalDays;
+    
+    if (progress < 0.25) {
+      return 'Analyzing your preferences and dietary needs…';
+    } else if (progress < 0.5) {
+      return 'Crafting delicious, healthy recipes…';
+    } else if (progress < 0.75) {
+      return 'Optimizing nutrition and meal timing…';
+    } else if (progress < 1.0) {
+      return 'Finalizing your personalized meal plan…';
+    } else {
+      return 'Your meal plan is ready!';
+    }
+  }
+
   MealType _getMealTypeForName(String name) {
     switch (name.toLowerCase()) {
       case 'breakfast':
@@ -306,7 +326,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
-              'We are cooking up your personalized meal plan…',
+              _getLoadingMessage(),
               style: AppTextStyles.heading4,
               textAlign: TextAlign.center,
             ),
@@ -328,16 +348,27 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             child: Column(
               children: [
                 // Progress bar
-                LinearProgressIndicator(
-                  value: _totalDays > 0 ? _completedDays / _totalDays : 0.0,
-                  backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
-                  minHeight: 8,
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 300),
+                  tween: Tween<double>(
+                    begin: 0.0,
+                    end: _totalDays > 0 ? _completedDays / _totalDays : 0.0,
+                  ),
+                  builder: (context, value, child) {
+                    return LinearProgressIndicator(
+                      value: value,
+                      backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
+                      minHeight: 8,
+                    );
+                  },
                 ),
                 const SizedBox(height: AppConstants.spacingS),
                 // Progress text
                 Text(
-                  'Generated $_completedDays of $_totalDays days',
+                  _totalDays > 0 
+                    ? 'Generated $_completedDays of $_totalDays days (${((_completedDays / _totalDays) * 100).toInt()}%)'
+                    : 'Preparing your meal plan...',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppConstants.textSecondary,
                     fontWeight: FontWeight.w500,
