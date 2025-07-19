@@ -41,41 +41,41 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingStep> _steps = [
     OnboardingStep(
-      title: 'Welcome to Champions Gym',
+      title: 'YOUR FITNESS JOURNEY IS ABOUT TO BEGIN',
       subtitle: 'Your journey to a healthier lifestyle starts here',
       description:
           'Let\'s personalize your experience by understanding your fitness goals and preferences.',
-      icon: "run.json",
+      icon: "arrow.json",
+      showIconColor: false,
       color: AppConstants.primaryColor,
     ),
+    // OnboardingStep(
+    //   title: 'Choose Your Coach',
+    //   subtitle: 'Sync with your Coach',
+    //   description:
+    //       'Choose from our handpicked personal trainers and start training with the right expert for your goals.',
+    //   icon: "calendar.json",
+    //   color: AppConstants.secondaryColor,
+    //   showIconColor: false
+    // ),
     OnboardingStep(
-      title: 'Choose Your Coach',
-      subtitle: 'Sync with your Coach',
-      description:
-          'Choose from our handpicked personal trainers and start training with the right expert for your goals.',
-      icon: "calendar.json",
-      color: AppConstants.secondaryColor,
-      showIconColor: false
-    ),
+        title: 'Tell us about yourself',
+        subtitle: 'Basic information for accurate calculations',
+        description:
+            'This helps us calculate your precise calorie needs and create personalized plans.',
+        icon: "weight.json",
+        color: AppConstants.accentColor,
+        showIconColor: false),
+    // Fitness Goal step (should come after BMI, which is inserted in initState)
     OnboardingStep(
-      title: 'Tell us about yourself',
-      subtitle: 'Basic information for accurate calculations',
-      description:
-          'This helps us calculate your precise calorie needs and create personalized plans.',
-      icon: "weight.json",
-      color: AppConstants.accentColor,
-      showIconColor: false
-    ),
+        title: 'What is your primary objective?',
+        subtitle: 'Choose your fitness goal',
+        description:
+            'This helps us create personalized workout and meal plans for you.',
+        icon: "target.json",
+        color: AppConstants.secondaryColor,
+        showIconColor: false),
     // BMI step will be inserted in initState
-    OnboardingStep(
-      title: 'What\'s your fitness goal?',
-      subtitle: 'Choose your primary objective',
-      description:
-          'This helps us create personalized workout and meal plans for you.',
-      icon: "target.json",
-      color: AppConstants.secondaryColor,
-      showIconColor: false
-    ),
     OnboardingStep(
       title: 'How active are you?',
       subtitle: 'Select your activity level',
@@ -224,12 +224,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Column(
               children: [
                 Container(
-                  width: step.icon.contains("calendar") ? 64 : 64,
-                  height: step.icon.contains("calendar") ? 64 : 64,
-                  decoration: BoxDecoration(
-                    // color: step.color.withOpacity(0.1),
-                    // borderRadius: BorxderRadius.circular(AppConstants.radiusL),
-                  ),
+                  width: step.icon.contains("arrow") ? 100 : 64,
+                  height: step.icon.contains("arrow") ? 100 : 64,
+                  decoration: const BoxDecoration(
+                      // color: step.color.withOpacity(0.1),
+                      // borderRadius: BorxderRadius.circular(AppConstants.radiusL),
+                      ),
                   child: Lottie.asset(
                     "assets/animations/${step.icon}",
                     delegates: LottieDelegates(
@@ -250,7 +250,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: AppConstants.spacingM),
+                SizedBox(
+                    height: step.icon.contains("arrow")
+                        ? 0
+                        : AppConstants.spacingM),
                 Text(
                   step.title,
                   style: AppTextStyles.heading3,
@@ -284,19 +287,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     switch (stepIndex) {
       case 0:
         return const OnboardingWelcomeStep();
+      // case 1:
+      //   return const OnboardingScheduleStep();
       case 1:
-        return const OnboardingScheduleStep();
-      case 2:
         return _buildPersonalInfoStep();
-      case 3:
+      case 2:
         return _buildBMIStep();
-      case 4:
+      case 3:
         return _buildFitnessGoalStep();
-      case 5:
+      case 4:
         return _buildActivityLevelStep();
-      case 6:
+      case 5:
         return _buildDietaryRestrictionsStep();
-      case 7:
+      case 6:
         return _buildWorkoutStylesStep();
       default:
         return const SizedBox.shrink();
@@ -497,6 +500,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     text: 'Back',
                     type: ButtonType.outline,
                     onPressed: () {
+                      HapticFeedback.lightImpact();
                       _pageController.previousPage(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
@@ -518,6 +522,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ? 'Get Started'
                       : 'Next',
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     if (_currentPage == _steps.length - 1) {
                       _completeOnboarding();
                     } else {
@@ -792,13 +797,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    // Insert BMI step after personal info (now index 3)
+    // Insert BMI step after personal info (index 2)
     _steps.insert(
-        3,
+        2,
         OnboardingStep(
           title: 'Your BMI',
           subtitle: 'Body Mass Index',
-          description: 'Here is your calculated BMI based on your info.',
+          description:
+              'Your BMI is calculated from your height and weight. This helps us personalize your experience.',
           icon: "heartbeat.json",
           color: AppConstants.warningColor,
         ));

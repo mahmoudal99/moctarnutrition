@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppConstants {
   // App Colors
-  static const Color primaryColor = Color(0xFF1E3A8A);
-  static const Color secondaryColor = Color(0xFF3B82F6);
-  static const Color accentColor = Color(0xFF10B981);
+  static const Color primaryColor = Color(0xFF10B981);
+  static const Color secondaryColor = Color(0xFF34D399);
+  static const Color accentColor = Color(0xFF059669);
   static const Color backgroundColor = Color(0xFFF8FAFC);
   static const Color surfaceColor = Color(0xFFFFFFFF);
   static const Color errorColor = Color(0xFFEF4444);

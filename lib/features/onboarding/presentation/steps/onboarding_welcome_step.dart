@@ -14,7 +14,7 @@ class OnboardingWelcomeStep extends StatelessWidget {
         _ActivityCardsStack(),
         SizedBox(height: 24),
         // Avatars row
-        _AvatarsRow(),
+        // _AvatarsRow(),
       ],
     );
   }
@@ -47,14 +47,13 @@ class _ActivityCardsStack extends StatelessWidget {
       ],
     ),
     _ActivityCardData(
-      title: 'Cardio with Mokhtar',
+      title: 'Chest & Biceps',
       time: '10:00am - 11:00am',
       color: Color(0xFFD6F5FF),
       accent: Color(0xFF4FC3F7),
       titleColor: Color(0xFF0277BD),
-      emoji: '☕',
+      emoji: '💪',
       avatars: [
-        'https://randomuser.me/api/portraits/men/15.jpg',
         'https://randomuser.me/api/portraits/women/16.jpg',
       ],
     ),

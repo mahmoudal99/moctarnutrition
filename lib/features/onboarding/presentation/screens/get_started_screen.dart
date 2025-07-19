@@ -142,7 +142,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
               ),
               // Get Started button
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                 child: SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -167,6 +167,26 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                   ),
                 ),
               ),
+              Column(
+                children: [
+                  Text(
+                    'Already a Member?',
+                    style: GoogleFonts.nunitoSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    'LOG IN',
+                    style: GoogleFonts.nunitoSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart'   ;
 import 'core/theme/app_theme.dart';
+import 'features/splash/presentation/screens/splash_screen.dart';
 import 'features/auth/presentation/screens/auth_screen.dart';
 import 'features/onboarding/presentation/screens/get_started_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -29,7 +30,7 @@ class ChampionsGymApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Champions Gym',
+      title: 'Muktar Nutrition',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: _router,
@@ -38,8 +39,14 @@ class ChampionsGymApp extends StatelessWidget {
 }
 
 final GoRouter _router = GoRouter(
-  initialLocation: '/get-started',
+  initialLocation: '/',
   routes: [
+    // Splash Screen Route
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
+
     // Get Started Route
     GoRoute(
       path: '/get-started',
@@ -69,7 +76,7 @@ final GoRouter _router = GoRouter(
       builder: (context, state, child) => MainNavigation(child: child),
       routes: [
         GoRoute(
-          path: '/',
+          path: '/home',
           builder: (context, state) => const WorkoutsScreen(),
         ),
         GoRoute(
