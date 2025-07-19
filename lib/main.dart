@@ -20,7 +20,7 @@ import 'shared/services/config_service.dart';
 void main() async {
   // Load environment variables
   try {
-    await dotenv.load(fileName: '.env');
+    await dotenv.load();
     print('Environment file loaded successfully');
   } catch (e) {
     print('Warning: Could not load .env file: $e');
