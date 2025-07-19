@@ -11,12 +11,17 @@ import 'cache_service.dart';
 import 'rate_limit_service.dart';
 
 class AIMealService {
-  /// Generate a single day meal plan
-  static Future<MealDay> _generateSingleDay(
+  /// Generate a single day meal plan with context from previous days
+  static Future<MealDay> _generateSingleDayWithContext(
     DietPlanPreferences preferences,
     int dayIndex,
+    List<MealDay> previousDays,
   ) async {
-    final dayPrompt = PromptService.buildSingleDayPrompt(preferences, dayIndex);
+    final dayPrompt = PromptService.buildSingleDayPromptWithContext(
+      preferences, 
+      dayIndex, 
+      previousDays.isNotEmpty ? previousDays : null,
+    );
 
     final requestBody = {
       'model': ConfigService.openAIModel,
@@ -59,6 +64,8 @@ class AIMealService {
     }
   }
 
+
+
   /// Generate a personalized meal plan using AI with caching and parallel processing
   static Future<MealPlanModel> generateMealPlan({
     required DietPlanPreferences preferences,
@@ -95,11 +102,10 @@ class AIMealService {
 
         // Create futures for parallel processing within the batch
         final futures = <Future<MealDay>>[];
-        final batchSize = batchEnd - batchStart + 1;
         int batchCompletedDays = 0;
         
         for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
-          futures.add(_generateSingleDay(preferences, dayIndex).then((mealDay) {
+          futures.add(_generateSingleDayWithContext(preferences, dayIndex, mealDays).then((mealDay) {
             // Report individual day completion
             batchCompletedDays++;
             final totalCompleted = mealDays.length + batchCompletedDays;
@@ -174,8 +180,8 @@ class AIMealService {
     required DietPlanPreferences preferences,
   }) async {
     try {
-      final previewPlan =
-          await generateMealPlan(preferences: preferences, days: 1);
+      // For preview, we don't need context since it's just one day
+      final previewPlan = await generateMealPlan(preferences: preferences, days: 1);
       // Convert the first day to a simple map for preview UI
       final day = previewPlan.mealDays.first;
       final Map<String, List<String>> preview = {};

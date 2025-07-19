@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import '../models/user_model.dart';
+import '../models/meal_model.dart';
 
 /// Service for generating AI prompts for meal plan generation
 class PromptService {
@@ -8,138 +9,136 @@ class PromptService {
     DietPlanPreferences preferences,
     int dayIndex,
   ) {
-    final fitnessGoal = _getFitnessGoalDescription(preferences.fitnessGoal);
-    final activityLevel = _getActivityLevelDescription(preferences.activityLevel);
-    final restrictions = preferences.dietaryRestrictions.join(', ');
-    final workoutStyles = preferences.preferredWorkoutStyles.join(', ');
-    final cuisines = preferences.preferredCuisines.join(', ');
-    final avoid = preferences.foodsToAvoid.join(', ');
-    final favorites = preferences.favoriteFoods.join(', ');
-    final mealFrequency = preferences.mealFrequency;
-    final nutritionGoal = preferences.nutritionGoal;
-    final weeklyRotation = preferences.weeklyRotation ? 'Yes' : 'No';
-    final reminders = preferences.remindersEnabled ? 'Yes' : 'No';
-    final targetCalories = preferences.targetCalories;
-
-    // Calculate the date for this day
     final dayDate = DateTime.now().add(Duration(days: dayIndex - 1));
     final formattedDate = DateFormat('yyyy-MM-dd').format(dayDate);
+    final bmi = (preferences.weight / ((preferences.height / 100) * (preferences.height / 100))).toStringAsFixed(1);
 
     return '''
-Generate Day $dayIndex of a personalized meal plan in JSON format with the following requirements:
+You are a professional nutritionist. Generate a meal plan for Day $dayIndex in JSON format, strictly adhering to the user's dietary restrictions and preferences.
 
-User Profile:
+### User Profile
 - Age: ${preferences.age} years
 - Gender: ${preferences.gender}
 - Weight: ${preferences.weight} kg
 - Height: ${preferences.height} cm
-- BMI: ${(preferences.weight / ((preferences.height / 100) * (preferences.height / 100))).toStringAsFixed(1)}
-- Fitness Goal: $fitnessGoal
-- Activity Level: $activityLevel
-- Nutrition Goal: $nutritionGoal
-- Target Calories: $targetCalories per day
-- Dietary Restrictions: $restrictions
-- Preferred Workout Styles: $workoutStyles
+- BMI: $bmi
+- Fitness Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}
+- Activity Level: ${_getActivityLevelDescription(preferences.activityLevel)}
+- Nutrition Goal: ${preferences.nutritionGoal}
+- Target Calories: ${preferences.targetCalories}/day
 
-Nutrition Preferences:
-- Preferred Cuisines: $cuisines
-- Foods to Avoid: $avoid
-- Favorite Foods: $favorites
+### Nutrition Preferences
+- Preferred Cuisines: ${preferences.preferredCuisines.join(', ').isEmpty ? 'Any' : preferences.preferredCuisines.join(', ')}
+- Favorite Foods: ${preferences.favoriteFoods.join(', ').isEmpty ? 'None' : preferences.favoriteFoods.join(', ')}
+- Foods to Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
+- Meal Frequency: ${preferences.mealFrequency} meals/day
 
-Meal Prep Preferences:
-- Meal Frequency: $mealFrequency
-- Weekly Rotation: $weeklyRotation
-- Reminders Enabled: $reminders
+### Dietary Restrictions (CRITICAL)
+- Restrictions: ${preferences.dietaryRestrictions.join(', ').isEmpty ? 'None' : preferences.dietaryRestrictions.join(', ')}
+- Rules:
+  - Vegan: No animal products (meat, fish, dairy, eggs, honey).
+  - Vegetarian: No meat or fish; dairy and eggs allowed.
+  - Gluten-Free: No wheat, barley, rye, or gluten-containing ingredients.
+  - Dairy-Free: No milk, cheese, yogurt, or dairy products.
+- ALWAYS respect these restrictions. Double-check all ingredients.
 
-CRITICAL DIETARY RESTRICTIONS:
-- The user has the following dietary restrictions: $restrictions
-- If the user is Vegan: DO NOT include any animal products (meat, fish, dairy, eggs, honey)
-- If the user is Vegetarian: DO NOT include any meat or fish, but dairy and eggs are allowed
-- If the user is Gluten-Free: DO NOT include wheat, barley, rye, or any gluten-containing ingredients
-- If the user is Dairy-Free: DO NOT include milk, cheese, yogurt, or any dairy products
-- ALWAYS respect these restrictions - this is the most important requirement
+### Requirements
+- Generate ${preferences.mealFrequency} meals (e.g., breakfast, lunch, dinner, snacks) for Day $dayIndex.
+- Total daily calories: ${preferences.targetCalories}.
+- Each meal must include:
+  - Name: Unique and descriptive.
+  - Description: Brief, appealing summary.
+  - Ingredients: List with name, amount, unit, and optional notes.
+  - Instructions: Clear, step-by-step, practical for home cooking.
+  - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (realistic, non-zero values).
+  - Prep Time, Cook Time: In minutes.
+  - Servings: 1.
+  - Cuisine Type: From preferred cuisines or varied.
+  - Tags: e.g., vegetarian, vegan, gluten-free, based on meal content.
+  - Flags: isVegetarian, isVegan, isGlutenFree, isDairyFree (true/false).
 
-Requirements:
-1. Create Day $dayIndex with meals (breakfast, lunch, dinner, snacks)
-2. Each meal should include:
-   - Name
-   - Description
-   - Ingredients with amounts
-   - Step-by-step instructions
-   - Nutritional info (calories, protein, carbs, fat, fiber, sugar, sodium)
-   - Prep time and cook time
-   - Servings
-   - Cuisine type
-   - Tags (vegetarian, vegan, gluten-free, etc.)
-   - Meal type (breakfast, lunch, dinner, snack)
+### Nutrition Guidelines
+- Balance macronutrients based on fitness goal:
+  - Weight Loss: ~40% carbs, 30% protein, 30% fat.
+  - Muscle Gain: ~40% carbs, 35% protein, 25% fat.
+  - Maintenance: ~50% carbs, 25% protein, 25% fat.
+  - Endurance: ~55% carbs, 20% protein, 25% fat.
+  - Strength: ~45% carbs, 30% protein, 25% fat.
+- Nutrition ranges per meal:
+  - Protein: 10-40g (higher for main meals, lower for snacks)
+  - Carbs: 20-80g (higher for breakfast/lunch, moderate for dinner)
+  - Fat: 5-30g (distribute evenly across meals)
+  - Fiber: 2-10g (aim for 25-35g total daily)
+  - Sugar: <10g per meal (natural sugars preferred)
+  - Sodium: <800mg per meal (aim for <2300mg daily)
+- Ensure variety in flavors, cuisines, and ingredients.
+- Adjust portions for weight, activity level, and fitness goal.
+- Meals must be practical, using common ingredients and simple techniques.
 
-3. Ensure the total daily calories match $targetCalories
-4. Consider the fitness goal, nutrition goal, dietary restrictions, and personal metrics
-5. Include variety in cuisines and flavors
-6. Make recipes practical and easy to follow
-7. Consider age-appropriate nutrition needs
-8. Adjust portion sizes based on weight and activity level
-9. Use the user's meal frequency and preferences for meal timing
-10. CRITICAL: Double-check that ALL meals respect the dietary restrictions
-
-Return the response in this exact JSON format, but replace all placeholder values with actual meal data:
-
+### JSON Format
 {
   "mealDay": {
     "id": "day_$dayIndex",
     "date": "$formattedDate",
-    "totalCalories": $targetCalories,
-    "totalProtein": [CALCULATE_DAY_PROTEIN_FROM_MEALS],
-    "totalCarbs": [CALCULATE_DAY_CARBS_FROM_MEALS],
-    "totalFat": [CALCULATE_DAY_FAT_FROM_MEALS],
+    "totalCalories": ${preferences.targetCalories},
+    "totalProtein": <sum of meal proteins>,
+    "totalCarbs": <sum of meal carbs>,
+    "totalFat": <sum of meal fats>,
     "meals": [
       {
-        "id": "meal_1",
-        "name": "[ACTUAL_MEAL_NAME]",
-        "description": "[ACTUAL_MEAL_DESCRIPTION]",
-        "type": "breakfast",
-        "cuisineType": "[ACTUAL_CUISINE]",
-        "prepTime": [ACTUAL_PREP_TIME],
-        "cookTime": [ACTUAL_COOK_TIME],
+        "id": "meal_<unique_id>",
+        "name": "<meal_name>",
+        "description": "<meal_description>",
+        "type": "<breakfast|lunch|dinner|snack>",
+        "cuisineType": "<cuisine>",
+        "prepTime": <minutes>,
+        "cookTime": <minutes>,
         "servings": 1,
         "ingredients": [
           {
-            "name": "[ACTUAL_INGREDIENT_NAME]",
-            "amount": [ACTUAL_AMOUNT],
-            "unit": "[ACTUAL_UNIT]",
-            "notes": "[OPTIONAL_NOTES]"
+            "name": "<ingredient_name>",
+            "amount": <amount>,
+            "unit": "<unit>",
+            "notes": "<optional_notes>"
           }
         ],
-        "instructions": [
-          "[ACTUAL_STEP_1]",
-          "[ACTUAL_STEP_2]"
-        ],
+        "instructions": ["<step1>", "<step2>"],
         "nutrition": {
-          "calories": [ACTUAL_CALORIES],
-          "protein": [ACTUAL_PROTEIN],
-          "carbs": [ACTUAL_CARBS],
-          "fat": [ACTUAL_FAT],
-          "fiber": [ACTUAL_FIBER],
-          "sugar": [ACTUAL_SUGAR],
-          "sodium": [ACTUAL_SODIUM]
+          "calories": <calories>,
+          "protein": <grams>,
+          "carbs": <grams>,
+          "fat": <grams>,
+          "fiber": <grams>,
+          "sugar": <grams>,
+          "sodium": <milligrams>
         },
-        "tags": ["[ACTUAL_TAGS]"],
-        "isVegetarian": [TRUE_OR_FALSE_BASED_ON_MEAL],
-        "isVegan": [TRUE_OR_FALSE_BASED_ON_MEAL],
-        "isGlutenFree": [TRUE_OR_FALSE_BASED_ON_MEAL],
-        "isDairyFree": [TRUE_OR_FALSE_BASED_ON_MEAL]
+        "tags": ["<tag1>", "<tag2>"],
+        "isVegetarian": <true|false>,
+        "isVegan": <true|false>,
+        "isGlutenFree": <true|false>,
+        "isDairyFree": <true|false>
       }
     ]
   }
 }
-
-IMPORTANT: 
-- Replace ALL placeholder values in [BRACKETS] with actual data
-- Calculate nutrition totals by summing all meals
-- Generate unique meal names for each meal
-- Ensure all nutrition values are realistic numbers, not 0
-- Create Day $dayIndex with breakfast, lunch, dinner, and snacks
 ''';
+  }
+
+  /// Build a single day prompt with context from previous days
+  static String buildSingleDayPromptWithContext(
+    DietPlanPreferences preferences,
+    int dayIndex,
+    List<MealDay>? previousDays,
+  ) {
+    String context = '';
+    if (previousDays != null && previousDays.isNotEmpty) {
+      final previousMeals = previousDays
+          .map((day) => day.meals.map((m) => m.name).join(', '))
+          .join('; ');
+      context = '\n\n### Previous Days Context\n- Previous days\' main dishes: $previousMeals\n- Avoid repeating these dishes. Ensure variety in ingredients, cooking methods, and cuisines.';
+    }
+    
+    return buildSingleDayPrompt(preferences, dayIndex) + context;
   }
 
   /// Build a detailed prompt for the AI
@@ -147,19 +146,8 @@ IMPORTANT:
     DietPlanPreferences preferences,
     int days,
   ) {
-    final fitnessGoal = _getFitnessGoalDescription(preferences.fitnessGoal);
-    final activityLevel = _getActivityLevelDescription(preferences.activityLevel);
-    final restrictions = preferences.dietaryRestrictions.join(', ');
-    final workoutStyles = preferences.preferredWorkoutStyles.join(', ');
-    final cuisines = preferences.preferredCuisines.join(', ');
-    final avoid = preferences.foodsToAvoid.join(', ');
-    final favorites = preferences.favoriteFoods.join(', ');
-    final mealFrequency = preferences.mealFrequency;
-    final nutritionGoal = preferences.nutritionGoal;
-    final weeklyRotation = preferences.weeklyRotation ? 'Yes' : 'No';
-    final reminders = preferences.remindersEnabled ? 'Yes' : 'No';
-    final targetCalories = preferences.targetCalories;
-
+    final bmi = (preferences.weight / ((preferences.height / 100) * (preferences.height / 100))).toStringAsFixed(1);
+    
     // Calculate proper dates
     final startDate = DateTime.now();
     final endDate = startDate.add(Duration(days: days - 1));
@@ -167,133 +155,128 @@ IMPORTANT:
     final formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
 
     return '''
-Generate a $days-day personalized meal plan in JSON format with the following requirements:
+You are a professional nutritionist. Generate a $days-day personalized meal plan in JSON format, strictly adhering to the user's dietary restrictions and preferences.
 
-User Profile:
+### User Profile
 - Age: ${preferences.age} years
 - Gender: ${preferences.gender}
 - Weight: ${preferences.weight} kg
 - Height: ${preferences.height} cm
-- BMI: ${(preferences.weight / ((preferences.height / 100) * (preferences.height / 100))).toStringAsFixed(1)}
-- Fitness Goal: $fitnessGoal
-- Activity Level: $activityLevel
-- Nutrition Goal: $nutritionGoal
-- Target Calories: $targetCalories per day
-- Dietary Restrictions: $restrictions
-- Preferred Workout Styles: $workoutStyles
+- BMI: $bmi
+- Fitness Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}
+- Activity Level: ${_getActivityLevelDescription(preferences.activityLevel)}
+- Nutrition Goal: ${preferences.nutritionGoal}
+- Target Calories: ${preferences.targetCalories}/day
 
-Nutrition Preferences:
-- Preferred Cuisines: $cuisines
-- Foods to Avoid: $avoid
-- Favorite Foods: $favorites
+### Nutrition Preferences
+- Preferred Cuisines: ${preferences.preferredCuisines.join(', ').isEmpty ? 'Any' : preferences.preferredCuisines.join(', ')}
+- Favorite Foods: ${preferences.favoriteFoods.join(', ').isEmpty ? 'None' : preferences.favoriteFoods.join(', ')}
+- Foods to Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
+- Meal Frequency: ${preferences.mealFrequency} meals/day
+- Weekly Rotation: ${preferences.weeklyRotation ? 'Yes' : 'No'}
 
-Meal Prep Preferences:
-- Meal Frequency: $mealFrequency
-- Weekly Rotation: $weeklyRotation
-- Reminders Enabled: $reminders
+### Dietary Restrictions (CRITICAL)
+- Restrictions: ${preferences.dietaryRestrictions.join(', ').isEmpty ? 'None' : preferences.dietaryRestrictions.join(', ')}
+- Rules:
+  - Vegan: No animal products (meat, fish, dairy, eggs, honey).
+  - Vegetarian: No meat or fish; dairy and eggs allowed.
+  - Gluten-Free: No wheat, barley, rye, or gluten-containing ingredients.
+  - Dairy-Free: No milk, cheese, yogurt, or dairy products.
+- ALWAYS respect these restrictions. Double-check all ingredients.
 
-CRITICAL DIETARY RESTRICTIONS:
-- The user has the following dietary restrictions: $restrictions
-- If the user is Vegan: DO NOT include any animal products (meat, fish, dairy, eggs, honey)
-- If the user is Vegetarian: DO NOT include any meat or fish, but dairy and eggs are allowed
-- If the user is Gluten-Free: DO NOT include wheat, barley, rye, or any gluten-containing ingredients
-- If the user is Dairy-Free: DO NOT include milk, cheese, yogurt, or any dairy products
-- ALWAYS respect these restrictions - this is the most important requirement
+### Requirements
+- Generate $days days of ${preferences.mealFrequency} meals each (breakfast, lunch, dinner, snacks).
+- Total daily calories: ${preferences.targetCalories}.
+- Each meal must include:
+  - Name: Unique and descriptive.
+  - Description: Brief, appealing summary.
+  - Ingredients: List with name, amount, unit, and optional notes.
+  - Instructions: Clear, step-by-step, practical for home cooking.
+  - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (realistic, non-zero values).
+  - Prep Time, Cook Time: In minutes.
+  - Servings: 1.
+  - Cuisine Type: From preferred cuisines or varied.
+  - Tags: e.g., vegetarian, vegan, gluten-free, based on meal content.
+  - Flags: isVegetarian, isVegan, isGlutenFree, isDairyFree (true/false).
 
-Requirements:
-1. Create $days days of meals (breakfast, lunch, dinner, snacks)
-2. Each meal should include:
-   - Name
-   - Description
-   - Ingredients with amounts
-   - Step-by-step instructions
-   - Nutritional info (calories, protein, carbs, fat, fiber, sugar, sodium)
-   - Prep time and cook time
-   - Servings
-   - Cuisine type
-   - Tags (vegetarian, vegan, gluten-free, etc.)
-   - Meal type (breakfast, lunch, dinner, snack)
+### Nutrition Guidelines
+- Balance macronutrients based on fitness goal:
+  - Weight Loss: ~40% carbs, 30% protein, 30% fat.
+  - Muscle Gain: ~40% carbs, 35% protein, 25% fat.
+  - Maintenance: ~50% carbs, 25% protein, 25% fat.
+  - Endurance: ~55% carbs, 20% protein, 25% fat.
+  - Strength: ~45% carbs, 30% protein, 25% fat.
+- Nutrition ranges per meal:
+  - Protein: 10-40g (higher for main meals, lower for snacks)
+  - Carbs: 20-80g (higher for breakfast/lunch, moderate for dinner)
+  - Fat: 5-30g (distribute evenly across meals)
+  - Fiber: 2-10g (aim for 25-35g total daily)
+  - Sugar: <10g per meal (natural sugars preferred)
+  - Sodium: <800mg per meal (aim for <2300mg daily)
+- Ensure variety in flavors, cuisines, and ingredients across days.
+- Adjust portions for weight, activity level, and fitness goal.
+- Meals must be practical, using common ingredients and simple techniques.
+- If weekly rotation is enabled, make each day unique; otherwise, repeat the same day.
 
-3. Ensure the total daily calories match $targetCalories
-4. Consider the fitness goal, nutrition goal, dietary restrictions, and personal metrics
-5. Include variety in cuisines and flavors
-6. Make recipes practical and easy to follow
-7. Consider age-appropriate nutrition needs
-8. Adjust portion sizes based on weight and activity level
-9. Use the user's meal frequency and preferences for meal timing
-10. If weekly rotation is Yes, make each day unique; if No, repeat the same day
-11. CRITICAL: Double-check that ALL meals respect the dietary restrictions
-
-Return the response in this exact JSON format, but replace all placeholder values with actual meal data:
-
+### JSON Format
 {
   "mealPlan": {
     "title": "Personalized $days-Day Meal Plan",
-    "description": "AI-generated meal plan for $fitnessGoal and $nutritionGoal",
+    "description": "AI-generated meal plan for ${_getFitnessGoalDescription(preferences.fitnessGoal)} and ${preferences.nutritionGoal}",
     "startDate": "$formattedStartDate",
     "endDate": "$formattedEndDate",
-    "totalCalories": $targetCalories * $days,
-    "totalProtein": [CALCULATE_TOTAL_PROTEIN_FROM_ALL_MEALS],
-    "totalCarbs": [CALCULATE_TOTAL_CARBS_FROM_ALL_MEALS],
-    "totalFat": [CALCULATE_TOTAL_FAT_FROM_ALL_MEALS],
-    "dietaryTags": ["$restrictions"],
+    "totalCalories": ${preferences.targetCalories * days},
+    "totalProtein": <sum of all meal proteins>,
+    "totalCarbs": <sum of all meal carbs>,
+    "totalFat": <sum of all meal fats>,
+    "dietaryTags": ["${preferences.dietaryRestrictions.join('", "')}"],
     "mealDays": [
       {
         "id": "day_1",
         "date": "$formattedStartDate",
-        "totalCalories": $targetCalories,
-        "totalProtein": [CALCULATE_DAY_PROTEIN_FROM_MEALS],
-        "totalCarbs": [CALCULATE_DAY_CARBS_FROM_MEALS],
-        "totalFat": [CALCULATE_DAY_FAT_FROM_MEALS],
+        "totalCalories": ${preferences.targetCalories},
+        "totalProtein": <sum of day 1 meal proteins>,
+        "totalCarbs": <sum of day 1 meal carbs>,
+        "totalFat": <sum of day 1 meal fats>,
         "meals": [
           {
-            "id": "meal_1",
-            "name": "[ACTUAL_MEAL_NAME]",
-            "description": "[ACTUAL_MEAL_DESCRIPTION]",
-            "type": "breakfast",
-            "cuisineType": "[ACTUAL_CUISINE]",
-            "prepTime": [ACTUAL_PREP_TIME],
-            "cookTime": [ACTUAL_COOK_TIME],
+            "id": "meal_<unique_id>",
+            "name": "<meal_name>",
+            "description": "<meal_description>",
+            "type": "<breakfast|lunch|dinner|snack>",
+            "cuisineType": "<cuisine>",
+            "prepTime": <minutes>,
+            "cookTime": <minutes>,
             "servings": 1,
             "ingredients": [
               {
-                "name": "[ACTUAL_INGREDIENT_NAME]",
-                "amount": [ACTUAL_AMOUNT],
-                "unit": "[ACTUAL_UNIT]",
-                "notes": "[OPTIONAL_NOTES]"
+                "name": "<ingredient_name>",
+                "amount": <amount>,
+                "unit": "<unit>",
+                "notes": "<optional_notes>"
               }
             ],
-            "instructions": [
-              "[ACTUAL_STEP_1]",
-              "[ACTUAL_STEP_2]"
-            ],
+            "instructions": ["<step1>", "<step2>"],
             "nutrition": {
-              "calories": [ACTUAL_CALORIES],
-              "protein": [ACTUAL_PROTEIN],
-              "carbs": [ACTUAL_CARBS],
-              "fat": [ACTUAL_FAT],
-              "fiber": [ACTUAL_FIBER],
-              "sugar": [ACTUAL_SUGAR],
-              "sodium": [ACTUAL_SODIUM]
+              "calories": <calories>,
+              "protein": <grams>,
+              "carbs": <grams>,
+              "fat": <grams>,
+              "fiber": <grams>,
+              "sugar": <grams>,
+              "sodium": <milligrams>
             },
-            "tags": ["[ACTUAL_TAGS]"],
-            "isVegetarian": [TRUE_OR_FALSE_BASED_ON_MEAL],
-            "isVegan": [TRUE_OR_FALSE_BASED_ON_MEAL],
-            "isGlutenFree": [TRUE_OR_FALSE_BASED_ON_MEAL],
-            "isDairyFree": [TRUE_OR_FALSE_BASED_ON_MEAL]
+            "tags": ["<tag1>", "<tag2>"],
+            "isVegetarian": <true|false>,
+            "isVegan": <true|false>,
+            "isGlutenFree": <true|false>,
+            "isDairyFree": <true|false>
           }
         ]
       }
     ]
   }
 }
-
-IMPORTANT: 
-- Replace ALL placeholder values in [BRACKETS] with actual data
-- Calculate nutrition totals by summing all meals
-- Generate unique meal names for each meal
-- Ensure all nutrition values are realistic numbers, not 0
-- Create $days days of meals, not just one day
 ''';
   }
 
