@@ -8,6 +8,7 @@ import '../../../../shared/services/meal_plan_storage_service.dart';
 import '../../../../shared/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
+import 'meal_detail_screen.dart';
 
 class MealPrepScreen extends StatefulWidget {
   const MealPrepScreen({super.key});
@@ -757,85 +758,92 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   }
 
   Widget _buildMealCard(Meal meal) {
-    return Container(
-      margin: const EdgeInsets.all(AppConstants.spacingS),
-      padding: const EdgeInsets.all(AppConstants.spacingS),
-      decoration: BoxDecoration(
-        color: AppConstants.backgroundColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusS),
-        border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.2),
+    final dayIndex = _currentMealPlan!.mealDays.indexWhere((day) => day.meals.contains(meal));
+    final dayTitle = dayIndex >= 0 ? 'Day ${dayIndex + 1}' : 'Unknown Day';
+    
+    return InkWell(
+      onTap: () => _navigateToMealDetail(meal, dayTitle),
+      borderRadius: BorderRadius.circular(AppConstants.radiusS),
+      child: Container(
+        margin: const EdgeInsets.all(AppConstants.spacingS),
+        padding: const EdgeInsets.all(AppConstants.spacingS),
+        decoration: BoxDecoration(
+          color: AppConstants.backgroundColor,
+          borderRadius: BorderRadius.circular(AppConstants.radiusS),
+          border: Border.all(
+            color: AppConstants.textTertiary.withOpacity(0.2),
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: _getMealTypeColor(meal.type).withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusS),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _getMealTypeColor(meal.type).withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                  ),
+                  child: Icon(
+                    _getMealTypeIcon(meal.type),
+                    color: _getMealTypeColor(meal.type),
+                    size: 18,
+                  ),
                 ),
-                child: Icon(
-                  _getMealTypeIcon(meal.type),
-                  color: _getMealTypeColor(meal.type),
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingM),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      meal.name,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
+                const SizedBox(width: AppConstants.spacingM),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        meal.name,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    Text(
-                      meal.description,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppConstants.textSecondary,
+                      Text(
+                        meal.description,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppConstants.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Text(
-                '${meal.nutrition.calories} cal',
-                style: AppTextStyles.caption.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppConstants.accentColor,
+                Text(
+                  '${meal.nutrition.calories} cal',
+                  style: AppTextStyles.caption.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppConstants.accentColor,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Row(
-            children: [
-              _buildNutritionChip(
-                  'P', '${meal.nutrition.protein.toStringAsFixed(0)}g'),
-              const SizedBox(width: AppConstants.spacingS),
-              _buildNutritionChip(
-                  'C', '${meal.nutrition.carbs.toStringAsFixed(0)}g'),
-              const SizedBox(width: AppConstants.spacingS),
-              _buildNutritionChip(
-                  'F', '${meal.nutrition.fat.toStringAsFixed(0)}g'),
-              const Spacer(),
-              Text(
-                '${meal.prepTime + meal.cookTime} min',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppConstants.textTertiary,
-                  fontSize: 10,
+              ],
+            ),
+            const SizedBox(height: AppConstants.spacingS),
+            Row(
+              children: [
+                _buildNutritionChip(
+                    'P', '${meal.nutrition.protein.toStringAsFixed(0)}g'),
+                const SizedBox(width: AppConstants.spacingS),
+                _buildNutritionChip(
+                    'C', '${meal.nutrition.carbs.toStringAsFixed(0)}g'),
+                const SizedBox(width: AppConstants.spacingS),
+                _buildNutritionChip(
+                    'F', '${meal.nutrition.fat.toStringAsFixed(0)}g'),
+                const Spacer(),
+                Text(
+                  '${meal.prepTime + meal.cookTime} min',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.textTertiary,
+                    fontSize: 10,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1036,6 +1044,18 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       case MealType.snack:
         return Icons.coffee;
     }
+  }
+
+  void _navigateToMealDetail(Meal meal, String dayTitle) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MealDetailScreen(
+          meal: meal,
+          dayTitle: dayTitle,
+        ),
+      ),
+    );
   }
 
   // Diet Plan Setup Flow Methods

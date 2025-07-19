@@ -69,6 +69,17 @@ class ConfigService {
     return dotenv.env['BUILD_NUMBER'] ?? '1';
   }
 
+  /// Get USDA API key from environment variables
+  static String get usdaApiKey {
+    return dotenv.env['USDA_API_KEY'] ?? 'DEMO_KEY';
+  }
+
+  /// Check if USDA API is enabled
+  static bool get isUsdaApiEnabled {
+    final key = usdaApiKey;
+    return key.isNotEmpty && key != 'DEMO_KEY';
+  }
+
   /// Validate that all required environment variables are set
   static void validateEnvironment() {
     final requiredVars = ['OPENAI_API_KEY'];

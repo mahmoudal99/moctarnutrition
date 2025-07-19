@@ -234,12 +234,14 @@ class RecipeIngredient {
   final double amount;
   final String unit;
   final String? notes;
+  final NutritionInfo? nutrition; // Nutritional data per ingredient
 
   RecipeIngredient({
     required this.name,
     required this.amount,
     required this.unit,
     this.notes,
+    this.nutrition,
   });
 
   factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
@@ -248,6 +250,9 @@ class RecipeIngredient {
       amount: (json['amount'] as num).toDouble(),
       unit: json['unit'] as String,
       notes: json['notes'] as String?,
+      nutrition: json['nutrition'] != null 
+          ? NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -257,6 +262,7 @@ class RecipeIngredient {
       'amount': amount,
       'unit': unit,
       'notes': notes,
+      'nutrition': nutrition?.toJson(),
     };
   }
 }

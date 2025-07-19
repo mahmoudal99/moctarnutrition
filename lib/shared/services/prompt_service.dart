@@ -48,14 +48,28 @@ You are a professional nutritionist. Generate a meal plan for Day $dayIndex in J
 - Each meal must include:
   - Name: Unique and descriptive.
   - Description: Brief, appealing summary.
-  - Ingredients: List with name, amount, unit, and optional notes.
+  - Ingredients: Detailed list with precise names, amounts, units, and nutritional data per ingredient.
   - Instructions: Clear, step-by-step, practical for home cooking.
-  - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (realistic, non-zero values).
+  - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (calculated from ingredients).
   - Prep Time, Cook Time: In minutes.
   - Servings: 1.
   - Cuisine Type: From preferred cuisines or varied.
   - Tags: e.g., vegetarian, vegan, gluten-free, based on meal content.
   - Flags: isVegetarian, isVegan, isGlutenFree, isDairyFree (true/false).
+
+### Ingredient Specifications (CRITICAL FOR VERIFICATION)
+- Use precise ingredient names that match USDA FoodData Central database:
+  - Examples: "chicken breast, raw" not "chicken", "almond flour" not "flour"
+  - Include preparation state: "cooked", "raw", "skinless", "boneless"
+  - Specify variety: "brown rice" not "rice", "extra virgin olive oil" not "oil"
+- Standardize units for consistency:
+  - Weight: grams (g) for solids, milliliters (ml) for liquids
+  - Count: pieces for whole items (e.g., "1 egg", "2 slices bread")
+  - Volume: cups, tablespoons, teaspoons (specify if packed/level)
+- Each ingredient must include nutritional data per specified amount:
+  - Calories, protein (g), carbs (g), fat (g), fiber (g), sugar (g), sodium (mg)
+  - Base calculations on USDA FoodData Central or similar verified sources
+  - Account for preparation method (cooked vs raw, etc.)
 
 ### Nutrition Guidelines
 - Balance macronutrients based on fitness goal:
@@ -96,10 +110,19 @@ You are a professional nutritionist. Generate a meal plan for Day $dayIndex in J
         "servings": 1,
         "ingredients": [
           {
-            "name": "<ingredient_name>",
+            "name": "<precise_ingredient_name>",
             "amount": <amount>,
             "unit": "<unit>",
-            "notes": "<optional_notes>"
+            "notes": "<preparation_notes>",
+            "nutrition": {
+              "calories": <calories_per_amount>,
+              "protein": <protein_g_per_amount>,
+              "carbs": <carbs_g_per_amount>,
+              "fat": <fat_g_per_amount>,
+              "fiber": <fiber_g_per_amount>,
+              "sugar": <sugar_g_per_amount>,
+              "sodium": <sodium_mg_per_amount>
+            }
           }
         ],
         "instructions": ["<step1>", "<step2>"],
@@ -190,14 +213,28 @@ You are a professional nutritionist. Generate a $days-day personalized meal plan
 - Each meal must include:
   - Name: Unique and descriptive.
   - Description: Brief, appealing summary.
-  - Ingredients: List with name, amount, unit, and optional notes.
+  - Ingredients: Detailed list with precise names, amounts, units, and nutritional data per ingredient.
   - Instructions: Clear, step-by-step, practical for home cooking.
-  - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (realistic, non-zero values).
+  - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (calculated from ingredients).
   - Prep Time, Cook Time: In minutes.
   - Servings: 1.
   - Cuisine Type: From preferred cuisines or varied.
   - Tags: e.g., vegetarian, vegan, gluten-free, based on meal content.
   - Flags: isVegetarian, isVegan, isGlutenFree, isDairyFree (true/false).
+
+### Ingredient Specifications (CRITICAL FOR VERIFICATION)
+- Use precise ingredient names that match USDA FoodData Central database:
+  - Examples: "chicken breast, raw" not "chicken", "almond flour" not "flour"
+  - Include preparation state: "cooked", "raw", "skinless", "boneless"
+  - Specify variety: "brown rice" not "rice", "extra virgin olive oil" not "oil"
+- Standardize units for consistency:
+  - Weight: grams (g) for solids, milliliters (ml) for liquids
+  - Count: pieces for whole items (e.g., "1 egg", "2 slices bread")
+  - Volume: cups, tablespoons, teaspoons (specify if packed/level)
+- Each ingredient must include nutritional data per specified amount:
+  - Calories, protein (g), carbs (g), fat (g), fiber (g), sugar (g), sodium (mg)
+  - Base calculations on USDA FoodData Central or similar verified sources
+  - Account for preparation method (cooked vs raw, etc.)
 
 ### Nutrition Guidelines
 - Balance macronutrients based on fitness goal:
@@ -250,10 +287,19 @@ You are a professional nutritionist. Generate a $days-day personalized meal plan
             "servings": 1,
             "ingredients": [
               {
-                "name": "<ingredient_name>",
+                "name": "<precise_ingredient_name>",
                 "amount": <amount>,
                 "unit": "<unit>",
-                "notes": "<optional_notes>"
+                "notes": "<preparation_notes>",
+                "nutrition": {
+                  "calories": <calories_per_amount>,
+                  "protein": <protein_g_per_amount>,
+                  "carbs": <carbs_g_per_amount>,
+                  "fat": <fat_g_per_amount>,
+                  "fiber": <fiber_g_per_amount>,
+                  "sugar": <sugar_g_per_amount>,
+                  "sodium": <sodium_mg_per_amount>
+                }
               }
             ],
             "instructions": ["<step1>", "<step2>"],
