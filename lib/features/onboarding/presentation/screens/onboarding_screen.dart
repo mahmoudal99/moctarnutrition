@@ -403,6 +403,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return OnboardingFitnessGoalStep(
       selectedFitnessGoal: _selectedFitnessGoal,
       onSelect: (goal) {
+        HapticFeedback.lightImpact();
         setState(() {
           _selectedFitnessGoal = goal;
         });
@@ -414,6 +415,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return OnboardingActivityLevelStep(
       selectedActivityLevel: _selectedActivityLevel,
       onSelect: (level) {
+        HapticFeedback.lightImpact();
         setState(() {
           _selectedActivityLevel = level;
         });
@@ -437,6 +439,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       selectedDietaryRestrictions: _selectedDietaryRestrictions,
       restrictions: restrictions,
       onSelect: (restriction) {
+        HapticFeedback.lightImpact();
         setState(() {
           if (restriction == 'None') {
             _selectedDietaryRestrictions.clear();
@@ -457,18 +460,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final styles = [
       'Strength Training',
       'Cardio',
-      'Yoga',
       'HIIT',
-      'Pilates',
-      'CrossFit',
       'Running',
-      'Swimming',
     ];
 
     return OnboardingWorkoutStylesStep(
       selectedWorkoutStyles: _selectedWorkoutStyles,
       styles: styles,
       onSelect: (style) {
+        HapticFeedback.lightImpact();
         setState(() {
           if (_selectedWorkoutStyles.contains(style)) {
             _selectedWorkoutStyles.remove(style);
@@ -500,7 +500,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     text: 'Back',
                     type: ButtonType.outline,
                     onPressed: () {
-                      HapticFeedback.lightImpact();
+                      HapticFeedback.mediumImpact();
                       _pageController.previousPage(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
@@ -522,7 +522,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ? 'Get Started'
                       : 'Next',
                   onPressed: () {
-                    HapticFeedback.lightImpact();
+                    HapticFeedback.mediumImpact();
                     if (_currentPage == _steps.length - 1) {
                       _completeOnboarding();
                     } else {

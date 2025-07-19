@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -147,7 +148,10 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () => context.go('/onboarding'),
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      context.go('/onboarding');
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,

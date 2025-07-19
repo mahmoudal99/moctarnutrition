@@ -54,7 +54,7 @@ class _ActivityCardsStack extends StatelessWidget {
       titleColor: Color(0xFF0277BD),
       emoji: '💪',
       avatars: [
-        'https://randomuser.me/api/portraits/women/16.jpg',
+        'https://randomuser.me/api/portraits/men/2.jpg',
       ],
     ),
   ];

@@ -37,18 +37,10 @@ class OnboardingWorkoutStylesStep extends StatelessWidget {
         return Icons.fitness_center;
       case 'Cardio':
         return Icons.favorite;
-      case 'Yoga':
-        return Icons.self_improvement;
       case 'HIIT':
         return Icons.timer;
-      case 'Pilates':
-        return Icons.accessibility_new;
-      case 'CrossFit':
-        return Icons.sports_gymnastics;
       case 'Running':
         return Icons.directions_run;
-      case 'Swimming':
-        return Icons.pool;
       default:
         return Icons.fitness_center;
     }
@@ -60,18 +52,10 @@ class OnboardingWorkoutStylesStep extends StatelessWidget {
         return 'Build muscle and strength';
       case 'Cardio':
         return 'Improve cardiovascular health';
-      case 'Yoga':
-        return 'Flexibility and mindfulness';
       case 'HIIT':
         return 'High-intensity interval training';
-      case 'Pilates':
-        return 'Core strength and flexibility';
-      case 'CrossFit':
-        return 'Functional fitness training';
       case 'Running':
         return 'Endurance and cardiovascular';
-      case 'Swimming':
-        return 'Low-impact full-body workout';
       default:
         return '';
     }
