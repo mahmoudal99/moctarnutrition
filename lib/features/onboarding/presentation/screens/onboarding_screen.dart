@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/providers/user_provider.dart';
+import '../../../../shared/services/onboarding_service.dart';
 import 'package:flutter/services.dart';
 import '../steps/onboarding_bmi_step.dart';
 import '../steps/onboarding_fitness_goal_step.dart';
@@ -840,6 +841,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     // Save user to provider/local storage
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     await userProvider.setUser(user);
+
+    // Mark onboarding as completed
+    await OnboardingService.markOnboardingAsSeen();
 
     // Navigate to subscription screen
     context.go('/subscription');

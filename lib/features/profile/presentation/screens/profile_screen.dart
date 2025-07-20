@@ -1,52 +1,96 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../../../../core/constants/app_constants.dart';
+import '../../../../shared/providers/auth_provider.dart' as app_auth;
+import '../../../../shared/models/user_model.dart';
+import '../../../../shared/services/auth_service.dart';
+import '../../../../shared/services/onboarding_service.dart';
+import '../../../onboarding/presentation/screens/get_started_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Mock data
-    final user = _mockUser;
-    final stats = _mockStats;
-    final quickAccess = _mockQuickAccess;
-    final ctaList = _mockCTA;
-    final settings = _mockSettings;
-    final support = _mockSupport;
+    return Consumer<app_auth.AuthProvider>(
+      builder: (context, authProvider, child) {
+        final user = authProvider.userModel;
+        final authUser = authProvider.firebaseUser;
+        
+        // Debug logging
+        print('Profile Screen - AuthProvider state:');
+        print('  isAuthenticated: ${authProvider.isAuthenticated}');
+        print('  isLoading: ${authProvider.isLoading}');
+        print('  userModel: ${user?.name ?? 'null'}');
+        print('  firebaseUser: ${authUser?.email ?? 'null'}');
+        
+        if (authProvider.isLoading) {
+          return const Scaffold(
+            backgroundColor: AppConstants.backgroundColor,
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
 
-    return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          children: [
-            _UserCard(user: user),
-            const SizedBox(height: 20),
-            // _StatsGrid(stats: stats),
-            const SizedBox(height: 20),
-            _QuickAccessGrid(items: quickAccess),
-            const SizedBox(height: 20),
-            _CTASection(items: ctaList),
-            const SizedBox(height: 28),
-            _SectionHeader(title: 'Settings'),
-            ...settings.map((item) => _SettingsTile(item: item)),
-            const SizedBox(height: 24),
-            _SectionHeader(title: 'Support'),
-            ...support.map((item) => _SettingsTile(item: item)),
-            const SizedBox(height: 32),
-            _LogoutButton(),
-          ],
-        ),
-      ),
+
+
+
+
+        if (user == null || authUser == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              context.go('/get-started');
+            }
+          });
+          return const GetStartedScreen();
+        }
+
+        final stats = _getUserStats(user);
+        final quickAccess = _getQuickAccessItems(context);
+        final ctaList = _getCTAItems(context, user);
+        final settings = _getSettingsItems(context);
+        final support = _getSupportItems(context);
+
+        return Scaffold(
+          backgroundColor: AppConstants.backgroundColor,
+          body: SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              children: [
+                _UserCard(user: user, authUser: authUser, authProvider: authProvider),
+                const SizedBox(height: 20),
+                // _StatsGrid(stats: stats),
+                const SizedBox(height: 20),
+                _QuickAccessGrid(items: quickAccess),
+                const SizedBox(height: 20),
+                _CTASection(items: ctaList),
+                const SizedBox(height: 28),
+                _SectionHeader(title: 'Settings'),
+                ...settings.map((item) => _SettingsTile(item: item)),
+                const SizedBox(height: 24),
+                _SectionHeader(title: 'Support'),
+                ...support.map((item) => _SettingsTile(item: item)),
+                const SizedBox(height: 32),
+                _LogoutButton(),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
 // --- User Card ---
 class _UserCard extends StatelessWidget {
-  final _MockUser user;
+  final UserModel user;
+  final firebase_auth.User authUser;
+  final app_auth.AuthProvider authProvider;
 
-  const _UserCard({required this.user});
+  const _UserCard({required this.user, required this.authUser, required this.authProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +105,20 @@ class _UserCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 38,
-                  backgroundImage: NetworkImage(user.photoUrl),
+                  backgroundImage: user.photoUrl != null 
+                      ? NetworkImage(user.photoUrl!) 
+                      : null,
+                  backgroundColor: AppConstants.primaryColor.withOpacity(0.1),
+                  child: user.photoUrl == null
+                      ? Text(
+                          (user.name?.isNotEmpty == true) ? user.name![0].toUpperCase() : 'U',
+                          style: AppTextStyles.heading4.copyWith(
+                            color: AppConstants.primaryColor,
+                          ),
+                        )
+                      : null,
                 ),
-                if (user.isVerified)
+                if (authUser.emailVerified)
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -88,14 +143,14 @@ class _UserCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          user.name,
+                          user.name ?? 'User',
                           style: AppTextStyles.heading4,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 6),
-                      if (user.membership == 'Premium')
+                      if (user.subscriptionStatus == SubscriptionStatus.premium)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
@@ -109,7 +164,7 @@ class _UserCard extends StatelessWidget {
                         ),
                       IconButton(
                         icon: const Icon(Icons.edit, color: AppConstants.textTertiary),
-                        onPressed: () {},
+                        onPressed: () => _showEditProfileDialog(context, user, authProvider),
                         tooltip: 'Edit profile',
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -118,20 +173,20 @@ class _UserCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '@${user.username}',
+                    user.email,
                     style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    user.branch,
+                    'Role: ${user.role.name}',
                     style: AppTextStyles.caption.copyWith(color: AppConstants.textTertiary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    'Member since ${user.joinDate}',
+                    'Member since ${_formatDate(user.createdAt)}',
                     style: AppTextStyles.caption.copyWith(color: AppConstants.textTertiary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -354,45 +409,67 @@ class _SettingsTile extends StatelessWidget {
 class _LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppConstants.errorColor.withOpacity(0.12),
-          foregroundColor: AppConstants.errorColor,
-          minimumSize: const Size.fromHeight(48),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          elevation: 0,
-        ),
-        icon: const Icon(Icons.logout),
-        label: const Text('Logout'),
-        onPressed: () {},
+    return Consumer<app_auth.AuthProvider>(
+      builder: (context, authProvider, child) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppConstants.errorColor.withOpacity(0.12),
+              foregroundColor: AppConstants.errorColor,
+              minimumSize: const Size.fromHeight(48),
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            icon: authProvider.isLoading 
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppConstants.errorColor),
+                    ),
+                  )
+                : const Icon(Icons.logout),
+            label: Text(authProvider.isLoading ? 'Signing out...' : 'Logout'),
+            onPressed: authProvider.isLoading ? null : () => _handleLogout(context, authProvider),
+          ),
+        );
+      },
+    );
+  }
+
+  void _handleLogout(BuildContext context, app_auth.AuthProvider authProvider) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sign Out'),
+          ),
+        ],
       ),
     );
+
+    if (confirmed == true && context.mounted) {
+      await authProvider.signOut();
+      if (context.mounted) {
+        // AuthProvider already resets onboarding state, just navigate to get started screen
+        context.go('/get-started');
+      }
+    }
   }
 }
 
-// --- MOCK DATA MODELS ---
-class _MockUser {
-  final String name;
-  final String username;
-  final String photoUrl;
-  final String membership;
-  final String branch;
-  final String joinDate;
-  final bool isVerified;
 
-  const _MockUser({
-    required this.name,
-    required this.username,
-    required this.photoUrl,
-    required this.membership,
-    required this.branch,
-    required this.joinDate,
-    required this.isVerified,
-  });
-}
 
 class _MockStat {
   final String value;
@@ -436,60 +513,221 @@ class _MockSettingsItem {
       {required this.label, required this.icon, this.trailing, this.onTap});
 }
 
-// --- MOCK DATA ---
-const _mockUser = _MockUser(
-  name: 'Mahmoud Almahroum',
-  username: 'champion150',
-  photoUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-  membership: 'Premium',
-  branch: 'Downtown Gym',
-  joinDate: 'Jan 2023',
-  isVerified: true,
-);
+// --- HELPER FUNCTIONS ---
+String _formatDate(DateTime date) {
+  final months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  return '${months[date.month - 1]} ${date.year}';
+}
 
-const _mockStats = [
-  _MockStat(value: '124', label: 'Workouts'),
-  _MockStat(value: '6', label: 'Weeks Streak'),
-  _MockStat(value: '18,500', label: 'Calories'),
-  _MockStat(value: 'PR: 120kg', label: 'Best Squat'),
-];
+void _showEditProfileDialog(BuildContext context, UserModel user, app_auth.AuthProvider authProvider) {
+  final nameController = TextEditingController(text: user.name ?? '');
+  
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Edit Profile'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Full Name',
+              hintText: 'Enter your full name',
+            ),
+            textCapitalization: TextCapitalization.words,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final newName = nameController.text.trim();
+            if (newName.isNotEmpty && newName != user.name) {
+              // Update user profile
+              final updatedUser = user.copyWith(
+                name: newName,
+                updatedAt: DateTime.now(),
+              );
+              
+              try {
+                await AuthService.updateUserProfile(updatedUser);
+                
+                // Update the AuthProvider to reflect changes immediately
+                await authProvider.updateUserProfile(updatedUser);
+                
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Profile updated successfully'),
+                      backgroundColor: AppConstants.successColor,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to update profile: $e'),
+                      backgroundColor: AppConstants.errorColor,
+                    ),
+                  );
+                }
+              }
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+}
 
-const _mockQuickAccess = [
-  _MockQuickAccess(
-      label: 'My Workouts', icon: Icons.fitness_center, badge: null),
-  _MockQuickAccess(
-      label: 'Class Schedule', icon: Icons.calendar_month, badge: 'NEW'),
-  _MockQuickAccess(label: 'Progress', icon: Icons.show_chart, badge: null),
-  _MockQuickAccess(label: 'Favorites', icon: Icons.star, badge: null),
-];
+// --- DATA GENERATION FUNCTIONS ---
+List<_MockStat> _getUserStats(UserModel user) {
+  // TODO: Replace with real stats from user data
+  return [
+    const _MockStat(value: '0', label: 'Workouts'),
+    const _MockStat(value: '0', label: 'Weeks Streak'),
+    const _MockStat(value: '0', label: 'Calories'),
+    const _MockStat(value: '0', label: 'Meals'),
+  ];
+}
 
-const _mockCTA = [
-  _MockCTA(label: 'Refer a Friend', icon: Icons.group_add, isProminent: true),
-  _MockCTA(label: 'Upgrade Membership', icon: Icons.workspace_premium),
-  _MockCTA(label: 'Book a 1-on-1 Trainer', icon: Icons.person_search),
-];
+List<_MockQuickAccess> _getQuickAccessItems(BuildContext context) {
+  return [
+    _MockQuickAccess(
+      label: 'My Workouts', 
+      icon: Icons.fitness_center, 
+      onTap: () => context.go('/workouts'),
+    ),
+    _MockQuickAccess(
+      label: 'Meal Plans', 
+      icon: Icons.restaurant, 
+      onTap: () => context.go('/meal-prep'),
+    ),
+    _MockQuickAccess(
+      label: 'Progress', 
+      icon: Icons.show_chart, 
+      onTap: () => context.go('/progress'),
+    ),
+    _MockQuickAccess(
+      label: 'Favorites', 
+      icon: Icons.star, 
+      onTap: () => context.go('/favorites'),
+    ),
+  ];
+}
 
-final _mockSettings = [
-  _MockSettingsItem(
+List<_MockCTA> _getCTAItems(BuildContext context, UserModel user) {
+  return [
+    _MockCTA(
+      label: 'Refer a Friend', 
+      icon: Icons.group_add, 
+      isProminent: true,
+      onTap: () {
+        // TODO: Implement refer a friend
+      },
+    ),
+    if (user.subscriptionStatus == SubscriptionStatus.free)
+      _MockCTA(
+        label: 'Upgrade Membership', 
+        icon: Icons.workspace_premium,
+        onTap: () => context.go('/subscription'),
+      ),
+    _MockCTA(
+      label: 'Book a 1-on-1 Trainer', 
+      icon: Icons.person_search,
+      onTap: () {
+        // TODO: Implement trainer booking
+      },
+    ),
+  ];
+}
+
+List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
+  return [
+    _MockSettingsItem(
       label: 'Notifications',
       icon: Icons.notifications,
-      trailing: Switch(value: true, onChanged: null)),
-  _MockSettingsItem(
+      trailing: Switch(value: true, onChanged: null),
+    ),
+    _MockSettingsItem(
       label: 'Reminders',
       icon: Icons.alarm,
-      trailing: Switch(value: false, onChanged: null)),
-  _MockSettingsItem(
+      trailing: Switch(value: false, onChanged: null),
+    ),
+    _MockSettingsItem(
       label: 'Dark Mode',
       icon: Icons.dark_mode,
-      trailing: Switch(value: false, onChanged: null)),
-  _MockSettingsItem(label: 'Workout Preferences', icon: Icons.fitness_center),
-  _MockSettingsItem(label: 'Nutrition Preferences', icon: Icons.restaurant),
-  _MockSettingsItem(label: 'Payment Info', icon: Icons.credit_card),
-  _MockSettingsItem(label: 'Account Settings', icon: Icons.settings),
-];
+      trailing: Switch(value: false, onChanged: null),
+    ),
+    _MockSettingsItem(
+      label: 'Workout Preferences', 
+      icon: Icons.fitness_center,
+      onTap: () {
+        // TODO: Navigate to workout preferences
+      },
+    ),
+    _MockSettingsItem(
+      label: 'Nutrition Preferences', 
+      icon: Icons.restaurant,
+      onTap: () {
+        // TODO: Navigate to nutrition preferences
+      },
+    ),
+    _MockSettingsItem(
+      label: 'Payment Info', 
+      icon: Icons.credit_card,
+      onTap: () {
+        // TODO: Navigate to payment settings
+      },
+    ),
+    _MockSettingsItem(
+      label: 'Account Settings', 
+      icon: Icons.settings,
+      onTap: () {
+        // TODO: Navigate to account settings
+      },
+    ),
+  ];
+}
 
-final _mockSupport = [
-  _MockSettingsItem(label: 'Help Center', icon: Icons.help_outline),
-  _MockSettingsItem(label: 'Report a Bug', icon: Icons.bug_report),
-  _MockSettingsItem(label: 'Feedback', icon: Icons.feedback),
-];
+List<_MockSettingsItem> _getSupportItems(BuildContext context) {
+  return [
+    _MockSettingsItem(
+      label: 'Help Center', 
+      icon: Icons.help_outline,
+      onTap: () {
+        // TODO: Open help center
+      },
+    ),
+    _MockSettingsItem(
+      label: 'Report a Bug', 
+      icon: Icons.bug_report,
+      onTap: () {
+        // TODO: Open bug report
+      },
+    ),
+    _MockSettingsItem(
+      label: 'Feedback', 
+      icon: Icons.feedback,
+      onTap: () {
+        // TODO: Open feedback form
+      },
+    ),
+  ];
+}
+
+

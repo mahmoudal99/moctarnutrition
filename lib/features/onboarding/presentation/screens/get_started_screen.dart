@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../shared/services/onboarding_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class GetStartedScreen extends StatefulWidget {
@@ -148,9 +149,12 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       HapticFeedback.mediumImpact();
-                      context.go('/onboarding');
+                      await OnboardingService.markGetStartedAsSeen();
+                      if (mounted) {
+                        context.go('/onboarding');
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -171,25 +175,34 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                   ),
                 ),
               ),
-              Column(
-                children: [
-                  Text(
-                    'Already a Member?',
-                    style: GoogleFonts.nunitoSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
+              GestureDetector(
+                onTap: () async {
+                  await OnboardingService.markGetStartedAsSeen();
+                  await OnboardingService.markOnboardingAsSeen();
+                  if (mounted) {
+                    context.go('/auth');
+                  }
+                },
+                child: Column(
+                  children: [
+                    Text(
+                      'Already a Member?',
+                      style: GoogleFonts.nunitoSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'LOG IN',
-                    style: GoogleFonts.nunitoSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    Text(
+                      'LOG IN',
+                      style: GoogleFonts.nunitoSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               )
             ],
           ),

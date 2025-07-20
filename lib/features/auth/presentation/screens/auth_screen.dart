@@ -1,23 +1,33 @@
+import 'package:champions_gym_app/shared/services/onboarding_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/providers/auth_provider.dart';
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+  final bool isSignUp;
+  
+  const AuthScreen({super.key, this.isSignUp = false});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  bool _isSignUp = true;
+  late bool _isSignUp; // Will be initialized in initState
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
-  bool _isLoading = false;
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _isSignUp = widget.isSignUp;
+  }
 
   @override
   void dispose() {
@@ -77,7 +87,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         const SizedBox(height: AppConstants.spacingM),
         Text(
-          'Almost there!',
+          _isSignUp ? 'Create Account' : 'Welcome Back!',
           style: AppTextStyles.heading3,
           textAlign: TextAlign.center,
         ),
@@ -157,6 +167,26 @@ class _AuthScreenState extends State<AuthScreen> {
               return null;
             },
           ),
+          if (!_isSignUp) ...[
+            const SizedBox(height: AppConstants.spacingS),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => context.push('/password-reset'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
+                  minimumSize: const Size(0, 32),
+                ),
+                child: Text(
+                  'Forgot Password?',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: AppConstants.spacingM),
           _buildAuthButton(),
           const SizedBox(height: AppConstants.spacingS),
@@ -213,16 +243,20 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Widget _buildAuthButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: CustomButton(
-        text: _isLoading 
-            ? 'Please wait...' 
-            : (_isSignUp ? 'Create Account' : 'Sign In'),
-        isLoading: _isLoading,
-        onPressed: _handleAuth,
-      ),
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        return SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: CustomButton(
+            text: authProvider.isLoading 
+                ? 'Please wait...' 
+                : (_isSignUp ? 'Create Account' : 'Sign In'),
+            isLoading: authProvider.isLoading,
+            onPressed: _handleAuth,
+          ),
+        );
+      },
     );
   }
 
@@ -342,23 +376,38 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildGuestOption() {
     return Column(
       children: [
-        Text(
-          'Want to try first?',
-          style: AppTextStyles.caption.copyWith(
-            color: AppConstants.textSecondary,
-          ),
-        ),
+        // Text(
+        //   'Want to try first?',
+        //   style: AppTextStyles.caption.copyWith(
+        //     color: AppConstants.textSecondary,
+        //   ),
+        // ),
+        // TextButton(
+        //   onPressed: _handleGuestAccess,
+        //   style: TextButton.styleFrom(
+        //     padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
+        //     minimumSize: const Size(0, 32),
+        //   ),
+        //   child: Text(
+        //     'Continue as Guest',
+        //     style: AppTextStyles.caption.copyWith(
+        //       color: AppConstants.primaryColor,
+        //       fontWeight: FontWeight.w600,
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(height: AppConstants.spacingS),
         TextButton(
-          onPressed: _handleGuestAccess,
+          onPressed: _handleBackToOnboarding,
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
             minimumSize: const Size(0, 32),
           ),
           child: Text(
-            'Continue as Guest',
+            'Back to Onboarding',
             style: AppTextStyles.caption.copyWith(
-              color: AppConstants.primaryColor,
-              fontWeight: FontWeight.w600,
+              color: AppConstants.textPrimary,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -369,99 +418,99 @@ class _AuthScreenState extends State<AuthScreen> {
   void _handleAuth() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    bool success = false;
 
-    try {
-      // TODO: Implement actual authentication
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
-      
+    if (_isSignUp) {
+      success = await authProvider.signUpWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim(),
+      );
+    } else {
+      success = await authProvider.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+    }
+
+    if (success && mounted) {
       // Navigate to main app
-      if (mounted) {
-        context.go('/home');
-      }
-    } catch (e) {
+      context.go('/home');
+    } else if (mounted && authProvider.error != null) {
       // Show error message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Authentication failed: $e'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.error!),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
     }
   }
 
   void _handleGoogleSignIn() async {
-    setState(() {
-      _isLoading = true;
-    });
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithGoogle();
 
-    try {
-      // TODO: Implement Google Sign-In
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted) {
-        context.go('/home');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Google Sign-In failed: $e'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (success && mounted) {
+      context.go('/home');
+    } else if (mounted && authProvider.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.error!),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
     }
   }
 
   void _handleAppleSignIn() async {
-    setState(() {
-      _isLoading = true;
-    });
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithApple();
 
-    try {
-      // TODO: Implement Apple Sign-In
-      await Future.delayed(const Duration(seconds: 2));
+    if (success && mounted) {
+      context.go('/home');
+    } else if (mounted && authProvider.error != null) {
+      // Show a more helpful error message for Apple Sign-In
+      String errorMessage = authProvider.error!;
+      if (errorMessage.contains('Apple sign in')) {
+        errorMessage = 'Apple Sign-In is not configured yet. Please use email/password or Google Sign-In for now.';
+      }
       
-      if (mounted) {
-        context.go('/home');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Apple Sign-In failed: $e'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: AppConstants.errorColor,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 
-  void _handleGuestAccess() {
-    // TODO: Save user preferences and continue as guest
-    context.go('/home');
+  void _handleGuestAccess() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signInAnonymously();
+
+    if (success && mounted) {
+      context.go('/home');
+    } else if (mounted && authProvider.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.error!),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
+    }
+  }
+
+  void _handleBackToOnboarding() async {
+    print('Back to Onboarding button pressed');
+    // Reset onboarding state to show get started screen
+    await OnboardingService.resetOnboardingState();
+    if (mounted) {
+      print('Navigating to get-started screen');
+      // Navigate to get started screen directly
+      context.go('/get-started');
+    }
   }
 } 

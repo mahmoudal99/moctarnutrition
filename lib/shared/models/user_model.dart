@@ -13,6 +13,7 @@ class UserModel {
   final DateTime? subscriptionExpiry;
   final UserPreferences preferences;
   final String? selectedTrainerId;
+  final bool hasSeenSubscriptionScreen;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -26,6 +27,7 @@ class UserModel {
     this.subscriptionExpiry,
     required this.preferences,
     this.selectedTrainerId,
+    this.hasSeenSubscriptionScreen = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -49,6 +51,7 @@ class UserModel {
           : null,
       preferences: UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>),
       selectedTrainerId: json['selectedTrainerId'] as String?,
+      hasSeenSubscriptionScreen: json['hasSeenSubscriptionScreen'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -65,6 +68,7 @@ class UserModel {
       'subscriptionExpiry': subscriptionExpiry?.toIso8601String(),
       'preferences': preferences.toJson(),
       'selectedTrainerId': selectedTrainerId,
+      'hasSeenSubscriptionScreen': hasSeenSubscriptionScreen,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -80,6 +84,7 @@ class UserModel {
     DateTime? subscriptionExpiry,
     UserPreferences? preferences,
     String? selectedTrainerId,
+    bool? hasSeenSubscriptionScreen,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -93,6 +98,7 @@ class UserModel {
       subscriptionExpiry: subscriptionExpiry ?? this.subscriptionExpiry,
       preferences: preferences ?? this.preferences,
       selectedTrainerId: selectedTrainerId ?? this.selectedTrainerId,
+      hasSeenSubscriptionScreen: hasSeenSubscriptionScreen ?? this.hasSeenSubscriptionScreen,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -191,6 +197,22 @@ class UserPreferences {
       weight: weight ?? this.weight,
       height: height ?? this.height,
       gender: gender ?? this.gender,
+    );
+  }
+
+  /// Create default user preferences
+  static UserPreferences defaultPreferences() {
+    return UserPreferences(
+      fitnessGoal: FitnessGoal.maintenance,
+      activityLevel: ActivityLevel.moderatelyActive,
+      dietaryRestrictions: [],
+      preferredWorkoutStyles: [],
+      targetCalories: 2000,
+      notificationsEnabled: true,
+      age: 25,
+      weight: 70.0,
+      height: 170.0,
+      gender: 'Male',
     );
   }
 } 

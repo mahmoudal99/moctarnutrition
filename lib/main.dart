@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart'   ;
+import 'package:go_router/go_router.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 import 'features/auth/presentation/screens/auth_screen.dart';
+import 'features/auth/presentation/screens/password_reset_screen.dart';
 import 'features/onboarding/presentation/screens/get_started_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/subscription/presentation/screens/subscription_screen.dart';
@@ -16,9 +18,21 @@ import 'features/profile/presentation/screens/profile_screen.dart';
 import 'shared/widgets/main_navigation.dart';
 import 'shared/providers/user_provider.dart';
 import 'shared/providers/meal_plan_provider.dart';
+import 'shared/providers/auth_provider.dart';
 import 'shared/services/config_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp();
+    print('Firebase initialized successfully');
+  } catch (e) {
+    print('Firebase initialization error: $e');
+    // Continue without Firebase for development
+  }
+  
   // Load environment variables
   try {
     await dotenv.load();
@@ -44,6 +58,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
         ChangeNotifierProvider(create: (_) => MealPlanProvider()),
       ],
@@ -67,12 +82,26 @@ class ChampionsGymApp extends StatelessWidget {
 }
 
 final GoRouter _router = GoRouter(
-  initialLocation: '/meal-prep',
+  initialLocation: '/',
   routes: [
-    // Splash Screen Route
+    // Main route that handles authentication flow
     GoRoute(
       path: '/',
-      builder: (context, state) => const SplashScreen(),
+      builder: (context, state) {
+        return Consumer<AuthProvider>(
+          builder: (context, authProvider, child) {
+            if (authProvider.isLoading) {
+              return const SplashScreen();
+            }
+            
+            if (!authProvider.isAuthenticated) {
+              return const GetStartedScreen();
+            }
+            
+            return const MainNavigation(child: WorkoutsScreen());
+          },
+        );
+      },
     ),
 
     // Get Started Route
@@ -81,10 +110,22 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const GetStartedScreen(),
     ),
 
-    // Auth Route
+    // Auth Route (for sign in - existing users)
     GoRoute(
       path: '/auth',
       builder: (context, state) => const AuthScreen(),
+    ),
+
+    // Auth Route (for sign up - new users after onboarding)
+    GoRoute(
+      path: '/auth-signup',
+      builder: (context, state) => const AuthScreen(isSignUp: true),
+    ),
+
+    // Password Reset Route
+    GoRoute(
+      path: '/password-reset',
+      builder: (context, state) => const PasswordResetScreen(),
     ),
 
     // Onboarding Route
@@ -99,7 +140,7 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const SubscriptionScreen(),
     ),
 
-    // Main App Routes
+    // Main App Routes (protected)
     ShellRoute(
       builder: (context, state, child) => MainNavigation(child: child),
       routes: [
