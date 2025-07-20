@@ -38,6 +38,14 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid;
     }
     
+    // Check-ins - users can only access their own check-ins
+    match /checkins/{checkinId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
     // Public data that anyone can read (like workout templates, nutrition info)
     match /public/{document=**} {
       allow read: if true;

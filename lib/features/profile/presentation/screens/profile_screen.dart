@@ -608,6 +608,11 @@ List<_MockStat> _getUserStats(UserModel user) {
 List<_MockQuickAccess> _getQuickAccessItems(BuildContext context) {
   return [
     _MockQuickAccess(
+      label: 'Weekly Check-in', 
+      icon: Icons.camera_alt, 
+      onTap: () => context.go('/checkin'),
+    ),
+    _MockQuickAccess(
       label: 'My Workouts', 
       icon: Icons.fitness_center, 
       onTap: () => context.go('/workouts'),
@@ -621,11 +626,6 @@ List<_MockQuickAccess> _getQuickAccessItems(BuildContext context) {
       label: 'Progress', 
       icon: Icons.show_chart, 
       onTap: () => context.go('/progress'),
-    ),
-    _MockQuickAccess(
-      label: 'Favorites', 
-      icon: Icons.star, 
-      onTap: () => context.go('/favorites'),
     ),
   ];
 }

@@ -12,6 +12,10 @@ import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/subscription/presentation/screens/subscription_screen.dart';
 import 'features/meal_prep/presentation/screens/meal_prep_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
+import 'features/checkin/presentation/screens/checkin_screen.dart';
+import 'features/checkin/presentation/screens/checkin_form_screen.dart';
+import 'features/checkin/presentation/screens/checkin_details_screen.dart';
+
 // import 'features/trainers/presentation/screens/trainers_screen.dart';
 // import 'features/workouts/presentation/screens/workouts_screen.dart';
 // import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
@@ -19,11 +23,13 @@ import 'shared/widgets/main_navigation.dart';
 import 'shared/providers/user_provider.dart';
 import 'shared/providers/meal_plan_provider.dart';
 import 'shared/providers/auth_provider.dart';
+import 'shared/providers/checkin_provider.dart';
 import 'shared/services/config_service.dart';
+import 'shared/models/checkin_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
   try {
     await Firebase.initializeApp();
@@ -32,17 +38,18 @@ void main() async {
     print('Firebase initialization error: $e');
     // Continue without Firebase for development
   }
-  
+
   // Load environment variables
   try {
     await dotenv.load();
     print('Environment file loaded successfully');
   } catch (e) {
     print('Warning: Could not load .env file: $e');
-    print('Please ensure you have copied .env.example to .env and configured your API key');
+    print(
+        'Please ensure you have copied .env.example to .env and configured your API key');
     // Continue with default configuration
   }
-  
+
   // Validate environment configuration
   try {
     ConfigService.validateEnvironment();
@@ -54,13 +61,14 @@ void main() async {
     // In production, you might want to show a user-friendly error
     // or fall back to a safe default configuration
   }
-  
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
         ChangeNotifierProvider(create: (_) => MealPlanProvider()),
+        ChangeNotifierProvider(create: (_) => CheckinProvider()),
       ],
       child: const ChampionsGymApp(),
     ),
@@ -93,11 +101,11 @@ final GoRouter _router = GoRouter(
             if (authProvider.isLoading) {
               return const SplashScreen();
             }
-            
+
             if (!authProvider.isAuthenticated) {
               return const GetStartedScreen();
             }
-            
+
             return const MainNavigation(child: WorkoutsScreen());
           },
         );
@@ -168,14 +176,25 @@ final GoRouter _router = GoRouter(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
         ),
+        GoRoute(
+          path: '/checkin',
+          builder: (context, state) => const CheckinScreen(),
+        ),
+        GoRoute(
+          path: '/checkin/form',
+          builder: (context, state) => const CheckinFormScreen(),
+        ),
+        GoRoute(
+          path: '/checkin/details',
+          builder: (context, state) {
+            final checkin = state.extra as CheckinModel;
+            return CheckinDetailsScreen(checkin: checkin);
+          },
+        ),
       ],
     ),
   ],
 );
-
-
-
-
 
 class TrainersScreen extends StatelessWidget {
   const TrainersScreen({super.key});

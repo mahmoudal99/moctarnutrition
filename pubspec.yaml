@@ -54,6 +54,7 @@ dependencies:
   
   # Storage & Database (for future backend integration)
   cloud_firestore: ^5.6.11
+  firebase_storage: ^12.2.2
   shared_preferences: ^2.2.2
   
   # In-App Purchases
@@ -63,6 +64,7 @@ dependencies:
   intl: ^0.19.0
   uuid: ^4.2.1
   image_picker: ^1.0.7
+  image: ^4.1.7
   video_player: ^2.8.2
   permission_handler: ^11.1.0
   
