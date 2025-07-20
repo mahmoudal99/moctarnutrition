@@ -203,10 +203,10 @@ class CheckinModel {
     return DateTime.now().difference(submittedAt!).inDays;
   }
 
-  /// Static method to get the start of a week (Monday)
+  /// Static method to get the start of a week (Sunday)
   static DateTime _getWeekStart(DateTime date) {
-    final daysFromMonday = date.weekday - 1;
-    return date.subtract(Duration(days: daysFromMonday));
+    final daysFromSunday = date.weekday % 7; // Sunday = 0, Monday = 1, etc.
+    return date.subtract(Duration(days: daysFromSunday));
   }
 
   /// Create a check-in for the current week

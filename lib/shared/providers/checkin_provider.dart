@@ -67,15 +67,23 @@ class CheckinProvider extends ChangeNotifier {
         throw Exception('User not authenticated');
       }
 
+      print('Loading check-ins for user: ${user.uid}');
       final checkins = await CheckinService.getUserCheckins(
         user.uid,
         limit: 20,
         lastDocument: _lastDocument,
       );
 
+      print('Loaded ${checkins.length} check-ins');
+      for (final checkin in checkins) {
+        print('Check-in: ${checkin.id} - Week: ${checkin.weekStartDate} - Status: ${checkin.status}');
+      }
+
       if (refresh) {
+        print('Refreshing - setting _userCheckins to ${checkins.length} items');
         _userCheckins = checkins;
       } else {
+        print('Adding ${checkins.length} items to existing list');
         _userCheckins.addAll(checkins);
       }
 
@@ -84,8 +92,11 @@ class CheckinProvider extends ChangeNotifier {
         _lastDocument = await _getLastDocument(user.uid);
       }
 
+      print('Total check-ins in provider after assignment: ${_userCheckins.length}');
+      print('Provider _userCheckins content: ${_userCheckins.map((c) => '${c.id}:${c.status}').toList()}');
       notifyListeners();
     } catch (e) {
+      print('Error loading check-ins: $e');
       _setError('Failed to load check-ins: $e');
     } finally {
       _setLoading(false);
@@ -235,16 +246,21 @@ class CheckinProvider extends ChangeNotifier {
     }
   }
 
-  /// Mark overdue check-ins as missed
+  /// Mark overdue check-ins as missed and cleanup duplicates
   Future<void> markOverdueCheckins() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
+      // Clean up duplicate pending check-ins first
+      await CheckinService.cleanupDuplicatePendingCheckins(user.uid);
+      
+      // Then mark overdue check-ins and create missing weekly ones
       await CheckinService.markOverdueCheckins(user.uid);
 
       // Reload data to reflect changes
       await loadCurrentWeekCheckin();
+      await loadUserCheckins(refresh: true);
       await loadProgressSummary();
     } catch (e) {
       _setError('Failed to mark overdue check-ins: $e');
@@ -253,11 +269,25 @@ class CheckinProvider extends ChangeNotifier {
 
   /// Refresh all check-in data
   Future<void> refresh() async {
-    await Future.wait([
-      loadCurrentWeekCheckin(),
-      loadUserCheckins(refresh: true),
-      loadProgressSummary(),
-    ]);
+    print('Refresh started');
+    try {
+      print('Loading current week check-in...');
+      await loadCurrentWeekCheckin();
+      print('Current week check-in loaded');
+      
+      print('Loading user check-ins...');
+      await loadUserCheckins(refresh: true);
+      print('User check-ins loaded');
+      
+      print('Loading progress summary...');
+      await loadProgressSummary();
+      print('Progress summary loaded');
+      
+      print('Refresh completed successfully');
+    } catch (e) {
+      print('Error during refresh: $e');
+      rethrow;
+    }
   }
 
   /// Clear all data

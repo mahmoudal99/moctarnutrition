@@ -78,6 +78,8 @@ class CheckinService {
     DocumentSnapshot? lastDocument,
   }) async {
     try {
+      print('Getting check-ins for user: $userId');
+      
       Query query = _checkinsCollection
           .where('userId', isEqualTo: userId)
           .orderBy('weekStartDate', descending: true)
@@ -88,16 +90,33 @@ class CheckinService {
       }
 
       final querySnapshot = await query.get();
+      print('Query returned ${querySnapshot.docs.length} documents');
 
-      return querySnapshot.docs.map((doc) {
+      final checkins = querySnapshot.docs.map((doc) {
+        print('Processing document: ${doc.id}');
         final rawData = doc.data();
+        print('Raw data: $rawData');
+        
         final data = rawData != null 
             ? Map<String, dynamic>.from(rawData as Map<String, dynamic>)
             : <String, dynamic>{};
         data['id'] = doc.id;
-        return CheckinModel.fromJson(data);
+        
+        try {
+          final checkin = CheckinModel.fromJson(data);
+          print('Successfully created checkin: ${checkin.id}');
+          return checkin;
+        } catch (e) {
+          print('Error creating checkin from data: $e');
+          print('Data: $data');
+          rethrow;
+        }
       }).toList();
+
+      print('Returning ${checkins.length} check-ins');
+      return checkins;
     } catch (e) {
+      print('Error in getUserCheckins: $e');
       _logger.e('Error getting user check-ins: $e');
       rethrow;
     }
@@ -194,6 +213,8 @@ class CheckinService {
     File photoFile,
   ) async {
     try {
+      _logger.i('Starting photo upload for user: $userId, checkin: $checkinId');
+      
       // Read and process image
       final bytes = await photoFile.readAsBytes();
       final image = img.decodeImage(bytes);
@@ -216,24 +237,33 @@ class CheckinService {
       final fullPhotoPath = 'checkins/$userId/$checkinId/full_$photoId.jpg';
       final thumbnailPath = 'checkins/$userId/$checkinId/thumb_$photoId.jpg';
 
+      _logger.i('Uploading full photo to: $fullPhotoPath');
+      
       // Upload full photo
       final fullPhotoRef = _storage.ref().child(fullPhotoPath);
       await fullPhotoRef.putData(bytes);
+      _logger.i('Full photo uploaded successfully');
 
+      _logger.i('Uploading thumbnail to: $thumbnailPath');
+      
       // Upload thumbnail
       final thumbnailRef = _storage.ref().child(thumbnailPath);
       await thumbnailRef.putData(thumbnailBytes);
+      _logger.i('Thumbnail uploaded successfully');
 
       // Get download URLs
       final fullPhotoUrl = await fullPhotoRef.getDownloadURL();
       final thumbnailUrl = await thumbnailRef.getDownloadURL();
 
+      _logger.i('Photo upload completed successfully');
+      
       return {
         'full': fullPhotoUrl,
         'thumbnail': thumbnailUrl,
       };
     } catch (e) {
       _logger.e('Error uploading check-in photo: $e');
+      _logger.e('Error details: ${e.toString()}');
       rethrow;
     }
   }
@@ -404,12 +434,15 @@ class CheckinService {
     return lastCheckinWeek.add(const Duration(days: 7));
   }
 
-  /// Mark overdue check-ins as missed
+  /// Mark overdue check-ins as missed and create missing weekly check-ins
   static Future<void> markOverdueCheckins(String userId) async {
     try {
       final currentWeekStart =
           CheckinModel.createForCurrentWeek(userId).weekStartDate;
 
+      // Get all existing check-ins for this user
+      final existingCheckins = await getUserCheckins(userId, limit: 100);
+      
       // Get all pending check-ins that are overdue
       final querySnapshot = await _checkinsCollection
           .where('userId', isEqualTo: userId)
@@ -420,6 +453,7 @@ class CheckinService {
 
       final batch = _firestore.batch();
 
+      // Mark overdue pending check-ins as missed
       for (final doc in querySnapshot.docs) {
         batch.update(doc.reference, {
           'status': 'missed',
@@ -427,13 +461,74 @@ class CheckinService {
         });
       }
 
-      if (querySnapshot.docs.isNotEmpty) {
-        await batch.commit();
-        _logger.i(
-            'Marked ${querySnapshot.docs.length} overdue check-ins as missed');
+      // Create missing weekly check-ins (going back 12 weeks)
+      final existingWeekStarts = existingCheckins.map((c) => c.weekStartDate).toSet();
+      final now = DateTime.now();
+      
+      for (int i = 0; i < 12; i++) {
+        final weekStart = currentWeekStart.subtract(Duration(days: 7 * i));
+        
+        // Skip if we already have a check-in for this week
+        if (existingWeekStarts.contains(weekStart)) continue;
+        
+        // Skip future weeks
+        if (weekStart.isAfter(now)) continue;
+        
+        // Create pending check-in for this week
+        final pendingCheckin = CheckinModel.createForWeek(userId, weekStart);
+        final docRef = _checkinsCollection.doc();
+        batch.set(docRef, pendingCheckin.toJson());
       }
+
+      await batch.commit();
+      _logger.i('Processed overdue check-ins and created missing weekly check-ins');
     } catch (e) {
       _logger.e('Error marking overdue check-ins: $e');
+      rethrow;
+    }
+  }
+
+  /// Clean up duplicate pending check-ins (keep only one per week)
+  static Future<void> cleanupDuplicatePendingCheckins(String userId) async {
+    try {
+      final querySnapshot = await _checkinsCollection
+          .where('userId', isEqualTo: userId)
+          .where('status', isEqualTo: 'pending')
+          .orderBy('weekStartDate', descending: true)
+          .get();
+
+      if (querySnapshot.docs.length <= 1) return;
+
+      final batch = _firestore.batch();
+      final seenWeekStarts = <DateTime>{};
+      final toDelete = <String>[];
+
+      for (final doc in querySnapshot.docs) {
+        final data = doc.data();
+        if (data == null) continue;
+
+        final weekStartTimestamp = data['weekStartDate'] as Timestamp;
+        final weekStart = weekStartTimestamp.toDate();
+
+        if (seenWeekStarts.contains(weekStart)) {
+          // This is a duplicate, mark for deletion
+          toDelete.add(doc.id);
+        } else {
+          seenWeekStarts.add(weekStart);
+        }
+      }
+
+      // Delete duplicates
+      for (final docId in toDelete) {
+        batch.delete(_checkinsCollection.doc(docId));
+      }
+
+      if (toDelete.isNotEmpty) {
+        await batch.commit();
+        _logger.i('Cleaned up ${toDelete.length} duplicate pending check-ins');
+      }
+    } catch (e) {
+      _logger.e('Error cleaning up duplicate pending check-ins: $e');
       rethrow;
     }
   }

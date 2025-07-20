@@ -32,6 +32,12 @@ class _CheckinScreenState extends State<CheckinScreen> {
     await checkinProvider.refresh();
   }
 
+  Future<void> _cleanupData() async {
+    final checkinProvider =
+        Provider.of<CheckinProvider>(context, listen: false);
+    await checkinProvider.markOverdueCheckins();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,18 +59,29 @@ class _CheckinScreenState extends State<CheckinScreen> {
             icon: const Icon(Icons.refresh, color: AppConstants.textPrimary),
             onPressed: _loadData,
           ),
+          // IconButton(
+          //   icon: const Icon(Icons.cleaning_services, color: AppConstants.textPrimary),
+          //   onPressed: _cleanupData,
+          //   tooltip: 'Cleanup duplicates',
+          // ),
         ],
       ),
       body: Consumer2<CheckinProvider, app_auth.AuthProvider>(
         builder: (context, checkinProvider, authProvider, child) {
+          print('CheckinScreen - isLoading: ${checkinProvider.isLoading}');
+          print('CheckinScreen - userCheckins.length: ${checkinProvider.userCheckins.length}');
+          print('CheckinScreen - error: ${checkinProvider.error}');
+          
           if (checkinProvider.isLoading &&
               checkinProvider.userCheckins.isEmpty) {
+            print('CheckinScreen - Showing loading indicator');
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
           if (checkinProvider.error != null) {
+            print('CheckinScreen - Showing error state');
             return _buildErrorState(checkinProvider.error!);
           }
 
@@ -147,6 +164,15 @@ class _CheckinScreenState extends State<CheckinScreen> {
   }
 
   Widget _buildHistorySection(CheckinProvider checkinProvider) {
+    print('_buildHistorySection - userCheckins.length: ${checkinProvider.userCheckins.length}');
+    print('_buildHistorySection - isEmpty: ${checkinProvider.userCheckins.isEmpty}');
+    
+    if (checkinProvider.userCheckins.isEmpty) {
+      print('_buildHistorySection - Building empty history');
+    } else {
+      print('_buildHistorySection - Building history list with ${checkinProvider.userCheckins.take(5).length} items');
+    }
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

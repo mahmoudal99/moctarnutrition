@@ -15,6 +15,7 @@ import 'features/profile/presentation/screens/profile_screen.dart';
 import 'features/checkin/presentation/screens/checkin_screen.dart';
 import 'features/checkin/presentation/screens/checkin_form_screen.dart';
 import 'features/checkin/presentation/screens/checkin_details_screen.dart';
+import 'features/checkin/presentation/screens/checkin_history_screen.dart';
 
 // import 'features/trainers/presentation/screens/trainers_screen.dart';
 // import 'features/workouts/presentation/screens/workouts_screen.dart';
@@ -190,6 +191,10 @@ final GoRouter _router = GoRouter(
             final checkin = state.extra as CheckinModel;
             return CheckinDetailsScreen(checkin: checkin);
           },
+        ),
+        GoRoute(
+          path: '/checkin/history',
+          builder: (context, state) => const CheckinHistoryScreen(),
         ),
       ],
     ),
