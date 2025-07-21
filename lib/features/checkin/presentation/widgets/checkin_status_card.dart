@@ -219,7 +219,7 @@ class CheckinStatusCard extends StatelessWidget {
           child: Text(
             daysUntilDue > 0 
                 ? '$daysUntilDue days remaining'
-                : 'Due today',
+                : 'Due Sunday',
             style: AppTextStyles.caption.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w600,

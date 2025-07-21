@@ -610,7 +610,7 @@ List<_MockQuickAccess> _getQuickAccessItems(BuildContext context) {
     _MockQuickAccess(
       label: 'Weekly Check-in', 
       icon: Icons.camera_alt, 
-      onTap: () => context.go('/checkin'),
+      onTap: () => context.push('/checkin'),
     ),
     _MockQuickAccess(
       label: 'My Workouts', 
