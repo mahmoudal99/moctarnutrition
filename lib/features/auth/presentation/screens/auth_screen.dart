@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/providers/auth_provider.dart';
+import '../../../../shared/providers/user_provider.dart';
 
 class AuthScreen extends StatefulWidget {
   final bool isSignUp;
@@ -435,6 +436,12 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     if (success && mounted) {
+      // Update UserProvider with the new user
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (authProvider.userModel != null) {
+        await userProvider.setUser(authProvider.userModel!);
+      }
       // Navigate to main app
       context.go('/home');
     } else if (mounted && authProvider.error != null) {

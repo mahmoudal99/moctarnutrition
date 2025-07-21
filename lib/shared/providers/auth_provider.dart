@@ -115,7 +115,8 @@ class AuthProvider extends ChangeNotifier {
 
       _userModel = userModel;
       await _storageService.saveUser(userModel);
-      
+      notifyListeners();
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -143,7 +144,8 @@ class AuthProvider extends ChangeNotifier {
 
       _userModel = userModel;
       await _storageService.saveUser(userModel);
-      
+      notifyListeners();
+
       return true;
     } catch (e) {
       _error = e.toString();
