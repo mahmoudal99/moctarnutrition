@@ -646,13 +646,6 @@ List<_MockCTA> _getCTAItems(BuildContext context, UserModel user) {
         icon: Icons.workspace_premium,
         onTap: () => context.go('/subscription'),
       ),
-    _MockCTA(
-      label: 'Book a 1-on-1 Trainer', 
-      icon: Icons.person_search,
-      onTap: () {
-        // TODO: Implement trainer booking
-      },
-    ),
   ];
 }
 

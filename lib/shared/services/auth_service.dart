@@ -78,23 +78,44 @@ class AuthService {
   }) async {
     try {
       _logger.i('Attempting to sign in with email: $email');
-      
       final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
       final User? user = userCredential.user;
       if (user == null) {
         throw Exception('Failed to sign in');
       }
-
       // Get user data from Firestore
-      final UserModel? userModel = await _getUserDocument(user.uid);
+      UserModel? userModel = await _getUserDocument(user.uid);
       if (userModel == null) {
-        throw Exception('User profile not found');
+        // Migration: Try to load from SharedPreferences and upload to Firestore
+        final localUser = await _storageService.loadUser();
+        print('AuthService migration: Loaded localUser from SharedPreferences:');
+        print('  dietaryRestrictions:  [32m${localUser?.preferences.dietaryRestrictions} [0m');
+        print('  workoutStyles:  [34m${localUser?.preferences.preferredWorkoutStyles} [0m');
+        if (localUser != null) {
+          final migratedUser = localUser.copyWith(
+            id: user.uid,
+            email: user.email ?? localUser.email,
+            name: user.displayName ?? localUser.name,
+            photoUrl: user.photoURL ?? localUser.photoUrl,
+            hasSeenOnboarding: localUser.hasSeenOnboarding,
+            hasSeenGetStarted: localUser.hasSeenGetStarted,
+            preferences: localUser.preferences,
+            updatedAt: DateTime.now(),
+          );
+          print('AuthService migration: Migrated user to Firestore:');
+          print('  dietaryRestrictions:  [32m${migratedUser.preferences.dietaryRestrictions} [0m');
+          print('  workoutStyles:  [34m${migratedUser.preferences.preferredWorkoutStyles} [0m');
+          await _createUserDocument(migratedUser);
+          userModel = migratedUser;
+          await _storageService.clearUser(); // Clear local user after migration
+          _logger.i('Migrated user from SharedPreferences to Firestore: ${user.uid}');
+        } else {
+          throw Exception('User profile not found');
+        }
       }
-
       _logger.i('User signed in successfully: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
@@ -110,63 +131,58 @@ class AuthService {
   static Future<UserModel> signInWithGoogle() async {
     try {
       _logger.i('Attempting Google sign in');
-      
-      // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw Exception('Google sign in was cancelled');
       }
-
-      // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      // Create a new credential
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
-      // Sign in to Firebase with the credential
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
       final User? user = userCredential.user;
-      
       if (user == null) {
         throw Exception('Failed to sign in with Google');
       }
-
-      // Wait a moment for Firebase Auth to fully establish the user
       await Future.delayed(const Duration(milliseconds: 500));
-
-      // Check if user document exists
       UserModel? userModel = await _getUserDocument(user.uid);
-      
       if (userModel == null) {
-        // Create new user document for first-time Google sign in
-        userModel = UserModel(
-          id: user.uid,
-          email: user.email ?? '',
-          name: user.displayName ?? 'User',
-          photoUrl: user.photoURL,
-          role: UserRole.user,
-          subscriptionStatus: SubscriptionStatus.free,
-          preferences: UserPreferences.defaultPreferences(),
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-        
-        await _createUserDocument(userModel);
-        _logger.i('Created new user document for Google sign in: ${user.uid}');
-      } else {
-        // Update existing user with latest Google info
-        userModel = userModel.copyWith(
-          name: user.displayName ?? userModel.name,
-          photoUrl: user.photoURL ?? userModel.photoUrl,
-          updatedAt: DateTime.now(),
-        );
-        await _updateUserDocument(userModel);
-        _logger.i('Updated existing user document for Google sign in: ${user.uid}');
+        final localUser = await _storageService.loadUser();
+        if (localUser != null) {
+          final migratedUser = localUser.copyWith(
+            id: user.uid,
+            email: user.email ?? localUser.email,
+            name: user.displayName ?? localUser.name,
+            photoUrl: user.photoURL ?? localUser.photoUrl,
+            hasSeenOnboarding: localUser.hasSeenOnboarding,
+            hasSeenGetStarted: localUser.hasSeenGetStarted,
+            preferences: localUser.preferences,
+            updatedAt: DateTime.now(),
+          );
+          await _createUserDocument(migratedUser);
+          userModel = migratedUser;
+          await _storageService.clearUser(); // Clear local user after migration
+          _logger.i('Migrated user from SharedPreferences to Firestore: ${user.uid}');
+        } else {
+          // Create new user document for first-time Google sign in
+          userModel = UserModel(
+            id: user.uid,
+            email: user.email ?? '',
+            name: user.displayName ?? 'User',
+            photoUrl: user.photoURL,
+            role: UserRole.user,
+            subscriptionStatus: SubscriptionStatus.free,
+            preferences: UserPreferences.defaultPreferences(),
+            hasSeenOnboarding: false,
+            hasSeenGetStarted: false,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+          await _createUserDocument(userModel);
+          _logger.i('Created new user document for Google sign in: ${user.uid}');
+        }
       }
-
       _logger.i('Google sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
@@ -174,8 +190,6 @@ class AuthService {
       throw _handleFirebaseAuthException(e);
     } catch (e) {
       _logger.e('Unexpected error during Google sign in: $e');
-      
-      // Provide more specific error messages for common issues
       if (e.toString().contains('cloud_firestore/unavailable')) {
         throw Exception('Firebase service is temporarily unavailable. Please try again in a few moments.');
       } else if (e.toString().contains('cloud_firestore/permission-denied')) {
@@ -192,75 +206,63 @@ class AuthService {
   static Future<UserModel> signInWithApple() async {
     try {
       _logger.i('Attempting Apple sign in');
-      
-      // Check if Apple Sign-In is available
       final isAvailable = await SignInWithApple.isAvailable();
       if (!isAvailable) {
         throw Exception('Apple Sign-In is not available on this device');
       }
-      
-      // Request credential for the currently signed in Apple account
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
       );
-
-      // Create an `OAuthCredential` from the credential returned by Apple
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: appleCredential.identityToken,
         accessToken: appleCredential.authorizationCode,
       );
-
-      // Sign in the user with Firebase
       final UserCredential userCredential = await _auth.signInWithCredential(oauthCredential);
       final User? user = userCredential.user;
-      
       if (user == null) {
         throw Exception('Failed to sign in with Apple');
       }
-
-      // Wait a moment for Firebase Auth to fully establish the user
       await Future.delayed(const Duration(milliseconds: 500));
-
-      // Check if user document exists
       UserModel? userModel = await _getUserDocument(user.uid);
-      
       if (userModel == null) {
-        // Create new user document for first-time Apple sign in
-        final String displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
-        
-        userModel = UserModel(
-          id: user.uid,
-          email: user.email ?? appleCredential.email ?? '',
-          name: displayName.isNotEmpty ? displayName : 'User',
-          photoUrl: user.photoURL,
-          role: UserRole.user,
-          subscriptionStatus: SubscriptionStatus.free,
-          preferences: UserPreferences.defaultPreferences(),
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-        
-        await _createUserDocument(userModel);
-        _logger.i('Created new user document for Apple sign in: ${user.uid} with name: $displayName');
-      } else {
-        // For existing users, only update name if Apple provides it (first-time sign-in)
-        final String displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
-        if (displayName.isNotEmpty && (userModel.name == null || userModel.name!.isEmpty)) {
-          // Only update if user doesn't have a name yet (first-time Apple sign-in)
-          userModel = userModel.copyWith(
-            name: displayName,
+        final localUser = await _storageService.loadUser();
+        if (localUser != null) {
+          final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
+          final migratedUser = localUser.copyWith(
+            id: user.uid,
+            email: user.email ?? appleCredential.email ?? localUser.email,
+            name: displayName.isNotEmpty ? displayName : localUser.name,
+            hasSeenOnboarding: localUser.hasSeenOnboarding,
+            hasSeenGetStarted: localUser.hasSeenGetStarted,
+            preferences: localUser.preferences,
             updatedAt: DateTime.now(),
           );
-          await _updateUserDocument(userModel);
-          _logger.i('Updated existing user name for Apple sign in: ${user.uid} with name: $displayName');
+          await _createUserDocument(migratedUser);
+          userModel = migratedUser;
+          await _storageService.clearUser(); // Clear local user after migration
+          _logger.i('Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
-          _logger.i('Existing user signed in with Apple: ${user.uid} (name already set)');
+          final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
+          userModel = UserModel(
+            id: user.uid,
+            email: user.email ?? appleCredential.email ?? '',
+            name: displayName.isNotEmpty ? displayName : 'User',
+            photoUrl: user.photoURL,
+            role: UserRole.user,
+            subscriptionStatus: SubscriptionStatus.free,
+            preferences: UserPreferences.defaultPreferences(),
+            hasSeenOnboarding: false,
+            hasSeenGetStarted: false,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+          await _createUserDocument(userModel);
+          _logger.i('Created new user document for Apple sign in: ${user.uid} with name: $displayName');
         }
       }
-
       _logger.i('Apple sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
@@ -268,13 +270,7 @@ class AuthService {
       throw _handleFirebaseAuthException(e);
     } catch (e) {
       _logger.e('Unexpected error during Apple sign in: $e');
-      
-      // Provide more specific error messages for common Apple Sign-In issues
-      if (e.toString().contains('AuthorizationErrorCode.unknown')) {
-        throw Exception('Apple Sign-In configuration error. Please ensure Apple Sign-In is enabled in Apple Developer Console and Firebase Console.');
-      } else if (e.toString().contains('not available')) {
-        throw Exception('Apple Sign-In is not available on this device. Please use email/password or Google Sign-In.');
-      } else if (e.toString().contains('cloud_firestore/unavailable')) {
+      if (e.toString().contains('cloud_firestore/unavailable')) {
         throw Exception('Firebase service is temporarily unavailable. Please try again in a few moments.');
       } else if (e.toString().contains('cloud_firestore/permission-denied')) {
         throw Exception('Permission denied. Please ensure you are properly authenticated.');
@@ -290,32 +286,46 @@ class AuthService {
   static Future<UserModel> signInAnonymously() async {
     try {
       _logger.i('Attempting anonymous sign in');
-      
       final UserCredential userCredential = await _auth.signInAnonymously();
       final User? user = userCredential.user;
-      
       if (user == null) {
         throw Exception('Failed to sign in anonymously');
       }
-
-      // Wait a moment for Firebase Auth to fully establish the user
       await Future.delayed(const Duration(milliseconds: 500));
-
-      // Create user document for anonymous user
-      final UserModel userModel = UserModel(
-        id: user.uid,
-        email: 'guest@championsgym.com',
-        name: 'Guest User',
-        photoUrl: null,
-        role: UserRole.user,
-        subscriptionStatus: SubscriptionStatus.free,
-        preferences: UserPreferences.defaultPreferences(),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      await _createUserDocument(userModel);
-
+      UserModel? userModel = await _getUserDocument(user.uid);
+      if (userModel == null) {
+        final localUser = await _storageService.loadUser();
+        if (localUser != null) {
+          final migratedUser = localUser.copyWith(
+            id: user.uid,
+            email: 'guest@championsgym.com',
+            name: 'Guest User',
+            hasSeenOnboarding: localUser.hasSeenOnboarding,
+            hasSeenGetStarted: localUser.hasSeenGetStarted,
+            preferences: localUser.preferences,
+            updatedAt: DateTime.now(),
+          );
+          await _createUserDocument(migratedUser);
+          userModel = migratedUser;
+          await _storageService.clearUser(); // Clear local user after migration
+          _logger.i('Migrated anonymous user from SharedPreferences to Firestore: ${user.uid}');
+        } else {
+          userModel = UserModel(
+            id: user.uid,
+            email: 'guest@championsgym.com',
+            name: 'Guest User',
+            photoUrl: null,
+            role: UserRole.user,
+            subscriptionStatus: SubscriptionStatus.free,
+            preferences: UserPreferences.defaultPreferences(),
+            hasSeenOnboarding: false,
+            hasSeenGetStarted: false,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+          await _createUserDocument(userModel);
+        }
+      }
       _logger.i('Anonymous sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
@@ -323,8 +333,6 @@ class AuthService {
       throw _handleFirebaseAuthException(e);
     } catch (e) {
       _logger.e('Unexpected error during anonymous sign in: $e');
-      
-      // Provide more specific error messages for common issues
       if (e.toString().contains('cloud_firestore/unavailable')) {
         throw Exception('Firebase service is temporarily unavailable. Please try again in a few moments.');
       } else if (e.toString().contains('cloud_firestore/permission-denied')) {

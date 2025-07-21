@@ -153,7 +153,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                       HapticFeedback.mediumImpact();
                       await OnboardingService.markGetStartedAsSeen();
                       if (mounted) {
-                        context.go('/onboarding');
+                      context.go('/onboarding');
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -184,24 +184,24 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                   }
                 },
                 child: Column(
-                  children: [
-                    Text(
-                      'Already a Member?',
-                      style: GoogleFonts.nunitoSans(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                      ),
+                children: [
+                  Text(
+                    'Already a Member?',
+                    style: GoogleFonts.nunitoSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
                     ),
-                    Text(
-                      'LOG IN',
-                      style: GoogleFonts.nunitoSans(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                  ),
+                  Text(
+                    'LOG IN',
+                    style: GoogleFonts.nunitoSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
-                  ],
+                  ),
+                ],
                 ),
               )
             ],

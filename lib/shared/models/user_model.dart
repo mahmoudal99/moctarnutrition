@@ -14,6 +14,8 @@ class UserModel {
   final UserPreferences preferences;
   final String? selectedTrainerId;
   final bool hasSeenSubscriptionScreen;
+  final bool hasSeenOnboarding;
+  final bool hasSeenGetStarted;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -28,6 +30,8 @@ class UserModel {
     required this.preferences,
     this.selectedTrainerId,
     this.hasSeenSubscriptionScreen = false,
+    this.hasSeenOnboarding = false,
+    this.hasSeenGetStarted = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -52,6 +56,8 @@ class UserModel {
       preferences: UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>),
       selectedTrainerId: json['selectedTrainerId'] as String?,
       hasSeenSubscriptionScreen: json['hasSeenSubscriptionScreen'] as bool? ?? false,
+      hasSeenOnboarding: json['hasSeenOnboarding'] as bool? ?? false,
+      hasSeenGetStarted: json['hasSeenGetStarted'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -69,6 +75,8 @@ class UserModel {
       'preferences': preferences.toJson(),
       'selectedTrainerId': selectedTrainerId,
       'hasSeenSubscriptionScreen': hasSeenSubscriptionScreen,
+      'hasSeenOnboarding': hasSeenOnboarding,
+      'hasSeenGetStarted': hasSeenGetStarted,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -85,6 +93,8 @@ class UserModel {
     UserPreferences? preferences,
     String? selectedTrainerId,
     bool? hasSeenSubscriptionScreen,
+    bool? hasSeenOnboarding,
+    bool? hasSeenGetStarted,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -99,6 +109,8 @@ class UserModel {
       preferences: preferences ?? this.preferences,
       selectedTrainerId: selectedTrainerId ?? this.selectedTrainerId,
       hasSeenSubscriptionScreen: hasSeenSubscriptionScreen ?? this.hasSeenSubscriptionScreen,
+      hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
+      hasSeenGetStarted: hasSeenGetStarted ?? this.hasSeenGetStarted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

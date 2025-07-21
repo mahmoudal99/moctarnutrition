@@ -226,8 +226,23 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userPrefs = _userPreferences ??
-        Provider.of<UserProvider>(context).user?.preferences;
+    final userProvider = Provider.of<UserProvider>(context);
+    final userPrefs = _userPreferences ?? userProvider.user?.preferences;
+
+    if (userPrefs == null) {
+      // Show loading spinner if user data is still loading, else show a helpful message
+      return Scaffold(
+        body: Center(
+          child: userProvider.user == null
+              ? const CircularProgressIndicator()
+              : Text(
+                  'Please complete your profile in the Profile tab before generating a meal plan.',
+                  style: AppTextStyles.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+        ),
+      );
+    }
     if (_showDietSetup) {
       return Scaffold(
         appBar: AppBar(

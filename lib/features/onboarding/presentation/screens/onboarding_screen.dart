@@ -15,6 +15,10 @@ import '../steps/onboarding_dietary_restrictions_step.dart';
 import '../steps/onboarding_workout_styles_step.dart';
 import '../steps/onboarding_welcome_step.dart';
 import '../steps/onboarding_schedule_step.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../shared/providers/auth_provider.dart' as app_auth;
+import '../../../../shared/services/auth_service.dart';
+import '../../../../shared/services/user_local_storage_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -482,6 +486,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildNavigationButtons() {
+    final isDietaryStep = _currentPage == 5;
+    final isWorkoutStep = _currentPage == 6;
+    final isNextEnabled = !isDietaryStep && !isWorkoutStep
+        ? true
+        : isDietaryStep
+            ? _selectedDietaryRestrictions.isNotEmpty
+            : _selectedWorkoutStyles.isNotEmpty;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(
@@ -522,17 +533,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   text: _currentPage == _steps.length - 1
                       ? 'Get Started'
                       : 'Next',
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    if (_currentPage == _steps.length - 1) {
-                      _completeOnboarding();
-                    } else {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
+                  onPressed: isNextEnabled
+                      ? () {
+                          HapticFeedback.mediumImpact();
+                          if (_currentPage == _steps.length - 1) {
+                            _completeOnboarding();
+                          } else {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        }
+                      : null,
                 ),
               ),
             ),
@@ -812,12 +825,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _completeOnboarding() async {
+    // Debug: Print selected preferences before saving
+    print('Onboarding complete:');
+    print('  Dietary Restrictions:  [32m [1m [4m [7m${_selectedDietaryRestrictions} [0m');
+    print('  Workout Styles:  [34m [1m [4m [7m${_selectedWorkoutStyles} [0m');
     // Create user preferences
     final preferences = UserPreferences(
       fitnessGoal: _selectedFitnessGoal,
       activityLevel: _selectedActivityLevel,
-      dietaryRestrictions: _selectedDietaryRestrictions,
-      preferredWorkoutStyles: _selectedWorkoutStyles,
+      dietaryRestrictions: List<String>.from(_selectedDietaryRestrictions),
+      preferredWorkoutStyles: List<String>.from(_selectedWorkoutStyles),
       targetCalories: _calculateTargetCalories(),
       age: _age,
       weight: _weight,
@@ -825,28 +842,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       gender: _gender,
     );
 
-    // Create a UserModel (mock id/email for now)
+    // Save onboarding data locally (Provider/SharedPreferences)
     final user = UserModel(
       id: 'local-user',
       email: 'user@example.com',
-      name: 'Mahmoud',
-      photoUrl: '',
+      name: 'User',
+      photoUrl: null,
       preferences: preferences,
       role: UserRole.user,
       subscriptionStatus: SubscriptionStatus.free,
+      hasSeenOnboarding: true,
+      hasSeenGetStarted: true,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
 
-    // Save user to provider/local storage
+    // Save to local provider/storage only
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     await userProvider.setUser(user);
-
-    // Mark onboarding as completed
+    // Persist onboarding data to SharedPreferences for migration after sign-up
+    await UserLocalStorageService().saveUser(user);
     await OnboardingService.markOnboardingAsSeen();
+    await OnboardingService.markGetStartedAsSeen();
 
-    // Navigate to subscription screen
-    context.go('/subscription');
+    // Navigate to sign up/sign in or next step (e.g., subscription)
+    if (mounted) {
+      context.go('/subscription');
+    }
   }
 
   int _calculateTargetCalories() {
