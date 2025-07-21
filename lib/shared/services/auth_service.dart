@@ -45,19 +45,38 @@ class AuthService {
       // Update display name
       await user.updateDisplayName(name);
 
-      // Create user document in Firestore
-      final UserModel userModel = UserModel(
-        id: user.uid,
-        email: email,
-        name: name,
-        photoUrl: user.photoURL,
-        role: UserRole.user,
-        subscriptionStatus: SubscriptionStatus.free,
-        preferences: UserPreferences.defaultPreferences(),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
+      // Try to use onboarding data from SharedPreferences
+      final localUser = await _storageService.loadUser();
+      UserModel userModel;
+      if (localUser != null) {
+        userModel = localUser.copyWith(
+          id: user.uid,
+          email: email,
+          name: name,
+          photoUrl: user.photoURL ?? localUser.photoUrl,
+          hasSeenOnboarding: localUser.hasSeenOnboarding,
+          hasSeenGetStarted: localUser.hasSeenGetStarted,
+          preferences: localUser.preferences,
+          updatedAt: DateTime.now(),
+        );
+        print('SignUp: Using onboarding data from SharedPreferences:');
+        print('  dietaryRestrictions: ${userModel.preferences.dietaryRestrictions}');
+        print('  workoutStyles: ${userModel.preferences.preferredWorkoutStyles}');
+        await _storageService.clearUser();
+      } else {
+        userModel = UserModel(
+          id: user.uid,
+          email: email,
+          name: name,
+          photoUrl: user.photoURL,
+          role: UserRole.user,
+          subscriptionStatus: SubscriptionStatus.free,
+          preferences: UserPreferences.defaultPreferences(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        print('SignUp: No onboarding data found, using default preferences.');
+      }
       await _createUserDocument(userModel);
 
       _logger.i('User signed up successfully: ${user.uid}');
