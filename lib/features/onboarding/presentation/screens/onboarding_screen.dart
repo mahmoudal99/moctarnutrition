@@ -126,7 +126,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 itemBuilder: (context, index) {
                   return _buildStepPage(index);
                 },
-                physics: const BouncingScrollPhysics(),
+                physics: _getPageViewPhysics(),
               ),
             ),
             _buildNavigationButtons(),
@@ -134,6 +134,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
       ),
     );
+  }
+
+  ScrollPhysics _getPageViewPhysics() {
+    // Fitness Goal step: index 3
+    // Dietary Restrictions step: index 5
+    // Workout Styles step: index 6
+    if (_currentPage == 3 && _selectedFitnessGoal == null) {
+      return const NeverScrollableScrollPhysics();
+    }
+    if (_currentPage == 5 && _selectedDietaryRestrictions.isEmpty) {
+      return const NeverScrollableScrollPhysics();
+    }
+    if (_currentPage == 6 && _selectedWorkoutStyles.isEmpty) {
+      return const NeverScrollableScrollPhysics();
+    }
+    return const BouncingScrollPhysics();
   }
 
   Widget _buildProgressIndicator() {
@@ -448,6 +464,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         setState(() {
           if (restriction == 'None') {
             _selectedDietaryRestrictions.clear();
+            _selectedDietaryRestrictions.add('None');
           } else {
             _selectedDietaryRestrictions.remove('None');
             if (_selectedDietaryRestrictions.contains(restriction)) {
@@ -867,7 +884,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     // Navigate to sign up/sign in or next step (e.g., subscription)
     if (mounted) {
-      context.go('/subscription');
+      context.push('/subscription');
     }
   }
 

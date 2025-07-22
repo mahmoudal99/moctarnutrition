@@ -234,13 +234,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           ),
           boxShadow: isSelected ? AppConstants.shadowL : AppConstants.shadowS,
         ),
-        child: Stack(
-          children: [
-            if (tier.isPopular)
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (tier.isPopular)
+                Container(
+                  margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppConstants.spacingM,
                     vertical: AppConstants.spacingS,
@@ -260,119 +261,111 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     ),
                   ),
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(AppConstants.spacingL),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tier.name,
-                              style: AppTextStyles.heading4.copyWith(
-                                color: isSelected
-                                    ? AppConstants.surfaceColor
-                                    : AppConstants.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: AppConstants.spacingXS),
-                            Text(
-                              tier.description,
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: isSelected
-                                    ? AppConstants.surfaceColor.withOpacity(0.8)
-                                    : AppConstants.textSecondary,
-                              ),
-                            ),
-                          ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tier.name,
+                          style: AppTextStyles.heading4.copyWith(
+                            color: isSelected
+                                ? AppConstants.surfaceColor
+                                : AppConstants.textPrimary,
+                          ),
                         ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        const SizedBox(height: AppConstants.spacingXS),
+                        Text(
+                          tier.description,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: isSelected
+                                ? AppConstants.surfaceColor.withOpacity(0.8)
+                                : AppConstants.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '\$',
-                                style: AppTextStyles.bodyLarge.copyWith(
-                                  color: isSelected
-                                      ? AppConstants.surfaceColor
-                                      : AppConstants.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                price.toStringAsFixed(0),
-                                style: AppTextStyles.heading2.copyWith(
-                                  color: isSelected
-                                      ? AppConstants.surfaceColor
-                                      : AppConstants.textPrimary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            '\$',
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: isSelected
+                                  ? AppConstants.surfaceColor
+                                  : AppConstants.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           Text(
-                            _selectedBillingCycle == BillingCycle.monthly
-                                ? '/month'
-                                : '/year',
-                            style: AppTextStyles.bodySmall.copyWith(
+                            price.toStringAsFixed(0),
+                            style: AppTextStyles.heading2.copyWith(
                               color: isSelected
-                                  ? AppConstants.surfaceColor.withOpacity(0.8)
-                                  : AppConstants.textSecondary,
+                                  ? AppConstants.surfaceColor
+                                  : AppConstants.textPrimary,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          if (_selectedBillingCycle == BillingCycle.yearly &&
-                              tier.yearlySavings > 0)
-                            Container(
-                              margin: const EdgeInsets.only(
-                                  top: AppConstants.spacingXS),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppConstants.spacingS,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppConstants.accentColor,
-                                borderRadius:
-                                    BorderRadius.circular(AppConstants.radiusS),
-                              ),
-                              child: Text(
-                                'Save \$${tier.yearlySavings.toStringAsFixed(0)}',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppConstants.surfaceColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
+                      Text(
+                        _selectedBillingCycle == BillingCycle.monthly
+                            ? '/month'
+                            : '/year',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: isSelected
+                              ? AppConstants.surfaceColor.withOpacity(0.8)
+                              : AppConstants.textSecondary,
+                        ),
+                      ),
+                      if (_selectedBillingCycle == BillingCycle.yearly &&
+                          tier.yearlySavings > 0)
+                        Container(
+                          margin: const EdgeInsets.only(
+                              top: AppConstants.spacingXS),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppConstants.spacingS,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppConstants.accentColor,
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusS),
+                          ),
+                          child: Text(
+                            'Save \$${tier.yearlySavings.toStringAsFixed(0)}',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppConstants.surfaceColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
-                  const SizedBox(height: AppConstants.spacingL),
-                  ...tier.features.take(3).map((feature) => _buildFeatureItem(
-                        feature: feature,
-                        isSelected: isSelected,
-                      )),
-                  if (tier.features.length > 3)
-                    Text(
-                      '+${tier.features.length - 3} more features',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: isSelected
-                            ? AppConstants.surfaceColor.withOpacity(0.8)
-                            : AppConstants.accentColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: AppConstants.spacingL),
+              ...tier.features.take(3).map((feature) => _buildFeatureItem(
+                    feature: feature,
+                    isSelected: isSelected,
+                  )),
+              if (tier.features.length > 3)
+                Text(
+                  '+${tier.features.length - 3} more features',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: isSelected
+                        ? AppConstants.surfaceColor.withOpacity(0.8)
+                        : AppConstants.accentColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
