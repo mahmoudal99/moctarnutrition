@@ -74,138 +74,111 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
         decoration: BoxDecoration(
             image: DecorationImage(
                 image: AssetImage(
-                  "assets/images/muk_one.jpg",
+                  "assets/images/latest.jpg",
                 ),
                 fit: BoxFit.cover)),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              // // Skip button
-              // Align(
-              //   alignment: Alignment.topRight,
-              //   child: Padding(
-              //     padding: const EdgeInsets.all(16.0),
-              //     child: TextButton(
-              //       onPressed: () => context.go('/onboarding'),
-              //       child: Text(
-              //         'Skip',
-              //         style: GoogleFonts.nunitoSans(
-              //           fontSize: 16,
-              //           fontWeight: FontWeight.w600,
-              //           color: AppConstants.textSecondary,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-
-              // Carousel
-              // Expanded(
-              //   child: PageView.builder(
-              //     controller: _pageController,
-              //     onPageChanged: _onPageChanged,
-              //     itemCount: _features.length,
-              //     itemBuilder: (context, index) {
-              //       return _FeatureCardWidget(feature: _features[index]);
-              //     },
-              //   ),
-              // ),
-
-              // Page indicators
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(vertical: 24.0),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     children: List.generate(_features.length, (index) {
-              //       return AnimatedContainer(
-              //         duration: const Duration(milliseconds: 300),
-              //         margin: const EdgeInsets.symmetric(horizontal: 4),
-              //         width: _currentPage == index ? 24 : 8,
-              //         height: 8,
-              //         decoration: BoxDecoration(
-              //           color: _currentPage == index
-              //               ? AppConstants.primaryColor
-              //               : AppConstants.textTertiary.withOpacity(0.3),
-              //           borderRadius: BorderRadius.circular(4),
-              //         ),
-              //       );
-              //     }),
-              //   ),
-              // ),
-              Text(
-                'ACHIEVE YOUR FITNESS\nGOALS, YOUR WAY',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.leagueSpartan(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+        child: Stack(
+          children: [
+            // Main content can go here if needed
+            // Bottom curved section
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 24, left: 0, right: 0),
+                decoration: const BoxDecoration(
                   color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(36),
+                    topRight: Radius.circular(36),
+                  ),
                 ),
-              ),
-              // Get Started button
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      HapticFeedback.mediumImpact();
-                      await OnboardingService.markGetStartedAsSeen();
-                      if (mounted) {
-                      context.go('/onboarding');
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      'Get Started',
-                      style: GoogleFonts.nunitoSans(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                      ),
+                child: SafeArea(
+                  top: false,
+                  bottom: true,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 140),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ACHIEVE YOUR FITNESS\nGOALS, YOUR WAY',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.leagueSpartan(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                HapticFeedback.mediumImpact();
+                                await OnboardingService.markGetStartedAsSeen();
+                                if (mounted) {
+                                  context.go('/onboarding');
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppConstants.primaryColor,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Text(
+                                'Get Started',
+                                style: GoogleFonts.nunitoSans(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            await OnboardingService.markGetStartedAsSeen();
+                            await OnboardingService.markOnboardingAsSeen();
+                            if (mounted) {
+                              context.go('/auth');
+                            }
+                          },
+                          child: Column(
+                            children: [
+                              Text(
+                                'Already a Member?',
+                                style: GoogleFonts.nunitoSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              Text(
+                                'LOG IN',
+                                style: GoogleFonts.nunitoSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () async {
-                  await OnboardingService.markGetStartedAsSeen();
-                  await OnboardingService.markOnboardingAsSeen();
-                  if (mounted) {
-                    context.go('/auth');
-                  }
-                },
-                child: Column(
-                children: [
-                  Text(
-                    'Already a Member?',
-                    style: GoogleFonts.nunitoSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'LOG IN',
-                    style: GoogleFonts.nunitoSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-                ),
-              )
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
