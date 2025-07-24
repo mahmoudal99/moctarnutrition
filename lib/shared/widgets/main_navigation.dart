@@ -21,7 +21,32 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
   List<_NavItem> _buildNavItems(UserModel? user) {
-    final items = [
+    if (user != null && user.role == UserRole.admin) {
+      return [
+        const _NavItem(
+          icon: Icons.home,
+          label: 'Home',
+          route: '/admin-home',
+        ),
+        const _NavItem(
+          icon: Icons.group,
+          label: 'Clients',
+          route: '/admin-users',
+        ),
+        const _NavItem(
+          icon: Icons.person,
+          label: 'Trainers',
+          route: '/trainers',
+        ),
+        const _NavItem(
+          icon: Icons.account_circle,
+          label: 'Profile',
+          route: '/profile',
+        ),
+      ];
+    }
+    // Non-admins: original tabs
+    return [
       const _NavItem(
         icon: Icons.fitness_center,
         label: 'Workouts',
@@ -43,14 +68,6 @@ class _MainNavigationState extends State<MainNavigation> {
         route: '/profile',
       ),
     ];
-    if (user != null && user.role == UserRole.admin) {
-      items.insert(0, const _NavItem(
-        icon: Icons.admin_panel_settings,
-        label: 'Admin',
-        route: '/admin-users',
-      ));
-    }
-    return items;
   }
 
   @override
