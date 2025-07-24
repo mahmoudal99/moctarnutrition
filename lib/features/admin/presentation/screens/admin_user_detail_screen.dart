@@ -31,7 +31,7 @@ class AdminUserDetailScreen extends StatelessWidget {
               Stack(
                 children: [
                   Container(
-                    height: 240, // Increased height
+                    height: 200, // Increased height
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -49,7 +49,7 @@ class AdminUserDetailScreen extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    top: 40,
+                    top: 20,
                     left: 16,
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -58,7 +58,7 @@ class AdminUserDetailScreen extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    top: 40,
+                    top: 20,
                     right: 16,
                     child: IconButton(
                       icon: const Icon(Icons.info_outline_rounded,
@@ -89,21 +89,21 @@ class AdminUserDetailScreen extends StatelessWidget {
                                     Border.all(color: Colors.white, width: 4),
                               ),
                               child: CircleAvatar(
-                                radius: 40,
+                                radius: 35,
                                 backgroundColor: Colors.white,
                                 backgroundImage: user.photoUrl != null
                                     ? NetworkImage(user.photoUrl!)
                                     : null,
                                 child: user.photoUrl == null
                                     ? const Icon(Icons.person,
-                                        size: 44,
+                                        size: 35,
                                         color: AppConstants.primaryColor)
                                     : null,
                               ),
                             ),
                             const SizedBox(height: 12),
                             Text(user.name ?? user.email,
-                                style: AppTextStyles.heading3
+                                style: AppTextStyles.heading4
                                     .copyWith(color: Colors.black87)),
                             const SizedBox(height: 4),
                             Text(handle,
@@ -120,6 +120,9 @@ class AdminUserDetailScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              SizedBox(
+                height: 10,
               ),
               // Stats row
               FutureBuilder<List<CheckinModel>>(
@@ -156,45 +159,45 @@ class AdminUserDetailScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 14),
+              // const SizedBox(height: 14),
               // Button row
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {},
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppConstants.primaryColor),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: Text('Message',
-                            style: AppTextStyles.bodyMedium
-                                .copyWith(fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstants.primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: Text('Assign Plan',
-                            style: AppTextStyles.bodyMedium
-                                .copyWith(fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 24),
+              //   child: Row(
+              //     children: [
+              //       Expanded(
+              //         child: OutlinedButton(
+              //           onPressed: () {},
+              //           style: OutlinedButton.styleFrom(
+              //             side: BorderSide(color: AppConstants.primaryColor),
+              //             padding: const EdgeInsets.symmetric(vertical: 14),
+              //             shape: RoundedRectangleBorder(
+              //                 borderRadius: BorderRadius.circular(12)),
+              //           ),
+              //           child: Text('Message',
+              //               style: AppTextStyles.bodyMedium
+              //                   .copyWith(fontWeight: FontWeight.w600)),
+              //         ),
+              //       ),
+              //       const SizedBox(width: 12),
+              //       Expanded(
+              //         child: ElevatedButton(
+              //           onPressed: () {},
+              //           style: ElevatedButton.styleFrom(
+              //             backgroundColor: AppConstants.primaryColor,
+              //             foregroundColor: Colors.white,
+              //             padding: const EdgeInsets.symmetric(vertical: 14),
+              //             shape: RoundedRectangleBorder(
+              //                 borderRadius: BorderRadius.circular(12)),
+              //           ),
+              //           child: Text('Assign Plan',
+              //               style: AppTextStyles.bodyMedium
+              //                   .copyWith(fontWeight: FontWeight.w600)),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
               const SizedBox(height: 22),
               // Tabs
               TabBar(
