@@ -230,80 +230,16 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final safeUserPrefs = _userPreferences ?? userProvider.user?.preferences;
 
-    if (_showDietSetup) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Set Up My Diet Plan'),
-        ),
-        body: _isLoading
-            ? _buildLoadingState()
-            : (safeUserPrefs == null
-                ? const Center(child: CircularProgressIndicator())
-                : DietPlanSetupFlow(
-                    step: _setupStep,
-                    onNext: _nextSetupStep,
-                    onBack: _prevSetupStep,
-                    selectedNutritionGoal: _selectedNutritionGoal,
-                    onSelectNutritionGoal: (goal) =>
-                        setState(() => _selectedNutritionGoal = goal),
-                    preferredCuisines: _preferredCuisines,
-                    onAddCuisine: (cuisine) => setState(() {
-                      if (cuisine.isNotEmpty &&
-                          !_preferredCuisines.contains(cuisine)) {
-                        _preferredCuisines.add(cuisine);
-                      }
-                    }),
-                    onRemoveCuisine: (cuisine) =>
-                        setState(() => _preferredCuisines.remove(cuisine)),
-                    foodsToAvoid: _foodsToAvoid,
-                    onAddAvoid: (food) => setState(() {
-                      if (food.isNotEmpty && !_foodsToAvoid.contains(food)) {
-                        _foodsToAvoid.add(food);
-                      }
-                    }),
-                    onRemoveAvoid: (food) =>
-                        setState(() => _foodsToAvoid.remove(food)),
-                    favoriteFoods: _favoriteFoods,
-                    onAddFavorite: (food) => setState(() {
-                      if (food.isNotEmpty && !_favoriteFoods.contains(food)) {
-                        _favoriteFoods.add(food);
-                      }
-                    }),
-                    onRemoveFavorite: (food) =>
-                        setState(() => _favoriteFoods.remove(food)),
-                    mealFrequency: _mealFrequency,
-                    onSelectMealFrequency: (freq) =>
-                        setState(() => _mealFrequency = freq),
-                    cuisineController: _cuisineController,
-                    avoidController: _avoidController,
-                    favoriteController: _favoriteController,
-                    isPreviewLoading: false,
-                    sampleDayPlan: {},
-                    onRegeneratePreview: () {},
-                    onLooksGood: () => _nextSetupStep(),
-                    onCustomize: () {
-                      /* TODO: Implement customization */
-                    },
-                    weeklyRotation: _weeklyRotation,
-                    onToggleWeeklyRotation: (val) =>
-                        setState(() => _weeklyRotation = val),
-                    remindersEnabled: _remindersEnabled,
-                    onToggleReminders: (val) =>
-                        setState(() => _remindersEnabled = val),
-                    onSavePlan: _completeDietSetup,
-                    userPreferences: safeUserPrefs,
-                    selectedDays: _selectedDays,
-                  )),
-      );
-    }
+    // If loading, show loading state (for legacy, but should not trigger now)
     if (_isLoading) {
       return _buildLoadingState();
     }
+    // If a meal plan exists, show it as before
     if (_currentMealPlan != null) {
       return _buildMealPlanView();
     }
-    // Show a welcome or empty state if no meal plan exists yet
-    return _buildWelcomeState();
+    // If no meal plan exists, show static message (admin will generate it)
+    return _buildWaitingForMealPlanState();
   }
 
   Widget _buildLoadingState() {
@@ -400,20 +336,35 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     );
   }
 
-  Widget _buildWelcomeState() {
-    final userPrefs = _userPreferences ??
-        Provider.of<UserProvider>(context, listen: false).user?.preferences;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          const SizedBox(height: AppConstants.spacingL),
-          _buildPreferencesCard(userPrefs),
-          const SizedBox(height: AppConstants.spacingM),
-          _buildGenerateButton(),
-        ],
+  // New: Static message for users waiting for admin to generate meal plan
+  Widget _buildWaitingForMealPlanState() {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Meal Plan'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.hourglass_empty, size: 64, color: AppConstants.primaryColor),
+              const SizedBox(height: AppConstants.spacingL),
+              Text(
+                'Your meal plan will be ready shortly!',
+                style: AppTextStyles.heading4,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppConstants.spacingM),
+              Text(
+                'Your personal trainer will prepare your AI-powered meal plan. You will receive a message when it is ready.',
+                style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
