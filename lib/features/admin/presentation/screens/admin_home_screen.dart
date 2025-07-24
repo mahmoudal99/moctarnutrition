@@ -151,7 +151,6 @@ class _SalesCard extends StatelessWidget {
                         color: Colors.white, fontWeight: FontWeight.bold)),
               ],
             ),
-            const SizedBox(height: 8),
             Text(lastUpdated,
                 style: AppTextStyles.caption.copyWith(color: Colors.white54)),
             const SizedBox(height: 16),
