@@ -13,6 +13,8 @@ class UserModel {
   final DateTime? subscriptionExpiry;
   final UserPreferences preferences;
   final String? selectedTrainerId;
+  // Reference to the user's current meal plan (Firestore best practice)
+  final String? mealPlanId;
   final bool hasSeenSubscriptionScreen;
   final bool hasSeenOnboarding;
   final bool hasSeenGetStarted;
@@ -29,6 +31,7 @@ class UserModel {
     this.subscriptionExpiry,
     required this.preferences,
     this.selectedTrainerId,
+    this.mealPlanId,
     this.hasSeenSubscriptionScreen = false,
     this.hasSeenOnboarding = false,
     this.hasSeenGetStarted = false,
@@ -55,6 +58,7 @@ class UserModel {
           : null,
       preferences: UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>),
       selectedTrainerId: json['selectedTrainerId'] as String?,
+      mealPlanId: json['mealPlanId'] as String?,
       hasSeenSubscriptionScreen: json['hasSeenSubscriptionScreen'] as bool? ?? false,
       hasSeenOnboarding: json['hasSeenOnboarding'] as bool? ?? false,
       hasSeenGetStarted: json['hasSeenGetStarted'] as bool? ?? false,
@@ -74,6 +78,7 @@ class UserModel {
       'subscriptionExpiry': subscriptionExpiry?.toIso8601String(),
       'preferences': preferences.toJson(),
       'selectedTrainerId': selectedTrainerId,
+      'mealPlanId': mealPlanId,
       'hasSeenSubscriptionScreen': hasSeenSubscriptionScreen,
       'hasSeenOnboarding': hasSeenOnboarding,
       'hasSeenGetStarted': hasSeenGetStarted,
@@ -92,6 +97,7 @@ class UserModel {
     DateTime? subscriptionExpiry,
     UserPreferences? preferences,
     String? selectedTrainerId,
+    String? mealPlanId,
     bool? hasSeenSubscriptionScreen,
     bool? hasSeenOnboarding,
     bool? hasSeenGetStarted,
@@ -108,6 +114,7 @@ class UserModel {
       subscriptionExpiry: subscriptionExpiry ?? this.subscriptionExpiry,
       preferences: preferences ?? this.preferences,
       selectedTrainerId: selectedTrainerId ?? this.selectedTrainerId,
+      mealPlanId: mealPlanId ?? this.mealPlanId,
       hasSeenSubscriptionScreen: hasSeenSubscriptionScreen ?? this.hasSeenSubscriptionScreen,
       hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
       hasSeenGetStarted: hasSeenGetStarted ?? this.hasSeenGetStarted,
