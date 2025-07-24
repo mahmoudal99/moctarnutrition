@@ -8,20 +8,23 @@ import 'package:champions_gym_app/features/checkin/presentation/screens/checkin_
 
 class AdminUserDetailScreen extends StatelessWidget {
   final UserModel user;
+
   const AdminUserDetailScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final prefs = user.preferences;
-    final handle = '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
-    final subtitle = '${_roleLabel(user.role)} • ${_subscriptionLabel(user.subscriptionStatus)}';
+    final handle =
+        '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
+    final subtitle =
+        '${_roleLabel(user.role)} • ${_subscriptionLabel(user.subscriptionStatus)}';
     final checkInsFuture = _fetchCheckins(user.id);
     final mealPlanFuture = _fetchMealPlan(user.mealPlanId);
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         backgroundColor: AppConstants.backgroundColor,
-        body: SingleChildScrollView(
+        body: SafeArea(
           child: Column(
             children: [
               // Modern header
@@ -49,7 +52,8 @@ class AdminUserDetailScreen extends StatelessWidget {
                     top: 40,
                     left: 16,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                          color: Colors.black87),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -57,7 +61,8 @@ class AdminUserDetailScreen extends StatelessWidget {
                     top: 40,
                     right: 16,
                     child: IconButton(
-                      icon: const Icon(Icons.info_outline_rounded, color: Colors.black54),
+                      icon: const Icon(Icons.info_outline_rounded,
+                          color: Colors.black54),
                       onPressed: () {},
                     ),
                   ),
@@ -66,11 +71,10 @@ class AdminUserDetailScreen extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: SingleChildScrollView(
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const SizedBox(height: 32),
                             Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
@@ -81,25 +85,34 @@ class AdminUserDetailScreen extends StatelessWidget {
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
-                                border: Border.all(color: Colors.white, width: 4),
+                                border:
+                                    Border.all(color: Colors.white, width: 4),
                               ),
                               child: CircleAvatar(
-                                radius: 44,
+                                radius: 40,
                                 backgroundColor: Colors.white,
                                 backgroundImage: user.photoUrl != null
                                     ? NetworkImage(user.photoUrl!)
                                     : null,
                                 child: user.photoUrl == null
-                                    ? Icon(Icons.person, size: 44, color: AppConstants.primaryColor)
+                                    ? const Icon(Icons.person,
+                                        size: 44,
+                                        color: AppConstants.primaryColor)
                                     : null,
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Text(user.name ?? user.email, style: AppTextStyles.heading3.copyWith(color: Colors.black87)),
+                            Text(user.name ?? user.email,
+                                style: AppTextStyles.heading3
+                                    .copyWith(color: Colors.black87)),
                             const SizedBox(height: 4),
-                            Text(handle, style: AppTextStyles.bodyMedium.copyWith(color: Colors.black54)),
+                            Text(handle,
+                                style: AppTextStyles.bodyMedium
+                                    .copyWith(color: Colors.black54)),
                             const SizedBox(height: 4),
-                            Text(subtitle, style: AppTextStyles.caption.copyWith(color: Colors.black45)),
+                            Text(subtitle,
+                                style: AppTextStyles.caption
+                                    .copyWith(color: Colors.black45)),
                             const SizedBox(height: 12),
                           ],
                         ),
@@ -108,14 +121,14 @@ class AdminUserDetailScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
-              // Stats row (Check-ins, Active Weeks, Meal Plan Days)
+              // Stats row
               FutureBuilder<List<CheckinModel>>(
                 future: checkInsFuture,
                 builder: (context, checkinSnap) {
                   final checkins = checkinSnap.data ?? [];
                   final checkinCount = checkins.length;
-                  final activeWeeks = checkins.map((c) => c.weekStartDate).toSet().length;
+                  final activeWeeks =
+                      checkins.map((c) => c.weekStartDate).toSet().length;
                   return FutureBuilder<MealPlanModel?>(
                     future: mealPlanFuture,
                     builder: (context, mealSnap) {
@@ -123,13 +136,20 @@ class AdminUserDetailScreen extends StatelessWidget {
                       final mealPlanDays = mealPlan?.mealDays.length ?? 0;
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildStat('$checkinCount', 'Check-ins'),
-                            _buildStat('$activeWeeks', 'Active Weeks'),
-                            _buildStat(mealPlan != null ? '$mealPlanDays' : 'N/A', 'Meal Plan Days'),
-                          ],
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppConstants.surfaceColor,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              _buildStatExpanded('$checkinCount', 'Check-ins', isLeft: true),
+                              _verticalDivider(),
+                              _buildStatExpanded('$activeWeeks', 'Active Weeks'),
+                              _verticalDivider(),
+                              _buildStatExpanded(mealPlan != null ? '$mealPlanDays' : 'N/A', 'Meal Plan Days', isRight: true),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -148,9 +168,12 @@ class AdminUserDetailScreen extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: AppConstants.primaryColor),
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: Text('Message', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                        child: Text('Message',
+                            style: AppTextStyles.bodyMedium
+                                .copyWith(fontWeight: FontWeight.w600)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -161,9 +184,12 @@ class AdminUserDetailScreen extends StatelessWidget {
                           backgroundColor: AppConstants.primaryColor,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: Text('Assign Plan', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                        child: Text('Assign Plan',
+                            style: AppTextStyles.bodyMedium
+                                .copyWith(fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
@@ -181,15 +207,11 @@ class AdminUserDetailScreen extends StatelessWidget {
                   Tab(text: 'Meal Plan'),
                 ],
               ),
-              SizedBox(
-                height: 480,
+              Expanded(
                 child: TabBarView(
                   children: [
-                    // Profile Tab
                     _profileTab(prefs, user),
-                    // Check-ins Tab
                     _checkInsTab(user.id),
-                    // Meal Plan Tab
                     _mealPlanTab(user.mealPlanId),
                   ],
                 ),
@@ -212,12 +234,17 @@ class AdminUserDetailScreen extends StatelessWidget {
     for (var doc in snapshot.docs) {
       print('Check-in doc: ${doc.data()}');
     }
-    return snapshot.docs.map((doc) => CheckinModel.fromJson(doc.data())).toList();
+    return snapshot.docs
+        .map((doc) => CheckinModel.fromJson(doc.data()))
+        .toList();
   }
 
   Future<MealPlanModel?> _fetchMealPlan(String? mealPlanId) async {
     if (mealPlanId == null) return null;
-    final doc = await FirebaseFirestore.instance.collection('meal_plans').doc(mealPlanId).get();
+    final doc = await FirebaseFirestore.instance
+        .collection('meal_plans')
+        .doc(mealPlanId)
+        .get();
     if (!doc.exists) return null;
     return MealPlanModel.fromJson(doc.data()!);
   }
@@ -233,7 +260,8 @@ class AdminUserDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.check_circle, color: AppConstants.primaryColor, size: 28),
+            Icon(Icons.check_circle,
+                color: AppConstants.primaryColor, size: 28),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -241,16 +269,19 @@ class AdminUserDetailScreen extends StatelessWidget {
                 children: [
                   Text(
                     _formatDate(c.createdAt),
-                    style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text('Weight: ', style: AppTextStyles.caption),
-                      Text(c.weight != null ? '${c.weight} kg' : '-', style: AppTextStyles.caption),
+                      Text(c.weight != null ? '${c.weight} kg' : '-',
+                          style: AppTextStyles.caption),
                       const SizedBox(width: 12),
                       Text('Status: ', style: AppTextStyles.caption),
-                      Text(c.status.toString().split('.').last, style: AppTextStyles.caption),
+                      Text(c.status.toString().split('.').last,
+                          style: AppTextStyles.caption),
                     ],
                   ),
                   if (c.mood != null || c.energyLevel != null)
@@ -259,15 +290,18 @@ class AdminUserDetailScreen extends StatelessWidget {
                       child: Row(
                         children: [
                           if (c.mood != null) ...[
-                            Icon(Icons.emoji_emotions, size: 16, color: AppConstants.accentColor),
+                            Icon(Icons.emoji_emotions,
+                                size: 16, color: AppConstants.accentColor),
                             const SizedBox(width: 4),
                             Text(c.mood!, style: AppTextStyles.caption),
                             const SizedBox(width: 12),
                           ],
                           if (c.energyLevel != null) ...[
-                            Icon(Icons.bolt, size: 16, color: AppConstants.warningColor),
+                            Icon(Icons.bolt,
+                                size: 16, color: AppConstants.warningColor),
                             const SizedBox(width: 4),
-                            Text('Energy: ${c.energyLevel}', style: AppTextStyles.caption),
+                            Text('Energy: ${c.energyLevel}',
+                                style: AppTextStyles.caption),
                           ],
                         ],
                       ),
@@ -293,23 +327,31 @@ class AdminUserDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(plan.title, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+            Text(plan.title,
+                style: AppTextStyles.bodyLarge
+                    .copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
-            Text(plan.description, style: AppTextStyles.bodySmall.copyWith(color: AppConstants.textSecondary)),
+            Text(plan.description,
+                style: AppTextStyles.bodySmall
+                    .copyWith(color: AppConstants.textSecondary)),
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 16, color: AppConstants.textTertiary),
+                Icon(Icons.calendar_today,
+                    size: 16, color: AppConstants.textTertiary),
                 const SizedBox(width: 4),
                 Text('$duration days', style: AppTextStyles.caption),
                 const SizedBox(width: 16),
-                Icon(Icons.local_fire_department, size: 16, color: AppConstants.warningColor),
+                Icon(Icons.local_fire_department,
+                    size: 16, color: AppConstants.warningColor),
                 const SizedBox(width: 4),
-                Text('${plan.totalCalories.toStringAsFixed(0)} kcal', style: AppTextStyles.caption),
+                Text('${plan.totalCalories.toStringAsFixed(0)} kcal',
+                    style: AppTextStyles.caption),
               ],
             ),
             const SizedBox(height: 8),
-            Text('Created: ${_formatDate(plan.createdAt)}', style: AppTextStyles.caption),
+            Text('Created: ${_formatDate(plan.createdAt)}',
+                style: AppTextStyles.caption),
             // TODO: Add button to view full meal plan details
           ],
         ),
@@ -343,7 +385,11 @@ class AdminUserDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          SizedBox(width: 120, child: Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppConstants.textSecondary))),
+          SizedBox(
+              width: 120,
+              child: Text(label,
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: AppConstants.textSecondary))),
           const SizedBox(width: 8),
           Expanded(child: Text(value, style: AppTextStyles.bodyMedium)),
         ],
@@ -436,10 +482,39 @@ class AdminUserDetailScreen extends StatelessWidget {
   Widget _buildStat(String value, String label) {
     return Column(
       children: [
-        Text(value, style: AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold)),
+        Text(value,
+            style:
+                AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 2),
-        Text(label, style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary)),
+        Text(label,
+            style: AppTextStyles.caption
+                .copyWith(color: AppConstants.textSecondary)),
       ],
+    );
+  }
+
+  Widget _buildStatExpanded(String value, String label, {bool isLeft = false, bool isRight = false}) {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(value, style: AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 2),
+            Text(label, style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _verticalDivider() {
+    return Container(
+      width: 1,
+      height: 36,
+      color: AppConstants.textTertiary.withOpacity(0.12),
     );
   }
 
@@ -459,11 +534,21 @@ class AdminUserDetailScreen extends StatelessWidget {
               _prefRow('Name', user.name ?? user.email),
               _prefRow('Email', user.email),
               _prefRow('Role', _roleLabel(user.role)),
-              _prefRow('Subscription', _subscriptionLabel(user.subscriptionStatus)),
+              _prefRow(
+                  'Subscription', _subscriptionLabel(user.subscriptionStatus)),
               _prefRow('Fitness Goal', _fitnessGoalLabel(prefs.fitnessGoal)),
-              _prefRow('Activity Level', _activityLevelLabel(prefs.activityLevel)),
-              _prefRow('Dietary Restrictions', prefs.dietaryRestrictions.isEmpty ? 'None' : prefs.dietaryRestrictions.join(', ')),
-              _prefRow('Preferred Workouts', prefs.preferredWorkoutStyles.isEmpty ? 'None' : prefs.preferredWorkoutStyles.join(', ')),
+              _prefRow(
+                  'Activity Level', _activityLevelLabel(prefs.activityLevel)),
+              _prefRow(
+                  'Dietary Restrictions',
+                  prefs.dietaryRestrictions.isEmpty
+                      ? 'None'
+                      : prefs.dietaryRestrictions.join(', ')),
+              _prefRow(
+                  'Preferred Workouts',
+                  prefs.preferredWorkoutStyles.isEmpty
+                      ? 'None'
+                      : prefs.preferredWorkoutStyles.join(', ')),
               _prefRow('Target Calories', '${prefs.targetCalories} kcal'),
               _prefRow('Age', prefs.age.toString()),
               _prefRow('Weight', '${prefs.weight} kg'),
@@ -481,17 +566,21 @@ class AdminUserDetailScreen extends StatelessWidget {
       future: _fetchCheckins(userId),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(child: Text('Error loading check-ins: ${snapshot.error}'));
+          return Center(
+              child: Text('Error loading check-ins: ${snapshot.error}'));
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         final checkins = snapshot.data ?? [];
         if (checkins.isEmpty) {
-          return Center(child: Text('No check-ins found.', style: AppTextStyles.bodyMedium));
+          return Center(
+              child:
+                  Text('No check-ins found.', style: AppTextStyles.bodyMedium));
         }
         return ListView.builder(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.only(
+            left: 12, right: 12, top: 12, bottom: kBottomNavigationBarHeight + 16),
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
           itemCount: checkins.length,
@@ -507,7 +596,8 @@ class AdminUserDetailScreen extends StatelessWidget {
                 leading: c.photoThumbnailUrl != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(c.photoThumbnailUrl!, width: 48, height: 48, fit: BoxFit.cover),
+                        child: Image.network(c.photoThumbnailUrl!,
+                            width: 48, height: 48, fit: BoxFit.cover),
                       )
                     : Container(
                         width: 48,
@@ -516,17 +606,24 @@ class AdminUserDetailScreen extends StatelessWidget {
                           color: AppConstants.surfaceColor,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(Icons.camera_alt, size: 28, color: AppConstants.textTertiary),
+                        child: Icon(Icons.camera_alt,
+                            size: 28, color: AppConstants.textTertiary),
                       ),
-                title: Text(_formatDate(c.createdAt), style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                title: Text(_formatDate(c.createdAt),
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(fontWeight: FontWeight.bold)),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (c.mood != null) Text('Mood: ${c.mood!}', style: AppTextStyles.bodySmall),
-                    if (c.weight != null) Text('Weight: ${c.weight} kg', style: AppTextStyles.bodySmall),
+                    if (c.mood != null)
+                      Text('Mood: ${c.mood!}', style: AppTextStyles.bodySmall),
+                    if (c.weight != null)
+                      Text('Weight: ${c.weight} kg',
+                          style: AppTextStyles.bodySmall),
                   ],
                 ),
-                trailing: _buildBadge(c.status.toString().split('.').last, _statusColor(c.status)),
+                trailing: _buildBadge(c.status.toString().split('.').last,
+                    _statusColor(c.status)),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -555,10 +652,13 @@ class AdminUserDetailScreen extends StatelessWidget {
         }
         final mealPlan = snapshot.data;
         if (mealPlan == null) {
-          return Center(child: Text('No meal plan found.', style: AppTextStyles.bodyMedium));
+          return Center(
+              child:
+                  Text('No meal plan found.', style: AppTextStyles.bodyMedium));
         }
         return ListView.builder(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.only(
+            left: 12, right: 12, top: 12, bottom: kBottomNavigationBarHeight + 16),
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
           itemCount: mealPlan.mealDays.length,
@@ -575,20 +675,26 @@ class AdminUserDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Day ${index + 1}', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                    Text('Day ${index + 1}',
+                        style: AppTextStyles.bodyMedium
+                            .copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text('${day.totalCalories.toStringAsFixed(0)} kcal', style: AppTextStyles.caption),
+                    Text('${day.totalCalories.toStringAsFixed(0)} kcal',
+                        style: AppTextStyles.caption),
                     const SizedBox(height: 8),
                     ...day.meals.map((meal) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        children: [
-                          Icon(Icons.restaurant, size: 14, color: AppConstants.primaryColor),
-                          const SizedBox(width: 4),
-                          Expanded(child: Text(meal.name, style: AppTextStyles.bodySmall)),
-                        ],
-                      ),
-                    )),
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            children: [
+                              Icon(Icons.restaurant,
+                                  size: 14, color: AppConstants.primaryColor),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                  child: Text(meal.name,
+                                      style: AppTextStyles.bodySmall)),
+                            ],
+                          ),
+                        )),
                   ],
                 ),
               ),
@@ -610,4 +716,4 @@ class AdminUserDetailScreen extends StatelessWidget {
         return AppConstants.warningColor;
     }
   }
-} 
+}
