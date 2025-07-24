@@ -22,29 +22,29 @@ class _MainNavigationState extends State<MainNavigation> {
 
   List<_NavItem> _buildNavItems(UserModel? user) {
     final items = [
-      _NavItem(
+      const _NavItem(
         icon: Icons.fitness_center,
         label: 'Workouts',
         route: '/workouts',
       ),
-      _NavItem(
+      const _NavItem(
         icon: Icons.restaurant_menu,
         label: 'Meal Prep',
         route: '/meal-prep',
       ),
-      _NavItem(
+      const _NavItem(
         icon: Icons.person,
         label: 'Trainers',
         route: '/trainers',
       ),
-      _NavItem(
+      const _NavItem(
         icon: Icons.account_circle,
         label: 'Profile',
         route: '/profile',
       ),
     ];
     if (user != null && user.role == UserRole.admin) {
-      items.add(_NavItem(
+      items.insert(0, const _NavItem(
         icon: Icons.admin_panel_settings,
         label: 'Admin',
         route: '/admin-users',

@@ -17,6 +17,7 @@ import 'features/checkin/presentation/screens/checkin_form_screen.dart';
 import 'features/checkin/presentation/screens/checkin_details_screen.dart';
 import 'features/checkin/presentation/screens/checkin_history_screen.dart';
 import 'features/admin/presentation/screens/admin_user_list_screen.dart';
+import 'package:champions_gym_app/shared/models/user_model.dart';
 
 // import 'features/trainers/presentation/screens/trainers_screen.dart';
 // import 'features/workouts/presentation/screens/workouts_screen.dart';
@@ -106,6 +107,16 @@ final GoRouter _router = GoRouter(
 
             if (!authProvider.isAuthenticated) {
               return const GetStartedScreen();
+            }
+
+            // If admin, redirect to admin-users
+            if (authProvider.userModel?.role == UserRole.admin) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                final currentLocation = GoRouter.of(context).routeInformationProvider.value.uri.toString();
+                if (currentLocation != '/admin-users') {
+                  GoRouter.of(context).go('/admin-users');
+                }
+              });
             }
 
             return const MainNavigation(child: WorkoutsScreen());
