@@ -103,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen>
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
-                      'MUKTAR NUTRITION',
+                      'MOCTAR NUTRITION',
                       style: GoogleFonts.leagueSpartan(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,

@@ -1,4 +1,4 @@
-# Muktar Nutrition
+# MOCTAR Nutrition
 
 AI-Powered Fitness & Meal Prep App
 
