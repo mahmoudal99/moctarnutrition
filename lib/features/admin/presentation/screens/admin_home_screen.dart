@@ -159,7 +159,6 @@ class _SalesCard extends StatelessWidget {
             Container(
               height: 64,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -175,13 +174,13 @@ class _SalesCard extends StatelessWidget {
                   lineBarsData: [
                     LineChartBarData(
                       spots: [
-                        FlSpot(0, 6),
+                        FlSpot(0, 1),
                         FlSpot(1, 7.5),
-                        FlSpot(2, 5),
+                        FlSpot(2, 2),
                         FlSpot(3, 8),
                         FlSpot(4, 6.5),
                         FlSpot(5, 9),
-                        FlSpot(6, 7),
+                        FlSpot(6, 1),
                       ],
                       isCurved: true,
                       color: const Color(0xFF4F8DFD),
