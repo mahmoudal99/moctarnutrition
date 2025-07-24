@@ -12,152 +12,189 @@ class AdminUserDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prefs = user.preferences;
-    // DEBUG: Print the user id being viewed
-    print('AdminUserDetailScreen: user.id = ${user.id}');
-    return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        title: Text(user.name ?? user.email),
+    final handle = '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
+    final subtitle = '${_roleLabel(user.role)} • ${_subscriptionLabel(user.subscriptionStatus)}';
+    final checkInsFuture = _fetchCheckins(user.id);
+    final mealPlanFuture = _fetchMealPlan(user.mealPlanId);
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
         backgroundColor: AppConstants.backgroundColor,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.radiusL),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Modern header
+              Stack(
+                children: [
+                  Container(
+                    height: 240, // Increased height
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFFe0c3fc), // pastel purple
+                          Color(0xFF8ec5fc), // pastel blue
+                          Color(0xFFf9f9f9), // white
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(32),
+                        bottomRight: Radius.circular(32),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 40,
+                    left: 16,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                  Positioned(
+                    top: 40,
+                    right: 16,
+                    child: IconButton(
+                      icon: const Icon(Icons.info_outline_rounded, color: Colors.black54),
+                      onPressed: () {},
+                    ),
+                  ),
+                  // Centered profile content
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: SingleChildScrollView(
+                        physics: NeverScrollableScrollPhysics(),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(height: 32),
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                border: Border.all(color: Colors.white, width: 4),
+                              ),
+                              child: CircleAvatar(
+                                radius: 44,
+                                backgroundColor: Colors.white,
+                                backgroundImage: user.photoUrl != null
+                                    ? NetworkImage(user.photoUrl!)
+                                    : null,
+                                child: user.photoUrl == null
+                                    ? Icon(Icons.person, size: 44, color: AppConstants.primaryColor)
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(user.name ?? user.email, style: AppTextStyles.heading3.copyWith(color: Colors.black87)),
+                            const SizedBox(height: 4),
+                            Text(handle, style: AppTextStyles.bodyMedium.copyWith(color: Colors.black54)),
+                            const SizedBox(height: 4),
+                            Text(subtitle, style: AppTextStyles.caption.copyWith(color: Colors.black45)),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
+              const SizedBox(height: 18),
+              // Stats row (Check-ins, Active Weeks, Meal Plan Days)
+              FutureBuilder<List<CheckinModel>>(
+                future: checkInsFuture,
+                builder: (context, checkinSnap) {
+                  final checkins = checkinSnap.data ?? [];
+                  final checkinCount = checkins.length;
+                  final activeWeeks = checkins.map((c) => c.weekStartDate).toSet().length;
+                  return FutureBuilder<MealPlanModel?>(
+                    future: mealPlanFuture,
+                    builder: (context, mealSnap) {
+                      final mealPlan = mealSnap.data;
+                      final mealPlanDays = mealPlan?.mealDays.length ?? 0;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildStat('$checkinCount', 'Check-ins'),
+                            _buildStat('$activeWeeks', 'Active Weeks'),
+                            _buildStat(mealPlan != null ? '$mealPlanDays' : 'N/A', 'Meal Plan Days'),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+              // Button row
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
                   children: [
-                    user.photoUrl != null
-                        ? CircleAvatar(
-                            backgroundImage: NetworkImage(user.photoUrl!),
-                            radius: 36,
-                          )
-                        : CircleAvatar(
-                            radius: 36,
-                            backgroundColor: AppConstants.primaryColor.withOpacity(0.08),
-                            child: Icon(Icons.person, color: AppConstants.primaryColor, size: 36),
-                          ),
-                    const SizedBox(width: 24),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(user.name ?? user.email, style: AppTextStyles.heading4),
-                          const SizedBox(height: 4),
-                          Text(user.email, style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary)),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              _buildBadge(_roleLabel(user.role), _roleColor(user.role)),
-                              const SizedBox(width: 8),
-                              _buildBadge(_subscriptionLabel(user.subscriptionStatus), _subscriptionColor(user.subscriptionStatus)),
-                            ],
-                          ),
-                        ],
+                      child: OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: AppConstants.primaryColor),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text('Message', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppConstants.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text('Assign Plan', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Text('Preferences', style: AppTextStyles.heading4),
-            const SizedBox(height: 12),
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              const SizedBox(height: 22),
+              // Tabs
+              TabBar(
+                labelColor: AppConstants.primaryColor,
+                unselectedLabelColor: AppConstants.textTertiary,
+                indicatorColor: AppConstants.primaryColor,
+                tabs: const [
+                  Tab(text: 'Profile'),
+                  Tab(text: 'Check-ins'),
+                  Tab(text: 'Meal Plan'),
+                ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              SizedBox(
+                height: 480,
+                child: TabBarView(
                   children: [
-                    _prefRow('Fitness Goal', _fitnessGoalLabel(prefs.fitnessGoal)),
-                    _prefRow('Activity Level', _activityLevelLabel(prefs.activityLevel)),
-                    _prefRow('Dietary Restrictions', prefs.dietaryRestrictions.isEmpty ? 'None' : prefs.dietaryRestrictions.join(', ')),
-                    _prefRow('Preferred Workouts', prefs.preferredWorkoutStyles.isEmpty ? 'None' : prefs.preferredWorkoutStyles.join(', ')),
-                    _prefRow('Target Calories', '${prefs.targetCalories} kcal'),
-                    _prefRow('Age', prefs.age.toString()),
-                    _prefRow('Weight', '${prefs.weight} kg'),
-                    _prefRow('Height', '${prefs.height} cm'),
-                    _prefRow('Gender', prefs.gender),
+                    // Profile Tab
+                    _profileTab(prefs, user),
+                    // Check-ins Tab
+                    _checkInsTab(user.id),
+                    // Meal Plan Tab
+                    _mealPlanTab(user.mealPlanId),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            // --- Check-ins Section ---
-            Text('Check-ins', style: AppTextStyles.heading4),
-            const SizedBox(height: 12),
-            FutureBuilder<List<CheckinModel>>(
-              future: _fetchCheckins(user.id),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  print('Check-in fetch error: ${snapshot.error}');
-                  return Center(child: Text('Error loading check-ins: ${snapshot.error}'));
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final checkins = snapshot.data ?? [];
-                if (checkins.isEmpty) {
-                  return Card(
-                    elevation: 1,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text('No check-ins found.', style: AppTextStyles.bodyMedium),
-                    ),
-                  );
-                }
-                return Column(
-                  children: checkins.map((c) => _checkinCard(c)).toList(),
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-            // --- Meal Plan Section ---
-            Text('Meal Plan', style: AppTextStyles.heading4),
-            const SizedBox(height: 12),
-            FutureBuilder<MealPlanModel?>(
-              future: _fetchMealPlan(user.mealPlanId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error loading meal plan'));
-                }
-                final mealPlan = snapshot.data;
-                if (mealPlan == null) {
-                  return Card(
-                    elevation: 1,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text('No meal plan found.', style: AppTextStyles.bodyMedium),
-                    ),
-                  );
-                }
-                return _mealPlanCard(mealPlan);
-              },
-            ),
-            const SizedBox(height: 24),
-            // TODO: Add Admin actions (generate meal plan, etc)
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -392,6 +429,176 @@ class AdminUserDetailScreen extends StatelessWidget {
         return 'Very Active';
       case ActivityLevel.extremelyActive:
         return 'Extremely Active';
+    }
+  }
+
+  Widget _buildStat(String value, String label) {
+    return Column(
+      children: [
+        Text(value, style: AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 2),
+        Text(label, style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary)),
+      ],
+    );
+  }
+
+  Widget _profileTab(UserPreferences prefs, UserModel user) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _prefRow('Name', user.name ?? user.email),
+              _prefRow('Email', user.email),
+              _prefRow('Role', _roleLabel(user.role)),
+              _prefRow('Subscription', _subscriptionLabel(user.subscriptionStatus)),
+              _prefRow('Fitness Goal', _fitnessGoalLabel(prefs.fitnessGoal)),
+              _prefRow('Activity Level', _activityLevelLabel(prefs.activityLevel)),
+              _prefRow('Dietary Restrictions', prefs.dietaryRestrictions.isEmpty ? 'None' : prefs.dietaryRestrictions.join(', ')),
+              _prefRow('Preferred Workouts', prefs.preferredWorkoutStyles.isEmpty ? 'None' : prefs.preferredWorkoutStyles.join(', ')),
+              _prefRow('Target Calories', '${prefs.targetCalories} kcal'),
+              _prefRow('Age', prefs.age.toString()),
+              _prefRow('Weight', '${prefs.weight} kg'),
+              _prefRow('Height', '${prefs.height} cm'),
+              _prefRow('Gender', prefs.gender),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _checkInsTab(String userId) {
+    return FutureBuilder<List<CheckinModel>>(
+      future: _fetchCheckins(userId),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error loading check-ins: ${snapshot.error}'));
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final checkins = snapshot.data ?? [];
+        if (checkins.isEmpty) {
+          return Center(child: Text('No check-ins found.', style: AppTextStyles.bodyMedium));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(12),
+          shrinkWrap: true,
+          physics: const ClampingScrollPhysics(),
+          itemCount: checkins.length,
+          itemBuilder: (context, index) {
+            final c = checkins[index];
+            return Card(
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              ),
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                leading: c.photoThumbnailUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(c.photoThumbnailUrl!, width: 48, height: 48, fit: BoxFit.cover),
+                      )
+                    : Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppConstants.surfaceColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.camera_alt, size: 28, color: AppConstants.textTertiary),
+                      ),
+                title: Text(_formatDate(c.createdAt), style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (c.mood != null) Text('Mood: ${c.mood!}', style: AppTextStyles.bodySmall),
+                    if (c.weight != null) Text('Weight: ${c.weight} kg', style: AppTextStyles.bodySmall),
+                  ],
+                ),
+                trailing: _buildBadge(c.status.toString().split('.').last, _statusColor(c.status)),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _mealPlanTab(String? mealPlanId) {
+    return FutureBuilder<MealPlanModel?>(
+      future: _fetchMealPlan(mealPlanId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error loading meal plan'));
+        }
+        final mealPlan = snapshot.data;
+        if (mealPlan == null) {
+          return Center(child: Text('No meal plan found.', style: AppTextStyles.bodyMedium));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(12),
+          shrinkWrap: true,
+          physics: const ClampingScrollPhysics(),
+          itemCount: mealPlan.mealDays.length,
+          itemBuilder: (context, index) {
+            final day = mealPlan.mealDays[index];
+            return Card(
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              ),
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Day ${index + 1}', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text('${day.totalCalories.toStringAsFixed(0)} kcal', style: AppTextStyles.caption),
+                    const SizedBox(height: 8),
+                    ...day.meals.map((meal) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.restaurant, size: 14, color: AppConstants.primaryColor),
+                          const SizedBox(width: 4),
+                          Expanded(child: Text(meal.name, style: AppTextStyles.bodySmall)),
+                        ],
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Color _statusColor(CheckinStatus status) {
+    switch (status) {
+      case CheckinStatus.completed:
+        return AppConstants.successColor;
+      case CheckinStatus.missed:
+        return AppConstants.errorColor;
+      case CheckinStatus.pending:
+      default:
+        return AppConstants.warningColor;
     }
   }
 } 
