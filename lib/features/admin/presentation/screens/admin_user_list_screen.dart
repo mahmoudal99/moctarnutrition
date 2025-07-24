@@ -2,6 +2,7 @@ import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_detail_screen.dart';
 
 class AdminUserListScreen extends StatefulWidget {
   const AdminUserListScreen({Key? key}) : super(key: key);
@@ -70,7 +71,12 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                       return _UserCard(
                         user: user,
                         onTap: () {
-                          // TODO: Navigate to user detail screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AdminUserDetailScreen(user: user),
+                            ),
+                          );
                         },
                       );
                     },
