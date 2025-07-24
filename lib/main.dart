@@ -16,6 +16,7 @@ import 'features/checkin/presentation/screens/checkin_screen.dart';
 import 'features/checkin/presentation/screens/checkin_form_screen.dart';
 import 'features/checkin/presentation/screens/checkin_details_screen.dart';
 import 'features/checkin/presentation/screens/checkin_history_screen.dart';
+import 'features/admin/presentation/screens/admin_user_list_screen.dart';
 
 // import 'features/trainers/presentation/screens/trainers_screen.dart';
 // import 'features/workouts/presentation/screens/workouts_screen.dart';
@@ -172,6 +173,10 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: '/admin',
           builder: (context, state) => const AdminDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/admin-users',
+          builder: (context, state) => const AdminUserListScreen(),
         ),
         GoRoute(
           path: '/profile',

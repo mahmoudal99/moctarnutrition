@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_constants.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+import '../models/user_model.dart';
 
 class MainNavigation extends StatefulWidget {
   final Widget child;
@@ -17,65 +20,80 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<_NavItem> _items = [
-    _NavItem(
-      icon: Icons.fitness_center,
-      label: 'Workouts',
-      route: '/workouts',
-    ),
-    _NavItem(
-      icon: Icons.restaurant_menu,
-      label: 'Meal Prep',
-      route: '/meal-prep',
-    ),
-    _NavItem(
-      icon: Icons.person,
-      label: 'Trainers',
-      route: '/trainers',
-    ),
-    _NavItem(
-      icon: Icons.account_circle,
-      label: 'Profile',
-      route: '/profile',
-    ),
-  ];
+  List<_NavItem> _buildNavItems(UserModel? user) {
+    final items = [
+      _NavItem(
+        icon: Icons.fitness_center,
+        label: 'Workouts',
+        route: '/workouts',
+      ),
+      _NavItem(
+        icon: Icons.restaurant_menu,
+        label: 'Meal Prep',
+        route: '/meal-prep',
+      ),
+      _NavItem(
+        icon: Icons.person,
+        label: 'Trainers',
+        route: '/trainers',
+      ),
+      _NavItem(
+        icon: Icons.account_circle,
+        label: 'Profile',
+        route: '/profile',
+      ),
+    ];
+    if (user != null && user.role == UserRole.admin) {
+      items.add(_NavItem(
+        icon: Icons.admin_panel_settings,
+        label: 'Admin',
+        route: '/admin-users',
+      ));
+    }
+    return items;
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Set the current index based on the current route
     final location = GoRouter.of(context).routeInformationProvider.value.uri;
-    final idx = _items.indexWhere((item) => location == item.route);
-    if (idx != -1 && idx != _currentIndex) {
-      setState(() {
-        _currentIndex = idx;
-      });
-    }
+    // We'll update _currentIndex in build based on nav items
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          context.go(_items[index].route);
-        },
-        selectedItemColor: AppConstants.primaryColor,
-        unselectedItemColor: AppConstants.textTertiary,
-        showUnselectedLabels: true,
-        items: _items
-            .map((item) => BottomNavigationBarItem(
-                  icon: Icon(item.icon),
-                  label: item.label,
-                ))
-            .toList(),
-      ),
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        final user = userProvider.user;
+        final items = _buildNavItems(user);
+        // Find the current index based on the current route
+        final location = GoRouter.of(context).routeInformationProvider.value.uri.toString();
+        final idx = items.indexWhere((item) => location == item.route);
+        final currentIndex = idx != -1 ? idx : _currentIndex;
+        return Scaffold(
+          body: widget.child,
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: currentIndex,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+              context.go(items[index].route);
+            },
+            selectedItemColor: AppConstants.primaryColor,
+            unselectedItemColor: AppConstants.textTertiary,
+            showUnselectedLabels: true,
+            items: items
+                .map((item) => BottomNavigationBarItem(
+                      icon: Icon(item.icon),
+                      label: item.label,
+                    ))
+                .toList(),
+          ),
+        );
+      },
     );
   }
 }
