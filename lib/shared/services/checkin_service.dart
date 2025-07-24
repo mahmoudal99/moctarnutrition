@@ -125,7 +125,18 @@ class CheckinService {
   /// Create a new check-in
   static Future<CheckinModel> createCheckin(CheckinModel checkin) async {
     try {
-      final docRef = await _checkinsCollection.add(checkin.toJson());
+      final data = checkin.toJson();
+      data['createdAt'] = FieldValue.serverTimestamp();
+      data['updatedAt'] = FieldValue.serverTimestamp();
+      final docRef = await _checkinsCollection.add(data);
+      // Fetch the document to get the actual server timestamp values
+      final docSnap = await docRef.get();
+      final savedData = docSnap.data();
+      if (savedData != null) {
+        final dataWithId = Map<String, dynamic>.from(savedData);
+        dataWithId['id'] = docRef.id;
+        return CheckinModel.fromJson(dataWithId);
+      }
       return checkin.copyWith(id: docRef.id);
     } catch (e) {
       _logger.e('Error creating check-in: $e');
@@ -136,9 +147,11 @@ class CheckinService {
   /// Update an existing check-in
   static Future<void> updateCheckin(CheckinModel checkin) async {
     try {
+      final data = checkin.copyWith(updatedAt: DateTime.now()).toJson();
+      data['updatedAt'] = FieldValue.serverTimestamp();
       await _checkinsCollection
           .doc(checkin.id)
-          .update(checkin.copyWith(updatedAt: DateTime.now()).toJson());
+          .update(data);
     } catch (e) {
       _logger.e('Error updating check-in: $e');
       rethrow;

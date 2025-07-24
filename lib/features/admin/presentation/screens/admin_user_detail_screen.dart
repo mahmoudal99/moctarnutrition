@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:champions_gym_app/shared/models/checkin_model.dart';
+import 'package:champions_gym_app/shared/models/meal_model.dart';
 
 class AdminUserDetailScreen extends StatelessWidget {
   final UserModel user;
@@ -9,6 +12,8 @@ class AdminUserDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prefs = user.preferences;
+    // DEBUG: Print the user id being viewed
+    print('AdminUserDetailScreen: user.id = ${user.id}');
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
@@ -90,13 +95,192 @@ class AdminUserDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            // TODO: Add Check-ins section
-            // TODO: Add Meal Plan section
+            // --- Check-ins Section ---
+            Text('Check-ins', style: AppTextStyles.heading4),
+            const SizedBox(height: 12),
+            FutureBuilder<List<CheckinModel>>(
+              future: _fetchCheckins(user.id),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  print('Check-in fetch error: ${snapshot.error}');
+                  return Center(child: Text('Error loading check-ins: ${snapshot.error}'));
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final checkins = snapshot.data ?? [];
+                if (checkins.isEmpty) {
+                  return Card(
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text('No check-ins found.', style: AppTextStyles.bodyMedium),
+                    ),
+                  );
+                }
+                return Column(
+                  children: checkins.map((c) => _checkinCard(c)).toList(),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            // --- Meal Plan Section ---
+            Text('Meal Plan', style: AppTextStyles.heading4),
+            const SizedBox(height: 12),
+            FutureBuilder<MealPlanModel?>(
+              future: _fetchMealPlan(user.mealPlanId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error loading meal plan'));
+                }
+                final mealPlan = snapshot.data;
+                if (mealPlan == null) {
+                  return Card(
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text('No meal plan found.', style: AppTextStyles.bodyMedium),
+                    ),
+                  );
+                }
+                return _mealPlanCard(mealPlan);
+              },
+            ),
+            const SizedBox(height: 24),
             // TODO: Add Admin actions (generate meal plan, etc)
           ],
         ),
       ),
     );
+  }
+
+  Future<List<CheckinModel>> _fetchCheckins(String userId) async {
+    print('Fetching check-ins for userId: ${userId}');
+    final snapshot = await FirebaseFirestore.instance
+        .collection('checkins')
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .get();
+    print('Fetched check-ins: ${snapshot.docs.length}');
+    for (var doc in snapshot.docs) {
+      print('Check-in doc: ${doc.data()}');
+    }
+    return snapshot.docs.map((doc) => CheckinModel.fromJson(doc.data())).toList();
+  }
+
+  Future<MealPlanModel?> _fetchMealPlan(String? mealPlanId) async {
+    if (mealPlanId == null) return null;
+    final doc = await FirebaseFirestore.instance.collection('meal_plans').doc(mealPlanId).get();
+    if (!doc.exists) return null;
+    return MealPlanModel.fromJson(doc.data()!);
+  }
+
+  Widget _checkinCard(CheckinModel c) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+      ),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle, color: AppConstants.primaryColor, size: 28),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _formatDate(c.createdAt),
+                    style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text('Weight: ', style: AppTextStyles.caption),
+                      Text(c.weight != null ? '${c.weight} kg' : '-', style: AppTextStyles.caption),
+                      const SizedBox(width: 12),
+                      Text('Status: ', style: AppTextStyles.caption),
+                      Text(c.status.toString().split('.').last, style: AppTextStyles.caption),
+                    ],
+                  ),
+                  if (c.mood != null || c.energyLevel != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        children: [
+                          if (c.mood != null) ...[
+                            Icon(Icons.emoji_emotions, size: 16, color: AppConstants.accentColor),
+                            const SizedBox(width: 4),
+                            Text(c.mood!, style: AppTextStyles.caption),
+                            const SizedBox(width: 12),
+                          ],
+                          if (c.energyLevel != null) ...[
+                            Icon(Icons.bolt, size: 16, color: AppConstants.warningColor),
+                            const SizedBox(width: 4),
+                            Text('Energy: ${c.energyLevel}', style: AppTextStyles.caption),
+                          ],
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _mealPlanCard(MealPlanModel plan) {
+    final duration = plan.endDate.difference(plan.startDate).inDays + 1;
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(plan.title, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(plan.description, style: AppTextStyles.bodySmall.copyWith(color: AppConstants.textSecondary)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.calendar_today, size: 16, color: AppConstants.textTertiary),
+                const SizedBox(width: 4),
+                Text('$duration days', style: AppTextStyles.caption),
+                const SizedBox(width: 16),
+                Icon(Icons.local_fire_department, size: 16, color: AppConstants.warningColor),
+                const SizedBox(width: 4),
+                Text('${plan.totalCalories.toStringAsFixed(0)} kcal', style: AppTextStyles.caption),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('Created: ${_formatDate(plan.createdAt)}', style: AppTextStyles.caption),
+            // TODO: Add button to view full meal plan details
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   Widget _buildBadge(String label, Color color) {
