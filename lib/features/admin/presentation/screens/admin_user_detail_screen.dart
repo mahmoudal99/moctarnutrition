@@ -4,6 +4,7 @@ import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:champions_gym_app/shared/models/checkin_model.dart';
 import 'package:champions_gym_app/shared/models/meal_model.dart';
+import 'package:champions_gym_app/features/checkin/presentation/screens/checkin_details_screen.dart';
 
 class AdminUserDetailScreen extends StatelessWidget {
   final UserModel user;
@@ -526,6 +527,14 @@ class AdminUserDetailScreen extends StatelessWidget {
                   ],
                 ),
                 trailing: _buildBadge(c.status.toString().split('.').last, _statusColor(c.status)),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CheckinDetailsScreen(checkin: c),
+                    ),
+                  );
+                },
               ),
             );
           },
