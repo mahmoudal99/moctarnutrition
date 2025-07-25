@@ -23,7 +23,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   bool _isLoading = false;
   MealPlanModel? _currentMealPlan;
   int _selectedDays = 7;
-  int _targetCalories = 0;
+  int _targetCalories = 2000;
 
   // Progress tracking
   int _completedDays = 0;
@@ -1114,6 +1114,59 @@ enum MealFrequencyOption {
   intermittentFasting
 }
 
+// 1. Add a new CaloriesStep widget
+class _CaloriesStep extends StatelessWidget {
+  final int targetCalories;
+  final ValueChanged<int> onChanged;
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+  const _CaloriesStep({
+    required this.targetCalories,
+    required this.onChanged,
+    required this.onNext,
+    required this.onBack,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Set Your Daily Calorie Target', style: AppTextStyles.heading4),
+        const SizedBox(height: AppConstants.spacingL),
+        Slider(
+          value: targetCalories.toDouble(),
+          min: 1200,
+          max: 4000,
+          divisions: 28,
+          label: '$targetCalories cal',
+          onChanged: (value) => onChanged(value.round()),
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        Text('$targetCalories calories per day',
+            style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+        const SizedBox(height: AppConstants.spacingL),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: onBack,
+                child: const Text('Back'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: onNext,
+                child: const Text('Next'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class DietPlanSetupFlow extends StatelessWidget {
   final int step;
   final VoidCallback onNext;
@@ -1146,6 +1199,8 @@ class DietPlanSetupFlow extends StatelessWidget {
   final VoidCallback onSavePlan;
   final UserPreferences? userPreferences;
   final int selectedDays;
+  final int targetCalories;
+  final ValueChanged<int> onTargetCaloriesChanged;
 
   const DietPlanSetupFlow({
     required this.step,
@@ -1179,9 +1234,11 @@ class DietPlanSetupFlow extends StatelessWidget {
     required this.onSavePlan,
     required this.userPreferences,
     required this.selectedDays,
+    required this.targetCalories,
+    required this.onTargetCaloriesChanged,
   });
 
-  static const int totalSteps = 6; // Update if you add/remove steps
+  static const int totalSteps = 7; // Increased by 1
 
   @override
   Widget build(BuildContext context) {
@@ -1239,11 +1296,18 @@ class DietPlanSetupFlow extends StatelessWidget {
           onNext: onNext,
         );
       case 3:
+        return _CaloriesStep(
+          targetCalories: targetCalories,
+          onChanged: onTargetCaloriesChanged,
+          onNext: onNext,
+          onBack: onBack,
+        );
+      case 4:
         return _PersonalizationConfirmationStep(
           onLooksGood: onNext,
           onCustomize: onCustomize,
         );
-      case 4:
+      case 5:
         return _PlanDurationStep(
           weeklyRotation: weeklyRotation,
           onToggleWeeklyRotation: onToggleWeeklyRotation,
@@ -1251,7 +1315,7 @@ class DietPlanSetupFlow extends StatelessWidget {
           onToggleReminders: onToggleReminders,
           onNext: onNext,
         );
-      case 5:
+      case 6:
         return _FinalReviewStep(
           userPreferences: userPreferences!,
           selectedDays: selectedDays,

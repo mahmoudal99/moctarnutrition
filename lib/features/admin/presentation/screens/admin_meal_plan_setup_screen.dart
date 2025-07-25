@@ -5,6 +5,7 @@ import 'package:champions_gym_app/features/meal_prep/presentation/screens/meal_p
 import 'package:champions_gym_app/shared/services/ai_meal_service.dart';
 import 'package:champions_gym_app/shared/models/meal_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 
 class AdminMealPlanSetupScreen extends StatefulWidget {
   final UserModel user;
@@ -25,6 +26,9 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   bool _remindersEnabled = false;
   int _selectedDays = 7;
   bool _isLoading = false;
+  int _targetCalories = 2000;
+  int _completedDays = 0;
+  int _totalDays = 0;
 
   // Controllers for text input
   final TextEditingController _cuisineController = TextEditingController();
@@ -75,11 +79,17 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         mealFrequency: _mealFrequency?.toString().split('.').last ?? '',
         weeklyRotation: _weeklyRotation,
         remindersEnabled: _remindersEnabled,
-        targetCalories: prefs.targetCalories,
+        targetCalories: _targetCalories,
       );
       final mealPlan = await AIMealService.generateMealPlan(
         preferences: dietPlanPreferences,
         days: _selectedDays,
+        onProgress: (completedDays, totalDays) {
+          setState(() {
+            _completedDays = completedDays;
+            _totalDays = totalDays;
+          });
+        },
       );
       print('[AdminMealPlanSetupScreen] Meal plan generated: ${mealPlan.toJson()}');
       // Ensure the meal plan has the correct userId
@@ -100,10 +110,113 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       print(stack);
       setState(() {
         _isLoading = false;
+        _completedDays = 0;
+        _totalDays = 0;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to generate meal plan: $e'), backgroundColor: AppConstants.errorColor),
       );
+    }
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      color: AppConstants.surfaceColor,
+      width: double.infinity,
+      height: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 160,
+            height: 160,
+            child: Lottie.asset(
+              'assets/animations/loading.json',
+              repeat: true,
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            child: Text(
+              _getLoadingMessage(),
+              style: AppTextStyles.heading4,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingS),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            child: Text(
+              'Hang tight while we craft delicious, healthy recipes just for you!',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingL),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            child: Column(
+              children: [
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 300),
+                  tween: Tween<double>(
+                    begin: 0.0,
+                    end: _totalDays > 0 ? _completedDays / _totalDays : 0.0,
+                  ),
+                  builder: (context, value, child) {
+                    return LinearProgressIndicator(
+                      value: value,
+                      backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
+                      minHeight: 8,
+                    );
+                  },
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                Text(
+                  _totalDays > 0
+                      ? 'Generated  [32m$_completedDays [0m of $_totalDays days (${((_completedDays / _totalDays) * 100).toInt()}%)'
+                      : 'Preparing your meal plan...',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppConstants.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                const SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: AppConstants.primaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getLoadingMessage() {
+    if (_totalDays == 0) {
+      return 'We are cooking up your personalized meal plan…';
+    }
+    final progress = _totalDays > 0 ? _completedDays / _totalDays : 0.0;
+    if (progress < 0.25) {
+      return 'Analyzing preferences and dietary needs…';
+    } else if (progress < 0.5) {
+      return 'Crafting delicious, healthy recipes…';
+    } else if (progress < 0.75) {
+      return 'Optimizing nutrition and meal timing…';
+    } else if (progress < 1.0) {
+      return 'Finalizing your personalized meal plan…';
+    } else {
+      return 'Your meal plan is ready!';
     }
   }
 
@@ -119,7 +232,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildLoadingState()
           : DietPlanSetupFlow(
               step: _setupStep,
               onNext: _onNextStep,
@@ -164,6 +277,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
               onSavePlan: _onSavePlan,
               userPreferences: prefs,
               selectedDays: _selectedDays,
+              targetCalories: _targetCalories,
+              onTargetCaloriesChanged: (val) => setState(() => _targetCalories = val),
             ),
     );
   }
