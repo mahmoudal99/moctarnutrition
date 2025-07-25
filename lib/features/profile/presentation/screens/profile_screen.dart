@@ -69,6 +69,7 @@ class ProfileScreen extends StatelessWidget {
                   _CTASection(items: ctaList),
                   const SizedBox(height: 28),
                 ],
+                const SizedBox(height: 24),
                 _SectionHeader(title: 'Settings'),
                 ...settings.map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 24),

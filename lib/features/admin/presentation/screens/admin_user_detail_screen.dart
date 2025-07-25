@@ -5,14 +5,29 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:champions_gym_app/shared/models/checkin_model.dart';
 import 'package:champions_gym_app/shared/models/meal_model.dart';
 import 'package:champions_gym_app/features/checkin/presentation/screens/checkin_details_screen.dart';
+import 'package:champions_gym_app/features/admin/presentation/screens/admin_meal_plan_setup_screen.dart';
 
-class AdminUserDetailScreen extends StatelessWidget {
+class AdminUserDetailScreen extends StatefulWidget {
   final UserModel user;
 
   const AdminUserDetailScreen({Key? key, required this.user}) : super(key: key);
 
   @override
+  State<AdminUserDetailScreen> createState() => _AdminUserDetailScreenState();
+}
+
+class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
+  String? _mealPlanId;
+
+  @override
+  void initState() {
+    super.initState();
+    _mealPlanId = widget.user.mealPlanId;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = widget.user;
     final prefs = user.preferences;
     final handle =
         '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
@@ -121,6 +136,41 @@ class AdminUserDetailScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              // Show Generate Meal Plan button only if no meal plan exists
+              if (_mealPlanId == null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.psychology),
+                      label: const Text('Generate Meal Plan'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppConstants.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => AdminMealPlanSetupScreen(user: widget.user),
+                          ),
+                        );
+                        if (result == true) {
+                          // Refetch the user document to get the new mealPlanId
+                          final userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.user.id).get();
+                          setState(() {
+                            _mealPlanId = userDoc.data()?['mealPlanId'] as String?;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ),
               SizedBox(
                 height: 10,
               ),
@@ -133,7 +183,7 @@ class AdminUserDetailScreen extends StatelessWidget {
                   final activeWeeks =
                       checkins.map((c) => c.weekStartDate).toSet().length;
                   return FutureBuilder<MealPlanModel?>(
-                    future: mealPlanFuture,
+                    future: _fetchMealPlan(_mealPlanId),
                     builder: (context, mealSnap) {
                       final mealPlan = mealSnap.data;
                       final mealPlanDays = mealPlan?.mealDays.length ?? 0;
@@ -159,45 +209,6 @@ class AdminUserDetailScreen extends StatelessWidget {
                   );
                 },
               ),
-              // const SizedBox(height: 14),
-              // Button row
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 24),
-              //   child: Row(
-              //     children: [
-              //       Expanded(
-              //         child: OutlinedButton(
-              //           onPressed: () {},
-              //           style: OutlinedButton.styleFrom(
-              //             side: BorderSide(color: AppConstants.primaryColor),
-              //             padding: const EdgeInsets.symmetric(vertical: 14),
-              //             shape: RoundedRectangleBorder(
-              //                 borderRadius: BorderRadius.circular(12)),
-              //           ),
-              //           child: Text('Message',
-              //               style: AppTextStyles.bodyMedium
-              //                   .copyWith(fontWeight: FontWeight.w600)),
-              //         ),
-              //       ),
-              //       const SizedBox(width: 12),
-              //       Expanded(
-              //         child: ElevatedButton(
-              //           onPressed: () {},
-              //           style: ElevatedButton.styleFrom(
-              //             backgroundColor: AppConstants.primaryColor,
-              //             foregroundColor: Colors.white,
-              //             padding: const EdgeInsets.symmetric(vertical: 14),
-              //             shape: RoundedRectangleBorder(
-              //                 borderRadius: BorderRadius.circular(12)),
-              //           ),
-              //           child: Text('Assign Plan',
-              //               style: AppTextStyles.bodyMedium
-              //                   .copyWith(fontWeight: FontWeight.w600)),
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
               const SizedBox(height: 22),
               // Tabs
               TabBar(
@@ -215,7 +226,7 @@ class AdminUserDetailScreen extends StatelessWidget {
                   children: [
                     _profileTab(prefs, user),
                     _checkInsTab(user.id),
-                    _mealPlanTab(user.mealPlanId),
+                    _mealPlanTab(_mealPlanId),
                   ],
                 ),
               ),

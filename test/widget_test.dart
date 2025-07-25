@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:champions_gym_app/main.dart';
+import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_detail_screen.dart';
+import 'package:champions_gym_app/shared/models/user_model.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
@@ -26,5 +28,39 @@ void main() {
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+  });
+
+  testWidgets('Admin can start meal plan generation flow for a client', (WidgetTester tester) async {
+    // Create a mock user
+    final mockUser = UserModel(
+      id: 'test_user',
+      email: 'client@example.com',
+      name: 'Test Client',
+      role: UserRole.user,
+      subscriptionStatus: SubscriptionStatus.premium,
+      preferences: UserPreferences.defaultPreferences(),
+      hasSeenSubscriptionScreen: true,
+    );
+
+    // Pump the AdminUserDetailScreen
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AdminUserDetailScreen(user: mockUser),
+      ),
+    );
+
+    // Find the Generate Meal Plan button
+    final generateButton = find.widgetWithText(ElevatedButton, 'Generate Meal Plan');
+    expect(generateButton, findsOneWidget);
+
+    // Tap the button and pump the navigation
+    await tester.tap(generateButton);
+    await tester.pumpAndSettle();
+
+    // Should navigate to AdminMealPlanSetupScreen (look for AppBar title)
+    expect(find.text('Generate Meal Plan'), findsOneWidget);
+
+    // The DietPlanSetupFlow should be present (look for step 1 text)
+    expect(find.text("What's your primary nutrition goal?"), findsOneWidget);
   });
 }

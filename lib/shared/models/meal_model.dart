@@ -45,6 +45,42 @@ class MealPlanModel {
     required this.updatedAt,
   });
 
+  MealPlanModel copyWith({
+    String? id,
+    String? userId,
+    String? title,
+    String? description,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<MealDay>? mealDays,
+    double? totalCalories,
+    double? totalProtein,
+    double? totalCarbs,
+    double? totalFat,
+    List<String>? dietaryTags,
+    bool? isAIGenerated,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return MealPlanModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      mealDays: mealDays ?? this.mealDays,
+      totalCalories: totalCalories ?? this.totalCalories,
+      totalProtein: totalProtein ?? this.totalProtein,
+      totalCarbs: totalCarbs ?? this.totalCarbs,
+      totalFat: totalFat ?? this.totalFat,
+      dietaryTags: dietaryTags ?? this.dietaryTags,
+      isAIGenerated: isAIGenerated ?? this.isAIGenerated,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   factory MealPlanModel.fromJson(Map<String, dynamic> json) {
     return MealPlanModel(
       id: json['id'] as String,

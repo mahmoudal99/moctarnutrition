@@ -10,6 +10,7 @@ import '../../../../shared/providers/meal_plan_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'meal_detail_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MealPrepScreen extends StatefulWidget {
   const MealPrepScreen({super.key});
@@ -70,31 +71,49 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   /// Load saved meal plan and diet preferences from storage
   Future<void> _loadSavedData() async {
     try {
-      // Load saved meal plan
+      // Fetch the current user from Firestore to get the latest mealPlanId
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final user = userProvider.user;
+      String? mealPlanId = user?.mealPlanId;
+      MealPlanModel? firestoreMealPlan;
+      if (mealPlanId != null) {
+        // Try to fetch the meal plan from Firestore
+        final doc = await FirebaseFirestore.instance.collection('meal_plans').doc(mealPlanId).get();
+        if (doc.exists) {
+          firestoreMealPlan = MealPlanModel.fromJson(doc.data()!);
+        }
+      }
+      if (firestoreMealPlan != null) {
+        setState(() {
+          _currentMealPlan = firestoreMealPlan;
+          _showDietSetup = false;
+        });
+        // Optionally cache to local storage
+        await MealPlanStorageService.saveMealPlan(firestoreMealPlan);
+        final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+        mealPlanProvider.setMealPlan(firestoreMealPlan);
+        print('Loaded meal plan from Firestore:  [32m${firestoreMealPlan.title} [0m');
+        return;
+      }
+      // Fallback: Load saved meal plan from local storage
       final savedMealPlan = await MealPlanStorageService.loadMealPlan();
       if (savedMealPlan != null) {
         setState(() {
           _currentMealPlan = savedMealPlan;
           _showDietSetup = false;
         });
-        
-        // Update the provider with the loaded meal plan
         final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
         mealPlanProvider.setMealPlan(savedMealPlan);
-        
-        print('Loaded saved meal plan: ${savedMealPlan.title}');
+        print('Loaded saved meal plan from local storage: ${savedMealPlan.title}');
       }
-
       // Load saved diet preferences
-      final savedDietPreferences =
-          await MealPlanStorageService.loadDietPreferences();
+      final savedDietPreferences = await MealPlanStorageService.loadDietPreferences();
       if (savedDietPreferences != null) {
         setState(() {
           _dietPlanPreferences = savedDietPreferences;
         });
         print('Loaded saved diet preferences');
       }
-
       // Show setup if no meal plan exists
       if (_currentMealPlan == null) {
         setState(() {
