@@ -94,10 +94,11 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         // Optionally cache to local storage
         await MealPlanStorageService.saveMealPlan(firestoreMealPlan);
         final mealPlanProvider =
-            Provider.of<MealPlanProvider>(context, listen: false);
+        Provider.of<MealPlanProvider>(context, listen: false);
         mealPlanProvider.setMealPlan(firestoreMealPlan);
         print(
-            'Loaded meal plan from Firestore:  [32m${firestoreMealPlan.title} [0m');
+            'Loaded meal plan from Firestore:  [32m${firestoreMealPlan
+                .title} [0m');
         return;
       }
       // Fallback: Load saved meal plan from local storage
@@ -108,14 +109,15 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           _showDietSetup = false;
         });
         final mealPlanProvider =
-            Provider.of<MealPlanProvider>(context, listen: false);
+        Provider.of<MealPlanProvider>(context, listen: false);
         mealPlanProvider.setMealPlan(savedMealPlan);
         print(
-            'Loaded saved meal plan from local storage: ${savedMealPlan.title}');
+            'Loaded saved meal plan from local storage: ${savedMealPlan
+                .title}');
       }
       // Load saved diet preferences
       final savedDietPreferences =
-          await MealPlanStorageService.loadDietPreferences();
+      await MealPlanStorageService.loadDietPreferences();
       if (savedDietPreferences != null) {
         setState(() {
           _dietPlanPreferences = savedDietPreferences;
@@ -138,7 +140,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   void _completeDietSetup() async {
     final userPrefs = _userPreferences ??
-        Provider.of<UserProvider>(context, listen: false).user?.preferences;
+        Provider
+            .of<UserProvider>(context, listen: false)
+            .user
+            ?.preferences;
     if (userPrefs == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -160,7 +165,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       preferredCuisines: List<String>.from(_preferredCuisines),
       foodsToAvoid: List<String>.from(_foodsToAvoid),
       favoriteFoods: List<String>.from(_favoriteFoods),
-      mealFrequency: _mealFrequency?.toString().split('.').last ?? '',
+      mealFrequency: _mealFrequency
+          ?.toString()
+          .split('.')
+          .last ?? '',
       weeklyRotation: _weeklyRotation,
       remindersEnabled: _remindersEnabled,
       targetCalories: userPrefs.targetCalories,
@@ -174,7 +182,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
     try {
       print(
-          'Generating meal plan with preferences: ${_dietPlanPreferences!.targetCalories} calories');
+          'Generating meal plan with preferences: ${_dietPlanPreferences!
+              .targetCalories} calories');
       final mealPlan = await AIMealService.generateMealPlan(
         preferences: _dietPlanPreferences!,
         days: _selectedDays, // Use the user's selected duration
@@ -291,7 +300,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           const SizedBox(height: AppConstants.spacingL),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
               _getLoadingMessage(),
               style: AppTextStyles.heading4,
@@ -301,7 +310,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           const SizedBox(height: AppConstants.spacingS),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
               'Hang tight while we craft delicious, healthy recipes just for you!',
               style: AppTextStyles.bodyMedium
@@ -313,7 +322,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           // Progress bar and status
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Column(
               children: [
                 // Progress bar
@@ -327,7 +336,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                     return LinearProgressIndicator(
                       value: value,
                       backgroundColor:
-                          AppConstants.textTertiary.withOpacity(0.2),
+                      AppConstants.textTertiary.withOpacity(0.2),
                       valueColor: AlwaysStoppedAnimation<Color>(
                           AppConstants.primaryColor),
                       minHeight: 8,
@@ -338,7 +347,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                 // Progress text
                 Text(
                   _totalDays > 0
-                      ? 'Generated $_completedDays of $_totalDays days (${((_completedDays / _totalDays) * 100).toInt()}%)'
+                      ? 'Generated $_completedDays of $_totalDays days (${((_completedDays /
+                      _totalDays) * 100).toInt()}%)'
                       : 'Preparing your meal plan...',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppConstants.textSecondary,
@@ -450,14 +460,14 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               'Plan Duration',
               '$_selectedDays days',
               Icons.calendar_today,
-              () => _showDaysSelector(),
+                  () => _showDaysSelector(),
             ),
             const SizedBox(height: AppConstants.spacingS),
             _buildSettingRow(
               'Target Calories',
               '$_targetCalories cal/day',
               Icons.local_fire_department,
-              () => _showCaloriesSelector(),
+                  () => _showCaloriesSelector(),
             ),
             const SizedBox(height: AppConstants.spacingS),
             _buildSettingRow(
@@ -480,12 +490,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     );
   }
 
-  Widget _buildSettingRow(
-    String title,
-    String value,
-    IconData icon,
-    VoidCallback? onTap,
-  ) {
+  Widget _buildSettingRow(String title,
+      String value,
+      IconData icon,
+      VoidCallback? onTap,) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppConstants.radiusS),
@@ -667,12 +675,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     );
   }
 
-  Widget _buildNutritionCard(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildNutritionCard(String label,
+      String value,
+      IconData icon,
+      Color color,) {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingS),
       decoration: BoxDecoration(
@@ -1064,10 +1070,11 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MealDetailScreen(
-          meal: meal,
-          dayTitle: dayTitle,
-        ),
+        builder: (context) =>
+            MealDetailScreen(
+              meal: meal,
+              dayTitle: dayTitle,
+            ),
       ),
     );
   }
@@ -1120,8 +1127,11 @@ extension NutritionGoalExt on NutritionGoal {
 
 enum MealFrequencyOption {
   threeMeals,
-  threeMealsTwoSnacks,
-  intermittentFasting
+  threeMealsOneSnack,
+  fourMeals,
+  fourMealsOneSnack,
+  fiveMeals,
+  fiveMealsOneSnack
 }
 
 // 1. Add a new CaloriesStep widget
@@ -1156,7 +1166,7 @@ class _CaloriesStep extends StatelessWidget {
         const SizedBox(height: AppConstants.spacingS),
         Text('$targetCalories calories per day',
             style:
-                AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+            AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center),
         const SizedBox(height: AppConstants.spacingL),
       ],
@@ -1586,8 +1596,7 @@ class _FoodPreferencesStep extends StatelessWidget {
     );
   }
 
-  Widget _buildInputSection(
-    BuildContext context, {
+  Widget _buildInputSection(BuildContext context, {
     required String label,
     required String hint,
     required List<String> items,
@@ -1600,19 +1609,20 @@ class _FoodPreferencesStep extends StatelessWidget {
       children: [
         Text(label,
             style:
-                AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+            AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: AppConstants.spacingS),
         Wrap(
           spacing: AppConstants.spacingS,
           runSpacing: AppConstants.spacingS,
           children: items
-              .map((item) => Chip(
-                    label: Text(item),
-                    onDeleted: () => onRemove(item),
-                    backgroundColor:
-                        AppConstants.primaryColor.withOpacity(0.08),
-                    labelStyle: AppTextStyles.bodyMedium,
-                  ))
+              .map((item) =>
+              Chip(
+                label: Text(item),
+                onDeleted: () => onRemove(item),
+                backgroundColor:
+                AppConstants.primaryColor.withOpacity(0.08),
+                labelStyle: AppTextStyles.bodyMedium,
+              ))
               .toList(),
         ),
         const SizedBox(height: AppConstants.spacingS),
@@ -1627,7 +1637,7 @@ class _FoodPreferencesStep extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppConstants.radiusS),
                   ),
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 onSubmitted: (value) {
                   onAdd(value.trim());
@@ -1670,40 +1680,66 @@ class _MealFrequencyStep extends StatelessWidget {
         Text('How many meals would you like per day?',
             style: AppTextStyles.heading4),
         const SizedBox(height: AppConstants.spacingL),
-        Column(
-          children: [
-            _buildOptionCard(
-              context,
-              label: '3 main meals',
-              value: MealFrequencyOption.threeMeals,
-              selected: selected == MealFrequencyOption.threeMeals,
-              onTap: () => onSelect(MealFrequencyOption.threeMeals),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildOptionCard(
+                  context,
+                  label: '3 meals',
+                  value: MealFrequencyOption.threeMeals,
+                  selected: selected == MealFrequencyOption.threeMeals,
+                  onTap: () => onSelect(MealFrequencyOption.threeMeals),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildOptionCard(
+                  context,
+                  label: '3 meals + 1 snack',
+                  value: MealFrequencyOption.threeMealsOneSnack,
+                  selected: selected == MealFrequencyOption.threeMealsOneSnack,
+                  onTap: () => onSelect(MealFrequencyOption.threeMealsOneSnack),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildOptionCard(
+                  context,
+                  label: '4 meals',
+                  value: MealFrequencyOption.fourMeals,
+                  selected: selected == MealFrequencyOption.fourMeals,
+                  onTap: () => onSelect(MealFrequencyOption.fourMeals),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildOptionCard(
+                  context,
+                  label: '4 meals + 1 snack',
+                  value: MealFrequencyOption.fourMealsOneSnack,
+                  selected: selected == MealFrequencyOption.fourMealsOneSnack,
+                  onTap: () => onSelect(MealFrequencyOption.fourMealsOneSnack),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildOptionCard(
+                  context,
+                  label: '5 meals',
+                  value: MealFrequencyOption.fiveMeals,
+                  selected: selected == MealFrequencyOption.fiveMeals,
+                  onTap: () => onSelect(MealFrequencyOption.fiveMeals),
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildOptionCard(
+                  context,
+                  label: '5 meals + 1 snack',
+                  value: MealFrequencyOption.fiveMealsOneSnack,
+                  selected: selected == MealFrequencyOption.fiveMealsOneSnack,
+                  onTap: () => onSelect(MealFrequencyOption.fiveMealsOneSnack),
+                ),
+              ],
             ),
-            const SizedBox(height: AppConstants.spacingM),
-            _buildOptionCard(
-              context,
-              label: '3 meals + 2 snacks',
-              value: MealFrequencyOption.threeMealsTwoSnacks,
-              selected: selected == MealFrequencyOption.threeMealsTwoSnacks,
-              onTap: () => onSelect(MealFrequencyOption.threeMealsTwoSnacks),
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-            _buildOptionCard(
-              context,
-              label: 'Intermittent fasting (e.g., 16:8)',
-              value: MealFrequencyOption.intermittentFasting,
-              selected: selected == MealFrequencyOption.intermittentFasting,
-              onTap: () => onSelect(MealFrequencyOption.intermittentFasting),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: AppConstants.spacingL),
       ],
     );
   }
 
-  Widget _buildOptionCard(
-    BuildContext context, {
+  Widget _buildOptionCard(BuildContext context, {
     required String label,
     required MealFrequencyOption value,
     required bool selected,
@@ -1807,7 +1843,7 @@ class _PlanDurationStep extends StatelessWidget {
               Expanded(
                 child: Card(
                   color:
-                      weeklyRotation ? AppConstants.primaryColor : Colors.white,
+                  weeklyRotation ? AppConstants.primaryColor : Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppConstants.radiusM),
                     side: BorderSide(
@@ -1959,7 +1995,7 @@ class _FinalReviewStep extends StatelessWidget {
       child: SingleChildScrollView(
         child: Padding(
           padding:
-              const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+          const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -1995,10 +2031,10 @@ class _FinalReviewStep extends StatelessWidget {
                         icon: _iconFor('restrictions'),
                         label: 'Dietary Restrictions',
                         value: (userPreferences.dietaryRestrictions.isEmpty ||
-                                (userPreferences.dietaryRestrictions.length ==
-                                        1 &&
-                                    userPreferences.dietaryRestrictions.first ==
-                                        'None'))
+                            (userPreferences.dietaryRestrictions.length ==
+                                1 &&
+                                userPreferences.dietaryRestrictions.first ==
+                                    'None'))
                             ? 'None'
                             : userPreferences.dietaryRestrictions.join(', '),
                       ),
@@ -2007,7 +2043,7 @@ class _FinalReviewStep extends StatelessWidget {
                         icon: _iconFor('workout'),
                         label: 'Preferred Workouts',
                         value:
-                            userPreferences.preferredWorkoutStyles.join(', '),
+                        userPreferences.preferredWorkoutStyles.join(', '),
                       ),
                       // Add more fields as needed
                     ],
