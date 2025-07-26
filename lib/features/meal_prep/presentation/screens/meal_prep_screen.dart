@@ -78,7 +78,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       MealPlanModel? firestoreMealPlan;
       if (mealPlanId != null) {
         // Try to fetch the meal plan from Firestore
-        final doc = await FirebaseFirestore.instance.collection('meal_plans').doc(mealPlanId).get();
+        final doc = await FirebaseFirestore.instance
+            .collection('meal_plans')
+            .doc(mealPlanId)
+            .get();
         if (doc.exists) {
           firestoreMealPlan = MealPlanModel.fromJson(doc.data()!);
         }
@@ -90,9 +93,11 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         });
         // Optionally cache to local storage
         await MealPlanStorageService.saveMealPlan(firestoreMealPlan);
-        final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+        final mealPlanProvider =
+            Provider.of<MealPlanProvider>(context, listen: false);
         mealPlanProvider.setMealPlan(firestoreMealPlan);
-        print('Loaded meal plan from Firestore:  [32m${firestoreMealPlan.title} [0m');
+        print(
+            'Loaded meal plan from Firestore:  [32m${firestoreMealPlan.title} [0m');
         return;
       }
       // Fallback: Load saved meal plan from local storage
@@ -102,12 +107,15 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           _currentMealPlan = savedMealPlan;
           _showDietSetup = false;
         });
-        final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+        final mealPlanProvider =
+            Provider.of<MealPlanProvider>(context, listen: false);
         mealPlanProvider.setMealPlan(savedMealPlan);
-        print('Loaded saved meal plan from local storage: ${savedMealPlan.title}');
+        print(
+            'Loaded saved meal plan from local storage: ${savedMealPlan.title}');
       }
       // Load saved diet preferences
-      final savedDietPreferences = await MealPlanStorageService.loadDietPreferences();
+      final savedDietPreferences =
+          await MealPlanStorageService.loadDietPreferences();
       if (savedDietPreferences != null) {
         setState(() {
           _dietPlanPreferences = savedDietPreferences;
@@ -368,7 +376,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.hourglass_empty, size: 64, color: AppConstants.primaryColor),
+              Icon(Icons.hourglass_empty,
+                  size: 64, color: AppConstants.primaryColor),
               const SizedBox(height: AppConstants.spacingL),
               Text(
                 'Your meal plan will be ready shortly!',
@@ -378,7 +387,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               const SizedBox(height: AppConstants.spacingM),
               Text(
                 'Your personal trainer will prepare your AI-powered meal plan. You will receive a message when it is ready.',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
+                style: AppTextStyles.bodyMedium
+                    .copyWith(color: AppConstants.textSecondary),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1118,14 +1128,16 @@ enum MealFrequencyOption {
 class _CaloriesStep extends StatelessWidget {
   final int targetCalories;
   final ValueChanged<int> onChanged;
-  final VoidCallback onNext;
-  final VoidCallback onBack;
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+
   const _CaloriesStep({
     required this.targetCalories,
     required this.onChanged,
     required this.onNext,
     required this.onBack,
   });
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -1143,34 +1155,20 @@ class _CaloriesStep extends StatelessWidget {
         ),
         const SizedBox(height: AppConstants.spacingS),
         Text('$targetCalories calories per day',
-            style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            style:
+                AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center),
         const SizedBox(height: AppConstants.spacingL),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: onBack,
-                child: const Text('Back'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: onNext,
-                child: const Text('Next'),
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }
 }
 
+// 1. Refactor DietPlanSetupFlow to use Scaffold and bottomNavigationBar
 class DietPlanSetupFlow extends StatelessWidget {
   final int step;
-  final VoidCallback onNext;
-  final VoidCallback onBack;
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
   final NutritionGoal? selectedNutritionGoal;
   final ValueChanged<NutritionGoal> onSelectNutritionGoal;
   final List<String> preferredCuisines;
@@ -1189,14 +1187,14 @@ class DietPlanSetupFlow extends StatelessWidget {
   final TextEditingController favoriteController;
   final bool isPreviewLoading;
   final Map<String, List<String>> sampleDayPlan;
-  final VoidCallback onRegeneratePreview;
-  final VoidCallback onLooksGood;
-  final VoidCallback onCustomize;
+  final VoidCallback? onRegeneratePreview;
+  final VoidCallback? onLooksGood;
+  final VoidCallback? onCustomize;
   final bool weeklyRotation;
   final ValueChanged<bool> onToggleWeeklyRotation;
   final bool remindersEnabled;
   final ValueChanged<bool> onToggleReminders;
-  final VoidCallback onSavePlan;
+  final VoidCallback? onSavePlan;
   final UserPreferences? userPreferences;
   final int selectedDays;
   final int targetCalories;
@@ -1242,36 +1240,41 @@ class DietPlanSetupFlow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: AppConstants.spacingL),
-          _ProgressDots(current: step, total: totalSteps),
-          const SizedBox(height: AppConstants.spacingL),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: AppConstants.spacingL),
-              child: _buildStepContent(context),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppConstants.spacingL),
+            _ProgressDots(current: step, total: totalSteps),
+            const SizedBox(height: AppConstants.spacingL),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: AppConstants.spacingL),
+                child: _buildStepContent(context, withButtons: false),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: _buildNavBar(context),
       ),
     );
   }
 
-  Widget _buildStepContent(BuildContext context) {
+  Widget _buildStepContent(BuildContext context, {bool withButtons = false}) {
     if (userPreferences == null) {
       return const Center(child: CircularProgressIndicator());
     }
-
     switch (step) {
       case 0:
         return _GoalSelectionStep(
           selected: selectedNutritionGoal,
           onSelect: onSelectNutritionGoal,
-          onNext: onNext,
         );
       case 1:
         return _FoodPreferencesStep(
@@ -1287,39 +1290,124 @@ class DietPlanSetupFlow extends StatelessWidget {
           cuisineController: cuisineController,
           avoidController: avoidController,
           favoriteController: favoriteController,
-          onNext: onNext,
         );
       case 2:
         return _MealFrequencyStep(
           selected: mealFrequency,
           onSelect: onSelectMealFrequency,
-          onNext: onNext,
         );
       case 3:
         return _CaloriesStep(
           targetCalories: targetCalories,
           onChanged: onTargetCaloriesChanged,
-          onNext: onNext,
-          onBack: onBack,
+          onNext: null,
+          onBack: null,
         );
       case 4:
-        return _PersonalizationConfirmationStep(
-          onLooksGood: onNext,
-          onCustomize: onCustomize,
-        );
+        return _PersonalizationConfirmationStep();
       case 5:
         return _PlanDurationStep(
           weeklyRotation: weeklyRotation,
           onToggleWeeklyRotation: onToggleWeeklyRotation,
           remindersEnabled: remindersEnabled,
           onToggleReminders: onToggleReminders,
-          onNext: onNext,
         );
       case 6:
         return _FinalReviewStep(
           userPreferences: userPreferences!,
           selectedDays: selectedDays,
-          onSavePlan: onSavePlan,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildNavBar(BuildContext context) {
+    switch (step) {
+      case 0:
+        return SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: CustomButton(
+            text: 'Next',
+            onPressed: selectedNutritionGoal != null ? onNext : null,
+          ),
+        );
+      case 1:
+        return SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: CustomButton(
+            text: 'Next',
+            onPressed: onNext,
+          ),
+        );
+      case 2:
+        return SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: CustomButton(
+            text: 'Next',
+            onPressed: mealFrequency != null ? onNext : null,
+          ),
+        );
+      case 3:
+        return Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: onBack,
+                child: const Text('Back'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: onNext,
+                child: const Text('Next'),
+              ),
+            ),
+          ],
+        );
+      case 4:
+        return Row(
+          children: [
+            Expanded(
+              child: CustomButton(
+                text: 'Looks good',
+                onPressed: onNext,
+                icon: Icons.check_circle,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: CustomButton(
+                text: 'Customize',
+                onPressed: onCustomize,
+                icon: Icons.edit,
+              ),
+            ),
+          ],
+        );
+      case 5:
+        return SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: CustomButton(
+            text: 'Next',
+            onPressed: onNext,
+            icon: Icons.arrow_forward,
+          ),
+        );
+      case 6:
+        return SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: CustomButton(
+            text: 'Save Plan',
+            onPressed: onSavePlan,
+            icon: Icons.save,
+          ),
         );
       default:
         return const SizedBox.shrink();
@@ -1365,15 +1453,14 @@ class _ProgressDots extends StatelessWidget {
   }
 }
 
+// 1. Remove navigation buttons from step widgets
 class _GoalSelectionStep extends StatelessWidget {
   final NutritionGoal? selected;
   final ValueChanged<NutritionGoal> onSelect;
-  final VoidCallback onNext;
 
   const _GoalSelectionStep({
     required this.selected,
     required this.onSelect,
-    required this.onNext,
   });
 
   @override
@@ -1418,19 +1505,12 @@ class _GoalSelectionStep extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: AppConstants.spacingL),
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: CustomButton(
-            text: 'Next',
-            onPressed: selected != null ? onNext : null,
-          ),
-        ),
       ],
     );
   }
 }
 
+// _FoodPreferencesStep
 class _FoodPreferencesStep extends StatelessWidget {
   final List<String> preferredCuisines;
   final ValueChanged<String> onAddCuisine;
@@ -1444,7 +1524,7 @@ class _FoodPreferencesStep extends StatelessWidget {
   final TextEditingController cuisineController;
   final TextEditingController avoidController;
   final TextEditingController favoriteController;
-  final VoidCallback onNext;
+  final VoidCallback? onNext;
 
   const _FoodPreferencesStep({
     required this.preferredCuisines,
@@ -1459,7 +1539,7 @@ class _FoodPreferencesStep extends StatelessWidget {
     required this.cuisineController,
     required this.avoidController,
     required this.favoriteController,
-    required this.onNext,
+    this.onNext,
   });
 
   @override
@@ -1501,14 +1581,6 @@ class _FoodPreferencesStep extends StatelessWidget {
             onRemove: onRemoveFavorite,
           ),
           const SizedBox(height: AppConstants.spacingL),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: CustomButton(
-              text: 'Next',
-              onPressed: onNext,
-            ),
-          ),
         ],
       ),
     );
@@ -1582,12 +1654,12 @@ class _FoodPreferencesStep extends StatelessWidget {
 class _MealFrequencyStep extends StatelessWidget {
   final MealFrequencyOption? selected;
   final ValueChanged<MealFrequencyOption> onSelect;
-  final VoidCallback onNext;
+  final VoidCallback? onNext;
 
   const _MealFrequencyStep({
     required this.selected,
     required this.onSelect,
-    required this.onNext,
+    this.onNext,
   });
 
   @override
@@ -1626,14 +1698,6 @@ class _MealFrequencyStep extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppConstants.spacingL),
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: CustomButton(
-            text: 'Next',
-            onPressed: selected != null ? onNext : null,
-          ),
-        ),
       ],
     );
   }
@@ -1690,12 +1754,12 @@ class _MealFrequencyStep extends StatelessWidget {
 }
 
 class _PersonalizationConfirmationStep extends StatelessWidget {
-  final VoidCallback onLooksGood;
-  final VoidCallback onCustomize;
+  final VoidCallback? onLooksGood;
+  final VoidCallback? onCustomize;
 
   const _PersonalizationConfirmationStep({
-    required this.onLooksGood,
-    required this.onCustomize,
+    this.onLooksGood,
+    this.onCustomize,
   });
 
   @override
@@ -1709,25 +1773,6 @@ class _PersonalizationConfirmationStep extends StatelessWidget {
           Text('Would you like to proceed or further customize your plan?',
               style: AppTextStyles.bodyMedium),
           const SizedBox(height: AppConstants.spacingL),
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton(
-                  text: 'Looks good',
-                  onPressed: onLooksGood,
-                  icon: Icons.check_circle,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: CustomButton(
-                  text: 'Customize',
-                  onPressed: onCustomize,
-                  icon: Icons.edit,
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -1739,14 +1784,14 @@ class _PlanDurationStep extends StatelessWidget {
   final ValueChanged<bool> onToggleWeeklyRotation;
   final bool remindersEnabled;
   final ValueChanged<bool> onToggleReminders;
-  final VoidCallback onNext;
+  final VoidCallback? onNext;
 
   const _PlanDurationStep({
     required this.weeklyRotation,
     required this.onToggleWeeklyRotation,
     required this.remindersEnabled,
     required this.onToggleReminders,
-    required this.onNext,
+    this.onNext,
   });
 
   @override
@@ -1858,15 +1903,6 @@ class _PlanDurationStep extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppConstants.spacingL),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: CustomButton(
-              text: 'Next',
-              onPressed: onNext,
-              icon: Icons.arrow_forward,
-            ),
-          ),
         ],
       ),
     );
@@ -1876,12 +1912,12 @@ class _PlanDurationStep extends StatelessWidget {
 class _FinalReviewStep extends StatelessWidget {
   final UserPreferences userPreferences;
   final int selectedDays;
-  final VoidCallback onSavePlan;
+  final VoidCallback? onSavePlan;
 
   const _FinalReviewStep({
     required this.userPreferences,
     required this.selectedDays,
-    required this.onSavePlan,
+    this.onSavePlan,
   });
 
   String _fitnessGoalName(FitnessGoal goal) {
@@ -1976,16 +2012,6 @@ class _FinalReviewStep extends StatelessWidget {
                       // Add more fields as needed
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: AppConstants.spacingXL),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: CustomButton(
-                  text: 'Save Plan',
-                  onPressed: onSavePlan,
-                  icon: Icons.save,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingXL),
