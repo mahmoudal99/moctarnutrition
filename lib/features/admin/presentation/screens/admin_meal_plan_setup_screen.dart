@@ -22,6 +22,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   final List<String> _foodsToAvoid = [];
   final List<String> _favoriteFoods = [];
   MealFrequencyOption? _mealFrequency;
+  String? _cheatDay;
   bool _weeklyRotation = true;
   bool _remindersEnabled = false;
   int _selectedDays = 7;
@@ -77,6 +78,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         foodsToAvoid: List<String>.from(_foodsToAvoid),
         favoriteFoods: List<String>.from(_favoriteFoods),
         mealFrequency: _mealFrequency?.toString().split('.').last ?? '',
+        cheatDay: _cheatDay,
         weeklyRotation: _weeklyRotation,
         remindersEnabled: _remindersEnabled,
         targetCalories: _targetCalories,
@@ -262,6 +264,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
               onRemoveFavorite: (food) => setState(() => _favoriteFoods.remove(food)),
               mealFrequency: _mealFrequency,
               onSelectMealFrequency: (freq) => setState(() => _mealFrequency = freq),
+              cheatDay: _cheatDay,
+              onCheatDayChanged: (day) => setState(() => _cheatDay = day),
               cuisineController: _cuisineController,
               avoidController: _avoidController,
               favoriteController: _favoriteController,

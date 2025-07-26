@@ -255,6 +255,7 @@ class DietPlanPreferences {
 
   // Meal prep preferences
   final String mealFrequency; // e.g. "3 meals", "3 meals + 2 snacks", "16:8 fasting"
+  final String? cheatDay; // e.g. "Monday", "Saturday", null for no cheat day
   final bool weeklyRotation;
   final bool remindersEnabled;
 
@@ -274,6 +275,7 @@ class DietPlanPreferences {
     required this.foodsToAvoid,
     required this.favoriteFoods,
     required this.mealFrequency,
+    this.cheatDay,
     required this.weeklyRotation,
     required this.remindersEnabled,
     required this.targetCalories,

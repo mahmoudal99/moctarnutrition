@@ -42,6 +42,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   final List<String> _foodsToAvoid = [];
   final List<String> _favoriteFoods = [];
   MealFrequencyOption? _mealFrequency;
+  String? _cheatDay;
   bool _weeklyRotation = true;
   bool _remindersEnabled = false;
 
@@ -169,9 +170,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           ?.toString()
           .split('.')
           .last ?? '',
+      cheatDay: _cheatDay,
       weeklyRotation: _weeklyRotation,
       remindersEnabled: _remindersEnabled,
-      targetCalories: userPrefs.targetCalories,
+      targetCalories: _targetCalories,
     );
     // Generate the actual meal plan using AI
     setState(() {
@@ -1209,6 +1211,8 @@ class DietPlanSetupFlow extends StatelessWidget {
   final int selectedDays;
   final int targetCalories;
   final ValueChanged<int> onTargetCaloriesChanged;
+  final String? cheatDay;
+  final ValueChanged<String?> onCheatDayChanged;
 
   const DietPlanSetupFlow({
     required this.step,
@@ -1244,9 +1248,11 @@ class DietPlanSetupFlow extends StatelessWidget {
     required this.selectedDays,
     required this.targetCalories,
     required this.onTargetCaloriesChanged,
+    required this.cheatDay,
+    required this.onCheatDayChanged,
   });
 
-  static const int totalSteps = 7; // Increased by 1
+  static const int totalSteps = 8; // Increased by 1 for cheat day step
 
   @override
   Widget build(BuildContext context) {
@@ -1314,15 +1320,20 @@ class DietPlanSetupFlow extends StatelessWidget {
           onBack: null,
         );
       case 4:
-        return _PersonalizationConfirmationStep();
+        return _CheatDayStep(
+          selectedDay: cheatDay,
+          onSelect: onCheatDayChanged,
+        );
       case 5:
+        return _PersonalizationConfirmationStep();
+      case 6:
         return _PlanDurationStep(
           weeklyRotation: weeklyRotation,
           onToggleWeeklyRotation: onToggleWeeklyRotation,
           remindersEnabled: remindersEnabled,
           onToggleReminders: onToggleReminders,
         );
-      case 6:
+      case 7:
         return _FinalReviewStep(
           userPreferences: userPreferences!,
           selectedDays: selectedDays,
@@ -1383,6 +1394,24 @@ class DietPlanSetupFlow extends StatelessWidget {
         return Row(
           children: [
             Expanded(
+              child: OutlinedButton(
+                onPressed: onBack,
+                child: const Text('Back'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: cheatDay != null ? onNext : null,
+                child: const Text('Next'),
+              ),
+            ),
+          ],
+        );
+      case 5:
+        return Row(
+          children: [
+            Expanded(
               child: CustomButton(
                 text: 'Looks good',
                 onPressed: onNext,
@@ -1399,7 +1428,7 @@ class DietPlanSetupFlow extends StatelessWidget {
             ),
           ],
         );
-      case 5:
+      case 6:
         return SizedBox(
           width: double.infinity,
           height: 52,
@@ -1409,7 +1438,7 @@ class DietPlanSetupFlow extends StatelessWidget {
             icon: Icons.arrow_forward,
           ),
         );
-      case 6:
+      case 7:
         return SizedBox(
           width: double.infinity,
           height: 52,
@@ -1516,6 +1545,117 @@ class _GoalSelectionStep extends StatelessWidget {
         ),
         const SizedBox(height: AppConstants.spacingL),
       ],
+    );
+  }
+}
+
+// _CheatDayStep
+class _CheatDayStep extends StatelessWidget {
+  final String? selectedDay;
+  final ValueChanged<String?> onSelect;
+
+  const _CheatDayStep({
+    required this.selectedDay,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final daysOfWeek = [
+      'Monday',
+      'Tuesday', 
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Choose their cheat day',
+            style: AppTextStyles.heading4),
+        const SizedBox(height: AppConstants.spacingS),
+        Text('Select one day per week where you can enjoy your favorite foods',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppConstants.textSecondary,
+            )),
+        const SizedBox(height: AppConstants.spacingL),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ...daysOfWeek.map((day) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
+                  child: _buildDayCard(
+                    context,
+                    day: day,
+                    isSelected: selectedDay == day,
+                    onTap: () => onSelect(day),
+                  ),
+                )),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildDayCard(
+                  context,
+                  day: 'No cheat day',
+                  isSelected: selectedDay == null,
+                  onTap: () => onSelect(null),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDayCard(
+    BuildContext context, {
+    required String day,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        color: isSelected ? AppConstants.primaryColor : Colors.white,
+        elevation: isSelected ? 2 : 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+          side: BorderSide(
+            color: isSelected
+                ? AppConstants.primaryColor
+                : AppConstants.textTertiary.withOpacity(0.15),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          child: Row(
+            children: [
+              Icon(
+                isSelected ? Icons.check_circle : Icons.circle_outlined,
+                color: isSelected
+                    ? AppConstants.surfaceColor
+                    : AppConstants.primaryColor,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  day,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: isSelected
+                        ? AppConstants.surfaceColor
+                        : AppConstants.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

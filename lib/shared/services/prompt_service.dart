@@ -196,6 +196,7 @@ You are a professional nutritionist. Generate a $days-day personalized meal plan
 - Favorite Foods: ${preferences.favoriteFoods.join(', ').isEmpty ? 'None' : preferences.favoriteFoods.join(', ')}
 - Foods to Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
 - Meal Frequency: ${preferences.mealFrequency} meals/day
+- Cheat Day: ${preferences.cheatDay ?? 'None'}
 - Weekly Rotation: ${preferences.weeklyRotation ? 'Yes' : 'No'}
 
 ### Dietary Restrictions (CRITICAL)
@@ -210,6 +211,7 @@ You are a professional nutritionist. Generate a $days-day personalized meal plan
 ### Requirements
 - Generate $days days of ${preferences.mealFrequency} meals each (breakfast, lunch, dinner, snacks).
 - Total daily calories: ${preferences.targetCalories}.
+- Cheat Day: ${preferences.cheatDay != null ? 'On ${preferences.cheatDay}, allow for slightly more indulgent meals while maintaining nutritional balance. Include favorite foods and comfort dishes.' : 'No cheat day specified - maintain consistent healthy eating throughout the week.'}
 - Each meal must include:
   - Name: Unique and descriptive.
   - Description: Brief, appealing summary.

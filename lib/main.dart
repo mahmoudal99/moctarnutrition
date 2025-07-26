@@ -35,89 +35,89 @@ late final GoRouter _router;
 
 GoRouter createRouter(AuthProvider authProvider) {
   return GoRouter(
-    initialLocation: '/',
+  initialLocation: '/',
     refreshListenable: authProvider,
-    routes: [
-      // Main route that handles authentication flow
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
+  routes: [
+    // Main route that handles authentication flow
+    GoRoute(
+      path: '/',
+      builder: (context, state) {
           final authProvider =
               Provider.of<AuthProvider>(context, listen: false);
-          if (authProvider.isLoading) {
-            return const SplashScreen();
-          }
-          if (!authProvider.isAuthenticated) {
-            return const GetStartedScreen();
-          }
+            if (authProvider.isLoading) {
+              return const SplashScreen();
+            }
+            if (!authProvider.isAuthenticated) {
+              return const GetStartedScreen();
+            }
           if (authProvider.userModel?.role == UserRole.admin) {
             // The redirect will handle navigation, just show a placeholder
             return const SizedBox.shrink();
           }
-          return const MainNavigation(child: WorkoutsScreen());
-        },
-      ),
+            return const MainNavigation(child: WorkoutsScreen());
+      },
+    ),
 
-      // Get Started Route
-      GoRoute(
-        path: '/get-started',
-        builder: (context, state) => const GetStartedScreen(),
-      ),
+    // Get Started Route
+    GoRoute(
+      path: '/get-started',
+      builder: (context, state) => const GetStartedScreen(),
+    ),
 
-      // Auth Route (for sign in - existing users)
-      GoRoute(
-        path: '/auth',
-        builder: (context, state) => const AuthScreen(),
-      ),
+    // Auth Route (for sign in - existing users)
+    GoRoute(
+      path: '/auth',
+      builder: (context, state) => const AuthScreen(),
+    ),
 
-      // Auth Route (for sign up - new users after onboarding)
-      GoRoute(
-        path: '/auth-signup',
-        builder: (context, state) => const AuthScreen(isSignUp: true),
-      ),
+    // Auth Route (for sign up - new users after onboarding)
+    GoRoute(
+      path: '/auth-signup',
+      builder: (context, state) => const AuthScreen(isSignUp: true),
+    ),
 
-      // Password Reset Route
-      GoRoute(
-        path: '/password-reset',
-        builder: (context, state) => const PasswordResetScreen(),
-      ),
+    // Password Reset Route
+    GoRoute(
+      path: '/password-reset',
+      builder: (context, state) => const PasswordResetScreen(),
+    ),
 
-      // Onboarding Route
-      GoRoute(
-        path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
-      ),
+    // Onboarding Route
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
 
-      // Subscription Route
-      GoRoute(
-        path: '/subscription',
-        builder: (context, state) => const SubscriptionScreen(),
-      ),
+    // Subscription Route
+    GoRoute(
+      path: '/subscription',
+      builder: (context, state) => const SubscriptionScreen(),
+    ),
 
-      // Main App Routes (protected)
-      ShellRoute(
-        builder: (context, state, child) => MainNavigation(child: child),
-        routes: [
-          GoRoute(
-            path: '/home',
-            builder: (context, state) => const WorkoutsScreen(),
-          ),
-          GoRoute(
-            path: '/workouts',
-            builder: (context, state) => const WorkoutsScreen(),
-          ),
-          GoRoute(
-            path: '/meal-prep',
-            builder: (context, state) => const MealPrepScreen(),
-          ),
-          GoRoute(
-            path: '/trainers',
-            builder: (context, state) => const TrainersScreen(),
-          ),
-          GoRoute(
-            path: '/admin',
-            builder: (context, state) => const AdminDashboardScreen(),
-          ),
+    // Main App Routes (protected)
+    ShellRoute(
+      builder: (context, state, child) => MainNavigation(child: child),
+      routes: [
+        GoRoute(
+          path: '/home',
+          builder: (context, state) => const WorkoutsScreen(),
+        ),
+        GoRoute(
+          path: '/workouts',
+          builder: (context, state) => const WorkoutsScreen(),
+        ),
+        GoRoute(
+          path: '/meal-prep',
+          builder: (context, state) => const MealPrepScreen(),
+        ),
+        GoRoute(
+          path: '/trainers',
+          builder: (context, state) => const TrainersScreen(),
+        ),
+        GoRoute(
+          path: '/admin',
+          builder: (context, state) => const AdminDashboardScreen(),
+        ),
           GoRoute(
             path: '/admin-users',
             builder: (context, state) => const AdminUserListScreen(),
@@ -126,32 +126,32 @@ GoRouter createRouter(AuthProvider authProvider) {
             path: '/admin-home',
             builder: (context, state) => const AdminHomeScreen(),
           ),
-          GoRoute(
-            path: '/profile',
-            builder: (context, state) => const ProfileScreen(),
-          ),
-          GoRoute(
-            path: '/checkin',
-            builder: (context, state) => const CheckinScreen(),
-          ),
-          GoRoute(
-            path: '/checkin/form',
-            builder: (context, state) => const CheckinFormScreen(),
-          ),
-          GoRoute(
-            path: '/checkin/details',
-            builder: (context, state) {
-              final checkin = state.extra as CheckinModel;
-              return CheckinDetailsScreen(checkin: checkin);
-            },
-          ),
-          GoRoute(
-            path: '/checkin/history',
-            builder: (context, state) => const CheckinHistoryScreen(),
-          ),
-        ],
-      ),
-    ],
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/checkin',
+          builder: (context, state) => const CheckinScreen(),
+        ),
+        GoRoute(
+          path: '/checkin/form',
+          builder: (context, state) => const CheckinFormScreen(),
+        ),
+        GoRoute(
+          path: '/checkin/details',
+          builder: (context, state) {
+            final checkin = state.extra as CheckinModel;
+            return CheckinDetailsScreen(checkin: checkin);
+          },
+        ),
+        GoRoute(
+          path: '/checkin/history',
+          builder: (context, state) => const CheckinHistoryScreen(),
+        ),
+      ],
+    ),
+  ],
     redirect: (context, state) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       if (authProvider.isLoading) return null;

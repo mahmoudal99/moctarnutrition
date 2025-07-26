@@ -48,26 +48,26 @@ class _MainNavigationState extends State<MainNavigation> {
     // Non-admins: original tabs
     return [
       const _NavItem(
-        icon: Icons.fitness_center,
-        label: 'Workouts',
-        route: '/workouts',
-      ),
+      icon: Icons.fitness_center,
+      label: 'Workouts',
+      route: '/workouts',
+    ),
       const _NavItem(
-        icon: Icons.restaurant_menu,
-        label: 'Meal Prep',
-        route: '/meal-prep',
-      ),
+      icon: Icons.restaurant_menu,
+      label: 'Meal Prep',
+      route: '/meal-prep',
+    ),
       const _NavItem(
-        icon: Icons.person,
-        label: 'Trainers',
-        route: '/trainers',
-      ),
+      icon: Icons.person,
+      label: 'Trainers',
+      route: '/trainers',
+    ),
       const _NavItem(
-        icon: Icons.account_circle,
-        label: 'Profile',
-        route: '/profile',
-      ),
-    ];
+      icon: Icons.account_circle,
+      label: 'Profile',
+      route: '/profile',
+    ),
+  ];
   }
 
   @override
@@ -88,27 +88,27 @@ class _MainNavigationState extends State<MainNavigation> {
         final location = GoRouter.of(context).routeInformationProvider.value.uri.toString();
         final idx = items.indexWhere((item) => location == item.route);
         final currentIndex = idx != -1 ? idx : _currentIndex;
-        return Scaffold(
-          body: widget.child,
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
+    return Scaffold(
+      body: widget.child,
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
             currentIndex: currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
               context.go(items[index].route);
-            },
-            selectedItemColor: AppConstants.primaryColor,
-            unselectedItemColor: AppConstants.textTertiary,
-            showUnselectedLabels: true,
+        },
+        selectedItemColor: AppConstants.primaryColor,
+        unselectedItemColor: AppConstants.textTertiary,
+        showUnselectedLabels: true,
             items: items
-                .map((item) => BottomNavigationBarItem(
-                      icon: Icon(item.icon),
-                      label: item.label,
-                    ))
-                .toList(),
-          ),
+            .map((item) => BottomNavigationBarItem(
+                  icon: Icon(item.icon),
+                  label: item.label,
+                ))
+            .toList(),
+      ),
         );
       },
     );
