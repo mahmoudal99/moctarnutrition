@@ -387,7 +387,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               ),
               const SizedBox(height: AppConstants.spacingM),
               Text(
-                'Your personal trainer will prepare your AI-powered meal plan. You will receive a message when it is ready.',
+                'Moctar will prepare your meal plan. You will receive a message when it is ready.',
                 style: AppTextStyles.bodyMedium
                     .copyWith(color: AppConstants.textSecondary),
                 textAlign: TextAlign.center,
