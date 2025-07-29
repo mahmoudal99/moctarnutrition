@@ -18,9 +18,6 @@ class AdminMealPlanSetupScreen extends StatefulWidget {
 class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   int _setupStep = 0;
   NutritionGoal? _selectedNutritionGoal;
-  final List<String> _preferredCuisines = [];
-  final List<String> _foodsToAvoid = [];
-  final List<String> _favoriteFoods = [];
   MealFrequencyOption? _mealFrequency;
   String? _cheatDay;
   bool _weeklyRotation = true;
@@ -31,16 +28,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   int _completedDays = 0;
   int _totalDays = 0;
 
-  // Controllers for text input
-  final TextEditingController _cuisineController = TextEditingController();
-  final TextEditingController _avoidController = TextEditingController();
-  final TextEditingController _favoriteController = TextEditingController();
-
   @override
   void dispose() {
-    _cuisineController.dispose();
-    _avoidController.dispose();
-    _favoriteController.dispose();
     super.dispose();
   }
 
@@ -74,9 +63,9 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         dietaryRestrictions: prefs.dietaryRestrictions,
         preferredWorkoutStyles: prefs.preferredWorkoutStyles,
         nutritionGoal: _selectedNutritionGoal?.label ?? '',
-        preferredCuisines: List<String>.from(_preferredCuisines),
-        foodsToAvoid: List<String>.from(_foodsToAvoid),
-        favoriteFoods: List<String>.from(_favoriteFoods),
+        preferredCuisines: List<String>.from(prefs.preferredCuisines),
+        foodsToAvoid: List<String>.from(prefs.foodsToAvoid),
+        favoriteFoods: List<String>.from(prefs.favoriteFoods),
         mealFrequency: _mealFrequency?.toString().split('.').last ?? '',
         cheatDay: _cheatDay,
         weeklyRotation: _weeklyRotation,
@@ -241,34 +230,10 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
               onBack: _onBackStep,
               selectedNutritionGoal: _selectedNutritionGoal,
               onSelectNutritionGoal: (goal) => setState(() => _selectedNutritionGoal = goal),
-              preferredCuisines: _preferredCuisines,
-              onAddCuisine: (cuisine) {
-                if (cuisine.isNotEmpty && !_preferredCuisines.contains(cuisine)) {
-                  setState(() => _preferredCuisines.add(cuisine));
-                }
-              },
-              onRemoveCuisine: (cuisine) => setState(() => _preferredCuisines.remove(cuisine)),
-              foodsToAvoid: _foodsToAvoid,
-              onAddAvoid: (food) {
-                if (food.isNotEmpty && !_foodsToAvoid.contains(food)) {
-                  setState(() => _foodsToAvoid.add(food));
-                }
-              },
-              onRemoveAvoid: (food) => setState(() => _foodsToAvoid.remove(food)),
-              favoriteFoods: _favoriteFoods,
-              onAddFavorite: (food) {
-                if (food.isNotEmpty && !_favoriteFoods.contains(food)) {
-                  setState(() => _favoriteFoods.add(food));
-                }
-              },
-              onRemoveFavorite: (food) => setState(() => _favoriteFoods.remove(food)),
               mealFrequency: _mealFrequency,
               onSelectMealFrequency: (freq) => setState(() => _mealFrequency = freq),
               cheatDay: _cheatDay,
               onCheatDayChanged: (day) => setState(() => _cheatDay = day),
-              cuisineController: _cuisineController,
-              avoidController: _avoidController,
-              favoriteController: _favoriteController,
               isPreviewLoading: false,
               sampleDayPlan: const {}, // Not used in admin flow for now
               onRegeneratePreview: () {},

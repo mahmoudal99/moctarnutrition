@@ -38,18 +38,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   bool _showDietSetup = false;
   int _setupStep = 0;
   NutritionGoal? _selectedNutritionGoal;
-  final List<String> _preferredCuisines = [];
-  final List<String> _foodsToAvoid = [];
-  final List<String> _favoriteFoods = [];
   MealFrequencyOption? _mealFrequency;
   String? _cheatDay;
   bool _weeklyRotation = true;
   bool _remindersEnabled = false;
-
-  // Controllers for text input
-  final TextEditingController _cuisineController = TextEditingController();
-  final TextEditingController _avoidController = TextEditingController();
-  final TextEditingController _favoriteController = TextEditingController();
 
   // For AI preview step
   // bool _isPreviewLoading = false;
@@ -57,9 +49,6 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   @override
   void dispose() {
-    _cuisineController.dispose();
-    _avoidController.dispose();
-    _favoriteController.dispose();
     super.dispose();
   }
 
@@ -163,9 +152,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       dietaryRestrictions: userPrefs.dietaryRestrictions,
       preferredWorkoutStyles: userPrefs.preferredWorkoutStyles,
       nutritionGoal: _selectedNutritionGoal?.label ?? '',
-      preferredCuisines: List<String>.from(_preferredCuisines),
-      foodsToAvoid: List<String>.from(_foodsToAvoid),
-      favoriteFoods: List<String>.from(_favoriteFoods),
+      preferredCuisines: List<String>.from(userPrefs.preferredCuisines),
+      foodsToAvoid: List<String>.from(userPrefs.foodsToAvoid),
+      favoriteFoods: List<String>.from(userPrefs.favoriteFoods),
       mealFrequency: _mealFrequency
           ?.toString()
           .split('.')
@@ -1183,20 +1172,8 @@ class DietPlanSetupFlow extends StatelessWidget {
   final VoidCallback? onBack;
   final NutritionGoal? selectedNutritionGoal;
   final ValueChanged<NutritionGoal> onSelectNutritionGoal;
-  final List<String> preferredCuisines;
-  final ValueChanged<String> onAddCuisine;
-  final ValueChanged<String> onRemoveCuisine;
-  final List<String> foodsToAvoid;
-  final ValueChanged<String> onAddAvoid;
-  final ValueChanged<String> onRemoveAvoid;
-  final List<String> favoriteFoods;
-  final ValueChanged<String> onAddFavorite;
-  final ValueChanged<String> onRemoveFavorite;
   final MealFrequencyOption? mealFrequency;
   final ValueChanged<MealFrequencyOption> onSelectMealFrequency;
-  final TextEditingController cuisineController;
-  final TextEditingController avoidController;
-  final TextEditingController favoriteController;
   final bool isPreviewLoading;
   final Map<String, List<String>> sampleDayPlan;
   final VoidCallback? onRegeneratePreview;
@@ -1220,20 +1197,8 @@ class DietPlanSetupFlow extends StatelessWidget {
     required this.onBack,
     required this.selectedNutritionGoal,
     required this.onSelectNutritionGoal,
-    required this.preferredCuisines,
-    required this.onAddCuisine,
-    required this.onRemoveCuisine,
-    required this.foodsToAvoid,
-    required this.onAddAvoid,
-    required this.onRemoveAvoid,
-    required this.favoriteFoods,
-    required this.onAddFavorite,
-    required this.onRemoveFavorite,
     required this.mealFrequency,
     required this.onSelectMealFrequency,
-    required this.cuisineController,
-    required this.avoidController,
-    required this.favoriteController,
     required this.isPreviewLoading,
     required this.sampleDayPlan,
     required this.onRegeneratePreview,
@@ -1252,7 +1217,7 @@ class DietPlanSetupFlow extends StatelessWidget {
     required this.onCheatDayChanged,
   });
 
-  static const int totalSteps = 8; // Increased by 1 for cheat day step
+  static const int totalSteps = 7; // Reduced by 1 since food preferences moved to onboarding
 
   @override
   Widget build(BuildContext context) {
@@ -1293,47 +1258,32 @@ class DietPlanSetupFlow extends StatelessWidget {
           onSelect: onSelectNutritionGoal,
         );
       case 1:
-        return _FoodPreferencesStep(
-          preferredCuisines: preferredCuisines,
-          onAddCuisine: onAddCuisine,
-          onRemoveCuisine: onRemoveCuisine,
-          foodsToAvoid: foodsToAvoid,
-          onAddAvoid: onAddAvoid,
-          onRemoveAvoid: onRemoveAvoid,
-          favoriteFoods: favoriteFoods,
-          onAddFavorite: onAddFavorite,
-          onRemoveFavorite: onRemoveFavorite,
-          cuisineController: cuisineController,
-          avoidController: avoidController,
-          favoriteController: favoriteController,
-        );
-      case 2:
         return _MealFrequencyStep(
           selected: mealFrequency,
           onSelect: onSelectMealFrequency,
         );
-      case 3:
+      case 2:
         return _CaloriesStep(
           targetCalories: targetCalories,
           onChanged: onTargetCaloriesChanged,
           onNext: null,
           onBack: null,
         );
-      case 4:
+      case 3:
         return _CheatDayStep(
           selectedDay: cheatDay,
           onSelect: onCheatDayChanged,
         );
-      case 5:
+      case 4:
         return _PersonalizationConfirmationStep();
-      case 6:
+      case 5:
         return _PlanDurationStep(
           weeklyRotation: weeklyRotation,
           onToggleWeeklyRotation: onToggleWeeklyRotation,
           remindersEnabled: remindersEnabled,
           onToggleReminders: onToggleReminders,
         );
-      case 7:
+      case 6:
         return _FinalReviewStep(
           userPreferences: userPreferences!,
           selectedDays: selectedDays,

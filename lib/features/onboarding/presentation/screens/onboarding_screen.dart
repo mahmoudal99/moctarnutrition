@@ -15,6 +15,7 @@ import '../steps/onboarding_dietary_restrictions_step.dart';
 import '../steps/onboarding_workout_styles_step.dart';
 import '../steps/onboarding_welcome_step.dart';
 import '../steps/onboarding_schedule_step.dart';
+import '../steps/onboarding_food_preferences_step.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/services/auth_service.dart';
@@ -37,6 +38,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<String> _selectedDietaryRestrictions = [];
   final List<String> _selectedWorkoutStyles = [];
   int _targetCalories = 2000;
+
+  // Food preferences
+  final List<String> _preferredCuisines = [];
+  final List<String> _foodsToAvoid = [];
+  final List<String> _favoriteFoods = [];
+  final TextEditingController _cuisineController = TextEditingController();
+  final TextEditingController _avoidController = TextEditingController();
+  final TextEditingController _favoriteController = TextEditingController();
 
   // User metrics
   int _age = 25;
@@ -105,6 +114,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: "run.json",
       color: AppConstants.primaryColor,
     ),
+    OnboardingStep(
+      title: 'Food preferences',
+      subtitle: 'Tell us what you like and don\'t like',
+      description:
+          'This helps us create personalized meal plans that match your taste preferences.',
+      icon: "diet.json",
+      color: AppConstants.successColor,
+    ),
   ];
 
   @override
@@ -140,6 +157,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     // Fitness Goal step: index 3
     // Dietary Restrictions step: index 5
     // Workout Styles step: index 6
+    // Food Preferences step: index 7
     if (_currentPage == 3 && _selectedFitnessGoal == null) {
       return const NeverScrollableScrollPhysics();
     }
@@ -322,6 +340,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return _buildDietaryRestrictionsStep();
       case 6:
         return _buildWorkoutStylesStep();
+      case 7:
+        return _buildFoodPreferencesStep();
       default:
         return const SizedBox.shrink();
     }
@@ -502,14 +522,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Widget _buildFoodPreferencesStep() {
+    return OnboardingFoodPreferencesStep(
+      preferredCuisines: _preferredCuisines,
+      onAddCuisine: (cuisine) {
+        if (cuisine.isNotEmpty && !_preferredCuisines.contains(cuisine)) {
+          setState(() => _preferredCuisines.add(cuisine));
+        }
+      },
+      onRemoveCuisine: (cuisine) => setState(() => _preferredCuisines.remove(cuisine)),
+      foodsToAvoid: _foodsToAvoid,
+      onAddAvoid: (food) {
+        if (food.isNotEmpty && !_foodsToAvoid.contains(food)) {
+          setState(() => _foodsToAvoid.add(food));
+        }
+      },
+      onRemoveAvoid: (food) => setState(() => _foodsToAvoid.remove(food)),
+      favoriteFoods: _favoriteFoods,
+      onAddFavorite: (food) {
+        if (food.isNotEmpty && !_favoriteFoods.contains(food)) {
+          setState(() => _favoriteFoods.add(food));
+        }
+      },
+      onRemoveFavorite: (food) => setState(() => _favoriteFoods.remove(food)),
+      cuisineController: _cuisineController,
+      avoidController: _avoidController,
+      favoriteController: _favoriteController,
+    );
+  }
+
   Widget _buildNavigationButtons() {
     final isDietaryStep = _currentPage == 5;
     final isWorkoutStep = _currentPage == 6;
-    final isNextEnabled = !isDietaryStep && !isWorkoutStep
+    final isFoodPreferencesStep = _currentPage == 7;
+    final isNextEnabled = !isDietaryStep && !isWorkoutStep && !isFoodPreferencesStep
         ? true
         : isDietaryStep
             ? _selectedDietaryRestrictions.isNotEmpty
-            : _selectedWorkoutStyles.isNotEmpty;
+            : isWorkoutStep
+                ? _selectedWorkoutStyles.isNotEmpty
+                : true; // Food preferences step is optional
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(
@@ -841,6 +893,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ));
   }
 
+  @override
+  void dispose() {
+    _cuisineController.dispose();
+    _avoidController.dispose();
+    _favoriteController.dispose();
+    super.dispose();
+  }
+
   void _completeOnboarding() async {
     // Debug: Print selected preferences before saving
     print('Onboarding complete:');
@@ -857,6 +917,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       weight: _weight,
       height: _height,
       gender: _gender,
+      preferredCuisines: List<String>.from(_preferredCuisines),
+      foodsToAvoid: List<String>.from(_foodsToAvoid),
+      favoriteFoods: List<String>.from(_favoriteFoods),
     );
 
     // Save onboarding data locally (Provider/SharedPreferences)

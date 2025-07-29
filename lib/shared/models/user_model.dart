@@ -138,6 +138,11 @@ class UserPreferences {
   final double weight; // in kg
   final double height; // in cm
   final String gender;
+  
+  // Food preferences
+  final List<String> preferredCuisines;
+  final List<String> foodsToAvoid;
+  final List<String> favoriteFoods;
 
   UserPreferences({
     required this.fitnessGoal,
@@ -151,6 +156,9 @@ class UserPreferences {
     this.weight = 70.0,
     this.height = 170.0,
     this.gender = 'Male',
+    this.preferredCuisines = const [],
+    this.foodsToAvoid = const [],
+    this.favoriteFoods = const [],
   });
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
@@ -172,6 +180,9 @@ class UserPreferences {
       weight: (json['weight'] as num?)?.toDouble() ?? 70.0,
       height: (json['height'] as num?)?.toDouble() ?? 170.0,
       gender: json['gender'] as String? ?? 'Male',
+      preferredCuisines: List<String>.from(json['preferredCuisines'] ?? []),
+      foodsToAvoid: List<String>.from(json['foodsToAvoid'] ?? []),
+      favoriteFoods: List<String>.from(json['favoriteFoods'] ?? []),
     );
   }
 
@@ -188,6 +199,9 @@ class UserPreferences {
       'weight': weight,
       'height': height,
       'gender': gender,
+      'preferredCuisines': preferredCuisines,
+      'foodsToAvoid': foodsToAvoid,
+      'favoriteFoods': favoriteFoods,
     };
   }
 
@@ -203,6 +217,9 @@ class UserPreferences {
     double? weight,
     double? height,
     String? gender,
+    List<String>? preferredCuisines,
+    List<String>? foodsToAvoid,
+    List<String>? favoriteFoods,
   }) {
     return UserPreferences(
       fitnessGoal: fitnessGoal ?? this.fitnessGoal,
@@ -216,6 +233,9 @@ class UserPreferences {
       weight: weight ?? this.weight,
       height: height ?? this.height,
       gender: gender ?? this.gender,
+      preferredCuisines: preferredCuisines ?? this.preferredCuisines,
+      foodsToAvoid: foodsToAvoid ?? this.foodsToAvoid,
+      favoriteFoods: favoriteFoods ?? this.favoriteFoods,
     );
   }
 
@@ -232,6 +252,9 @@ class UserPreferences {
       weight: 70.0,
       height: 170.0,
       gender: 'Male',
+      preferredCuisines: [],
+      foodsToAvoid: [],
+      favoriteFoods: [],
     );
   }
 } 
