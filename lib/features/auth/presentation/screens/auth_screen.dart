@@ -436,14 +436,20 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     if (success && mounted) {
-      // Update UserProvider with the new user
+      // Wait for user data to be loaded before navigating
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
       if (authProvider.userModel != null) {
-        await userProvider.setUser(authProvider.userModel!);
+        print('AuthScreen - User data loaded, navigating to home');
+        context.go('/home');
+      } else {
+        print('AuthScreen - Waiting for user data to load...');
+        // Wait a bit for the auth state listener to load the user data
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted && authProvider.userModel != null) {
+          print('AuthScreen - User data loaded after delay, navigating to home');
+          context.go('/home');
+        }
       }
-      // Navigate to main app
-      context.go('/home');
     } else if (mounted && authProvider.error != null) {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -460,7 +466,19 @@ class _AuthScreenState extends State<AuthScreen> {
     final success = await authProvider.signInWithGoogle();
 
     if (success && mounted) {
-      context.go('/home');
+      // Wait for user data to be loaded before navigating
+      if (authProvider.userModel != null) {
+        print('AuthScreen - User data loaded, navigating to home');
+        context.go('/home');
+      } else {
+        print('AuthScreen - Waiting for user data to load...');
+        // Wait a bit for the auth state listener to load the user data
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted && authProvider.userModel != null) {
+          print('AuthScreen - User data loaded after delay, navigating to home');
+          context.go('/home');
+        }
+      }
     } else if (mounted && authProvider.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -476,7 +494,19 @@ class _AuthScreenState extends State<AuthScreen> {
     final success = await authProvider.signInWithApple();
 
     if (success && mounted) {
-      context.go('/home');
+      // Wait for user data to be loaded before navigating
+      if (authProvider.userModel != null) {
+        print('AuthScreen - User data loaded, navigating to home');
+        context.go('/home');
+      } else {
+        print('AuthScreen - Waiting for user data to load...');
+        // Wait a bit for the auth state listener to load the user data
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted && authProvider.userModel != null) {
+          print('AuthScreen - User data loaded after delay, navigating to home');
+          context.go('/home');
+        }
+      }
     } else if (mounted && authProvider.error != null) {
       // Show a more helpful error message for Apple Sign-In
       String errorMessage = authProvider.error!;
@@ -499,7 +529,19 @@ class _AuthScreenState extends State<AuthScreen> {
     final success = await authProvider.signInAnonymously();
 
     if (success && mounted) {
-      context.go('/home');
+      // Wait for user data to be loaded before navigating
+      if (authProvider.userModel != null) {
+        print('AuthScreen - User data loaded, navigating to home');
+        context.go('/home');
+      } else {
+        print('AuthScreen - Waiting for user data to load...');
+        // Wait a bit for the auth state listener to load the user data
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted && authProvider.userModel != null) {
+          print('AuthScreen - User data loaded after delay, navigating to home');
+          context.go('/home');
+        }
+      }
     } else if (mounted && authProvider.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

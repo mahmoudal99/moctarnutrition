@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/user_model.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -21,7 +21,10 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
   List<_NavItem> _buildNavItems(UserModel? user) {
+    print('MainNavigation - Building nav items for user: ${user?.name ?? 'null'} with role: ${user?.role ?? 'null'}');
+    
     if (user != null && user.role == UserRole.admin) {
+      print('MainNavigation - Building ADMIN navigation items');
       return [
         const _NavItem(
           icon: Icons.home,
@@ -46,6 +49,7 @@ class _MainNavigationState extends State<MainNavigation> {
       ];
     }
     // Non-admins: original tabs
+    print('MainNavigation - Building USER navigation items');
     return [
       const _NavItem(
       icon: Icons.fitness_center,
@@ -80,9 +84,17 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
-        final user = userProvider.user;
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final user = authProvider.userModel;
+        
+        // Debug logging
+        print('MainNavigation - AuthProvider state:');
+        print('  isLoading: ${authProvider.isLoading}');
+        print('  isAuthenticated: ${authProvider.isAuthenticated}');
+        print('  user: ${user?.name ?? 'null'}');
+        print('  user role: ${user?.role ?? 'null'}');
+        
         final items = _buildNavItems(user);
         // Find the current index based on the current route
         final location = GoRouter.of(context).routeInformationProvider.value.uri.toString();

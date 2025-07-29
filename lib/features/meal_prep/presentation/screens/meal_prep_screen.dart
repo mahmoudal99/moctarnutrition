@@ -5,7 +5,7 @@ import '../../../../shared/models/user_model.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/ai_meal_service.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
-import '../../../../shared/providers/user_provider.dart';
+import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/meal_plan_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
@@ -62,8 +62,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   Future<void> _loadSavedData() async {
     try {
       // Fetch the current user from Firestore to get the latest mealPlanId
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final user = userProvider.user;
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final user = authProvider.userModel;
       String? mealPlanId = user?.mealPlanId;
       MealPlanModel? firestoreMealPlan;
       if (mealPlanId != null) {
@@ -131,8 +131,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   void _completeDietSetup() async {
     final userPrefs = _userPreferences ??
         Provider
-            .of<UserProvider>(context, listen: false)
-            .user
+            .of<AuthProvider>(context, listen: false)
+            .userModel
             ?.preferences;
     if (userPrefs == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -254,8 +254,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   @override
   Widget build(BuildContext context) {
     // Do not block meal prep onboarding on userPrefs
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final safeUserPrefs = _userPreferences ?? userProvider.user?.preferences;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final safeUserPrefs = _userPreferences ?? authProvider.userModel?.preferences;
 
     // If loading, show loading state (for legacy, but should not trigger now)
     if (_isLoading) {

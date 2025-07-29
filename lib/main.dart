@@ -154,15 +154,28 @@ GoRouter createRouter(AuthProvider authProvider) {
   ],
     redirect: (context, state) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      
+      // Debug logging
+      print('Router redirect - AuthProvider state:');
+      print('  isLoading: ${authProvider.isLoading}');
+      print('  isAuthenticated: ${authProvider.isAuthenticated}');
+      print('  userModel: ${authProvider.userModel?.name ?? 'null'}');
+      print('  user role: ${authProvider.userModel?.role ?? 'null'}');
+      print('  current route: ${state.uri.toString()}');
+      
       if (authProvider.isLoading) return null;
       final isAdmin = authProvider.userModel?.role == UserRole.admin;
       final isAuthenticated = authProvider.isAuthenticated;
       const adminRoutes = ['/admin-home', '/admin-users', '/profile', '/trainers'];
       final currentRoute = state.uri.toString();
+      
       // If admin and authenticated, redirect to /admin-home only if not on an admin route
       if (isAuthenticated && isAdmin && !adminRoutes.contains(currentRoute)) {
+        print('Router redirect - Redirecting admin to /admin-home');
         return '/admin-home';
       }
+      
+      print('Router redirect - No redirect needed');
       // Otherwise, no redirect
       return null;
     },

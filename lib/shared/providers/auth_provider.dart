@@ -28,18 +28,22 @@ class AuthProvider extends ChangeNotifier {
   /// Initialize authentication state listener
   void _initializeAuthState() {
     AuthService.authStateChanges.listen((User? user) async {
+      print('AuthProvider - Auth state changed: ${user?.email ?? 'null'}');
       _firebaseUser = user;
       
       if (user != null) {
         // User is signed in
+        print('AuthProvider - Loading user model for: ${user.uid}');
         await _loadUserModel(user.uid);
       } else {
         // User is signed out
+        print('AuthProvider - User signed out, clearing data');
         _userModel = null;
         await _storageService.clearUser();
       }
       
       _error = null;
+      print('AuthProvider - Notifying listeners');
       notifyListeners();
     });
   }
@@ -80,17 +84,23 @@ class AuthProvider extends ChangeNotifier {
   /// Load user model from Firestore
   Future<void> _loadUserModel(String userId) async {
     try {
+      print('AuthProvider - Starting to load user model');
       _isLoading = true;
       notifyListeners();
 
       final userModel = await AuthService.getCurrentUserModel();
       if (userModel != null) {
+        print('AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
         _userModel = userModel;
         await _storageService.saveUser(userModel);
+      } else {
+        print('AuthProvider - No user model found');
       }
     } catch (e) {
+      print('AuthProvider - Error loading user model: $e');
       _error = 'Failed to load user profile: $e';
     } finally {
+      print('AuthProvider - Finished loading user model, setting isLoading to false');
       _isLoading = false;
       notifyListeners();
     }
