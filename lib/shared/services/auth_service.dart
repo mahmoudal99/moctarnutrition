@@ -387,6 +387,11 @@ class AuthService {
     try {
       _logger.i('Attempting to reset password for: $email');
       
+      // Validate email format before sending
+      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+        throw Exception('Please enter a valid email address.');
+      }
+      
       await _auth.sendPasswordResetEmail(email: email);
       
       _logger.i('Password reset email sent successfully');
@@ -499,7 +504,7 @@ class AuthService {
   static Exception _handleFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        return Exception('No user found with this email address.');
+        return Exception('No user found with this email address. Please check the email or create a new account.');
       case 'wrong-password':
         return Exception('Incorrect password. Please try again.');
       case 'email-already-in-use':
@@ -516,6 +521,12 @@ class AuthService {
         return Exception('This sign-in method is not enabled.');
       case 'network-request-failed':
         return Exception('Network error. Please check your connection.');
+      case 'invalid-action-code':
+        return Exception('The password reset link is invalid or has expired. Please request a new one.');
+      case 'expired-action-code':
+        return Exception('The password reset link has expired. Please request a new one.');
+      case 'user-mismatch':
+        return Exception('The email address doesn\'t match the reset link. Please use the correct email.');
       default:
         return Exception('Authentication failed: ${e.message}');
     }

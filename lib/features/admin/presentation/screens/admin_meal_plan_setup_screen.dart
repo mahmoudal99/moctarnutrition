@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
-import 'package:champions_gym_app/features/meal_prep/presentation/screens/meal_prep_screen.dart';
 import 'package:champions_gym_app/shared/services/ai_meal_service.dart';
-import 'package:champions_gym_app/shared/models/meal_model.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../../meal_prep/presentation/widgets/setup_steps/goal_selection_step.dart';
+import '../../../meal_prep/presentation/widgets/setup_steps/meal_frequency_step.dart';
+import '../../../meal_prep/presentation/widgets/setup_steps/calories_step.dart';
+import '../../../meal_prep/presentation/widgets/setup_steps/cheat_day_step.dart';
+import '../../../meal_prep/presentation/widgets/setup_steps/plan_duration_step.dart';
+import '../../../meal_prep/presentation/widgets/setup_steps/final_review_step.dart';
+
 class AdminMealPlanSetupScreen extends StatefulWidget {
   final UserModel user;
-  const AdminMealPlanSetupScreen({Key? key, required this.user}) : super(key: key);
+  const AdminMealPlanSetupScreen({super.key, required this.user});
 
   @override
   State<AdminMealPlanSetupScreen> createState() => _AdminMealPlanSetupScreenState();
@@ -22,7 +28,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   String? _cheatDay;
   bool _weeklyRotation = true;
   bool _remindersEnabled = false;
-  int _selectedDays = 7;
+  final int _selectedDays = 7;
   bool _isLoading = false;
   int _targetCalories = 2000;
   int _completedDays = 0;
@@ -104,9 +110,11 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         _completedDays = 0;
         _totalDays = 0;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to generate meal plan: $e'), backgroundColor: AppConstants.errorColor),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to generate meal plan: $e'), backgroundColor: AppConstants.errorColor),
+        );
+      }
     }
   }
 
@@ -161,7 +169,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                     return LinearProgressIndicator(
                       value: value,
                       backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
                       minHeight: 8,
                     );
                   },
@@ -211,12 +219,115 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     }
   }
 
+  Widget _buildStepContent(UserPreferences prefs) {
+    return Column(
+      children: [
+        // Progress indicator
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(6, (i) {
+              final color = i <= _setupStep
+                  ? AppConstants.primaryColor
+                  : AppConstants.textTertiary.withOpacity(0.2);
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: i == _setupStep ? 18 : 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              );
+            }),
+          ),
+        ),
+        
+        // Step content
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: _buildCurrentStep(prefs),
+          ),
+        ),
+        
+        // Navigation buttons
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: _buildNavigationButtons(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCurrentStep(UserPreferences prefs) {
+    switch (_setupStep) {
+      case 0:
+        return GoalSelectionStep(
+          selected: _selectedNutritionGoal,
+          onSelect: (goal) => setState(() => _selectedNutritionGoal = goal),
+        );
+      case 1:
+        return MealFrequencyStep(
+          selected: _mealFrequency,
+          onSelect: (frequency) => setState(() => _mealFrequency = frequency),
+        );
+      case 2:
+        return CaloriesStep(
+          targetCalories: _targetCalories,
+          onChanged: (calories) => setState(() => _targetCalories = calories),
+        );
+      case 3:
+        return CheatDayStep(
+          selectedDay: _cheatDay,
+          onSelect: (day) => setState(() => _cheatDay = day),
+        );
+      case 4:
+        return PlanDurationStep(
+          weeklyRotation: _weeklyRotation,
+          onToggleWeeklyRotation: (value) => setState(() => _weeklyRotation = value),
+          remindersEnabled: _remindersEnabled,
+          onToggleReminders: (value) => setState(() => _remindersEnabled = value),
+        );
+      case 5:
+        return FinalReviewStep(
+          userPreferences: prefs,
+          selectedDays: _selectedDays,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildNavigationButtons() {
+    return Row(
+      children: [
+        if (_setupStep > 0)
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _onBackStep,
+              child: const Text('Back'),
+            ),
+          ),
+        if (_setupStep > 0) const SizedBox(width: 12),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _setupStep == 5 ? _onSavePlan : _onNextStep,
+            child: Text(_setupStep == 5 ? 'Generate Plan' : 'Next'),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final prefs = widget.user.preferences;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Generate Meal Plan'),
+        title: const Text('Generate Meal Plan'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -224,31 +335,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       ),
       body: _isLoading
           ? _buildLoadingState()
-          : DietPlanSetupFlow(
-              step: _setupStep,
-              onNext: _onNextStep,
-              onBack: _onBackStep,
-              selectedNutritionGoal: _selectedNutritionGoal,
-              onSelectNutritionGoal: (goal) => setState(() => _selectedNutritionGoal = goal),
-              mealFrequency: _mealFrequency,
-              onSelectMealFrequency: (freq) => setState(() => _mealFrequency = freq),
-              cheatDay: _cheatDay,
-              onCheatDayChanged: (day) => setState(() => _cheatDay = day),
-              isPreviewLoading: false,
-              sampleDayPlan: const {}, // Not used in admin flow for now
-              onRegeneratePreview: () {},
-              onLooksGood: _onNextStep,
-              onCustomize: _onNextStep,
-              weeklyRotation: _weeklyRotation,
-              onToggleWeeklyRotation: (val) => setState(() => _weeklyRotation = val),
-              remindersEnabled: _remindersEnabled,
-              onToggleReminders: (val) => setState(() => _remindersEnabled = val),
-              onSavePlan: _onSavePlan,
-              userPreferences: prefs,
-              selectedDays: _selectedDays,
-              targetCalories: _targetCalories,
-              onTargetCaloriesChanged: (val) => setState(() => _targetCalories = val),
-            ),
+          : _buildStepContent(prefs),
     );
   }
 } 

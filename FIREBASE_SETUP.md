@@ -21,20 +21,74 @@ This guide will help you set up Firebase for the Champions Gym app authenticatio
    - **Apple** (for Apple Sign-In, iOS only)
    - **Anonymous** (for guest mode)
 
-### 1.2 Configure Google Sign-In
+### 1.2 Configure Custom Email Templates (Prevent Spam)
+
+**IMPORTANT: This step helps prevent password reset emails from going to spam**
+
+1. In Firebase Console, go to **Authentication** > **Templates**
+2. Click on **Password reset** template
+3. Customize the email template:
+   - **Sender name**: "Champions Gym" (instead of generic Firebase name)
+   - **Subject**: "Reset your Champions Gym password"
+   - **Message**: Customize the email body to be more professional and branded
+   - **Action URL**: Keep the default (Firebase handles the reset link)
+4. Click **Save**
+
+Example custom template:
+```
+Subject: Reset your Champions Gym password
+
+Hello,
+
+You requested to reset your password for your Champions Gym account.
+
+Click the link below to reset your password:
+[Reset Link]
+
+If you didn't request this password reset, you can safely ignore this email.
+
+Best regards,
+The Champions Gym Team
+```
+
+### 1.3 Configure Google Sign-In
 
 1. In the **Google** provider settings:
    - Enable Google Sign-In
    - Add your app's SHA-1 fingerprint (see platform-specific setup below)
 
-### 1.3 Configure Apple Sign-In (iOS only)
+### 1.4 Configure Apple Sign-In (iOS only)
 
 1. In the **Apple** provider settings:
    - Enable Apple Sign-In
    - Add your Apple Developer Team ID
    - Configure the Service ID
 
-### 1.4 Set up Firestore Database
+### 1.5 Configure Email Domain Authentication (Advanced Spam Prevention)
+
+**This step is crucial for preventing emails from going to spam in production**
+
+1. **Set up a custom domain** (recommended for production):
+   - Purchase a domain (e.g., `championsgym.com`)
+   - In Firebase Console, go to **Authentication** > **Settings** > **Authorized domains**
+   - Add your custom domain
+
+2. **Configure DNS records for email authentication**:
+   - Add SPF record to your domain's DNS:
+     ```
+     TXT record: v=spf1 include:_spf.google.com ~all
+     ```
+   - Add DKIM record (Firebase will provide this)
+   - Add DMARC record:
+     ```
+     TXT record: v=DMARC1; p=quarantine; rua=mailto:dmarc@yourdomain.com
+     ```
+
+3. **Alternative: Use Firebase Hosting custom domain**:
+   - Set up Firebase Hosting with your custom domain
+   - This automatically configures some email authentication
+
+### 1.6 Set up Firestore Database
 
 1. Navigate to **Firestore Database**
 2. Create a database in **test mode** (for development)

@@ -218,6 +218,45 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
           ),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: AppConstants.spacingM),
+        Container(
+          padding: const EdgeInsets.all(AppConstants.spacingM),
+          decoration: BoxDecoration(
+            color: AppConstants.primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(AppConstants.radiusM),
+            border: Border.all(
+              color: AppConstants.primaryColor.withOpacity(0.3),
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppConstants.primaryColor,
+                    size: 20,
+                  ),
+                  const SizedBox(width: AppConstants.spacingXS),
+                  Text(
+                    'Email not in your inbox?',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppConstants.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingXS),
+              Text(
+                '• Check your spam/junk folder\n• Make sure the email address is correct\n• Wait a few minutes for delivery',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: AppConstants.spacingXL),
         SizedBox(
           width: double.infinity,
