@@ -249,7 +249,6 @@ class CheckinProgressSummary {
   final DateTime? lastCheckinDate;
   final DateTime? nextCheckinDate;
   final double? averageWeight;
-  final double? averageBodyFat;
   final double? averageEnergyLevel;
   final double? averageMotivationLevel;
 
@@ -262,7 +261,6 @@ class CheckinProgressSummary {
     this.lastCheckinDate,
     this.nextCheckinDate,
     this.averageWeight,
-    this.averageBodyFat,
     this.averageEnergyLevel,
     this.averageMotivationLevel,
   });

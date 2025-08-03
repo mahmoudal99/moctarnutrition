@@ -42,7 +42,7 @@ class CheckinDetailsScreen extends StatelessWidget {
               _buildNotesSection(),
               const SizedBox(height: 24),
             ],
-            if (checkin.weight != null || checkin.bodyFatPercentage != null || checkin.muscleMass != null) ...[
+            if (checkin.weight != null) ...[
               _buildMetricsSection(),
               const SizedBox(height: 24),
             ],
@@ -241,39 +241,12 @@ class CheckinDetailsScreen extends StatelessWidget {
           style: AppTextStyles.heading4,
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            if (checkin.weight != null)
-              Expanded(
-                child: _buildMetricCard(
-                  label: 'Weight',
-                  value: '${checkin.weight!.toStringAsFixed(1)} kg',
-                  icon: Icons.monitor_weight,
-                  color: AppConstants.primaryColor,
-                ),
-              ),
-            if (checkin.weight != null && checkin.bodyFatPercentage != null)
-              const SizedBox(width: 12),
-            if (checkin.bodyFatPercentage != null)
-              Expanded(
-                child: _buildMetricCard(
-                  label: 'Body Fat',
-                  value: '${checkin.bodyFatPercentage!.toStringAsFixed(1)}%',
-                  icon: Icons.pie_chart,
-                  color: AppConstants.warningColor,
-                ),
-              ),
-          ],
+        _buildMetricCard(
+          label: 'Weight',
+          value: '${checkin.weight!.toStringAsFixed(1)} kg',
+          icon: Icons.monitor_weight,
+          color: AppConstants.primaryColor,
         ),
-        if (checkin.muscleMass != null) ...[
-          const SizedBox(height: 12),
-          _buildMetricCard(
-            label: 'Muscle Mass',
-            value: '${checkin.muscleMass!.toStringAsFixed(1)} kg',
-            icon: Icons.fitness_center,
-            color: AppConstants.successColor,
-          ),
-        ],
       ],
     );
   }

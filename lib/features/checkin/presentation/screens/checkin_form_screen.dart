@@ -21,8 +21,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
   final _weightController = TextEditingController();
-  final _bodyFatController = TextEditingController();
-  final _muscleMassController = TextEditingController();
   
   String? _selectedPhotoPath;
   String? _selectedMood;
@@ -38,8 +36,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   void dispose() {
     _notesController.dispose();
     _weightController.dispose();
-    _bodyFatController.dispose();
-    _muscleMassController.dispose();
     super.dispose();
   }
 
@@ -230,8 +226,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
             
             ProgressMetricsForm(
               weightController: _weightController,
-              bodyFatController: _bodyFatController,
-              muscleMassController: _muscleMassController,
               measurements: _measurements,
               onMeasurementsChanged: (measurements) {
                 setState(() {
@@ -541,8 +535,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
         photoPath: _selectedPhotoPath!,
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         weight: _weightController.text.isNotEmpty ? double.tryParse(_weightController.text) : null,
-        bodyFatPercentage: _bodyFatController.text.isNotEmpty ? double.tryParse(_bodyFatController.text) : null,
-        muscleMass: _muscleMassController.text.isNotEmpty ? double.tryParse(_muscleMassController.text) : null,
         measurements: _measurements.isNotEmpty ? _measurements : null,
         mood: _selectedMood,
         energyLevel: _selectedEnergyLevel,

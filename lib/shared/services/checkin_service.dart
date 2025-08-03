@@ -174,8 +174,6 @@ class CheckinService {
     required File photoFile,
     String? notes,
     double? weight,
-    double? bodyFatPercentage,
-    double? muscleMass,
     Map<String, double>? measurements,
     String? mood,
     int? energyLevel,
@@ -200,8 +198,6 @@ class CheckinService {
         photoThumbnailUrl: photoUrls['thumbnail'],
         notes: notes,
         weight: weight,
-        bodyFatPercentage: bodyFatPercentage,
-        muscleMass: muscleMass,
         measurements: measurements,
         mood: mood,
         energyLevel: energyLevel,
@@ -358,7 +354,6 @@ class CheckinService {
           checkins.where((c) => c.status == CheckinStatus.completed).toList();
 
       double? averageWeight;
-      double? averageBodyFat;
       double? averageEnergyLevel;
       double? averageMotivationLevel;
 
@@ -366,10 +361,6 @@ class CheckinService {
         final weights = completedCheckinsList
             .where((c) => c.weight != null)
             .map((c) => c.weight!)
-            .toList();
-        final bodyFats = completedCheckinsList
-            .where((c) => c.bodyFatPercentage != null)
-            .map((c) => c.bodyFatPercentage!)
             .toList();
         final energyLevels = completedCheckinsList
             .where((c) => c.energyLevel != null)
@@ -382,9 +373,6 @@ class CheckinService {
 
         averageWeight = weights.isNotEmpty
             ? weights.reduce((a, b) => a + b) / weights.length
-            : null;
-        averageBodyFat = bodyFats.isNotEmpty
-            ? bodyFats.reduce((a, b) => a + b) / bodyFats.length
             : null;
         averageEnergyLevel = energyLevels.isNotEmpty
             ? energyLevels.reduce((a, b) => a + b) / energyLevels.length
@@ -407,7 +395,6 @@ class CheckinService {
             sortedCheckins.isNotEmpty ? sortedCheckins.first.submittedAt : null,
         nextCheckinDate: nextCheckinDate,
         averageWeight: averageWeight,
-        averageBodyFat: averageBodyFat,
         averageEnergyLevel: averageEnergyLevel,
         averageMotivationLevel: averageMotivationLevel,
       );

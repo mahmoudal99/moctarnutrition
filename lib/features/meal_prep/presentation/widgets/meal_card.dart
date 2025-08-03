@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../screens/meal_detail_screen.dart';
@@ -18,7 +19,10 @@ class MealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap ?? () => _navigateToMealDetail(context),
+      onTap: onTap ?? () {
+        HapticFeedback.lightImpact();
+        _navigateToMealDetail(context);
+      },
       borderRadius: BorderRadius.circular(AppConstants.radiusS),
       child: Container(
         margin: const EdgeInsets.all(AppConstants.spacingS),
@@ -178,6 +182,9 @@ class MealCard extends StatelessWidget {
   }
 
   void _navigateToMealDetail(BuildContext context) {
+    // Add haptic feedback
+    HapticFeedback.lightImpact();
+    
     Navigator.push(
       context,
       MaterialPageRoute(

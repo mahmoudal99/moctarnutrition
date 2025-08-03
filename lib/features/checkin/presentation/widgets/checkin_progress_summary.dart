@@ -23,7 +23,7 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
             _buildHeader(),
             const SizedBox(height: 20),
             _buildStatsGrid(),
-            if (summary.averageWeight != null || summary.averageBodyFat != null)
+            if (summary.averageWeight != null)
               ...[
                 const SizedBox(height: 20),
                 _buildMetricsSection(),
@@ -199,16 +199,6 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
                   label: 'Weight',
                   value: '${summary.averageWeight!.toStringAsFixed(1)} kg',
                   icon: Icons.monitor_weight,
-                ),
-              ),
-            if (summary.averageWeight != null && summary.averageBodyFat != null)
-              const SizedBox(width: 16),
-            if (summary.averageBodyFat != null)
-              Expanded(
-                child: _buildMetricItem(
-                  label: 'Body Fat',
-                  value: '${summary.averageBodyFat!.toStringAsFixed(1)}%',
-                  icon: Icons.pie_chart,
                 ),
               ),
           ],

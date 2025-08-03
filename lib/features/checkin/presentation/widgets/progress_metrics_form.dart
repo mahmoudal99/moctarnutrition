@@ -3,16 +3,12 @@ import '../../../../core/constants/app_constants.dart';
 
 class ProgressMetricsForm extends StatefulWidget {
   final TextEditingController weightController;
-  final TextEditingController bodyFatController;
-  final TextEditingController muscleMassController;
   final Map<String, double> measurements;
   final Function(Map<String, double>) onMeasurementsChanged;
 
   const ProgressMetricsForm({
     super.key,
     required this.weightController,
-    required this.bodyFatController,
-    required this.muscleMassController,
     required this.measurements,
     required this.onMeasurementsChanged,
   });
@@ -80,36 +76,12 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
           ),
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildMetricField(
-                controller: widget.weightController,
-                label: 'Weight',
-                hint: '70.5',
-                suffix: 'kg',
-                icon: Icons.monitor_weight,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildMetricField(
-                controller: widget.bodyFatController,
-                label: 'Body Fat %',
-                hint: '15.2',
-                suffix: '%',
-                icon: Icons.pie_chart,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
         _buildMetricField(
-          controller: widget.muscleMassController,
-          label: 'Muscle Mass',
-          hint: '45.3',
+          controller: widget.weightController,
+          label: 'Weight',
+          hint: '70.5',
           suffix: 'kg',
-          icon: Icons.fitness_center,
+          icon: Icons.monitor_weight,
         ),
       ],
     );
