@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/models/meal_model.dart';
+import '../../../../shared/models/user_model.dart';
 import '../widgets/meal_plan_view.dart';
 import '../widgets/admin_meal_setup_flow.dart';
 import '../widgets/waiting_for_meal_plan.dart';
@@ -185,6 +186,20 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
         ),
         Expanded(
           child: AdminMealSetupFlow(
+            targetUserPreferences: UserPreferences(
+              age: 25,
+              gender: 'Male',
+              weight: 70.0,
+              height: 175.0,
+              fitnessGoal: FitnessGoal.muscleGain,
+              activityLevel: ActivityLevel.moderatelyActive,
+              dietaryRestrictions: ['None'],
+              preferredWorkoutStyles: ['Strength Training'],
+              targetCalories: 2200,
+              preferredCuisines: ['Mediterranean', 'Asian'],
+              foodsToAvoid: ['Shellfish'],
+              favoriteFoods: ['Chicken', 'Rice', 'Vegetables'],
+            ),
             onMealPlanGenerated: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Meal plan generated!')),

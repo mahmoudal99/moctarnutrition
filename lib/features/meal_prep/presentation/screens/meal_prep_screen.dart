@@ -6,7 +6,6 @@ import '../../../../shared/providers/meal_plan_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/meal_plan_view.dart';
-import '../widgets/admin_meal_setup_flow.dart';
 import '../widgets/waiting_for_meal_plan.dart';
 
 
@@ -19,7 +18,6 @@ class MealPrepScreen extends StatefulWidget {
 
 class _MealPrepScreenState extends State<MealPrepScreen> {
   MealPlanModel? _currentMealPlan;
-  bool _showAdminSetup = false;
 
   @override
   void initState() {
@@ -50,7 +48,6 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       if (firestoreMealPlan != null) {
         setState(() {
           _currentMealPlan = firestoreMealPlan;
-          _showAdminSetup = false;
         });
         // Optionally cache to local storage
         await MealPlanStorageService.saveMealPlan(firestoreMealPlan);
@@ -61,74 +58,45 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       }
       
       // Fallback: Load saved meal plan from local storage
-      final savedMealPlan = await MealPlanStorageService.loadMealPlan();
-      if (savedMealPlan != null) {
-        setState(() {
-          _currentMealPlan = savedMealPlan;
-          _showAdminSetup = false;
-        });
-        final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
-        mealPlanProvider.setMealPlan(savedMealPlan);
-        print('Loaded saved meal plan from local storage: ${savedMealPlan.title}');
+      if (user?.id != null) {
+        final savedMealPlan = await MealPlanStorageService.loadMealPlan(user!.id);
+        if (savedMealPlan != null) {
+          setState(() {
+            _currentMealPlan = savedMealPlan;
+          });
+          final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+          mealPlanProvider.setMealPlan(savedMealPlan);
+          print('Loaded saved meal plan from local storage for user ${user.id}: ${savedMealPlan.title}');
+        }
       }
       
-      // Show admin setup if no meal plan exists
-      if (_currentMealPlan == null) {
-        setState(() {
-          _showAdminSetup = true;
-        });
-      }
+      // No meal plan exists - will show waiting state
     } catch (e) {
       print('Error loading saved data: $e');
-      setState(() {
-        _showAdminSetup = true;
-      });
+      // Will show waiting state
     }
   }
 
-  void _onMealPlanGenerated() {
-    setState(() {
-      _showAdminSetup = false;
-    });
-    _loadSavedData(); // Reload to get the new meal plan
-  }
+
 
   void _onMealTap() {
     // Handle meal tap if needed
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
-    // If admin setup is active, show the setup flow
-    if (_showAdminSetup) {
-      return AdminMealSetupFlow(
-        onMealPlanGenerated: _onMealPlanGenerated,
-      );
-    }
-
     // If a meal plan exists, show it
     if (_currentMealPlan != null) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Meal Plan'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-      setState(() {
-                  _showAdminSetup = true;
-                });
-              },
-              tooltip: 'Generate New Plan',
-          ),
-        ],
-      ),
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Meal Plan'),
+        ),
         body: MealPlanView(
           mealPlan: _currentMealPlan!,
           onMealTap: _onMealTap,
-      ),
-    );
-  }
+        ),
+      );
+    }
 
     // If no meal plan exists, show waiting state
     return const WaitingForMealPlan();

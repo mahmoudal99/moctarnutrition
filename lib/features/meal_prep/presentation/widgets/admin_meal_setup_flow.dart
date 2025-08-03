@@ -4,8 +4,7 @@ import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/services/ai_meal_service.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
-import '../../../../shared/providers/auth_provider.dart';
-import 'package:provider/provider.dart';
+
 import 'package:lottie/lottie.dart';
 import 'setup_steps/goal_selection_step.dart' show GoalSelectionStep, NutritionGoal, NutritionGoalExt;
 import 'setup_steps/meal_frequency_step.dart' show MealFrequencyOption, MealFrequencyStep;
@@ -15,10 +14,12 @@ import 'setup_steps/plan_duration_step.dart';
 import 'setup_steps/final_review_step.dart';
 
 class AdminMealSetupFlow extends StatefulWidget {
+  final UserPreferences targetUserPreferences;
   final VoidCallback? onMealPlanGenerated;
 
   const AdminMealSetupFlow({
     super.key,
+    required this.targetUserPreferences,
     this.onMealPlanGenerated,
   });
 
@@ -41,21 +42,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
   int _completedDays = 0;
   int _totalDays = 0;
 
-  UserPreferences? _userPreferences;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserPreferences();
-  }
-
-  Future<void> _loadUserPreferences() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final user = authProvider.userModel;
-    setState(() {
-      _userPreferences = user?.preferences;
-    });
-  }
+  UserPreferences get _userPreferences => widget.targetUserPreferences;
 
   void _nextStep() {
     if (_setupStep < 6) {
@@ -74,31 +61,20 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
   }
 
   void _generateMealPlan() async {
-    if (_userPreferences == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User preferences not found.'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
-      return;
-    }
 
     final dietPlanPreferences = DietPlanPreferences(
-      age: _userPreferences!.age,
-      gender: _userPreferences!.gender,
-      weight: _userPreferences!.weight,
-      height: _userPreferences!.height,
-      fitnessGoal: _userPreferences!.fitnessGoal,
-      activityLevel: _userPreferences!.activityLevel,
-      dietaryRestrictions: _userPreferences!.dietaryRestrictions,
-      preferredWorkoutStyles: _userPreferences!.preferredWorkoutStyles,
+      age: _userPreferences.age,
+      gender: _userPreferences.gender,
+      weight: _userPreferences.weight,
+      height: _userPreferences.height,
+      fitnessGoal: _userPreferences.fitnessGoal,
+      activityLevel: _userPreferences.activityLevel,
+      dietaryRestrictions: _userPreferences.dietaryRestrictions,
+      preferredWorkoutStyles: _userPreferences.preferredWorkoutStyles,
       nutritionGoal: _selectedNutritionGoal?.label ?? '',
-      preferredCuisines: List<String>.from(_userPreferences!.preferredCuisines),
-      foodsToAvoid: List<String>.from(_userPreferences!.foodsToAvoid),
-      favoriteFoods: List<String>.from(_userPreferences!.favoriteFoods),
+      preferredCuisines: List<String>.from(_userPreferences.preferredCuisines),
+      foodsToAvoid: List<String>.from(_userPreferences.foodsToAvoid),
+      favoriteFoods: List<String>.from(_userPreferences.favoriteFoods),
       mealFrequency: _mealFrequency
           ?.toString()
           .split('.')
@@ -128,7 +104,8 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
       );
 
       await MealPlanStorageService.saveMealPlan(mealPlan);
-      await MealPlanStorageService.saveDietPreferences(dietPlanPreferences);
+      // Note: We don't save diet preferences here since we don't have the user ID
+      // The diet preferences are already saved when the meal plan is generated
 
       setState(() {
         _isLoading = false;
@@ -299,9 +276,6 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
   }
 
   Widget _buildStepContent() {
-    if (_userPreferences == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
 
     switch (_setupStep) {
       case 0:
@@ -335,7 +309,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
         );
       case 5:
         return FinalReviewStep(
-          userPreferences: _userPreferences!,
+          userPreferences: _userPreferences,
           selectedDays: _selectedDays,
         );
       default:
