@@ -3,11 +3,13 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
 
 class NutritionSummaryCard extends StatelessWidget {
-  final MealPlanModel mealPlan;
+  final MealDay mealDay;
+  final int dayNumber;
 
   const NutritionSummaryCard({
     super.key,
-    required this.mealPlan,
+    required this.mealDay,
+    required this.dayNumber,
   });
 
   @override
@@ -18,17 +20,12 @@ class NutritionSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Nutrition Summary',
-              style: AppTextStyles.heading4,
-            ),
-            const SizedBox(height: AppConstants.spacingS),
             Row(
               children: [
                 Expanded(
                   child: _buildNutritionCard(
                     'Calories',
-                    '${mealPlan.totalCalories}',
+                    '${mealDay.totalCalories}',
                     Icons.local_fire_department,
                     AppConstants.warningColor,
                   ),
@@ -37,7 +34,7 @@ class NutritionSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _buildNutritionCard(
                     'Protein',
-                    '${mealPlan.totalProtein.toStringAsFixed(0)}g',
+                    '${mealDay.totalProtein.toStringAsFixed(0)}g',
                     Icons.fitness_center,
                     AppConstants.accentColor,
                   ),
@@ -46,7 +43,7 @@ class NutritionSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _buildNutritionCard(
                     'Carbs',
-                    '${mealPlan.totalCarbs.toStringAsFixed(0)}g',
+                    '${mealDay.totalCarbs.toStringAsFixed(0)}g',
                     Icons.grain,
                     AppConstants.secondaryColor,
                   ),
@@ -96,4 +93,4 @@ class NutritionSummaryCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

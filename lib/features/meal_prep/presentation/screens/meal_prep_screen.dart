@@ -8,7 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/meal_plan_view.dart';
 import '../widgets/waiting_for_meal_plan.dart';
 
-
 class MealPrepScreen extends StatefulWidget {
   const MealPrepScreen({super.key});
 
@@ -33,7 +32,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       final user = authProvider.userModel;
       String? mealPlanId = user?.mealPlanId;
       MealPlanModel? firestoreMealPlan;
-      
+
       if (mealPlanId != null) {
         // Try to fetch the meal plan from Firestore
         final doc = await FirebaseFirestore.instance
@@ -44,32 +43,36 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           firestoreMealPlan = MealPlanModel.fromJson(doc.data()!);
         }
       }
-      
+
       if (firestoreMealPlan != null) {
         setState(() {
           _currentMealPlan = firestoreMealPlan;
         });
         // Optionally cache to local storage
         await MealPlanStorageService.saveMealPlan(firestoreMealPlan);
-        final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+        final mealPlanProvider =
+            Provider.of<MealPlanProvider>(context, listen: false);
         mealPlanProvider.setMealPlan(firestoreMealPlan);
         print('Loaded meal plan from Firestore: ${firestoreMealPlan.title}');
         return;
       }
-      
+
       // Fallback: Load saved meal plan from local storage
       if (user?.id != null) {
-        final savedMealPlan = await MealPlanStorageService.loadMealPlan(user!.id);
+        final savedMealPlan =
+            await MealPlanStorageService.loadMealPlan(user!.id);
         if (savedMealPlan != null) {
           setState(() {
             _currentMealPlan = savedMealPlan;
           });
-          final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+          final mealPlanProvider =
+              Provider.of<MealPlanProvider>(context, listen: false);
           mealPlanProvider.setMealPlan(savedMealPlan);
-          print('Loaded saved meal plan from local storage for user ${user.id}: ${savedMealPlan.title}');
+          print(
+              'Loaded saved meal plan from local storage for user ${user.id}: ${savedMealPlan.title}');
         }
       }
-      
+
       // No meal plan exists - will show waiting state
     } catch (e) {
       print('Error loading saved data: $e');
@@ -77,13 +80,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     }
   }
 
-
-
-  void _onMealTap() {
-    // Handle meal tap if needed
-  }
-
-    @override
+  @override
   Widget build(BuildContext context) {
     // If a meal plan exists, show it
     if (_currentMealPlan != null) {
@@ -93,7 +90,6 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         ),
         body: MealPlanView(
           mealPlan: _currentMealPlan!,
-          onMealTap: _onMealTap,
         ),
       );
     }
