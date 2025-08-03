@@ -30,11 +30,32 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
     'Left Calf',
     'Right Calf',
   ];
+  
+  bool _showMeasurements = false;
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
+    // Show measurements if there's existing data
+    _showMeasurements = widget.measurements.isNotEmpty;
+  }
+
+  @override
+  void didUpdateWidget(ProgressMetricsForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controllers if measurements changed
+    if (oldWidget.measurements != widget.measurements) {
+      for (final type in _measurementTypes) {
+        final controller = _measurementControllers[type]!;
+        final newValue = widget.measurements[type]?.toString() ?? '';
+        if (controller.text != newValue) {
+          controller.text = newValue;
+        }
+      }
+      // Update visibility based on new data
+      _showMeasurements = widget.measurements.isNotEmpty;
+    }
   }
 
   void _initializeControllers() {
@@ -103,15 +124,11 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
             TextButton.icon(
               onPressed: _toggleMeasurements,
               icon: Icon(
-                _measurementControllers.values.any((c) => c.text.isNotEmpty)
-                    ? Icons.visibility_off
-                    : Icons.visibility,
+                _showMeasurements ? Icons.visibility_off : Icons.visibility,
                 size: 16,
               ),
               label: Text(
-                _measurementControllers.values.any((c) => c.text.isNotEmpty)
-                    ? 'Hide'
-                    : 'Add',
+                _showMeasurements ? 'Hide' : 'Add',
               ),
               style: TextButton.styleFrom(
                 foregroundColor: AppConstants.primaryColor,
@@ -121,35 +138,46 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
           ],
         ),
         const SizedBox(height: 12),
-        if (_measurementControllers.values.any((c) => c.text.isNotEmpty))
+        if (_showMeasurements) ...[
+          Text(
+            'Track your body measurements to monitor your progress over time.',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppConstants.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
           _buildMeasurementsGrid(),
+        ],
       ],
     );
   }
 
   Widget _buildMeasurementsGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 2.5,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 400),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 3.0,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemCount: _measurementTypes.length,
+        itemBuilder: (context, index) {
+          final type = _measurementTypes[index];
+          final controller = _measurementControllers[type]!;
+          
+          return _buildMeasurementField(
+            controller: controller,
+            label: type,
+            hint: '0.0',
+            suffix: 'cm',
+            onChanged: (value) => _updateMeasurement(type, value),
+          );
+        },
       ),
-      itemCount: _measurementTypes.length,
-      itemBuilder: (context, index) {
-        final type = _measurementTypes[index];
-        final controller = _measurementControllers[type]!;
-        
-        return _buildMeasurementField(
-          controller: controller,
-          label: type,
-          hint: '0.0',
-          suffix: 'cm',
-          onChanged: (value) => _updateMeasurement(type, value),
-        );
-      },
     );
   }
 
@@ -228,6 +256,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
@@ -236,40 +265,42 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 4),
-        TextFormField(
-          controller: controller,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: AppTextStyles.bodySmall.copyWith(
-              color: AppConstants.textTertiary,
-            ),
-            suffixText: suffix,
-            suffixStyle: AppTextStyles.bodySmall.copyWith(
-              color: AppConstants.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(
-                color: AppConstants.textTertiary.withOpacity(0.3),
+        const SizedBox(height: 2),
+        Expanded(
+          child: TextFormField(
+            controller: controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: AppTextStyles.bodySmall.copyWith(
+                color: AppConstants.textTertiary,
               ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(
-                color: AppConstants.textTertiary.withOpacity(0.3),
+              suffixText: suffix,
+              suffixStyle: AppTextStyles.bodySmall.copyWith(
+                color: AppConstants.textSecondary,
+                fontWeight: FontWeight.w500,
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(
-                color: AppConstants.primaryColor,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: BorderSide(
+                  color: AppConstants.textTertiary.withOpacity(0.3),
+                ),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: BorderSide(
+                  color: AppConstants.textTertiary.withOpacity(0.3),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: BorderSide(
+                  color: AppConstants.primaryColor,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           ),
         ),
       ],
@@ -277,17 +308,16 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
   }
 
   void _toggleMeasurements() {
-    final hasMeasurements = _measurementControllers.values.any((c) => c.text.isNotEmpty);
+    setState(() {
+      _showMeasurements = !_showMeasurements;
+    });
     
-    if (hasMeasurements) {
-      // Clear all measurements
+    // If hiding measurements, clear all data
+    if (!_showMeasurements) {
       for (final controller in _measurementControllers.values) {
         controller.clear();
       }
       widget.onMeasurementsChanged({});
-    } else {
-      // Show measurements grid (it will be shown automatically when any field has content)
-      setState(() {});
     }
   }
 
