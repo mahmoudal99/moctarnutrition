@@ -25,6 +25,7 @@ import 'package:champions_gym_app/shared/models/user_model.dart';
 // import 'features/workouts/presentation/screens/workouts_screen.dart';
 // import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'shared/widgets/main_navigation.dart';
+import 'shared/widgets/floating_main_navigation.dart';
 import 'shared/providers/user_provider.dart';
 import 'shared/providers/meal_plan_provider.dart';
 import 'shared/providers/auth_provider.dart';
@@ -55,7 +56,7 @@ GoRouter createRouter(AuthProvider authProvider) {
             // The redirect will handle navigation, just show a placeholder
             return const SizedBox.shrink();
           }
-            return const MainNavigation(child: WorkoutsScreen());
+            return const FloatingMainNavigation(child: WorkoutsScreen());
       },
     ),
 
@@ -97,7 +98,7 @@ GoRouter createRouter(AuthProvider authProvider) {
 
     // Main App Routes (protected)
     ShellRoute(
-      builder: (context, state, child) => MainNavigation(child: child),
+      builder: (context, state, child) => FloatingMainNavigation(child: child),
       routes: [
         GoRoute(
           path: '/home',

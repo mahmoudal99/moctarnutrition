@@ -93,6 +93,9 @@ dependencies:
   
   # UI Effects
   magnifying_glass: ^2.1.1
+  
+  # Floating Bottom Bar
+  flutter_floating_bottom_bar: ^1.3.0
 
 dev_dependencies:
   flutter_test:
