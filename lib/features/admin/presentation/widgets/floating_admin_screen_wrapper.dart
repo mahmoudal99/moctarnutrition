@@ -3,21 +3,34 @@ import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 
-class FloatingAdminBottomNavigation extends StatelessWidget {
+class FloatingAdminScreenWrapper extends StatefulWidget {
+  final Widget child;
   final int currentIndex;
   final Function(int) onIndexChanged;
 
-  const FloatingAdminBottomNavigation({
+  const FloatingAdminScreenWrapper({
     Key? key,
+    required this.child,
     required this.currentIndex,
     required this.onIndexChanged,
   }) : super(key: key);
 
   @override
+  State<FloatingAdminScreenWrapper> createState() => _FloatingAdminScreenWrapperState();
+}
+
+class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper> {
+  @override
   Widget build(BuildContext context) {
     return BottomBar(
-      body: (context, controller) => Container(),
-      // This will be replaced by the actual body
+      child: _buildFloatingBottomBar(),
+      body: (context, controller) => NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          // Handle scroll notifications if needed
+          return false;
+        },
+        child: widget.child,
+      ),
       borderRadius: BorderRadius.circular(25),
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -27,7 +40,7 @@ class FloatingAdminBottomNavigation extends StatelessWidget {
       end: 0,
       offset: 16,
       barAlignment: Alignment.bottomCenter,
-      hideOnScroll: true,
+      hideOnScroll: false,
       showIcon: false,
       barDecoration: BoxDecoration(
         color: Colors.white,
@@ -40,7 +53,6 @@ class FloatingAdminBottomNavigation extends StatelessWidget {
           ),
         ],
       ),
-      child: _buildFloatingBottomBar(),
     );
   }
 
@@ -59,26 +71,24 @@ class FloatingAdminBottomNavigation extends StatelessWidget {
   }
 
   Widget _buildBottomNavItem(int index, String label) {
-    final isSelected = currentIndex == index;
+    final isSelected = widget.currentIndex == index;
     return Expanded(
       child: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
-          onIndexChanged(index);
+          widget.onIndexChanged(index);
         },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppConstants.primaryColor.withOpacity(0.1)
-                : Colors.transparent,
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: isSelected ? AppConstants.primaryColor : Colors.grey[600],
+            style: AppTextStyles.caption.copyWith(
+              color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
@@ -86,4 +96,4 @@ class FloatingAdminBottomNavigation extends StatelessWidget {
       ),
     );
   }
-}
+} 

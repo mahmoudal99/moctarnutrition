@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_bottom_navigation.dart';
+import 'package:champions_gym_app/features/admin/presentation/widgets/floating_admin_screen_wrapper.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_profile_screen.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_checkins_screen.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_meal_plan_screen.dart';
@@ -28,37 +29,42 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      body: _buildCurrentScreen(),
-      bottomNavigationBar: AdminBottomNavigation(
-        currentIndex: _currentIndex,
-        onIndexChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+    return FloatingAdminScreenWrapper(
+      currentIndex: _currentIndex,
+      onIndexChanged: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      child: Scaffold(
+        backgroundColor: AppConstants.backgroundColor,
+        body: _buildCurrentScreen(),
       ),
     );
   }
 
   Widget _buildCurrentScreen() {
+    print('AdminUserDetailScreen - Building screen for index: $_currentIndex');
     switch (_currentIndex) {
       case 0:
+        print('AdminUserDetailScreen - Showing Profile screen');
         return AdminUserProfileScreen(
           user: widget.user,
           mealPlanId: _mealPlanId,
           onMealPlanCreated: _refreshMealPlanId,
         );
       case 1:
+        print('AdminUserDetailScreen - Showing Check-ins screen');
         return AdminUserCheckinsScreen(user: widget.user);
       case 2:
+        print('AdminUserDetailScreen - Showing Meal Plan screen');
         return AdminUserMealPlanScreen(
           user: widget.user,
           mealPlanId: _mealPlanId,
           onMealPlanCreated: _refreshMealPlanId,
         );
       default:
+        print('AdminUserDetailScreen - Showing default Profile screen');
         return AdminUserProfileScreen(
           user: widget.user,
           mealPlanId: _mealPlanId,
@@ -76,4 +82,4 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
       _mealPlanId = userDoc.data()?['mealPlanId'] as String?;
     });
   }
-} 
+}

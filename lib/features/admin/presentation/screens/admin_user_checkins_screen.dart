@@ -15,9 +15,11 @@ class AdminUserCheckinsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('AdminUserCheckinsScreen - Building with user: ${user.id}');
     return FutureBuilder<List<CheckinModel>>(
       future: _fetchCheckins(user.id),
       builder: (context, snapshot) {
+        print('AdminUserCheckinsScreen - FutureBuilder state: ${snapshot.connectionState}, hasData: ${snapshot.hasData}, hasError: ${snapshot.hasError}');
         if (snapshot.hasError) {
           return Center(
             child: Column(
@@ -40,6 +42,7 @@ class AdminUserCheckinsScreen extends StatelessWidget {
         }
 
         final checkins = snapshot.data ?? [];
+        print('AdminUserCheckinsScreen - Rendering with ${checkins.length} checkins');
 
         return SafeArea(
           child: SingleChildScrollView(
@@ -120,13 +123,23 @@ class AdminUserCheckinsScreen extends StatelessWidget {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('checkins')
           .where('userId', isEqualTo: userId)
-          .orderBy('timestamp', descending: true)
           .limit(50)
           .get();
 
-      return querySnapshot.docs
-          .map((doc) => CheckinModel.fromJson(doc.data()))
+      final checkins = querySnapshot.docs
+          .map((doc) {
+            try {
+              return CheckinModel.fromJson(doc.data());
+            } catch (e) {
+              print('Error processing checkin doc ${doc.id}: $e');
+              return null;
+            }
+          })
+          .where((checkin) => checkin != null)
+          .cast<CheckinModel>()
           .toList();
+      
+      return checkins;
     } catch (e) {
       print('Error fetching checkins: $e');
       return [];
