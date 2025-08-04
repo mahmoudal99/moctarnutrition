@@ -30,16 +30,16 @@ class AdminHomeScreen extends StatelessWidget {
             children: [
               Text('Welcome back, $adminName!', style: AppTextStyles.heading3),
               const SizedBox(height: 8),
-              Text('This is your admin dashboard.',
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppConstants.textSecondary)),
-              const SizedBox(height: 28),
+              // Text('This is your admin dashboard.',
+              //     style: AppTextStyles.bodyMedium
+              //         .copyWith(color: AppConstants.textSecondary)),
+              const SizedBox(height: 15),
               // Sales Card
               _SalesCard(lastUpdated: lastUpdated),
               const SizedBox(height: 18),
               _StatisticsCard(stats: [
-                _SalesStat('Earnings', ' 12,235.99', '+20.46%', true),
-                _SalesStat('Sales', ' 31,890.00', '-3.46%', false),
+                _SalesStat('Earnings', '€12,235.99', '+20.46%', true),
+                _SalesStat('Sales', '€31,890.00', '-3.46%', false),
                 _SalesStat('Product Views', ' 129,781', '+8.30%', true),
               ]),
               const SizedBox(height: 28),
@@ -125,10 +125,10 @@ class _SalesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Dummy data
-    final totalBalance = ' 25,640.00';
+    final totalBalance = '€25,640.00';
     final stats = [
-      _SalesStat('Total Earnings', ' 12,235.99', '+20.46%', true),
-      _SalesStat('Number of Sales', ' 31,890.00', '-3.46%', false),
+      _SalesStat('Total Earnings', '€12,235.99', '+20.46%', true),
+      _SalesStat('Number of Sales', '€31,890.00', '-3.46%', false),
       _SalesStat('Product Views', ' 129,781', '+8.30%', true),
     ];
     return Card(

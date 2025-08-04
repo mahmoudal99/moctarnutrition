@@ -37,11 +37,11 @@ class _MainNavigationState extends State<MainNavigation> {
           label: 'Clients',
           route: '/admin-users',
         ),
-        const _NavItem(
-          icon: Icons.person,
-          label: 'Trainers',
-          route: '/trainers',
-        ),
+        // const _NavItem(
+        //   icon: Icons.person,
+        //   label: 'Trainers',
+        //   route: '/trainers',
+        // ),
         const _NavItem(
           icon: Icons.account_circle,
           label: 'Profile',
