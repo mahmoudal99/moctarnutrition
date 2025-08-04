@@ -116,7 +116,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
       slivers: [
         // SliverAppBar with flexible space for the green header
         SliverAppBar(
-          expandedHeight: 200,
+          expandedHeight: 180,
           collapsedHeight: 80,
           floating: false,
           pinned: true,
@@ -732,9 +732,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
           Expanded(
             child: Text(
               value,
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: AppTextStyles.bodySmall.copyWith(
                 color: Colors.black87,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
