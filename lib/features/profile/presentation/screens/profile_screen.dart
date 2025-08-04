@@ -7,6 +7,7 @@ import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/services/auth_service.dart';
 import '../../../../shared/services/onboarding_service.dart';
+import '../../../../shared/utils/avatar_utils.dart';
 import '../../../onboarding/presentation/screens/get_started_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -105,20 +106,12 @@ class _UserCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                CircleAvatar(
+                AvatarUtils.buildAvatar(
+                  photoUrl: user.photoUrl,
+                  name: user.name,
+                  email: user.email,
                   radius: 38,
-                  backgroundImage: user.photoUrl != null 
-                      ? NetworkImage(user.photoUrl!) 
-                      : null,
-                  backgroundColor: AppConstants.primaryColor.withOpacity(0.1),
-                  child: user.photoUrl == null
-                      ? Text(
-                          (user.name?.isNotEmpty == true) ? user.name![0].toUpperCase() : 'U',
-                          style: AppTextStyles.heading4.copyWith(
-                            color: AppConstants.primaryColor,
-                          ),
-                        )
-                      : null,
+                  fontSize: 18,
                 ),
                 if (authUser.emailVerified)
                   Positioned(

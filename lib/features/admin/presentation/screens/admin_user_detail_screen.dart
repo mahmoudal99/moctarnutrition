@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
+import 'package:champions_gym_app/shared/utils/avatar_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:champions_gym_app/shared/models/checkin_model.dart';
 import 'package:champions_gym_app/shared/models/meal_model.dart';
@@ -103,17 +104,12 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                                 border:
                                     Border.all(color: Colors.white, width: 4),
                               ),
-                              child: CircleAvatar(
+                              child: AvatarUtils.buildAvatar(
+                                photoUrl: user.photoUrl,
+                                name: user.name,
+                                email: user.email,
                                 radius: 35,
-                                backgroundColor: Colors.white,
-                                backgroundImage: user.photoUrl != null
-                                    ? NetworkImage(user.photoUrl!)
-                                    : null,
-                                child: user.photoUrl == null
-                                    ? const Icon(Icons.person,
-                                        size: 35,
-                                        color: AppConstants.primaryColor)
-                                    : null,
+                                fontSize: 16,
                               ),
                             ),
                             const SizedBox(height: 12),

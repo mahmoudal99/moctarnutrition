@@ -1,5 +1,6 @@
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
+import 'package:champions_gym_app/shared/utils/avatar_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_detail_screen.dart';
@@ -128,6 +129,11 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                     color: AppConstants.textTertiary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(24),
                   ),
+                  child: Icon(
+                    Icons.person,
+                    color: AppConstants.textTertiary.withOpacity(0.3),
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -253,18 +259,12 @@ class _UserCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              user.photoUrl != null
-                  ? CircleAvatar(
-                      backgroundImage: NetworkImage(user.photoUrl!),
-                      radius: 24,
-                    )
-                  : CircleAvatar(
-                      radius: 24,
-                      backgroundColor:
-                          AppConstants.primaryColor.withOpacity(0.08),
-                      child:
-                          Icon(Icons.person, color: AppConstants.primaryColor),
-                    ),
+              AvatarUtils.buildAvatar(
+                photoUrl: user.photoUrl,
+                name: user.name,
+                email: user.email,
+                radius: 24,
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
