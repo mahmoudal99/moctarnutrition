@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/utils/avatar_utils.dart';
@@ -70,7 +71,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           color: Colors.black87),
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.of(context).pop();
+                      },
                     ),
                   ),
                   Positioned(
@@ -151,6 +155,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                         ),
                       ),
                       onPressed: () async {
+                        HapticFeedback.mediumImpact();
                         final result = await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => AdminMealPlanSetupScreen(user: widget.user),

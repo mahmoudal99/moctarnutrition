@@ -2,6 +2,7 @@ import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/shared/utils/avatar_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_detail_screen.dart';
 
@@ -72,6 +73,7 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                       return _UserCard(
                         user: user,
                         onTap: () {
+                          HapticFeedback.lightImpact();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -104,7 +106,12 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
           borderSide: BorderSide.none,
         ),
       ),
-      onChanged: (value) => setState(() => _search = value),
+      onChanged: (value) {
+        if (value.length == 1) {
+          HapticFeedback.selectionClick();
+        }
+        setState(() => _search = value);
+      },
     );
   }
 

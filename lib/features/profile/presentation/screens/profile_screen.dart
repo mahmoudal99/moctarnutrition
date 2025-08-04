@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -159,7 +160,10 @@ class _UserCard extends StatelessWidget {
                         ),
                       IconButton(
                         icon: const Icon(Icons.edit, color: AppConstants.textTertiary),
-                        onPressed: () => _showEditProfileDialog(context, user, authProvider),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          _showEditProfileDialog(context, user, authProvider);
+                        },
                         tooltip: 'Edit profile',
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -428,7 +432,10 @@ class _LogoutButton extends StatelessWidget {
                   )
                 : const Icon(Icons.logout),
             label: Text(authProvider.isLoading ? 'Signing out...' : 'Logout'),
-            onPressed: authProvider.isLoading ? null : () => _handleLogout(context, authProvider),
+            onPressed: authProvider.isLoading ? null : () {
+              HapticFeedback.mediumImpact();
+              _handleLogout(context, authProvider);
+            },
           ),
         );
       },
