@@ -99,16 +99,16 @@ class AdminUserProfileScreen extends StatelessWidget {
                     children: [
                       AdminInfoRow(
                         label: 'Fitness Goal',
-                        value: _fitnessGoalLabel(user.preferences?.fitnessGoal),
+                        value: _fitnessGoalLabel(user.preferences.fitnessGoal),
                       ),
                       AdminInfoRow(
                         label: 'Activity Level',
                         value: _activityLevelLabel(
-                            user.preferences?.activityLevel),
+                            user.preferences.activityLevel),
                       ),
                       AdminInfoRow(
                         label: 'Target Calories',
-                        value: '${user.preferences?.targetCalories ?? 0} kcal',
+                        value: '${user.preferences.targetCalories ?? 0} kcal',
                       ),
                     ],
                   ),
@@ -122,16 +122,16 @@ class AdminUserProfileScreen extends StatelessWidget {
                     children: [
                       AdminInfoRow(
                           label: 'Age',
-                          value: '${user.preferences?.age ?? 0} years'),
+                          value: '${user.preferences.age ?? 0} years'),
                       AdminInfoRow(
                           label: 'Weight',
-                          value: '${user.preferences?.weight ?? 0} kg'),
+                          value: '${user.preferences.weight ?? 0} kg'),
                       AdminInfoRow(
                           label: 'Height',
-                          value: '${user.preferences?.height ?? 0} cm'),
+                          value: '${user.preferences.height ?? 0} cm'),
                       AdminInfoRow(
                           label: 'Gender',
-                          value: user.preferences?.gender ?? 'Not specified'),
+                          value: user.preferences.gender ?? 'Not specified'),
                     ],
                   ),
 
