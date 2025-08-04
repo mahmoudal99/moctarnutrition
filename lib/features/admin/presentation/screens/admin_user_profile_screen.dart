@@ -144,26 +144,26 @@ class AdminUserProfileScreen extends StatelessWidget {
                     children: [
                       AdminInfoRow(
                         label: 'Dietary Restrictions',
-                        value: (user.preferences?.dietaryRestrictions ?? [])
+                        value: (user.preferences.dietaryRestrictions ?? [])
                                 .isEmpty
                             ? 'None'
-                            : user.preferences?.dietaryRestrictions
+                            : user.preferences.dietaryRestrictions
                                     .join(', ') ??
                                 'None',
                       ),
                       AdminInfoRow(
                         label: 'Preferred Workouts',
-                        value: (user.preferences?.preferredWorkoutStyles ?? [])
+                        value: (user.preferences.preferredWorkoutStyles ?? [])
                                 .isEmpty
                             ? 'None'
-                            : user.preferences?.preferredWorkoutStyles
+                            : user.preferences.preferredWorkoutStyles
                                     .join(', ') ??
                                 'None',
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 128),
                 ],
               ),
             ),
