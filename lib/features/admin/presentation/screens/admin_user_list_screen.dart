@@ -61,7 +61,26 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                                   .contains(_search.toLowerCase()) ??
                               false) ||
                           u.email.toLowerCase().contains(_search.toLowerCase()))
-                      .toList();
+                      .toList()
+                      ..sort((a, b) {
+                        // Sort by name first, then by email if names are the same
+                        final nameA = a.name?.toLowerCase() ?? '';
+                        final nameB = b.name?.toLowerCase() ?? '';
+                        
+                        if (nameA.isEmpty && nameB.isEmpty) {
+                          // If both names are empty, sort by email
+                          return a.email.toLowerCase().compareTo(b.email.toLowerCase());
+                        } else if (nameA.isEmpty) {
+                          // Empty names go to the end
+                          return 1;
+                        } else if (nameB.isEmpty) {
+                          // Empty names go to the end
+                          return -1;
+                        } else {
+                          // Sort by name
+                          return nameA.compareTo(nameB);
+                        }
+                      });
                   if (users.isEmpty) {
                     return _buildEmptyState();
                   }

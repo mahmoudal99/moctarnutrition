@@ -33,10 +33,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
     final prefs = user.preferences;
     final handle =
         '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
-    final subtitle =
-        '${_roleLabel(user.role)} • ${_subscriptionLabel(user.subscriptionStatus)}';
     final checkInsFuture = _fetchCheckins(user.id);
     final mealPlanFuture = _fetchMealPlan(user.mealPlanId);
+    
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -44,17 +43,17 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              // Modern header
+              // Gradient header with centered profile
               Stack(
                 children: [
                   Container(
-                    height: 200, // Increased height
+                    height: 180,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xFFe0c3fc), // pastel purple
-                          Color(0xFF8ec5fc), // pastel blue
-                          Color(0xFFf9f9f9), // white
+                          Color(0xFFe8f5e8), // soft mint green
+                          Color(0xFFd4f4ff), // soft blue
+                          Color(0xFFf8f9fa), // clean white
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -80,10 +79,19 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                   Positioned(
                     top: 20,
                     right: 16,
-                    child: IconButton(
-                      icon: const Icon(Icons.info_outline_rounded,
-                          color: Colors.black54),
-                      onPressed: () {},
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _roleColor(user.role).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _roleLabel(user.role),
+                        style: AppTextStyles.caption.copyWith(
+                          color: _roleColor(user.role),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                   // Centered profile content
@@ -95,6 +103,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            const SizedBox(height: 20), // Added padding above avatar
                             Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
@@ -105,30 +114,51 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
-                                border:
-                                    Border.all(color: Colors.white, width: 4),
+                                border: Border.all(color: Colors.white, width: 3),
                               ),
                               child: AvatarUtils.buildAvatar(
                                 photoUrl: user.photoUrl,
                                 name: user.name,
                                 email: user.email,
-                                radius: 35,
+                                radius: 32,
                                 fontSize: 16,
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Text(user.name ?? user.email,
-                                style: AppTextStyles.heading4
-                                    .copyWith(color: Colors.black87)),
+                            Text(
+                              user.name ?? user.email,
+                              style: AppTextStyles.heading4.copyWith(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                             const SizedBox(height: 4),
-                            Text(handle,
-                                style: AppTextStyles.bodyMedium
-                                    .copyWith(color: Colors.black54)),
-                            const SizedBox(height: 4),
-                            Text(subtitle,
-                                style: AppTextStyles.caption
-                                    .copyWith(color: Colors.black45)),
-                            const SizedBox(height: 12),
+                            Text(
+                              handle,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: Colors.black54,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _subscriptionColor(user.subscriptionStatus).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                _subscriptionLabel(user.subscriptionStatus),
+                                style: AppTextStyles.caption.copyWith(
+                                  color: _subscriptionColor(user.subscriptionStatus),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                           ],
                         ),
                       ),
@@ -136,92 +166,118 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                   ),
                 ],
               ),
-              // Show Generate Meal Plan button only if no meal plan exists
+              
+              // Generate Meal Plan button (if needed)
               if (_mealPlanId == null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.psychology),
-                      label: const Text('Generate Meal Plan'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppConstants.primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        textStyle: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                Container(
+                  margin: const EdgeInsets.all(24),
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.restaurant_menu, size: 20),
+                    label: const Text('Create Meal Plan'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppConstants.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                      textStyle: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      onPressed: () async {
-                        HapticFeedback.mediumImpact();
-                        final result = await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => AdminMealPlanSetupScreen(user: widget.user),
-                          ),
-                        );
-                        if (result == true) {
-                          // Refetch the user document to get the new mealPlanId
-                          final userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.user.id).get();
-                          setState(() {
-                            _mealPlanId = userDoc.data()?['mealPlanId'] as String?;
-                          });
-                        }
-                      },
+                      elevation: 0,
                     ),
+                    onPressed: () async {
+                      HapticFeedback.mediumImpact();
+                      final result = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => AdminMealPlanSetupScreen(user: widget.user),
+                        ),
+                      );
+                      if (result == true) {
+                        final userDoc = await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.user.id)
+                            .get();
+                        setState(() {
+                          _mealPlanId = userDoc.data()?['mealPlanId'] as String?;
+                        });
+                      }
+                    },
                   ),
                 ),
-              SizedBox(
-                height: 10,
-              ),
-              // Stats row
+              
+              // Clean stats section
               FutureBuilder<List<CheckinModel>>(
                 future: checkInsFuture,
                 builder: (context, checkinSnap) {
                   final checkins = checkinSnap.data ?? [];
                   final checkinCount = checkins.length;
-                  final activeWeeks =
-                      checkins.map((c) => c.weekStartDate).toSet().length;
+                  final activeWeeks = checkins.map((c) => c.weekStartDate).toSet().length;
+                  
                   return FutureBuilder<MealPlanModel?>(
                     future: _fetchMealPlan(_mealPlanId),
                     builder: (context, mealSnap) {
                       final mealPlan = mealSnap.data;
                       final mealPlanDays = mealPlan?.mealDays.length ?? 0;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppConstants.surfaceColor,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              _buildStatExpanded('$checkinCount', 'Check-ins', isLeft: true),
-                              _verticalDivider(),
-                              _buildStatExpanded('$activeWeeks', 'Active Weeks'),
-                              _verticalDivider(),
-                              _buildStatExpanded(mealPlan != null ? '$mealPlanDays' : 'N/A', 'Meal Plan Days', isRight: true),
-                            ],
-                          ),
+                      
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            _buildCleanStat('$checkinCount', 'Check-ins'),
+                            _buildCleanDivider(),
+                            _buildCleanStat('$activeWeeks', 'Weeks'),
+                            _buildCleanDivider(),
+                            _buildCleanStat(
+                              mealPlan != null ? '$mealPlanDays' : '0', 
+                              'Meal Days'
+                            ),
+                          ],
                         ),
                       );
                     },
                   );
                 },
               ),
-              const SizedBox(height: 22),
-              // Tabs
-              TabBar(
-                labelColor: AppConstants.primaryColor,
-                unselectedLabelColor: AppConstants.textTertiary,
-                indicatorColor: AppConstants.primaryColor,
-                tabs: const [
-                  Tab(text: 'Profile'),
-                  Tab(text: 'Check-ins'),
-                  Tab(text: 'Meal Plan'),
-                ],
+              
+              const SizedBox(height: 24),
+              
+              // Clean tabs
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TabBar(
+                  labelColor: AppConstants.primaryColor,
+                  unselectedLabelColor: Colors.grey[600],
+                  indicatorColor: AppConstants.primaryColor,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicatorWeight: 3,
+                  labelStyle: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                  unselectedLabelStyle: AppTextStyles.bodyMedium,
+                  tabs: const [
+                    Tab(text: 'Profile'),
+                    Tab(text: 'Check-ins'),
+                    Tab(text: 'Meal Plan'),
+                  ],
+                ),
               ),
+              
+              const SizedBox(height: 16),
+              
+              // Tab content
               Expanded(
                 child: TabBarView(
                   children: [
@@ -508,7 +564,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
     );
   }
 
-  Widget _buildStatExpanded(String value, String label, {bool isLeft = false, bool isRight = false}) {
+  Widget _buildStatExpanded(String value, String label,
+      {bool isLeft = false, bool isRight = false}) {
     return Expanded(
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16),
@@ -516,9 +573,13 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(value, style: AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold)),
+            Text(value,
+                style: AppTextStyles.heading4
+                    .copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 2),
-            Text(label, style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary)),
+            Text(label,
+                style: AppTextStyles.caption
+                    .copyWith(color: AppConstants.textSecondary)),
           ],
         ),
       ),
@@ -535,43 +596,62 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
 
   Widget _profileTab(UserPreferences prefs, UserModel user) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Card(
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _prefRow('Name', user.name ?? user.email),
-              _prefRow('Email', user.email),
-              _prefRow('Role', _roleLabel(user.role)),
-              _prefRow(
-                  'Subscription', _subscriptionLabel(user.subscriptionStatus)),
-              _prefRow('Fitness Goal', _fitnessGoalLabel(prefs.fitnessGoal)),
-              _prefRow(
-                  'Activity Level', _activityLevelLabel(prefs.activityLevel)),
-              _prefRow(
-                  'Dietary Restrictions',
-                  prefs.dietaryRestrictions.isEmpty
-                      ? 'None'
-                      : prefs.dietaryRestrictions.join(', ')),
-              _prefRow(
-                  'Preferred Workouts',
-                  prefs.preferredWorkoutStyles.isEmpty
-                      ? 'None'
-                      : prefs.preferredWorkoutStyles.join(', ')),
-              _prefRow('Target Calories', '${prefs.targetCalories} kcal'),
-              _prefRow('Age', prefs.age.toString()),
-              _prefRow('Weight', '${prefs.weight} kg'),
-              _prefRow('Height', '${prefs.height} cm'),
-              _prefRow('Gender', prefs.gender),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          // Contact Information
+          _buildProfileSection(
+            'Contact Information',
+            [
+              _buildProfileRow('Name', user.name ?? user.email),
+              _buildProfileRow('Email', user.email),
             ],
           ),
-        ),
+          
+          const SizedBox(height: 16),
+          
+          // Fitness Information
+          _buildProfileSection(
+            'Fitness Profile',
+            [
+              _buildProfileRow('Fitness Goal', _fitnessGoalLabel(prefs.fitnessGoal)),
+              _buildProfileRow('Activity Level', _activityLevelLabel(prefs.activityLevel)),
+              _buildProfileRow('Target Calories', '${prefs.targetCalories} kcal'),
+            ],
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Physical Information
+          _buildProfileSection(
+            'Physical Information',
+            [
+              _buildProfileRow('Age', '${prefs.age} years'),
+              _buildProfileRow('Weight', '${prefs.weight} kg'),
+              _buildProfileRow('Height', '${prefs.height} cm'),
+              _buildProfileRow('Gender', prefs.gender),
+            ],
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Preferences
+          _buildProfileSection(
+            'Preferences',
+            [
+              _buildProfileRow(
+                'Dietary Restrictions',
+                prefs.dietaryRestrictions.isEmpty ? 'None' : prefs.dietaryRestrictions.join(', '),
+              ),
+              _buildProfileRow(
+                'Preferred Workouts',
+                prefs.preferredWorkoutStyles.isEmpty ? 'None' : prefs.preferredWorkoutStyles.join(', '),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
@@ -595,7 +675,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
         }
         return ListView.builder(
           padding: EdgeInsets.only(
-            left: 12, right: 12, top: 12, bottom: kBottomNavigationBarHeight + 16),
+              left: 12,
+              right: 12,
+              top: 12,
+              bottom: kBottomNavigationBarHeight + 16),
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
           itemCount: checkins.length,
@@ -673,7 +756,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
         }
         return ListView.builder(
           padding: EdgeInsets.only(
-            left: 12, right: 12, top: 12, bottom: kBottomNavigationBarHeight + 16),
+              left: 12,
+              right: 12,
+              top: 12,
+              bottom: kBottomNavigationBarHeight + 16),
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
           itemCount: mealPlan.mealDays.length,
@@ -730,5 +816,91 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
       default:
         return AppConstants.warningColor;
     }
+  }
+
+  Widget _buildCleanStat(String value, String label) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value,
+              style: AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 2),
+          Text(label,
+              style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCleanDivider() {
+    return Container(
+      width: 1,
+      height: 36,
+      color: AppConstants.textTertiary.withOpacity(0.12),
+    );
+  }
+
+  Widget _buildProfileSection(String title, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: AppTextStyles.bodyLarge.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              value,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
