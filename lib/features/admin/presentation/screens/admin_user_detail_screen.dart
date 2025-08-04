@@ -540,85 +540,86 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
   }
 
   Widget _buildCreateMealPlanCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppConstants.primaryColor.withOpacity(0.1),
-            AppConstants.primaryColor.withOpacity(0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppConstants.primaryColor.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.restaurant_menu,
-              color: AppConstants.primaryColor,
-              size: 24,
-            ),
+    return InkWell(
+      onTap: () async {
+        HapticFeedback.mediumImpact();
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) =>
+                AdminMealPlanSetupScreen(user: widget.user),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Create Meal Plan',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppConstants.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Generate personalized meal plan for ${widget.user.name?.split(' ').first ?? 'this user'}',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
+        );
+        if (result == true) {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.user.id)
+              .get();
+          setState(() {
+            _mealPlanId = userDoc.data()?['mealPlanId'] as String?;
+          });
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppConstants.primaryColor.withOpacity(0.1),
+              AppConstants.primaryColor.withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          IconButton(
-            onPressed: () async {
-              HapticFeedback.mediumImpact();
-              final result = await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) =>
-                      AdminMealPlanSetupScreen(user: widget.user),
-                ),
-              );
-              if (result == true) {
-                final userDoc = await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(widget.user.id)
-                    .get();
-                setState(() {
-                  _mealPlanId = userDoc.data()?['mealPlanId'] as String?;
-                });
-              }
-            },
-            icon: const Icon(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppConstants.primaryColor.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppConstants.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.restaurant_menu,
+                color: AppConstants.primaryColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Create Meal Plan',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppConstants.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Generate personalized meal plan for ${widget.user.name?.split(' ').first ?? 'this user'}',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
               Icons.arrow_forward_ios,
               color: AppConstants.primaryColor,
               size: 16,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -728,7 +729,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const Spacer(),
           Expanded(
             child: Text(
               value,
@@ -738,6 +739,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
+              textAlign: TextAlign.end,
             ),
           ),
         ],
