@@ -30,135 +30,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = widget.user;
-    final handle =
-        '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
-
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.black87),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            Navigator.of(context).pop();
-          },
-        ),
-        title: Text(
-          'Client Details',
-          style: AppTextStyles.heading4.copyWith(
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: _roleColor(user.role).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              _subscriptionLabel(user.subscriptionStatus),
-              style: AppTextStyles.caption.copyWith(
-                color: _roleColor(user.role),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
       body: _buildCurrentScreen(),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
-  }
-
-  Widget _buildUserProfileHeader(UserModel user, String handle) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppConstants.primaryColor.withOpacity(0.1),
-            AppConstants.accentColor.withOpacity(0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-              border: Border.all(color: Colors.white, width: 3),
-            ),
-            child: AvatarUtils.buildAvatar(
-              photoUrl: user.photoUrl,
-              name: user.name,
-              email: user.email,
-              radius: 40,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user.name ?? user.email,
-                  style: AppTextStyles.heading4.copyWith(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  handle,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.black54,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _buildBadge(_roleLabel(user.role), _roleColor(user.role)),
-                    const SizedBox(width: 8),
-                    _buildBadge(_subscriptionLabel(user.subscriptionStatus),
-                        _subscriptionColor(user.subscriptionStatus)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickStats() {
-    return const SizedBox.shrink();
   }
 
   Widget _buildBottomNavigationBar() {
@@ -236,92 +112,225 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
     final handle =
         '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // User profile header
-          _buildUserProfileHeader(user, handle),
-
-          // Quick stats cards
-          _buildQuickStats(),
-
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                // Create Meal Plan button (if needed)
-                if (_mealPlanId == null) _buildCreateMealPlanCard(),
-
-                if (_mealPlanId == null) const SizedBox(height: 24),
-
-                // Contact Information
-                _buildInfoCard(
-                  'Contact Information',
-                  Icons.contact_mail_outlined,
-                  [
-                    _buildInfoRow('Name', user.name ?? user.email),
-                    _buildInfoRow('Email', user.email),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Fitness Information
-                _buildInfoCard(
-                  'Fitness Profile',
-                  Icons.fitness_center_outlined,
-                  [
-                    _buildInfoRow(
-                        'Fitness Goal', _fitnessGoalLabel(prefs.fitnessGoal)),
-                    _buildInfoRow(
-                        'Activity Level', _activityLevelLabel(prefs.activityLevel)),
-                    _buildInfoRow('Target Calories', '${prefs.targetCalories} kcal'),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Physical Information
-                _buildInfoCard(
-                  'Physical Information',
-                  Icons.person_outline,
-                  [
-                    _buildInfoRow('Age', '${prefs.age} years'),
-                    _buildInfoRow('Weight', '${prefs.weight} kg'),
-                    _buildInfoRow('Height', '${prefs.height} cm'),
-                    _buildInfoRow('Gender', prefs.gender),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Preferences
-                _buildInfoCard(
-                  'Preferences',
-                  Icons.settings_outlined,
-                  [
-                    _buildInfoRow(
-                      'Dietary Restrictions',
-                      prefs.dietaryRestrictions.isEmpty
-                          ? 'None'
-                          : prefs.dietaryRestrictions.join(', '),
-                    ),
-                    _buildInfoRow(
-                      'Preferred Workouts',
-                      prefs.preferredWorkoutStyles.isEmpty
-                          ? 'None'
-                          : prefs.preferredWorkoutStyles.join(', '),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-              ],
+    return CustomScrollView(
+      slivers: [
+        // SliverAppBar with flexible space for the green header
+        SliverAppBar(
+          expandedHeight: 200,
+          collapsedHeight: 80,
+          floating: false,
+          pinned: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.of(context).pop();
+            },
+          ),
+          title: Text(
+            'Client Details',
+            style: AppTextStyles.heading4.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ],
-      ),
+          centerTitle: true,
+          actions: [
+            Container(
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _roleColor(user.role).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                _subscriptionLabel(user.subscriptionStatus),
+                style: AppTextStyles.caption.copyWith(
+                  color: _roleColor(user.role),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+          flexibleSpace: FlexibleSpaceBar(
+            background: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppConstants.primaryColor.withOpacity(0.1),
+                    AppConstants.accentColor.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: Border.all(color: Colors.white, width: 3),
+                          ),
+                          child: AvatarUtils.buildAvatar(
+                            photoUrl: user.photoUrl,
+                            name: user.name,
+                            email: user.email,
+                            radius: 40,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.name ?? user.email,
+                                style: AppTextStyles.heading4.copyWith(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                handle,
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.black54,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  _buildBadge(_roleLabel(user.role), _roleColor(user.role)),
+                                  const SizedBox(width: 8),
+                                  _buildBadge(_subscriptionLabel(user.subscriptionStatus),
+                                      _subscriptionColor(user.subscriptionStatus)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        
+        // Content that scrolls over the header
+        SliverToBoxAdapter(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(32),
+                topRight: Radius.circular(32),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  // Create Meal Plan button (if needed)
+                  if (_mealPlanId == null) _buildCreateMealPlanCard(),
+
+                  if (_mealPlanId == null) const SizedBox(height: 24),
+
+                  // Contact Information
+                  _buildInfoCard(
+                    'Contact Information',
+                    Icons.contact_mail_outlined,
+                    [
+                      _buildInfoRow('Name', user.name ?? user.email),
+                      _buildInfoRow('Email', user.email),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Fitness Information
+                  _buildInfoCard(
+                    'Fitness Profile',
+                    Icons.fitness_center_outlined,
+                    [
+                      _buildInfoRow(
+                          'Fitness Goal', _fitnessGoalLabel(prefs.fitnessGoal)),
+                      _buildInfoRow(
+                          'Activity Level', _activityLevelLabel(prefs.activityLevel)),
+                      _buildInfoRow('Target Calories', '${prefs.targetCalories} kcal'),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Physical Information
+                  _buildInfoCard(
+                    'Physical Information',
+                    Icons.person_outline,
+                    [
+                      _buildInfoRow('Age', '${prefs.age} years'),
+                      _buildInfoRow('Weight', '${prefs.weight} kg'),
+                      _buildInfoRow('Height', '${prefs.height} cm'),
+                      _buildInfoRow('Gender', prefs.gender),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Preferences
+                  _buildInfoCard(
+                    'Preferences',
+                    Icons.settings_outlined,
+                    [
+                      _buildInfoRow(
+                        'Dietary Restrictions',
+                        prefs.dietaryRestrictions.isEmpty
+                            ? 'None'
+                            : prefs.dietaryRestrictions.join(', '),
+                      ),
+                      _buildInfoRow(
+                        'Preferred Workouts',
+                        prefs.preferredWorkoutStyles.isEmpty
+                            ? 'None'
+                            : prefs.preferredWorkoutStyles.join(', '),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -727,6 +736,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                 color: Colors.black87,
                 fontWeight: FontWeight.w500,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
