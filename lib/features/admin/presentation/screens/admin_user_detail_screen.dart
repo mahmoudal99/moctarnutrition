@@ -175,12 +175,12 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              _buildBottomNavItem(0, 'Profile', Icons.person_outline),
-              _buildBottomNavItem(1, 'Check-ins', Icons.check_circle_outline),
-              _buildBottomNavItem(2, 'Meal Plan', Icons.restaurant_outlined),
+              _buildBottomNavItem(0, 'Profile'),
+              _buildBottomNavItem(1, 'Check-ins'),
+              _buildBottomNavItem(2, 'Meal Plan'),
             ],
           ),
         ),
@@ -188,7 +188,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
     );
   }
 
-  Widget _buildBottomNavItem(int index, String label, IconData icon) {
+  Widget _buildBottomNavItem(int index, String label) {
     final isSelected = _currentIndex == index;
     return Expanded(
       child: GestureDetector(
@@ -199,28 +199,18 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
           });
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             color: isSelected ? AppConstants.primaryColor.withOpacity(0.1) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                color: isSelected ? AppConstants.primaryColor : Colors.grey[600],
-                size: 24,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: isSelected ? AppConstants.primaryColor : Colors.grey[600],
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
-            ],
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: isSelected ? AppConstants.primaryColor : Colors.grey[600],
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
         ),
       ),
@@ -370,7 +360,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.check_circle_outline,
-                    size: 64, color: Colors.grey[400]),
+                    size: 32, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'No check-ins found',
@@ -466,7 +456,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.restaurant_outlined,
-                    size: 64, color: Colors.grey[400]),
+                    size: 32, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'No meal plan found',
