@@ -26,6 +26,14 @@ class AdminUserProfileScreen extends StatelessWidget {
           collapsedHeight: 80,
           pinned: true,
           backgroundColor: Colors.transparent,
+          title: Text(
+            'Client Details',
+            style: AppTextStyles.heading4.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          centerTitle: true,
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
               decoration: BoxDecoration(
