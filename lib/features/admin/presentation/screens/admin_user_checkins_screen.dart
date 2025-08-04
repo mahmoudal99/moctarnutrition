@@ -15,11 +15,9 @@ class AdminUserCheckinsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('AdminUserCheckinsScreen - Building with user: ${user.id}');
     return FutureBuilder<List<CheckinModel>>(
       future: _fetchCheckins(user.id),
       builder: (context, snapshot) {
-        print('AdminUserCheckinsScreen - FutureBuilder state: ${snapshot.connectionState}, hasData: ${snapshot.hasData}, hasError: ${snapshot.hasError}');
         if (snapshot.hasError) {
           return Center(
             child: Column(
@@ -42,7 +40,6 @@ class AdminUserCheckinsScreen extends StatelessWidget {
         }
 
         final checkins = snapshot.data ?? [];
-        print('AdminUserCheckinsScreen - Rendering with ${checkins.length} checkins');
 
         return SafeArea(
           child: SingleChildScrollView(

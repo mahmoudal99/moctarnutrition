@@ -44,27 +44,22 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
   }
 
   Widget _buildCurrentScreen() {
-    print('AdminUserDetailScreen - Building screen for index: $_currentIndex');
     switch (_currentIndex) {
       case 0:
-        print('AdminUserDetailScreen - Showing Profile screen');
         return AdminUserProfileScreen(
           user: widget.user,
           mealPlanId: _mealPlanId,
           onMealPlanCreated: _refreshMealPlanId,
         );
       case 1:
-        print('AdminUserDetailScreen - Showing Check-ins screen');
         return AdminUserCheckinsScreen(user: widget.user);
       case 2:
-        print('AdminUserDetailScreen - Showing Meal Plan screen');
         return AdminUserMealPlanScreen(
           user: widget.user,
           mealPlanId: _mealPlanId,
           onMealPlanCreated: _refreshMealPlanId,
         );
       default:
-        print('AdminUserDetailScreen - Showing default Profile screen');
         return AdminUserProfileScreen(
           user: widget.user,
           mealPlanId: _mealPlanId,
