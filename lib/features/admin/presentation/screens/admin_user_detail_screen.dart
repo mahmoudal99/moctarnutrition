@@ -86,10 +86,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        _roleLabel(user.role),
+                        _subscriptionLabel(user.subscriptionStatus),
                         style: AppTextStyles.caption.copyWith(
                           color: _roleColor(user.role),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -144,21 +144,6 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                               maxLines: 1,
                             ),
                             const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _subscriptionColor(user.subscriptionStatus).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                _subscriptionLabel(user.subscriptionStatus),
-                                style: AppTextStyles.caption.copyWith(
-                                  color: _subscriptionColor(user.subscriptionStatus),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
                           ],
                         ),
                       ),
@@ -170,21 +155,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
               // Generate Meal Plan button (if needed)
               if (_mealPlanId == null)
                 Container(
-                  margin: const EdgeInsets.all(24),
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.restaurant_menu, size: 20),
-                    label: const Text('Create Meal Plan'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppConstants.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                      textStyle: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: () async {
+                  margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: InkWell(
+                    onTap: () async {
                       HapticFeedback.mediumImpact();
                       final result = await Navigator.of(context).push(
                         MaterialPageRoute(
@@ -201,6 +174,68 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                         });
                       }
                     },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppConstants.primaryColor.withOpacity(0.1),
+                            AppConstants.primaryColor.withOpacity(0.05),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppConstants.primaryColor.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppConstants.primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.restaurant_menu,
+                              color: AppConstants.primaryColor,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Create Meal Plan',
+                                  style: AppTextStyles.bodyLarge.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppConstants.primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Generate personalized meal plan for ${user.name?.split(' ').first ?? 'this user'}',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            color: AppConstants.primaryColor,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               
@@ -220,27 +255,33 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
                       
                       return Container(
                         margin: const EdgeInsets.symmetric(horizontal: 24),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
                         child: Row(
                           children: [
-                            _buildCleanStat('$checkinCount', 'Check-ins'),
-                            _buildCleanDivider(),
-                            _buildCleanStat('$activeWeeks', 'Weeks'),
-                            _buildCleanDivider(),
-                            _buildCleanStat(
-                              mealPlan != null ? '$mealPlanDays' : '0', 
-                              'Meal Days'
+                            Expanded(
+                              child: _buildModernStatCard(
+                                '$checkinCount',
+                                'Check-ins',
+                                Icons.check_circle_outline,
+                                Colors.blue,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildModernStatCard(
+                                '$activeWeeks',
+                                'Weeks',
+                                Icons.calendar_today_outlined,
+                                Colors.green,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildModernStatCard(
+                                mealPlan != null ? '$mealPlanDays' : '0',
+                                'Meal Days',
+                                Icons.restaurant_outlined,
+                                Colors.orange,
+                              ),
                             ),
                           ],
                         ),
@@ -818,15 +859,50 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
     }
   }
 
-  Widget _buildCleanStat(String value, String label) {
-    return Expanded(
+  Widget _buildModernStatCard(String value, String label, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         children: [
-          Text(value,
-              style: AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 2),
-          Text(label,
-              style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary)),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: AppTextStyles.heading4.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );
