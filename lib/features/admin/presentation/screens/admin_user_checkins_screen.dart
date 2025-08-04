@@ -41,72 +41,74 @@ class AdminUserCheckinsScreen extends StatelessWidget {
 
         final checkins = snapshot.data ?? [];
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Stats section
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      '${checkins.length}',
-                      'Check-ins',
-                      Icons.check_circle_outline,
-                      AppConstants.primaryColor,
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Stats section
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        '${checkins.length}',
+                        'Check-ins',
+                        Icons.check_circle_outline,
+                        AppConstants.primaryColor,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatCard(
-                      '${_calculateActiveWeeks(checkins)}',
-                      'Active Weeks',
-                      Icons.calendar_today_outlined,
-                      Colors.orange,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildStatCard(
+                        '${_calculateActiveWeeks(checkins)}',
+                        'Active Weeks',
+                        Icons.calendar_today_outlined,
+                        Colors.orange,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // Check-ins list
-              Text(
-                'Recent Check-ins',
-                style: AppTextStyles.heading4.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
+                  ],
                 ),
-              ),
-
-              const SizedBox(height: 16),
-
-              if (checkins.isEmpty)
-                Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.fitness_center_outlined,
-                          size: 32, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No check-ins yet',
-                        style: AppTextStyles.bodyLarge
-                            .copyWith(color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'This user hasn\'t checked in yet',
-                        style: AppTextStyles.bodyMedium
-                            .copyWith(color: Colors.grey[500]),
-                      ),
-                    ],
+          
+                const SizedBox(height: 32),
+          
+                // Check-ins list
+                Text(
+                  'Recent Check-ins',
+                  style: AppTextStyles.heading4.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
                   ),
-                )
-              else
-                ...checkins
-                    .map((checkin) => _buildCheckinCard(context, checkin)),
-            ],
+                ),
+          
+                const SizedBox(height: 16),
+          
+                if (checkins.isEmpty)
+                  Center(
+                    child: Column(
+                      children: [
+                        Icon(Icons.fitness_center_outlined,
+                            size: 32, color: Colors.grey[400]),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No check-ins yet',
+                          style: AppTextStyles.bodyLarge
+                              .copyWith(color: Colors.grey[600]),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'This user hasn\'t checked in yet',
+                          style: AppTextStyles.bodyMedium
+                              .copyWith(color: Colors.grey[500]),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ...checkins
+                      .map((checkin) => _buildCheckinCard(context, checkin)),
+              ],
+            ),
           ),
         );
       },
