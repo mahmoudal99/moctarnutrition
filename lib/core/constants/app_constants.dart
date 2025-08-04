@@ -89,9 +89,16 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     color: AppConstants.textPrimary,
   );
+
   
   static TextStyle get heading4 => GoogleFonts.nunitoSans(
     fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: AppConstants.textPrimary,
+  );
+
+  static TextStyle get heading5 => GoogleFonts.nunitoSans(
+    fontSize: 16,
     fontWeight: FontWeight.w600,
     color: AppConstants.textPrimary,
   );

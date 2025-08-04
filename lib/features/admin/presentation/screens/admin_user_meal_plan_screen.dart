@@ -32,21 +32,17 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back_ios_outlined),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shadowColor: Colors.black.withOpacity(0.1),
                       elevation: 2,
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '${user.name}\'s Meal Plan',
-                      style: AppTextStyles.heading4.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                      ),
+                  Text(
+                    '${user.name}\'s Meal Plan',
+                    style: AppTextStyles.heading5.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
                     ),
                   ),
                 ],
@@ -171,8 +167,6 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shadowColor: Colors.black.withOpacity(0.1),
                         elevation: 2,
                       ),
                     ),
@@ -180,7 +174,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         '${user.name}\'s Meal Plan',
-                        style: AppTextStyles.heading4.copyWith(
+                        style: AppTextStyles.heading5.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.grey[800],
                         ),
