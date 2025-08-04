@@ -187,8 +187,6 @@ class AdminUserCheckinsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 8),
           Text(
             value,
             style: AppTextStyles.heading4.copyWith(

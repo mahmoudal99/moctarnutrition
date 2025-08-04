@@ -20,14 +20,14 @@ class ProfileScreen extends StatelessWidget {
       builder: (context, authProvider, child) {
         final user = authProvider.userModel;
         final authUser = authProvider.firebaseUser;
-        
+
         // Debug logging
         print('Profile Screen - AuthProvider state:');
         print('  isAuthenticated: ${authProvider.isAuthenticated}');
         print('  isLoading: ${authProvider.isLoading}');
         print('  userModel: ${user?.name ?? 'null'}');
         print('  firebaseUser: ${authUser?.email ?? 'null'}');
-        
+
         if (authProvider.isLoading) {
           return const Scaffold(
             backgroundColor: AppConstants.backgroundColor,
@@ -36,10 +36,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           );
         }
-
-
-
-
 
         if (user == null || authUser == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,7 +46,7 @@ class ProfileScreen extends StatelessWidget {
           return const GetStartedScreen();
         }
 
-        final stats = _getUserStats(user);
+        _getUserStats(user);
         final quickAccess = _getQuickAccessItems(context);
         final ctaList = _getCTAItems(context, user);
         final settings = _getSettingsItems(context);
@@ -62,7 +58,8 @@ class ProfileScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               children: [
-                _UserCard(user: user, authUser: authUser, authProvider: authProvider),
+                _UserCard(
+                    user: user, authUser: authUser, authProvider: authProvider),
                 if (user.role != UserRole.admin) ...[
                   // _StatsGrid(stats: stats),
                   const SizedBox(height: 20),
@@ -72,10 +69,10 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 28),
                 ],
                 const SizedBox(height: 24),
-                _SectionHeader(title: 'Settings'),
+                const _SectionHeader(title: 'Settings'),
                 ...settings.map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 24),
-                _SectionHeader(title: 'Support'),
+                const _SectionHeader(title: 'Support'),
                 ...support.map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 32),
                 _LogoutButton(),
@@ -95,7 +92,8 @@ class _UserCard extends StatelessWidget {
   final firebase_auth.User authUser;
   final app_auth.AuthProvider authProvider;
 
-  const _UserCard({required this.user, required this.authUser, required this.authProvider});
+  const _UserCard(
+      {required this.user, required this.authUser, required this.authProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +124,8 @@ class _UserCard extends StatelessWidget {
                         border: Border.all(color: Colors.white, width: 2),
                       ),
                       padding: const EdgeInsets.all(4),
-                      child: const Icon(Icons.check, size: 16, color: Colors.white),
+                      child: const Icon(Icons.check,
+                          size: 16, color: Colors.white),
                     ),
                   ),
               ],
@@ -149,7 +148,8 @@ class _UserCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       if (user.subscriptionStatus == SubscriptionStatus.premium)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: AppConstants.primaryColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
@@ -160,7 +160,8 @@ class _UserCard extends StatelessWidget {
                                   fontWeight: FontWeight.bold)),
                         ),
                       IconButton(
-                        icon: const Icon(Icons.edit, color: AppConstants.textTertiary),
+                        icon: const Icon(Icons.edit,
+                            color: AppConstants.textTertiary),
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           _showEditProfileDialog(context, user, authProvider);
@@ -174,20 +175,23 @@ class _UserCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     user.email,
-                    style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary),
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppConstants.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
                     'Role: ${user.role.name}',
-                    style: AppTextStyles.caption.copyWith(color: AppConstants.textTertiary),
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppConstants.textTertiary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     'Member since ${_formatDate(user.createdAt)}',
-                    style: AppTextStyles.caption.copyWith(color: AppConstants.textTertiary),
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppConstants.textTertiary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -240,7 +244,8 @@ class _StatCard extends StatelessWidget {
             children: [
               Text(
                 stat.value,
-                style: AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold),
+                style: AppTextStyles.heading4
+                    .copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -248,7 +253,8 @@ class _StatCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 stat.label,
-                style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary, fontSize: 12),
+                style: AppTextStyles.caption
+                    .copyWith(color: AppConstants.textSecondary, fontSize: 12),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -418,32 +424,36 @@ class _LogoutButton extends StatelessWidget {
               backgroundColor: AppConstants.errorColor.withOpacity(0.12),
               foregroundColor: AppConstants.errorColor,
               minimumSize: const Size.fromHeight(48),
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
-            icon: authProvider.isLoading 
+            icon: authProvider.isLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppConstants.errorColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          AppConstants.errorColor),
                     ),
                   )
                 : const Icon(Icons.logout),
             label: Text(authProvider.isLoading ? 'Signing out...' : 'Logout'),
-            onPressed: authProvider.isLoading ? null : () {
-              HapticFeedback.mediumImpact();
-              _handleLogout(context, authProvider);
-            },
+            onPressed: authProvider.isLoading
+                ? null
+                : () {
+                    HapticFeedback.mediumImpact();
+                    _handleLogout(context, authProvider);
+                  },
           ),
         );
       },
     );
   }
 
-  void _handleLogout(BuildContext context, app_auth.AuthProvider authProvider) async {
+  void _handleLogout(
+      BuildContext context, app_auth.AuthProvider authProvider) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -471,8 +481,6 @@ class _LogoutButton extends StatelessWidget {
     }
   }
 }
-
-
 
 class _MockStat {
   final String value;
@@ -519,15 +527,26 @@ class _MockSettingsItem {
 // --- HELPER FUNCTIONS ---
 String _formatDate(DateTime date) {
   final months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
   ];
   return '${months[date.month - 1]} ${date.year}';
 }
 
-void _showEditProfileDialog(BuildContext context, UserModel user, app_auth.AuthProvider authProvider) {
+void _showEditProfileDialog(
+    BuildContext context, UserModel user, app_auth.AuthProvider authProvider) {
   final nameController = TextEditingController(text: user.name ?? '');
-  
+
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -559,13 +578,13 @@ void _showEditProfileDialog(BuildContext context, UserModel user, app_auth.AuthP
                 name: newName,
                 updatedAt: DateTime.now(),
               );
-              
+
               try {
                 await AuthService.updateUserProfile(updatedUser);
-                
+
                 // Update the AuthProvider to reflect changes immediately
                 await authProvider.updateUserProfile(updatedUser);
-                
+
                 if (context.mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -611,23 +630,23 @@ List<_MockStat> _getUserStats(UserModel user) {
 List<_MockQuickAccess> _getQuickAccessItems(BuildContext context) {
   return [
     _MockQuickAccess(
-      label: 'Weekly Check-in', 
-      icon: Icons.camera_alt, 
+      label: 'Weekly Check-in',
+      icon: Icons.camera_alt,
       onTap: () => context.push('/checkin'),
     ),
     _MockQuickAccess(
-      label: 'My Workouts', 
-      icon: Icons.fitness_center, 
+      label: 'My Workouts',
+      icon: Icons.fitness_center,
       onTap: () => context.go('/workouts'),
     ),
     _MockQuickAccess(
-      label: 'Meal Plans', 
-      icon: Icons.restaurant, 
+      label: 'Meal Plans',
+      icon: Icons.restaurant,
       onTap: () => context.go('/meal-prep'),
     ),
     _MockQuickAccess(
-      label: 'Progress', 
-      icon: Icons.show_chart, 
+      label: 'Progress',
+      icon: Icons.show_chart,
       onTap: () => context.go('/progress'),
     ),
   ];
@@ -636,8 +655,8 @@ List<_MockQuickAccess> _getQuickAccessItems(BuildContext context) {
 List<_MockCTA> _getCTAItems(BuildContext context, UserModel user) {
   return [
     _MockCTA(
-      label: 'Refer a Friend', 
-      icon: Icons.group_add, 
+      label: 'Refer a Friend',
+      icon: Icons.group_add,
       isProminent: true,
       onTap: () {
         // TODO: Implement refer a friend
@@ -645,7 +664,7 @@ List<_MockCTA> _getCTAItems(BuildContext context, UserModel user) {
     ),
     if (user.subscriptionStatus == SubscriptionStatus.free)
       _MockCTA(
-        label: 'Upgrade Membership', 
+        label: 'Upgrade Membership',
         icon: Icons.workspace_premium,
         onTap: () => context.go('/subscription'),
       ),
@@ -654,44 +673,44 @@ List<_MockCTA> _getCTAItems(BuildContext context, UserModel user) {
 
 List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
   return [
-    _MockSettingsItem(
+    const _MockSettingsItem(
       label: 'Notifications',
       icon: Icons.notifications,
       trailing: Switch(value: true, onChanged: null),
     ),
-    _MockSettingsItem(
+    const _MockSettingsItem(
       label: 'Reminders',
       icon: Icons.alarm,
       trailing: Switch(value: false, onChanged: null),
     ),
+    // const _MockSettingsItem(
+    //   label: 'Dark Mode',
+    //   icon: Icons.dark_mode,
+    //   trailing: Switch(value: false, onChanged: null),
+    // ),
     _MockSettingsItem(
-      label: 'Dark Mode',
-      icon: Icons.dark_mode,
-      trailing: Switch(value: false, onChanged: null),
-    ),
-    _MockSettingsItem(
-      label: 'Workout Preferences', 
+      label: 'Workout Preferences',
       icon: Icons.fitness_center,
       onTap: () {
         // TODO: Navigate to workout preferences
       },
     ),
     _MockSettingsItem(
-      label: 'Nutrition Preferences', 
+      label: 'Nutrition Preferences',
       icon: Icons.restaurant,
       onTap: () {
         // TODO: Navigate to nutrition preferences
       },
     ),
     _MockSettingsItem(
-      label: 'Payment Info', 
+      label: 'Payment Info',
       icon: Icons.credit_card,
       onTap: () {
         // TODO: Navigate to payment settings
       },
     ),
     _MockSettingsItem(
-      label: 'Account Settings', 
+      label: 'Account Settings',
       icon: Icons.settings,
       onTap: () {
         // TODO: Navigate to account settings
@@ -703,21 +722,21 @@ List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
 List<_MockSettingsItem> _getSupportItems(BuildContext context) {
   return [
     _MockSettingsItem(
-      label: 'Help Center', 
+      label: 'Help Center',
       icon: Icons.help_outline,
       onTap: () {
         // TODO: Open help center
       },
     ),
     _MockSettingsItem(
-      label: 'Report a Bug', 
+      label: 'Report a Bug',
       icon: Icons.bug_report,
       onTap: () {
         // TODO: Open bug report
       },
     ),
     _MockSettingsItem(
-      label: 'Feedback', 
+      label: 'Feedback',
       icon: Icons.feedback,
       onTap: () {
         // TODO: Open feedback form
@@ -725,5 +744,3 @@ List<_MockSettingsItem> _getSupportItems(BuildContext context) {
     ),
   ];
 }
-
-

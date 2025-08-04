@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 
 class AdminUserListScreen extends StatefulWidget {
-  const AdminUserListScreen({Key? key}) : super(key: key);
+  const AdminUserListScreen({super.key});
 
   @override
   State<AdminUserListScreen> createState() => _AdminUserListScreenState();
@@ -38,7 +38,7 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 96),
         child: Column(
           children: [
             _buildSearchBar(),
@@ -62,25 +62,27 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                               false) ||
                           u.email.toLowerCase().contains(_search.toLowerCase()))
                       .toList()
-                      ..sort((a, b) {
-                        // Sort by name first, then by email if names are the same
-                        final nameA = a.name?.toLowerCase() ?? '';
-                        final nameB = b.name?.toLowerCase() ?? '';
-                        
-                        if (nameA.isEmpty && nameB.isEmpty) {
-                          // If both names are empty, sort by email
-                          return a.email.toLowerCase().compareTo(b.email.toLowerCase());
-                        } else if (nameA.isEmpty) {
-                          // Empty names go to the end
-                          return 1;
-                        } else if (nameB.isEmpty) {
-                          // Empty names go to the end
-                          return -1;
-                        } else {
-                          // Sort by name
-                          return nameA.compareTo(nameB);
-                        }
-                      });
+                    ..sort((a, b) {
+                      // Sort by name first, then by email if names are the same
+                      final nameA = a.name?.toLowerCase() ?? '';
+                      final nameB = b.name?.toLowerCase() ?? '';
+
+                      if (nameA.isEmpty && nameB.isEmpty) {
+                        // If both names are empty, sort by email
+                        return a.email
+                            .toLowerCase()
+                            .compareTo(b.email.toLowerCase());
+                      } else if (nameA.isEmpty) {
+                        // Empty names go to the end
+                        return 1;
+                      } else if (nameB.isEmpty) {
+                        // Empty names go to the end
+                        return -1;
+                      } else {
+                        // Sort by name
+                        return nameA.compareTo(nameB);
+                      }
+                    });
                   if (users.isEmpty) {
                     return _buildEmptyState();
                   }
@@ -353,4 +355,3 @@ class _UserCard extends StatelessWidget {
     );
   }
 }
- 
