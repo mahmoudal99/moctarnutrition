@@ -17,6 +17,7 @@ import 'features/checkin/presentation/screens/checkin_form_screen.dart';
 import 'features/checkin/presentation/screens/checkin_details_screen.dart';
 import 'features/checkin/presentation/screens/checkin_history_screen.dart';
 import 'features/admin/presentation/screens/admin_user_list_screen.dart';
+import 'features/admin/presentation/screens/admin_user_detail_screen.dart';
 import 'features/admin/presentation/screens/admin_home_screen.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 
@@ -151,6 +152,15 @@ GoRouter createRouter(AuthProvider authProvider) {
         ),
       ],
     ),
+    
+    // Admin User Detail Route (outside shell route - no bottom navigation)
+    GoRoute(
+      path: '/admin/user-detail',
+      builder: (context, state) {
+        final user = state.extra as UserModel;
+        return AdminUserDetailScreen(user: user);
+      },
+    ),
   ],
     redirect: (context, state) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -166,7 +176,7 @@ GoRouter createRouter(AuthProvider authProvider) {
       if (authProvider.isLoading) return null;
       final isAdmin = authProvider.userModel?.role == UserRole.admin;
       final isAuthenticated = authProvider.isAuthenticated;
-      const adminRoutes = ['/admin-home', '/admin-users', '/profile', '/trainers'];
+      const adminRoutes = ['/admin-home', '/admin-users', '/admin/user-detail', '/profile', '/trainers'];
       final currentRoute = state.uri.toString();
       
       // If admin and authenticated, redirect to /admin-home only if not on an admin route

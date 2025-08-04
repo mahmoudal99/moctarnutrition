@@ -4,7 +4,7 @@ import 'package:champions_gym_app/shared/utils/avatar_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_detail_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class AdminUserListScreen extends StatefulWidget {
   const AdminUserListScreen({Key? key}) : super(key: key);
@@ -93,12 +93,7 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                         user: user,
                         onTap: () {
                           HapticFeedback.lightImpact();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => AdminUserDetailScreen(user: user),
-                            ),
-                          );
+                          context.push('/admin/user-detail', extra: user);
                         },
                       );
                     },
