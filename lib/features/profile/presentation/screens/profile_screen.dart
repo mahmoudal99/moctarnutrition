@@ -79,6 +79,7 @@ class ProfileScreen extends StatelessWidget {
                 ...support.map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 32),
                 _LogoutButton(),
+                const SizedBox(height: 96),
               ],
             ),
           ),

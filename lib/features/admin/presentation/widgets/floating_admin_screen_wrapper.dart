@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 
 class FloatingAdminScreenWrapper extends StatefulWidget {
@@ -23,7 +24,6 @@ class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper>
   @override
   Widget build(BuildContext context) {
     return BottomBar(
-      child: _buildFloatingBottomBar(),
       body: (context, controller) => NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           // Handle scroll notifications if needed
@@ -53,6 +53,7 @@ class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper>
           ),
         ],
       ),
+      child: _buildFloatingBottomBar(),
     );
   }
 
@@ -62,15 +63,15 @@ class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildBottomNavItem(0, 'Profile'),
-          _buildBottomNavItem(1, 'Check-ins'),
-          _buildBottomNavItem(2, 'Meal Plan'),
+          _buildBottomNavItem(0, 'Profile', 'assets/images/profile.svg'),
+          _buildBottomNavItem(1, 'Check-ins', 'assets/images/checkin.svg'),
+          _buildBottomNavItem(2, 'Meal Plan', 'assets/images/meal.svg'),
         ],
       ),
     );
   }
 
-  Widget _buildBottomNavItem(int index, String label) {
+  Widget _buildBottomNavItem(int index, String label, String svgPath) {
     final isSelected = widget.currentIndex == index;
     return Expanded(
       child: GestureDetector(
@@ -79,18 +80,33 @@ class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper>
           widget.onIndexChanged(index);
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.caption.copyWith(
-              color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                svgPath,
+                width: 20,
+                height: 20,
+                colorFilter: ColorFilter.mode(
+                  isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
+                  BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.caption.copyWith(
+                  color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ],
           ),
         ),
       ),
