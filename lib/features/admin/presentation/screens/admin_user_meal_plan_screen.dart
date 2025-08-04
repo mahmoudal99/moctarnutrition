@@ -21,54 +21,91 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (mealPlanId == null) {
-      return Center(
+      return SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.restaurant_menu_outlined,
-                size: 32,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No Meal Plan Yet',
-                style: AppTextStyles.heading4.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Create a personalized meal plan for ${user.name?.split(' ').first ?? 'this user'} to help them achieve their fitness goals',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final result = await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => AdminMealPlanSetupScreen(user: user),
+              // Back button
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shadowColor: Colors.black.withOpacity(0.1),
+                      elevation: 2,
                     ),
-                  );
-                  if (result == true) {
-                    onMealPlanCreated?.call();
-                  }
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Create Meal Plan'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      '${user.name}\'s Meal Plan',
+                      style: AppTextStyles.heading4.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // No meal plan content
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.restaurant_menu_outlined,
+                        size: 32,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No Meal Plan Yet',
+                        style: AppTextStyles.heading4.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Create a personalized meal plan for ${user.name?.split(' ').first ?? 'this user'} to help them achieve their fitness goals',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final result = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => AdminMealPlanSetupScreen(user: user),
+                            ),
+                          );
+                          if (result == true) {
+                            onMealPlanCreated?.call();
+                          }
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text('Create Meal Plan'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppConstants.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -125,7 +162,35 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Back button
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shadowColor: Colors.black.withOpacity(0.1),
+                        elevation: 2,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '${user.name}\'s Meal Plan',
+                        style: AppTextStyles.heading4.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 24),
+                
                 // Meal plan overview card
                 _buildMealPlanOverviewCard(mealPlan),
 
