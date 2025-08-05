@@ -180,7 +180,6 @@ class CheckinStatusCard extends StatelessWidget {
   }
 
   Widget _buildPendingContent() {
-    final daysUntilDue = currentCheckin?.daysUntilDue ?? 0;
     final now = DateTime.now();
     final isSunday = now.weekday == 7;
     
@@ -239,7 +238,7 @@ class CheckinStatusCard extends StatelessWidget {
       );
     } else {
       final now = DateTime.now();
-      final isSunday = now.weekday == 2;
+      final isSunday = now.weekday == 7;
       
       return SizedBox(
         width: double.infinity,

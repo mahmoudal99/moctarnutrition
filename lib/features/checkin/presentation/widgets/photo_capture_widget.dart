@@ -127,7 +127,7 @@ class PhotoCaptureWidget extends StatelessWidget {
               color: AppConstants.primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(40),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.camera_alt_outlined,
               size: 40,
               color: AppConstants.primaryColor,
