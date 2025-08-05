@@ -264,7 +264,24 @@ class _CheckinScreenState extends State<CheckinScreen> {
   }
 
   void _navigateToCheckinForm(BuildContext context) {
+    final now = DateTime.now();
+    if (now.weekday != 7) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Check-ins can only be submitted on Sundays. Today is ${_getDayName(now.weekday)}.'),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
+      return;
+    }
     context.push('/checkin/form');
+  }
+
+  String _getDayName(int weekday) {
+    const days = [
+      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    ];
+    return days[weekday - 1];
   }
 
   void _viewCurrentCheckin(BuildContext context) {

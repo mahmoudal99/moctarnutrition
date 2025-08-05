@@ -180,8 +180,19 @@ class CheckinService {
     int? motivationLevel,
   }) async {
     try {
+      // Final validation: Check if it's Sunday
+      final now = DateTime.now();
+      if (now.weekday != 7) {
+        throw Exception('Check-ins can only be submitted on Sundays');
+      }
+
       // Get or create current week check-in
       CheckinModel? currentCheckin = await getCurrentWeekCheckin(userId);
+
+      // Final validation: Check if there's already a completed check-in
+      if (currentCheckin != null && currentCheckin.status == CheckinStatus.completed) {
+        throw Exception('You have already submitted a check-in for this week');
+      }
 
       if (currentCheckin == null) {
         currentCheckin = CheckinModel.createForCurrentWeek(userId);

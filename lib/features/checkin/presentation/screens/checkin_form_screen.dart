@@ -524,13 +524,37 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       return;
     }
 
+    // Check if it's Sunday (weekday 7)
+    final now = DateTime.now();
+    if (now.weekday != 7) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Check-ins can only be submitted on Sundays. Today is ${_getDayName(now.weekday)}.'),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
+      return;
+    }
+
+    // Check if there's already a check-in for this week
+    final checkinProvider = Provider.of<CheckinProvider>(context, listen: false);
+    final currentWeekCheckin = checkinProvider.currentWeekCheckin;
+    
+    if (currentWeekCheckin != null && currentWeekCheckin.status == CheckinStatus.completed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You have already submitted a check-in for this week.'),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      final checkinProvider = Provider.of<CheckinProvider>(context, listen: false);
-      
       final success = await checkinProvider.submitCheckin(
         photoPath: _selectedPhotoPath!,
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
@@ -573,6 +597,13 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
         });
       }
     }
+  }
+
+  String _getDayName(int weekday) {
+    const days = [
+      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    ];
+    return days[weekday - 1];
   }
 
   void _showExitDialog() {

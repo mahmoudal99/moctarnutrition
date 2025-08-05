@@ -142,6 +142,20 @@ class CheckinProvider extends ChangeNotifier {
         throw Exception('User not authenticated');
       }
 
+      // Validate that it's Sunday
+      final now = DateTime.now();
+      if (now.weekday != 7) {
+        _setError('Check-ins can only be submitted on Sundays');
+        return false;
+      }
+
+      // Check if there's already a completed check-in for this week
+      final existingCheckin = await CheckinService.getCurrentWeekCheckin(user.uid);
+      if (existingCheckin != null && existingCheckin.status == CheckinStatus.completed) {
+        _setError('You have already submitted a check-in for this week');
+        return false;
+      }
+
       final photoFile = await _getPhotoFile(photoPath);
       if (photoFile == null) {
         throw Exception('Failed to load photo file');

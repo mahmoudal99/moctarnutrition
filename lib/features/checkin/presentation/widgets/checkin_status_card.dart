@@ -181,6 +181,8 @@ class CheckinStatusCard extends StatelessWidget {
 
   Widget _buildPendingContent() {
     final daysUntilDue = currentCheckin?.daysUntilDue ?? 0;
+    final now = DateTime.now();
+    final isSunday = now.weekday == 7;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,13 +190,13 @@ class CheckinStatusCard extends StatelessWidget {
         Row(
           children: [
             Icon(
-              Icons.schedule,
+              isSunday ? Icons.schedule : Icons.event,
               color: Colors.white,
               size: 20,
             ),
             const SizedBox(width: 8),
             Text(
-              'Time for your weekly check-in',
+              isSunday ? 'Time for your weekly check-in' : 'Check-in day is Sunday',
               style: AppTextStyles.bodyMedium.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -204,26 +206,11 @@ class CheckinStatusCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Take a progress photo to track your fitness journey',
+          isSunday 
+              ? 'Take a progress photo to track your fitness journey'
+              : 'Come back on Sunday to submit your weekly check-in.',
           style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.white.withOpacity(0.8),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            daysUntilDue > 0 
-                ? '$daysUntilDue days remaining'
-                : 'Due Sunday',
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+            color: Colors.white,
           ),
         ),
       ],
@@ -251,15 +238,18 @@ class CheckinStatusCard extends StatelessWidget {
         ),
       );
     } else {
+      final now = DateTime.now();
+      final isSunday = now.weekday == 7;
+      
       return SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
-          onPressed: onCheckinNow,
-          icon: const Icon(Icons.camera_alt),
-          label: const Text('Take Progress Photo'),
+          onPressed: isSunday ? onCheckinNow : null,
+          icon: Icon(isSunday ? Icons.camera_alt : Icons.schedule),
+          label: Text(isSunday ? 'Take Progress Photo' : 'Check-in on Sunday'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: _getPrimaryColor(),
+            backgroundColor: isSunday ? Colors.white : Colors.white.withOpacity(0.3),
+            foregroundColor: isSunday ? _getPrimaryColor() : Colors.white.withOpacity(0.7),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -350,5 +340,11 @@ class CheckinStatusCard extends StatelessWidget {
       ];
       return '${months[date.month - 1]} ${date.day}';
     }
+  }
+
+  int _getDaysUntilSunday() {
+    final now = DateTime.now();
+    final daysUntilSunday = (7 - now.weekday) % 7;
+    return daysUntilSunday == 0 ? 7 : daysUntilSunday;
   }
 } 
