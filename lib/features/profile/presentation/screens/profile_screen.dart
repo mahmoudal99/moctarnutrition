@@ -635,16 +635,6 @@ List<_MockQuickAccess> _getQuickAccessItems(BuildContext context) {
       onTap: () => context.push('/checkin'),
     ),
     _MockQuickAccess(
-      label: 'My Workouts',
-      icon: Icons.fitness_center,
-      onTap: () => context.go('/workouts'),
-    ),
-    _MockQuickAccess(
-      label: 'Meal Plans',
-      icon: Icons.restaurant,
-      onTap: () => context.go('/meal-prep'),
-    ),
-    _MockQuickAccess(
       label: 'Progress',
       icon: Icons.show_chart,
       onTap: () => context.go('/progress'),
