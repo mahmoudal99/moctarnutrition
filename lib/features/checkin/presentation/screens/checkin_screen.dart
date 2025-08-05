@@ -109,6 +109,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
 
                 // Check-in history
                 _buildHistorySection(checkinProvider),
+                const SizedBox(height: 128),
               ],
             ),
           );
@@ -124,7 +125,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 64,
               color: AppConstants.errorColor,

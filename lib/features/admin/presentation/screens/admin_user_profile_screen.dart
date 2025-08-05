@@ -11,11 +11,11 @@ class AdminUserProfileScreen extends StatelessWidget {
   final VoidCallback? onMealPlanCreated;
 
   const AdminUserProfileScreen({
-    Key? key,
+    super.key,
     required this.user,
     this.mealPlanId,
     this.onMealPlanCreated,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +108,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                       ),
                       AdminInfoRow(
                         label: 'Target Calories',
-                        value: '${user.preferences.targetCalories ?? 0} kcal',
+                        value: '${user.preferences.targetCalories} kcal',
                       ),
                     ],
                   ),
@@ -122,16 +122,16 @@ class AdminUserProfileScreen extends StatelessWidget {
                     children: [
                       AdminInfoRow(
                           label: 'Age',
-                          value: '${user.preferences.age ?? 0} years'),
+                          value: '${user.preferences.age} years'),
                       AdminInfoRow(
                           label: 'Weight',
-                          value: '${user.preferences.weight ?? 0} kg'),
+                          value: '${user.preferences.weight} kg'),
                       AdminInfoRow(
                           label: 'Height',
-                          value: '${user.preferences.height ?? 0} cm'),
+                          value: '${user.preferences.height} cm'),
                       AdminInfoRow(
                           label: 'Gender',
-                          value: user.preferences.gender ?? 'Not specified'),
+                          value: user.preferences.gender),
                     ],
                   ),
 
@@ -144,12 +144,11 @@ class AdminUserProfileScreen extends StatelessWidget {
                     children: [
                       AdminInfoRow(
                         label: 'Dietary Restrictions',
-                        value: (user.preferences.dietaryRestrictions ?? [])
+                        value: (user.preferences.dietaryRestrictions)
                                 .isEmpty
                             ? 'None'
                             : user.preferences.dietaryRestrictions
-                                    .join(', ') ??
-                                'None',
+                                    .join(', '),
                       ),
                       AdminInfoRow(
                         label: 'Preferred Workouts',
@@ -157,8 +156,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                                 .isEmpty
                             ? 'None'
                             : user.preferences.preferredWorkoutStyles
-                                    .join(', ') ??
-                                'None',
+                                    .join(', '),
                       ),
                     ],
                   ),
