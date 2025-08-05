@@ -239,7 +239,7 @@ class CheckinStatusCard extends StatelessWidget {
       );
     } else {
       final now = DateTime.now();
-      final isSunday = now.weekday == 7;
+      final isSunday = now.weekday == 2;
       
       return SizedBox(
         width: double.infinity,

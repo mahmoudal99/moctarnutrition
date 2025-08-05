@@ -1,11 +1,15 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
+import 'dart:io'; // Added for File
+import 'dart:async'; // Added for Timer
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/checkin_model.dart';
+import '../../../../shared/providers/checkin_provider.dart';
+import '../../../../shared/services/background_upload_service.dart';
 
-class CheckinDetailsScreen extends StatelessWidget {
+class CheckinDetailsScreen extends StatefulWidget {
   final CheckinModel checkin;
 
   const CheckinDetailsScreen({
@@ -14,7 +18,71 @@ class CheckinDetailsScreen extends StatelessWidget {
   });
 
   @override
+  State<CheckinDetailsScreen> createState() => _CheckinDetailsScreenState();
+}
+
+class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
+  CheckinModel? _currentCheckin;
+  bool _isRefreshing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentCheckin = widget.checkin;
+  }
+
+  Future<void> _refreshIfPhotoUrlsAvailable() async {
+    if (_currentCheckin?.photoUrl != null) {
+      return; // Already has photo URL, no need to check
+    }
+    
+    try {
+      final hasPhotoUrls = await BackgroundUploadService.hasPhotoUrls(_currentCheckin!.id);
+      
+      if (hasPhotoUrls) {
+        // Photo URLs are now available, refresh the checkin data
+        await _refreshCheckinData();
+      }
+    } catch (e) {
+      // Ignore errors, just continue checking
+    }
+  }
+
+  void _refreshCheckinDataIfNeeded() {
+    // Only refresh once to avoid infinite loops
+    if (!_isRefreshing) {
+      _isRefreshing = true;
+      _refreshCheckinData();
+    }
+  }
+
+  Future<void> _refreshCheckinData() async {
+    try {
+      final checkinProvider = Provider.of<CheckinProvider>(context, listen: false);
+      await checkinProvider.refresh();
+      
+      // Find the updated checkin
+      final updatedCheckin = checkinProvider.userCheckins.firstWhere(
+        (checkin) => checkin.id == _currentCheckin!.id,
+        orElse: () => _currentCheckin!,
+      );
+      
+      if (updatedCheckin.photoUrl != null && updatedCheckin.photoUrl != _currentCheckin?.photoUrl) {
+        setState(() {
+          _currentCheckin = updatedCheckin;
+        });
+      }
+    } catch (e) {
+      // Ignore errors
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final checkin = _currentCheckin ?? widget.checkin;
+    
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
@@ -28,40 +96,54 @@ class CheckinDetailsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: AppConstants.textPrimary),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          if (checkin.photoUrl == null)
+            IconButton(
+              icon: _isRefreshing 
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh, color: AppConstants.textPrimary),
+              onPressed: _isRefreshing ? null : _refreshCheckinData,
+              tooltip: 'Refresh photo',
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildPhotoSection(),
+            _buildPhotoSection(checkin),
             const SizedBox(height: 24),
-            _buildStatusSection(),
+            _buildStatusSection(checkin),
             const SizedBox(height: 24),
             if (checkin.notes?.isNotEmpty == true) ...[
-              _buildNotesSection(),
+              _buildNotesSection(checkin),
               const SizedBox(height: 24),
             ],
             if (checkin.weight != null) ...[
-              _buildMetricsSection(),
+              _buildMetricsSection(checkin),
               const SizedBox(height: 24),
             ],
             if (checkin.measurements?.isNotEmpty == true) ...[
-              _buildMeasurementsSection(),
+              _buildMeasurementsSection(checkin),
               const SizedBox(height: 24),
             ],
             if (checkin.mood != null || checkin.energyLevel != null || checkin.motivationLevel != null) ...[
-              _buildMoodSection(),
+              _buildMoodSection(checkin),
               const SizedBox(height: 24),
             ],
-            _buildTimelineSection(),
+            _buildTimelineSection(checkin),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPhotoSection() {
+  Widget _buildPhotoSection(CheckinModel checkin) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -81,64 +163,100 @@ class CheckinDetailsScreen extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: checkin.photoUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: checkin.photoUrl!,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: AppConstants.textTertiary.withOpacity(0.1),
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: AppConstants.textTertiary.withOpacity(0.1),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            color: AppConstants.errorColor,
-                            size: 48,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Failed to load image',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppConstants.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : Container(
-                    color: AppConstants.textTertiary.withOpacity(0.1),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.camera_alt_outlined,
-                          color: AppConstants.textTertiary,
-                          size: 48,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'No photo available',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppConstants.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            child: _buildPhotoContent(checkin),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStatusSection() {
+  Widget _buildPhotoContent(CheckinModel checkin) {
+    // First priority: Show local image if it exists (regardless of Firebase URLs)
+    return FutureBuilder<String?>(
+      future: _getLocalImagePath(checkin.id),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data != null) {
+          // Show local image immediately - this is the priority
+          return Image.file(
+            File(snapshot.data!),
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder: (context, error, stackTrace) {
+              // If local image fails, fall back to Firebase URL
+              if (checkin.photoUrl != null && checkin.photoUrl!.isNotEmpty) {
+                return CachedNetworkImage(
+                  imageUrl: checkin.photoUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: AppConstants.textTertiary.withOpacity(0.1),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => _buildNoPhotoPlaceholder(checkin),
+                );
+              }
+              return _buildNoPhotoPlaceholder(checkin);
+            },
+          );
+        }
+        
+        // Second priority: If no local image, check if we need to refresh data for Firebase URL
+        if (checkin.photoUrl == null && checkin.status == CheckinStatus.completed) {
+          // Try to refresh the checkin data to get the Firebase URL
+          _refreshCheckinDataIfNeeded();
+        }
+        
+        // Third priority: Show Firebase URL if available
+        if (checkin.photoUrl != null && checkin.photoUrl!.isNotEmpty) {
+          return CachedNetworkImage(
+            imageUrl: checkin.photoUrl!,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              color: AppConstants.textTertiary.withOpacity(0.1),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            errorWidget: (context, url, error) => _buildNoPhotoPlaceholder(checkin),
+          );
+        }
+        
+        // Last resort: No photo available
+        return _buildNoPhotoPlaceholder(checkin);
+      },
+    );
+  }
+
+  Widget _buildNoPhotoPlaceholder(CheckinModel checkin) {
+    return Container(
+      color: AppConstants.textTertiary.withOpacity(0.1),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.camera_alt_outlined,
+            color: AppConstants.textTertiary,
+            size: 48,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No photo available',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppConstants.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _getLocalImagePath(String checkinId) async {
+    return BackgroundUploadService.getLocalImagePath(checkinId);
+  }
+
+  Widget _buildStatusSection(CheckinModel checkin) {
     Color statusColor;
     IconData statusIcon;
     String statusText;
@@ -204,7 +322,7 @@ class CheckinDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNotesSection() {
+  Widget _buildNotesSection(CheckinModel checkin) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -232,7 +350,7 @@ class CheckinDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricsSection() {
+  Widget _buildMetricsSection(CheckinModel checkin) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,7 +369,7 @@ class CheckinDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMeasurementsSection() {
+  Widget _buildMeasurementsSection(CheckinModel checkin) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -282,7 +400,7 @@ class CheckinDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMoodSection() {
+  Widget _buildMoodSection(CheckinModel checkin) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -295,25 +413,25 @@ class CheckinDetailsScreen extends StatelessWidget {
           children: [
             if (checkin.mood != null)
               Expanded(
-                child: _buildMoodCard(),
+                child: _buildMoodCard(checkin),
               ),
             if (checkin.mood != null && checkin.energyLevel != null)
               const SizedBox(width: 12),
             if (checkin.energyLevel != null)
               Expanded(
-                child: _buildEnergyCard(),
+                child: _buildEnergyCard(checkin),
               ),
           ],
         ),
         if (checkin.motivationLevel != null) ...[
           const SizedBox(height: 12),
-          _buildMotivationCard(),
+          _buildMotivationCard(checkin),
         ],
       ],
     );
   }
 
-  Widget _buildTimelineSection() {
+  Widget _buildTimelineSection(CheckinModel checkin) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -440,7 +558,7 @@ class CheckinDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMoodCard() {
+  Widget _buildMoodCard(CheckinModel checkin) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -468,7 +586,7 @@ class CheckinDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEnergyCard() {
+  Widget _buildEnergyCard(CheckinModel checkin) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -504,7 +622,7 @@ class CheckinDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMotivationCard() {
+  Widget _buildMotivationCard(CheckinModel checkin) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

@@ -20,6 +20,7 @@ import 'features/admin/presentation/screens/admin_user_list_screen.dart';
 import 'features/admin/presentation/screens/admin_user_detail_screen.dart';
 import 'features/admin/presentation/screens/admin_home_screen.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
+import 'shared/services/background_upload_service.dart';
 
 // import 'features/trainers/presentation/screens/trainers_screen.dart';
 // import 'features/workouts/presentation/screens/workouts_screen.dart';
@@ -226,6 +227,15 @@ void main() async {
     print('Please check your .env file and ensure OPENAI_API_KEY is set');
     // In production, you might want to show a user-friendly error
     // or fall back to a safe default configuration
+  }
+
+  // Initialize background upload service
+  try {
+    await BackgroundUploadService.initialize();
+    print('Background upload service initialized successfully');
+  } catch (e) {
+    print('Warning: Could not initialize background upload service: $e');
+    // Continue without background upload service
   }
 
   final authProvider = AuthProvider();

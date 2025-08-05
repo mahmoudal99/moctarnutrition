@@ -74,6 +74,9 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
           Expanded(
             child: _buildCurrentStep(),
           ),
+          const SizedBox(
+            height: 128,
+          )
         ],
       ),
     );
@@ -568,8 +571,9 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Check-in submitted successfully!'),
+            content: Text('Check-in submitted successfully! Your photo is being uploaded in the background.'),
             backgroundColor: AppConstants.successColor,
+            duration: Duration(seconds: 4),
           ),
         );
         context.pop();

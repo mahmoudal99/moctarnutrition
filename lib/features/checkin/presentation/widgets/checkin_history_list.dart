@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/checkin_model.dart';
+import '../../../../shared/services/background_upload_service.dart';
 
 class CheckinHistoryList extends StatelessWidget {
   final List<CheckinModel> checkins;
@@ -105,8 +107,55 @@ class _CheckinHistoryItem extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: checkin.photoThumbnailUrl != null
-            ? CachedNetworkImage(
+        child: FutureBuilder<String?>(
+          future: BackgroundUploadService.getLocalImagePath(checkin.id),
+          builder: (context, snapshot) {
+            // First priority: Show local image if it exists
+            if (snapshot.hasData && snapshot.data != null) {
+              return Image.file(
+                File(snapshot.data!),
+                fit: BoxFit.cover,
+                width: 60,
+                height: 60,
+                errorBuilder: (context, error, stackTrace) {
+                  // If local image fails, fall back to Firebase URL
+                  if (checkin.photoThumbnailUrl != null) {
+                    return CachedNetworkImage(
+                      imageUrl: checkin.photoThumbnailUrl!,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: AppConstants.textTertiary.withOpacity(0.1),
+                        child: Icon(
+                          Icons.camera_alt_outlined,
+                          color: AppConstants.textTertiary,
+                          size: 24,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: AppConstants.textTertiary.withOpacity(0.1),
+                        child: Icon(
+                          Icons.error_outline,
+                          color: AppConstants.errorColor,
+                          size: 24,
+                        ),
+                      ),
+                    );
+                  }
+                  return Container(
+                    color: AppConstants.textTertiary.withOpacity(0.1),
+                    child: Icon(
+                      Icons.camera_alt_outlined,
+                      color: AppConstants.textTertiary,
+                      size: 24,
+                    ),
+                  );
+                },
+              );
+            }
+            
+            // Second priority: Show Firebase URL if available
+            if (checkin.photoThumbnailUrl != null) {
+              return CachedNetworkImage(
                 imageUrl: checkin.photoThumbnailUrl!,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
@@ -125,15 +174,20 @@ class _CheckinHistoryItem extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-              )
-            : Container(
-                color: AppConstants.textTertiary.withOpacity(0.1),
-                child: Icon(
-                  Icons.camera_alt_outlined,
-                  color: AppConstants.textTertiary,
-                  size: 24,
-                ),
+              );
+            }
+            
+            // Last resort: No photo available
+            return Container(
+              color: AppConstants.textTertiary.withOpacity(0.1),
+              child: Icon(
+                Icons.camera_alt_outlined,
+                color: AppConstants.textTertiary,
+                size: 24,
               ),
+            );
+          },
+        ),
       ),
     );
   }

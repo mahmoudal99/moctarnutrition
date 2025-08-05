@@ -1,20 +1,15 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image/image.dart' as img;
-import 'package:uuid/uuid.dart';
 import 'package:logger/logger.dart';
 import '../models/checkin_model.dart';
+import 'background_upload_service.dart';
 
 class CheckinService {
+  static final _firestore = FirebaseFirestore.instance;
+  static final _checkinsCollection = _firestore.collection('checkins');
   static final _logger = Logger();
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final FirebaseStorage _storage = FirebaseStorage.instance;
-  static const _uuid = Uuid();
-
-  // Collection references
-  static CollectionReference<Map<String, dynamic>> get _checkinsCollection =>
-      _firestore.collection('checkins');
 
   /// Get current week's check-in for a user
   static Future<CheckinModel?> getCurrentWeekCheckin(String userId) async {
@@ -199,14 +194,17 @@ class CheckinService {
         currentCheckin = await createCheckin(currentCheckin);
       }
 
-      // Upload photo
-      final photoUrls =
-          await _uploadCheckinPhoto(userId, currentCheckin.id, photoFile);
+      // Start background upload process
+      final imageBytes = await photoFile.readAsBytes();
+      await BackgroundUploadService.startBackgroundUpload(
+        imageBytes: imageBytes,
+        userId: userId,
+        checkinId: currentCheckin.id,
+        uploadType: 'checkins',
+      );
 
-      // Update check-in with submitted data
+      // Update check-in with submitted data (without photo URLs for now)
       final updatedCheckin = currentCheckin.copyWith(
-        photoUrl: photoUrls['full'],
-        photoThumbnailUrl: photoUrls['thumbnail'],
         notes: notes,
         weight: weight,
         measurements: measurements,
@@ -222,68 +220,6 @@ class CheckinService {
       return updatedCheckin;
     } catch (e) {
       _logger.e('Error submitting check-in: $e');
-      rethrow;
-    }
-  }
-
-  /// Upload check-in photo and create thumbnail
-  static Future<Map<String, String>> _uploadCheckinPhoto(
-    String userId,
-    String checkinId,
-    File photoFile,
-  ) async {
-    try {
-      _logger.i('Starting photo upload for user: $userId, checkin: $checkinId');
-      
-      // Read and process image
-      final bytes = await photoFile.readAsBytes();
-      final image = img.decodeImage(bytes);
-
-      if (image == null) {
-        throw Exception('Failed to decode image');
-      }
-
-      // Create thumbnail (resize to 300x300)
-      final thumbnail = img.copyResize(
-        image,
-        width: 300,
-        height: 300,
-        interpolation: img.Interpolation.linear,
-      );
-      final thumbnailBytes = img.encodeJpg(thumbnail, quality: 80);
-
-      // Generate unique filenames
-      final photoId = _uuid.v4();
-      final fullPhotoPath = 'checkins/$userId/$checkinId/full_$photoId.jpg';
-      final thumbnailPath = 'checkins/$userId/$checkinId/thumb_$photoId.jpg';
-
-      _logger.i('Uploading full photo to: $fullPhotoPath');
-      
-      // Upload full photo
-      final fullPhotoRef = _storage.ref().child(fullPhotoPath);
-      await fullPhotoRef.putData(bytes);
-      _logger.i('Full photo uploaded successfully');
-
-      _logger.i('Uploading thumbnail to: $thumbnailPath');
-      
-      // Upload thumbnail
-      final thumbnailRef = _storage.ref().child(thumbnailPath);
-      await thumbnailRef.putData(thumbnailBytes);
-      _logger.i('Thumbnail uploaded successfully');
-
-      // Get download URLs
-      final fullPhotoUrl = await fullPhotoRef.getDownloadURL();
-      final thumbnailUrl = await thumbnailRef.getDownloadURL();
-
-      _logger.i('Photo upload completed successfully');
-      
-      return {
-        'full': fullPhotoUrl,
-        'thumbnail': thumbnailUrl,
-      };
-    } catch (e) {
-      _logger.e('Error uploading check-in photo: $e');
-      _logger.e('Error details: ${e.toString()}');
       rethrow;
     }
   }
