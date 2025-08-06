@@ -14,6 +14,11 @@ class ConfigService {
       throw Exception('OPENAI_API_KEY not found or not configured. '
           'Please copy .env.example to .env and set your actual OpenAI API key.');
     }
+    
+    // Log the first and last few characters of the API key for debugging
+    final maskedKey = '${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 10)}';
+    print('ConfigService: Using OpenAI API key: $maskedKey');
+    
     return apiKey;
   }
 

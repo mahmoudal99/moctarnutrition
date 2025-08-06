@@ -28,8 +28,8 @@ class MockDataService {
     return MealPlanModel(
       id: const Uuid().v4(),
       userId: 'current_user',
-      title: 'AI-Generated $days-Day Meal Plan',
-      description: 'Personalized meal plan based on your preferences',
+      title: 'Fallback $days-Day Meal Plan',
+      description: 'Backup meal plan generated when AI service is unavailable. All required meals are included.',
       startDate: DateTime.now(),
       endDate: DateTime.now().add(Duration(days: days - 1)),
       mealDays: mealDays,

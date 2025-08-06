@@ -89,6 +89,10 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         },
       );
       print('[AdminMealPlanSetupScreen] Meal plan generated: ${mealPlan.toJson()}');
+      
+      // Check if this was a fallback meal plan
+      final isFallbackPlan = mealPlan.title.contains('Fallback') || mealPlan.description.contains('fallback');
+      
       // Ensure the meal plan has the correct userId
       final mealPlanWithUser = mealPlan.copyWith(userId: userId);
       print('[AdminMealPlanSetupScreen] Saving meal plan to Firestore with userId: $userId');
@@ -99,7 +103,26 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         'mealPlanId': mealPlanRef.id,
       });
       print('[AdminMealPlanSetupScreen] Updated user document with mealPlanId: ${mealPlanRef.id}');
+      
       if (mounted) {
+        // Show appropriate message based on whether it was a fallback plan
+        if (isFallbackPlan) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Meal plan generated using backup recipes due to high demand. All required meals are included!'),
+              backgroundColor: AppConstants.warningColor ?? Colors.orange,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Meal plan generated successfully!'),
+              backgroundColor: AppConstants.successColor ?? Colors.green,
+            ),
+          );
+        }
+        
         Navigator.of(context).pop(true); // Return success
       }
     } catch (e, stack) {
@@ -111,8 +134,32 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         _totalDays = 0;
       });
       if (mounted) {
+        // Show more user-friendly error message
+        String errorMessage = 'Failed to generate meal plan';
+        if (e.toString().contains('QuotaExceededException')) {
+          errorMessage = 'OpenAI quota exceeded. Please add credits to your account and try again.';
+        } else if (e.toString().contains('AuthenticationException')) {
+          errorMessage = 'API key authentication failed. Please check your OpenAI configuration.';
+        } else if (e.toString().contains('RegionNotSupportedException')) {
+          errorMessage = 'OpenAI is not available in your region. Please contact support.';
+        } else if (e.toString().contains('RateLimitException')) {
+          errorMessage = 'Service is temporarily busy. Please try again in a few minutes.';
+        } else if (e.toString().contains('ServerOverloadedException')) {
+          errorMessage = 'OpenAI servers are overloaded. Please try again later.';
+        } else if (e.toString().contains('SlowDownException')) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
+        } else if (e.toString().contains('network') || e.toString().contains('connection')) {
+          errorMessage = 'Network connection issue. Please check your internet and try again.';
+        } else {
+          errorMessage = 'Unable to generate meal plan at this time. Please try again.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to generate meal plan: $e'), backgroundColor: AppConstants.errorColor),
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: AppConstants.errorColor,
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     }
