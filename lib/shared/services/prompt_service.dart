@@ -13,6 +13,9 @@ class PromptService {
     final formattedDate = DateFormat('yyyy-MM-dd').format(dayDate);
     final bmi = (preferences.weight / ((preferences.height / 100) * (preferences.height / 100))).toStringAsFixed(1);
 
+    // Determine required meal types based on meal frequency
+    final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
+
     return '''
 You are a professional nutritionist. Generate a meal plan for Day $dayIndex in JSON format, strictly adhering to the user's dietary restrictions and preferences.
 
@@ -42,12 +45,20 @@ You are a professional nutritionist. Generate a meal plan for Day $dayIndex in J
   - Dairy-Free: No milk, cheese, yogurt, or dairy products.
 - ALWAYS respect these restrictions. Double-check all ingredients.
 
+### CRITICAL MEAL REQUIREMENTS
+- You MUST include exactly ${requiredMeals.length} meals for Day $dayIndex.
+- Required meal types: ${requiredMeals.map((type) => type.name).join(', ')}.
+- You CANNOT skip any of these meal types.
+- Each meal type must be included exactly once.
+- If additional meals are needed, add them as "snack" type.
+
 ### Requirements
-- Generate ${preferences.mealFrequency} meals (e.g., breakfast, lunch, dinner, snacks) for Day $dayIndex.
+- Generate ${preferences.mealFrequency} meals for Day $dayIndex.
 - Total daily calories: ${preferences.targetCalories}.
 - Each meal must include:
   - Name: Unique and descriptive.
   - Description: Brief, appealing summary.
+  - Type: Must be one of the required meal types (${requiredMeals.map((type) => type.name).join(', ')}).
   - Ingredients: Detailed list with precise names, amounts, units, and nutritional data per ingredient.
   - Instructions: Clear, step-by-step, practical for home cooking.
   - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (calculated from ingredients).
@@ -144,6 +155,14 @@ You are a professional nutritionist. Generate a meal plan for Day $dayIndex in J
     ]
   }
 }
+
+### VALIDATION CHECKLIST
+Before submitting your response, verify:
+1. You have included exactly ${requiredMeals.length} meals
+2. Each required meal type (${requiredMeals.map((type) => type.name).join(', ')}) is present exactly once
+3. All meals have valid JSON structure
+4. All ingredients respect dietary restrictions
+5. Total calories are approximately ${preferences.targetCalories}
 ''';
   }
 
@@ -177,6 +196,9 @@ You are a professional nutritionist. Generate a meal plan for Day $dayIndex in J
     final formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
     final formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
 
+    // Determine required meal types based on meal frequency
+    final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
+
     return '''
 You are a professional nutritionist. Generate a $days-day personalized meal plan in JSON format, strictly adhering to the user's dietary restrictions and preferences.
 
@@ -208,13 +230,21 @@ You are a professional nutritionist. Generate a $days-day personalized meal plan
   - Dairy-Free: No milk, cheese, yogurt, or dairy products.
 - ALWAYS respect these restrictions. Double-check all ingredients.
 
+### CRITICAL MEAL REQUIREMENTS
+- For EACH day, you MUST include exactly ${requiredMeals.length} meals.
+- Required meal types for each day: ${requiredMeals.map((type) => type.name).join(', ')}.
+- You CANNOT skip any of these meal types on any day.
+- Each meal type must be included exactly once per day.
+- If additional meals are needed, add them as "snack" type.
+
 ### Requirements
-- Generate $days days of ${preferences.mealFrequency} meals each (breakfast, lunch, dinner, snacks).
+- Generate $days days of ${preferences.mealFrequency} meals each.
 - Total daily calories: ${preferences.targetCalories}.
 - Cheat Day: ${preferences.cheatDay != null ? 'On ${preferences.cheatDay}, allow for slightly more indulgent meals while maintaining nutritional balance. Include favorite foods and comfort dishes.' : 'No cheat day specified - maintain consistent healthy eating throughout the week.'}
 - Each meal must include:
   - Name: Unique and descriptive.
   - Description: Brief, appealing summary.
+  - Type: Must be one of the required meal types (${requiredMeals.map((type) => type.name).join(', ')}).
   - Ingredients: Detailed list with precise names, amounts, units, and nutritional data per ingredient.
   - Instructions: Clear, step-by-step, practical for home cooking.
   - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (calculated from ingredients).
@@ -357,5 +387,18 @@ You are a professional nutritionist. Generate a $days-day personalized meal plan
       case ActivityLevel.extremelyActive:
         return 'Extremely Active (very hard exercise, physical job)';
     }
+  }
+
+  /// Helper to determine required meal types based on meal frequency
+  static List<MealType> _getRequiredMealTypes(String mealFrequency) {
+    // Always require breakfast, lunch, and dinner as core meals
+    final requiredMeals = [MealType.breakfast, MealType.lunch, MealType.dinner];
+    
+    // Add snacks based on meal frequency string
+    if (mealFrequency.contains('snack') || mealFrequency.contains('4') || mealFrequency.contains('5')) {
+      requiredMeals.add(MealType.snack);
+    }
+    
+    return requiredMeals;
   }
 } 

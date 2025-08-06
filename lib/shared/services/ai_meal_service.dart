@@ -55,13 +55,139 @@ class AIMealService {
       final content = data['choices'][0]['message']['content'];
       print('Day $dayIndex response received successfully');
 
-      return ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
+      final mealDay = ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
+      
+      // Validate that all required meals are present
+      if (!_validateMealDay(mealDay, preferences)) {
+        print('Day $dayIndex validation failed - missing required meals. Regenerating...');
+        // Try one more time with a more explicit prompt
+        return await _generateSingleDayWithContextRetry(preferences, dayIndex, previousDays, mealDay);
+      }
+
+      return mealDay;
     } else {
       print(
           'API Error for day $dayIndex: ${response.statusCode} - ${response.body}');
       throw Exception(
           'Failed to generate day $dayIndex: ${response.statusCode}');
     }
+  }
+
+  /// Retry generation with more explicit prompt if validation fails
+  static Future<MealDay> _generateSingleDayWithContextRetry(
+    DietPlanPreferences preferences,
+    int dayIndex,
+    List<MealDay> previousDays,
+    MealDay failedMealDay,
+  ) async {
+    final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
+    final missingMeals = _getMissingMealTypes(failedMealDay, requiredMeals);
+    
+    final retryPrompt = '''
+${PromptService.buildSingleDayPromptWithContext(preferences, dayIndex, previousDays.isNotEmpty ? previousDays : null)}
+
+### URGENT: PREVIOUS ATTEMPT FAILED
+Your previous response was missing the following required meal types: ${missingMeals.map((type) => type.name).join(', ')}.
+
+You MUST include ALL of these meal types:
+${requiredMeals.map((type) => '- ${type.name}').join('\n')}
+
+The current response only had: ${failedMealDay.meals.map((m) => m.type.name).join(', ')}
+
+Please regenerate the meal plan ensuring ALL required meal types are included.
+''';
+
+    final requestBody = {
+      'model': ConfigService.openAIModel,
+      'messages': [
+        {
+          'role': 'system',
+          'content':
+              'You are a professional nutritionist and meal planner. Generate detailed, personalized meal plans in JSON format. ALWAYS respect dietary restrictions - this is the most critical requirement. Never include foods that violate the user\'s dietary restrictions.',
+        },
+        {
+          'role': 'user',
+          'content': retryPrompt,
+        },
+      ],
+      'temperature': ConfigService.openAITemperature,
+      'max_tokens': ConfigService.openAIMaxTokens,
+    };
+
+    final response = await RateLimitService.makeApiCall(
+      url: Uri.parse(ConfigService.openAIBaseUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${ConfigService.openAIApiKey}',
+      },
+      body: jsonEncode(requestBody),
+      context: 'day $dayIndex retry',
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final content = data['choices'][0]['message']['content'];
+      print('Day $dayIndex retry response received successfully');
+
+      final mealDay = ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
+      
+      // Validate again
+      if (!_validateMealDay(mealDay, preferences)) {
+        print('Day $dayIndex retry validation failed - using fallback meal plan');
+        return _generateFallbackMealDay(preferences, dayIndex, requiredMeals);
+      }
+
+      return mealDay;
+    } else {
+      print('API Error for day $dayIndex retry: ${response.statusCode} - ${response.body}');
+      final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
+      return _generateFallbackMealDay(preferences, dayIndex, requiredMeals);
+    }
+  }
+
+  /// Validate that a meal day contains all required meals
+  static bool _validateMealDay(MealDay mealDay, DietPlanPreferences preferences) {
+    final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
+    final presentMealTypes = mealDay.meals.map((m) => m.type).toSet();
+    
+    for (final requiredType in requiredMeals) {
+      if (!presentMealTypes.contains(requiredType)) {
+        print('Missing required meal type: ${requiredType.name}');
+        return false;
+      }
+    }
+    
+    print('Meal day validation passed - all required meals present');
+    return true;
+  }
+
+  /// Get missing meal types from a meal day
+  static List<MealType> _getMissingMealTypes(MealDay mealDay, List<MealType> requiredMeals) {
+    final presentMealTypes = mealDay.meals.map((m) => m.type).toSet();
+    return requiredMeals.where((type) => !presentMealTypes.contains(type)).toList();
+  }
+
+  /// Generate a fallback meal day with all required meals
+  static MealDay _generateFallbackMealDay(
+    DietPlanPreferences preferences,
+    int dayIndex,
+    List<MealType> requiredMeals,
+  ) {
+    print('Generating fallback meal day for day $dayIndex');
+    return MockDataService.generateMockMealDay(preferences, dayIndex, requiredMeals);
+  }
+
+  /// Helper to determine required meal types based on meal frequency
+  static List<MealType> _getRequiredMealTypes(String mealFrequency) {
+    // Always require breakfast, lunch, and dinner as core meals
+    final requiredMeals = [MealType.breakfast, MealType.lunch, MealType.dinner];
+    
+    // Add snacks based on meal frequency string
+    if (mealFrequency.contains('snack') || mealFrequency.contains('4') || mealFrequency.contains('5')) {
+      requiredMeals.add(MealType.snack);
+    }
+    
+    return requiredMeals;
   }
 
   /// Generate a personalized meal plan using AI with caching and parallel processing
@@ -225,5 +351,52 @@ class AIMealService {
     CacheService.clearCache();
     RateLimitService.resetRateLimit();
     print('All caches and rate limits reset');
+  }
+
+  /// Test method to validate meal plan generation with required meals
+  static Future<void> testMealPlanValidation() async {
+    print('🧪 Testing meal plan validation...');
+    
+    final testPreferences = DietPlanPreferences(
+      age: 30,
+      gender: 'Male',
+      weight: 70.0,
+      height: 175.0,
+      fitnessGoal: FitnessGoal.weightLoss,
+      activityLevel: ActivityLevel.moderatelyActive,
+      dietaryRestrictions: [],
+      preferredWorkoutStyles: [],
+      nutritionGoal: 'Lose fat',
+      preferredCuisines: ['American', 'Italian'],
+      foodsToAvoid: [],
+      favoriteFoods: [],
+      mealFrequency: '3 meals',
+      weeklyRotation: true,
+      remindersEnabled: false,
+      targetCalories: 2000,
+    );
+
+    try {
+      final mealPlan = await generateMealPlan(
+        preferences: testPreferences,
+        days: 1,
+        onProgress: (completed, total) {
+          print('Progress: $completed/$total days completed');
+        },
+      );
+
+      print('✅ Test completed successfully');
+      print('Generated ${mealPlan.mealDays.length} days');
+      
+      for (int i = 0; i < mealPlan.mealDays.length; i++) {
+        final day = mealPlan.mealDays[i];
+        print('Day ${i + 1}: ${day.meals.length} meals');
+        for (final meal in day.meals) {
+          print('  - ${meal.type.name}: ${meal.name}');
+        }
+      }
+    } catch (e) {
+      print('❌ Test failed: $e');
+    }
   }
 }

@@ -63,6 +63,9 @@ class ParserService {
         if (JsonUtils.safeToDouble(mealDayData['totalFat']) == 0 || mealDayData['totalFat'] == null) {
           mealDayData['totalFat'] = dayFat;
         }
+
+        // Validate meal types
+        _validateMealTypes(meals, preferences, dayIndex);
       }
 
       return MealDay.fromJson(mealDayData);
@@ -171,5 +174,43 @@ class ParserService {
       print('JSON parsing failed: $e');
       throw Exception('Failed to parse AI response: $e');
     }
+  }
+
+  /// Validate that all required meal types are present
+  static void _validateMealTypes(
+    List<Map<String, dynamic>> meals,
+    DietPlanPreferences preferences,
+    int dayIndex,
+  ) {
+    final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
+    final presentMealTypes = meals.map((m) => m['type'] as String).toSet();
+    
+    final missingMeals = <String>[];
+    for (final requiredType in requiredMeals) {
+      if (!presentMealTypes.contains(requiredType.name)) {
+        missingMeals.add(requiredType.name);
+      }
+    }
+    
+    if (missingMeals.isNotEmpty) {
+      print('⚠️ WARNING: Day $dayIndex is missing required meal types: ${missingMeals.join(', ')}');
+      print('Present meals: ${presentMealTypes.join(', ')}');
+      print('Required meals: ${requiredMeals.map((t) => t.name).join(', ')}');
+    } else {
+      print('✅ Day $dayIndex validation passed - all required meals present');
+    }
+  }
+
+  /// Helper to determine required meal types based on meal frequency
+  static List<MealType> _getRequiredMealTypes(String mealFrequency) {
+    // Always require breakfast, lunch, and dinner as core meals
+    final requiredMeals = [MealType.breakfast, MealType.lunch, MealType.dinner];
+    
+    // Add snacks based on meal frequency string
+    if (mealFrequency.contains('snack') || mealFrequency.contains('4') || mealFrequency.contains('5')) {
+      requiredMeals.add(MealType.snack);
+    }
+    
+    return requiredMeals;
   }
 } 
