@@ -6,6 +6,7 @@ import 'package:champions_gym_app/shared/models/checkin_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/features/checkin/presentation/screens/checkin_details_screen.dart';
 import 'package:champions_gym_app/shared/services/background_upload_service.dart';
+import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_app_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminUserCheckinsScreen extends StatelessWidget {
@@ -44,32 +45,16 @@ class AdminUserCheckinsScreen extends StatelessWidget {
 
         final checkins = snapshot.data ?? [];
 
-        return SafeArea(
-          child: SingleChildScrollView(
+        return Scaffold(
+          appBar: AdminUserAppBar(
+            user: user,
+            title: 'Check-ins',
+          ),
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back button
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back_ios_outlined),
-                      style: IconButton.styleFrom(
-                        elevation: 2,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${user.name}\'s Check-ins',
-                      style: AppTextStyles.heading5.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                  ],
-                ),
 
                 const SizedBox(height: 24),
 

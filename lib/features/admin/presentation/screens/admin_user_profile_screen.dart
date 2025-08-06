@@ -4,6 +4,7 @@ import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_header.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_info_card.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_create_meal_plan_card.dart';
+import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_app_bar.dart';
 
 class AdminUserProfileScreen extends StatelessWidget {
   final UserModel user;
@@ -23,17 +24,44 @@ class AdminUserProfileScreen extends StatelessWidget {
       slivers: [
         SliverAppBar(
           expandedHeight: 180,
-          collapsedHeight: 80,
+          collapsedHeight: 60,
           pinned: true,
-          backgroundColor: Colors.transparent,
-          title: Text(
-            'Client Details',
-            style: AppTextStyles.heading4.copyWith(
-              color: Colors.black87,
-              fontWeight: FontWeight.w600,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_outlined,
+                color: Colors.grey[700],
+                size: 20,
+              ),
             ),
           ),
-          centerTitle: true,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Client Details',
+                style: AppTextStyles.heading4.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              )
+            ],
+          ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(
+              height: 1,
+              color: Colors.grey[200],
+            ),
+          ),
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
               decoration: BoxDecoration(

@@ -3,6 +3,7 @@ import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/shared/models/meal_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_create_meal_plan_card.dart';
+import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_app_bar.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_meal_plan_setup_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -21,35 +22,19 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (mealPlanId == null) {
-      return SafeArea(
-        child: Padding(
+      return Scaffold(
+        appBar: AdminUserAppBar(
+          user: user,
+          title: 'Meal Plan',
+        ),
+        body: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Back button
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_ios_outlined),
-                    style: IconButton.styleFrom(
-                      elevation: 2,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '${user.name}\'s Meal Plan',
-                    style: AppTextStyles.heading5.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ],
-              ),
-              
+
               const SizedBox(height: 32),
-              
+
               // No meal plan content
               Expanded(
                 child: Center(
@@ -82,7 +67,8 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                         onPressed: () async {
                           final result = await Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => AdminMealPlanSetupScreen(user: user),
+                              builder: (_) =>
+                                  AdminMealPlanSetupScreen(user: user),
                             ),
                           );
                           if (result == true) {
@@ -94,8 +80,8 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppConstants.primaryColor,
                           foregroundColor: Colors.white,
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -137,35 +123,19 @@ class AdminUserMealPlanScreen extends StatelessWidget {
 
         final mealPlan = snapshot.data;
         if (mealPlan == null) {
-          return SafeArea(
-            child: Padding(
+          return Scaffold(
+            appBar: AdminUserAppBar(
+              user: user,
+              title: 'Meal Plan',
+            ),
+            body: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Back button
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_back_ios_outlined),
-                        style: IconButton.styleFrom(
-                          elevation: 2,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${user.name}\'s Meal Plan',
-                        style: AppTextStyles.heading5.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ],
-                  ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // No meal plan content
                   Expanded(
                     child: Center(
@@ -198,7 +168,8 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                             onPressed: () async {
                               final result = await Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (_) => AdminMealPlanSetupScreen(user: user),
+                                  builder: (_) =>
+                                      AdminMealPlanSetupScreen(user: user),
                                 ),
                               );
                               if (result == true) {
@@ -210,8 +181,8 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppConstants.primaryColor,
                               foregroundColor: Colors.white,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -227,37 +198,19 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           );
         }
 
-        return SafeArea(
-          child: SingleChildScrollView(
+        return Scaffold(
+          appBar: AdminUserAppBar(
+            user: user,
+            title: 'Meal Plan',
+          ),
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back button
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back),
-                      style: IconButton.styleFrom(
-                        elevation: 2,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        '${user.name}\'s Meal Plan',
-                        style: AppTextStyles.heading5.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Meal plan overview card
                 _buildMealPlanOverviewCard(mealPlan),
 
@@ -272,7 +225,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                     child: _buildMealDayCard(day, index + 1),
                   );
                 }),
-                SizedBox(
+                const SizedBox(
                   height: 96,
                 )
               ],
