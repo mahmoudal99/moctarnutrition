@@ -16,6 +16,13 @@ class PromptService {
     // Determine required meal types based on meal frequency
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
 
+    // Check if this day is a cheat day
+    final dayOfWeek = _getDayOfWeek(dayDate);
+    final isCheatDay = preferences.cheatDay != null && dayOfWeek == preferences.cheatDay;
+    final cheatDayInstructions = isCheatDay 
+        ? 'This is a CHEAT DAY (${preferences.cheatDay}). Allow for slightly more indulgent meals while maintaining nutritional balance. Include favorite foods and comfort dishes. You can be more flexible with calorie targets and include treats, but still maintain healthy portions and nutritional variety.'
+        : '';
+
     return '''
 You are a professional nutritionist based in Ireland, Dublin. Generate a meal plan for Day $dayIndex in JSON format, strictly adhering to the user's dietary restrictions and preferences.
 
@@ -42,6 +49,8 @@ You are a professional nutritionist based in Ireland, Dublin. Generate a meal pl
 - Favorite Foods: ${preferences.favoriteFoods.join(', ').isEmpty ? 'None' : preferences.favoriteFoods.join(', ')}
 - Foods to Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
 - Meal Frequency: ${preferences.mealFrequency} meals/day
+- Cheat Day: ${preferences.cheatDay ?? 'None'}
+${isCheatDay ? '- **CURRENT DAY IS CHEAT DAY**' : ''}
 
 ### Dietary Restrictions (CRITICAL)
 - Restrictions: ${preferences.dietaryRestrictions.join(', ').isEmpty ? 'None' : preferences.dietaryRestrictions.join(', ')}
@@ -62,6 +71,7 @@ You are a professional nutritionist based in Ireland, Dublin. Generate a meal pl
 ### Requirements
 - Generate ${preferences.mealFrequency} meals for Day $dayIndex.
 - Total daily calories: ${preferences.targetCalories}.
+${isCheatDay ? '- **CHEAT DAY INSTRUCTIONS**: $cheatDayInstructions' : ''}
 - Each meal must include:
   - Name: Unique and descriptive.
   - Description: Brief, appealing summary.
@@ -420,5 +430,27 @@ You are a professional nutritionist based in Ireland, Dublin. Generate a $days-d
     }
     
     return requiredMeals;
+  }
+
+  /// Helper to get the day of the week for a given date
+  static String _getDayOfWeek(DateTime date) {
+    switch (date.weekday) {
+      case 1:
+        return 'Monday';
+      case 2:
+        return 'Tuesday';
+      case 3:
+        return 'Wednesday';
+      case 4:
+        return 'Thursday';
+      case 5:
+        return 'Friday';
+      case 6:
+        return 'Saturday';
+      case 7:
+        return 'Sunday';
+      default:
+        return 'Unknown';
+    }
   }
 } 
