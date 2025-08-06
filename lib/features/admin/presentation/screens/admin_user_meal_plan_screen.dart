@@ -137,19 +137,92 @@ class AdminUserMealPlanScreen extends StatelessWidget {
 
         final mealPlan = snapshot.data;
         if (mealPlan == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.restaurant_menu_outlined,
-                    size: 64, color: Colors.grey[400]),
-                const SizedBox(height: 16),
-                Text(
-                  'Meal plan not found',
-                  style:
-                      AppTextStyles.bodyLarge.copyWith(color: Colors.grey[600]),
-                ),
-              ],
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Back button
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back_ios_outlined),
+                        style: IconButton.styleFrom(
+                          elevation: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '${user.name}\'s Meal Plan',
+                        style: AppTextStyles.heading5.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // No meal plan content
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.restaurant_menu_outlined,
+                            size: 32,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No Meal Plan Yet',
+                            style: AppTextStyles.heading4.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Create a personalized meal plan for ${user.name?.split(' ').first ?? 'this user'} to help them achieve their fitness goals',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 32),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              final result = await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => AdminMealPlanSetupScreen(user: user),
+                                ),
+                              );
+                              if (result == true) {
+                                onMealPlanCreated?.call();
+                              }
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text('Create Meal Plan'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppConstants.primaryColor,
+                              foregroundColor: Colors.white,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -210,7 +283,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   Future<MealPlanModel?> _fetchMealPlan(String mealPlanId) async {
     try {
       final doc = await FirebaseFirestore.instance
-          .collection('mealPlans')
+          .collection('meal_plans')
           .doc(mealPlanId)
           .get();
 
