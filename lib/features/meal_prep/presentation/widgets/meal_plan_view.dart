@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
 import 'meal_card.dart';
@@ -159,7 +160,7 @@ class _MealPlanViewState extends State<MealPlanView> {
           }),
 
           // Add some bottom padding
-          const SizedBox(height: AppConstants.spacingL),
+          const SizedBox(height: 128),
         ],
       ),
     );
@@ -188,10 +189,10 @@ class _MealPlanViewState extends State<MealPlanView> {
       ),
       child: Row(
         children: [
-          Icon(
-            _getMealTypeIcon(mealType),
-            color: _getMealTypeColor(mealType),
-            size: 16,
+          SvgPicture.asset(
+            "assets/images/${_getMealTypeIcon(mealType)}",
+            colorFilter: ColorFilter.mode(_getMealTypeColor(mealType), BlendMode.srcIn),
+            height: 20,
           ),
           const SizedBox(width: AppConstants.spacingS),
           Text(
@@ -232,16 +233,16 @@ class _MealPlanViewState extends State<MealPlanView> {
     }
   }
 
-  IconData _getMealTypeIcon(MealType mealType) {
+  String _getMealTypeIcon(MealType mealType) {
     switch (mealType) {
       case MealType.breakfast:
-        return Icons.wb_sunny;
+        return "eggs.svg";
       case MealType.lunch:
-        return Icons.restaurant;
+        return "lunch.svg";
       case MealType.dinner:
-        return Icons.dinner_dining;
+        return "dinner.svg";
       case MealType.snack:
-        return Icons.coffee;
+        return "lunch.svg";
     }
   }
 

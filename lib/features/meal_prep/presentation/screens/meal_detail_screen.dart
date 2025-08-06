@@ -19,7 +19,6 @@ class MealDetailScreen extends StatefulWidget {
 }
 
 class _MealDetailScreenState extends State<MealDetailScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -57,7 +56,8 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             backgroundColor: AppConstants.backgroundColor,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: AppConstants.textPrimary),
+              icon:
+                  const Icon(Icons.arrow_back, color: AppConstants.textPrimary),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -82,6 +82,9 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                 _buildInstructionsSection(currentMeal),
                 const SizedBox(height: AppConstants.spacingL),
                 _buildMealInfo(currentMeal),
+                SizedBox(
+                  height: 128,
+                )
               ],
             ),
           ),
@@ -109,20 +112,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: _getMealTypeColor(meal.type).withOpacity(0.15),
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
-            ),
-            child: Icon(
-              _getMealTypeIcon(meal.type),
-              color: _getMealTypeColor(meal.type),
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: AppConstants.spacingM),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +132,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                 const SizedBox(height: AppConstants.spacingXS),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.calendar_today,
                       size: 14,
                       color: AppConstants.textTertiary,
@@ -310,7 +299,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           ),
         ),
         const SizedBox(height: AppConstants.spacingM),
-
         Container(
           decoration: BoxDecoration(
             color: AppConstants.surfaceColor,
@@ -328,8 +316,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       ],
     );
   }
-
-
 
   Widget _buildIngredientTile(RecipeIngredient ingredient, Meal meal) {
     final hasNutrition = ingredient.nutrition != null;
@@ -362,8 +348,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                     color: AppConstants.textSecondary,
                   ),
                 ),
-                if (ingredient.notes != null &&
-                    ingredient.notes!.isNotEmpty)
+                if (ingredient.notes != null && ingredient.notes!.isNotEmpty)
                   Text(
                     ingredient.notes!,
                     style: AppTextStyles.caption.copyWith(
@@ -374,8 +359,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
               ],
             ),
           ),
-          if (hasNutrition)
-            _buildIngredientNutrition(ingredient.nutrition!),
+          if (hasNutrition) _buildIngredientNutrition(ingredient.nutrition!),
         ],
       ),
     );
@@ -426,8 +410,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       ),
     );
   }
-
-
 
   Widget _buildInstructionsSection(Meal meal) {
     return Column(
@@ -599,6 +581,4 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         return 'Other';
     }
   }
-
-
 }

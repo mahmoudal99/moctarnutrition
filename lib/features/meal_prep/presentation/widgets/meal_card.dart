@@ -39,20 +39,7 @@ class MealCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: _getMealTypeColor(meal.type).withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                  ),
-                  child: Icon(
-                    _getMealTypeIcon(meal.type),
-                    color: _getMealTypeColor(meal.type),
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacingM),
+                const SizedBox(width: AppConstants.spacingS),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

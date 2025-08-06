@@ -10,7 +10,6 @@ class AdminHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Dummy data for now
     final metrics = [
       _MetricCardData('Clients', '42', Icons.group, AppConstants.primaryColor),
       _MetricCardData('Active Subs', '30', Icons.workspace_premium,
@@ -53,8 +52,7 @@ class AdminHomeScreen extends StatelessWidget {
                 childAspectRatio: 1.5,
                 children: metrics.map((m) => _MetricCard(m)).toList(),
               ),
-              const SizedBox(height: 32),
-              // TODO: Add more admin dashboard widgets here
+              const SizedBox(height: 96),
             ],
           ),
         ),
