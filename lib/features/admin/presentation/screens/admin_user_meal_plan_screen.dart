@@ -402,8 +402,15 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                     // Meals for this type
                     ...meals.map((meal) => _buildMealItem(meal)),
 
-                    if (mealType != mealTypeOrder.last)
+                    if (mealType != mealTypeOrder.last) ...[
                       const SizedBox(height: 16),
+                      Divider(
+                        color: Colors.grey.withOpacity(0.2),
+                        height: 1,
+                        thickness: 1,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ],
                 );
               }).toList(),
