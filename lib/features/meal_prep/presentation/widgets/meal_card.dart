@@ -122,19 +122,34 @@ class MealCard extends StatelessWidget {
   }
 
   Widget _buildNutritionChip(String label, String value) {
+    Color chipColor;
+    switch (label) {
+      case 'P':
+        chipColor = AppConstants.proteinColor;
+        break;
+      case 'C':
+        chipColor = AppConstants.carbsColor;
+        break;
+      case 'F':
+        chipColor = AppConstants.fatColor;
+        break;
+      default:
+        chipColor = AppConstants.primaryColor;
+    }
+    
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingXS,
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: AppConstants.primaryColor.withOpacity(0.08),
+        color: chipColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(AppConstants.radiusXS),
       ),
       child: Text(
         '$label: $value',
         style: AppTextStyles.caption.copyWith(
-          color: AppConstants.textSecondary,
+          color: chipColor,
           fontWeight: FontWeight.w600,
           fontSize: 10,
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/shared/models/meal_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
@@ -32,7 +33,6 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               const SizedBox(height: 32),
 
               // No meal plan content
@@ -133,7 +133,6 @@ class AdminUserMealPlanScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   const SizedBox(height: 32),
 
                   // No meal plan content
@@ -208,7 +207,6 @@ class AdminUserMealPlanScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 const SizedBox(height: 24),
 
                 // Meal plan overview card
@@ -333,6 +331,20 @@ class AdminUserMealPlanScreen extends StatelessWidget {
       (sum, meal) => sum + meal.nutrition.calories,
     );
 
+    // Group meals by type
+    final Map<MealType, List<Meal>> mealsByType = {};
+    for (final meal in day.meals) {
+      mealsByType.putIfAbsent(meal.type, () => []).add(meal);
+    }
+
+    // Define the order of meal types
+    const mealTypeOrder = [
+      MealType.breakfast,
+      MealType.lunch,
+      MealType.dinner,
+      MealType.snack,
+    ];
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -380,7 +392,26 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              children: day.meals.map((meal) => _buildMealItem(meal)).toList(),
+              children: mealTypeOrder
+                  .where((mealType) => mealsByType.containsKey(mealType))
+                  .map((mealType) {
+                final meals = mealsByType[mealType]!;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Meal type section header
+                    _buildMealTypeSection(mealType, meals),
+                    const SizedBox(height: 8),
+
+                    // Meals for this type
+                    ...meals.map((meal) => _buildMealItem(meal)),
+
+                    if (mealType != mealTypeOrder.last)
+                      const SizedBox(height: 16),
+                  ],
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -396,7 +427,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppConstants.primaryColor,
               shape: BoxShape.circle,
             ),
@@ -413,17 +444,144 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                     color: Colors.grey[800],
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${meal.nutrition.calories.round()} kcal • ${meal.nutrition.protein}g protein • ${meal.nutrition.carbs}g carbs • ${meal.nutrition.fat}g fat',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _buildNutritionChip(
+                        'P', '${meal.nutrition.protein.toStringAsFixed(0)}g'),
+                    const SizedBox(width: 8),
+                    _buildNutritionChip(
+                        'C', '${meal.nutrition.carbs.toStringAsFixed(0)}g'),
+                    const SizedBox(width: 8),
+                    _buildNutritionChip(
+                        'F', '${meal.nutrition.fat.toStringAsFixed(0)}g'),
+                  ],
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMealTypeSection(MealType mealType, List<Meal> meals) {
+    final totalCalories = meals.fold<double>(
+      0,
+      (sum, meal) => sum + meal.nutrition.calories,
+    );
+
+    return Row(
+      children: [
+        SvgPicture.asset(
+          "assets/images/${_getMealTypeIcon(mealType)}",
+          colorFilter:
+              ColorFilter.mode(_getMealTypeColor(mealType), BlendMode.srcIn),
+          height: 20,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          _getMealTypeTitle(mealType),
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[800],
+          ),
+        ),
+        const Spacer(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppConstants.accentColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppConstants.accentColor.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            '${totalCalories.round()} kcal',
+            style: AppTextStyles.caption.copyWith(
+              color: AppConstants.accentColor,
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getMealTypeTitle(MealType mealType) {
+    switch (mealType) {
+      case MealType.breakfast:
+        return 'Breakfast';
+      case MealType.lunch:
+        return 'Lunch';
+      case MealType.dinner:
+        return 'Dinner';
+      case MealType.snack:
+        return 'Snack';
+    }
+  }
+
+  Color _getMealTypeColor(MealType mealType) {
+    switch (mealType) {
+      case MealType.breakfast:
+        return AppConstants.warningColor;
+      case MealType.lunch:
+        return AppConstants.proteinColor;
+      case MealType.dinner:
+        return AppConstants.primaryColor;
+      case MealType.snack:
+        return AppConstants.secondaryColor;
+    }
+  }
+
+  String _getMealTypeIcon(MealType mealType) {
+    switch (mealType) {
+      case MealType.breakfast:
+        return "eggs.svg";
+      case MealType.lunch:
+        return "lunch.svg";
+      case MealType.dinner:
+        return "dinner.svg";
+      case MealType.snack:
+        return "lunch.svg";
+    }
+  }
+
+  Widget _buildNutritionChip(String label, String value) {
+    Color chipColor;
+    switch (label) {
+      case 'P':
+        chipColor = AppConstants.proteinColor;
+        break;
+      case 'C':
+        chipColor = AppConstants.carbsColor;
+        break;
+      case 'F':
+        chipColor = AppConstants.fatColor;
+        break;
+      default:
+        chipColor = AppConstants.primaryColor;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 6,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: chipColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        '$label: $value',
+        style: AppTextStyles.caption.copyWith(
+          color: chipColor,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+        ),
       ),
     );
   }

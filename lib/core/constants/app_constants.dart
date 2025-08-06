@@ -12,6 +12,11 @@ class AppConstants {
   static const Color warningColor = Color(0xFFF59E0B);
   static const Color successColor = Color(0xFF10B981);
   
+  // Macronutrient Colors
+  static const Color proteinColor = Color(0xFF3B82F6); // Blue
+  static const Color carbsColor = Color(0xFFF59E0B); // Orange
+  static const Color fatColor = Color(0xFF8B5A2B); // Brown
+  
   // Text Colors
   static const Color textPrimary = Color(0xFF1F2937);
   static const Color textSecondary = Color(0xFF6B7280);
