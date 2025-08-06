@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// Service for managing environment-specific configurations
 class ConfigService {
   static const String _defaultOpenAIUrl = 'https://api.openai.com/v1/chat/completions';
-  static const String _defaultModel = 'gpt-4o';
+  static const String _defaultModel = 'gpt-4o-mini'; // Changed from 'gpt-4o' to use 2.5M free tokens/day
   static const double _defaultTemperature = 0.7;
   static const int _defaultMaxTokens = 4000;
 

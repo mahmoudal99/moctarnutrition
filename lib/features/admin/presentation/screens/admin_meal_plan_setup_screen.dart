@@ -136,17 +136,17 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       if (mounted) {
         // Show more user-friendly error message
         String errorMessage = 'Failed to generate meal plan';
-        if (e.toString().contains('QuotaExceededException')) {
-          errorMessage = 'OpenAI quota exceeded. Please add credits to your account and try again.';
-        } else if (e.toString().contains('AuthenticationException')) {
+        if (e.toString().contains('QuotaExceededException') || e.toString().contains('quota exceeded')) {
+          errorMessage = 'Free token limit reached. Please try again tomorrow or contact support to upgrade your plan.';
+        } else if (e.toString().contains('AuthenticationException') || e.toString().contains('Invalid API key')) {
           errorMessage = 'API key authentication failed. Please check your OpenAI configuration.';
-        } else if (e.toString().contains('RegionNotSupportedException')) {
+        } else if (e.toString().contains('RegionNotSupportedException') || e.toString().contains('not supported')) {
           errorMessage = 'OpenAI is not available in your region. Please contact support.';
-        } else if (e.toString().contains('RateLimitException')) {
+        } else if (e.toString().contains('RateLimitException') || e.toString().contains('rate limit')) {
           errorMessage = 'Service is temporarily busy. Please try again in a few minutes.';
-        } else if (e.toString().contains('ServerOverloadedException')) {
+        } else if (e.toString().contains('ServerOverloadedException') || e.toString().contains('overloaded')) {
           errorMessage = 'OpenAI servers are overloaded. Please try again later.';
-        } else if (e.toString().contains('SlowDownException')) {
+        } else if (e.toString().contains('SlowDownException') || e.toString().contains('slow down')) {
           errorMessage = 'Too many requests. Please wait a moment and try again.';
         } else if (e.toString().contains('network') || e.toString().contains('connection')) {
           errorMessage = 'Network connection issue. Please check your internet and try again.';

@@ -190,6 +190,22 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
     return requiredMeals;
   }
 
+  /// Check if there are enough free tokens remaining for meal plan generation
+  static bool _hasEnoughFreeTokens(int days) {
+    // Estimate tokens needed: ~1,400 tokens per day based on your usage data
+    final estimatedTokensNeeded = days * 1400;
+    
+    // Get remaining free tokens (2.5M for GPT-4o-mini)
+    final remainingFreeTokens = 2500000; // TODO: Get actual remaining tokens
+    
+    final hasEnough = remainingFreeTokens >= estimatedTokensNeeded;
+    
+    print('Token check: Need ~$estimatedTokensNeeded tokens, have ~$remainingFreeTokens remaining');
+    print('Has enough free tokens: $hasEnough');
+    
+    return hasEnough;
+  }
+
   /// Generate a personalized meal plan using AI with caching and parallel processing
   static Future<MealPlanModel> generateMealPlan({
     required DietPlanPreferences preferences,
@@ -208,6 +224,14 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
           onProgress?.call(days, days); // Report full completion
           return cached.mealPlan;
         }
+      }
+
+      // Check if we have enough free tokens remaining
+      if (!_hasEnoughFreeTokens(days)) {
+        print('Insufficient free tokens remaining, using fallback meal plan');
+        final fallbackPlan = MockDataService.generateMockMealPlan(preferences, days);
+        onProgress?.call(days, days);
+        return fallbackPlan;
       }
 
       // Determine optimal batch size for processing
