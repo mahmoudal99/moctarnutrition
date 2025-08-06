@@ -91,6 +91,21 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       );
       print('[AdminMealPlanSetupScreen] Meal plan generated: ${mealPlan.toJson()}');
       
+      // Debug: Check ingredients for each meal
+      for (int i = 0; i < mealPlan.mealDays.length; i++) {
+        final day = mealPlan.mealDays[i];
+        print('[AdminMealPlanSetupScreen] Day ${i + 1}:');
+        for (int j = 0; j < day.meals.length; j++) {
+          final meal = day.meals[j];
+          print('[AdminMealPlanSetupScreen]   Meal ${j + 1} (${meal.type.name}): ${meal.name}');
+          print('[AdminMealPlanSetupScreen]     Ingredients:');
+          for (int k = 0; k < meal.ingredients.length; k++) {
+            final ingredient = meal.ingredients[k];
+            print('[AdminMealPlanSetupScreen]       ${k + 1}. ${ingredient.name} - ${ingredient.amount} ${ingredient.unit}');
+          }
+        }
+      }
+      
       // Check if this was a fallback meal plan
       final isFallbackPlan = mealPlan.title.contains('Fallback') || mealPlan.description.contains('fallback');
       

@@ -201,6 +201,25 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           appBar: AdminUserAppBar(
             user: user,
             title: 'Meal Plan',
+            actions: [
+              // Debug delete button for testing
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.red.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: IconButton(
+                  onPressed: () => _showDeleteConfirmation(context, mealPlanId!),
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  tooltip: 'Delete Meal Plan (Debug)',
+                ),
+              ),
+            ],
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -577,6 +596,110 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           fontSize: 10,
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String mealPlanId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.orange),
+              const SizedBox(width: 8),
+              const Text('Delete Meal Plan'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.orange.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.bug_report, size: 16, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    Text(
+                      'DEBUG ACTION',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Are you sure you want to delete this meal plan? This action cannot be undone.',
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Delete'),
+              onPressed: () async {
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('meal_plans')
+                      .doc(mealPlanId)
+                      .delete();
+                  
+                  // Also remove the mealPlanId from the user document
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.id)
+                      .update({
+                    'mealPlanId': FieldValue.delete(),
+                  });
+                  
+                  Navigator.of(context).pop();
+                  
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Meal plan deleted successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  
+                  onMealPlanCreated?.call(); // Refresh the screen
+                } catch (e) {
+                  print('Error deleting meal plan: $e');
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to delete meal plan: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

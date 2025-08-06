@@ -15,11 +15,36 @@ class ParserService {
       print('Parsing single day AI response for day $dayIndex...');
       print('AI Response length: ${aiResponse.length}');
       print('AI Response preview: ${aiResponse.substring(0, aiResponse.length > 200 ? 200 : aiResponse.length)}...');
+      
+      // Debug: Print the full AI response for debugging
+      print('FULL AI RESPONSE FOR DAY $dayIndex:');
+      print(aiResponse);
 
       // Clean and fix the JSON
       final cleanedJson = JsonUtils.cleanAndFixJson(aiResponse);
+      print('CLEANED JSON FOR DAY $dayIndex:');
+      print(cleanedJson);
+      
       final data = JsonUtils.parseJson(cleanedJson, context: 'day $dayIndex');
       final mealDayData = data['mealDay'];
+      
+      // Debug: Check ingredients in parsed data
+      if (mealDayData['meals'] != null) {
+        final meals = mealDayData['meals'] as List;
+        print('PARSED MEALS FOR DAY $dayIndex:');
+        for (int i = 0; i < meals.length; i++) {
+          final meal = meals[i];
+          print('  Meal ${i + 1}: ${meal['name']} (${meal['type']})');
+          if (meal['ingredients'] != null) {
+            final ingredients = meal['ingredients'] as List;
+            print('    Ingredients:');
+            for (int j = 0; j < ingredients.length; j++) {
+              final ingredient = ingredients[j];
+              print('      ${j + 1}. ${ingredient['name']} - ${ingredient['amount']} ${ingredient['unit']}');
+            }
+          }
+        }
+      }
 
       // Generate unique IDs for the meal day and meals
       mealDayData['id'] = const Uuid().v4();

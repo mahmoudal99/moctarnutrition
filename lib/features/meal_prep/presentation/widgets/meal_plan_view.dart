@@ -27,8 +27,8 @@ class _MealPlanViewState extends State<MealPlanView> {
   void initState() {
     super.initState();
     _currentDayIndex = _getCurrentDayIndex();
-    // Start with a large initial page to enable circular scrolling
-    _pageController = PageController(initialPage: 1000 + _currentDayIndex);
+    // Start with the current day index for circular scrolling
+    _pageController = PageController(initialPage: _currentDayIndex);
   }
 
   @override
@@ -55,20 +55,19 @@ class _MealPlanViewState extends State<MealPlanView> {
           ),
         ),
 
-        // Swipeable day content with circular scrolling
+        // Swipeable day content
         Expanded(
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (index) {
               setState(() {
-                _currentDayIndex = index % widget.mealPlan.mealDays.length;
+                _currentDayIndex = index;
               });
             },
-            itemCount: 2000, // Large number to enable circular scrolling
+            itemCount: widget.mealPlan.mealDays.length,
             itemBuilder: (context, index) {
-              final actualIndex = index % widget.mealPlan.mealDays.length;
-              final mealDay = widget.mealPlan.mealDays[actualIndex];
-              return _buildDayContent(mealDay, actualIndex + 1);
+              final mealDay = widget.mealPlan.mealDays[index];
+              return _buildDayContent(mealDay, index + 1);
             },
           ),
         ),
