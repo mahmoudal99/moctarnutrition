@@ -219,7 +219,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                   final index = entry.key;
                   final day = entry.value;
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: 24),
                     child: _buildMealDayCard(day, index + 1),
                   );
                 }),
@@ -279,46 +279,41 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppConstants.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppConstants.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.restaurant_menu,
+              color: AppConstants.primaryColor,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Meal Plan Overview',
+                  style: AppTextStyles.heading4.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppConstants.primaryColor,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.restaurant_menu,
-                  color: AppConstants.primaryColor,
-                  size: 24,
+                const SizedBox(height: 4),
+                Text(
+                  '${totalCalories.round()} total calories',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Colors.grey[600],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Meal Plan Overview',
-                      style: AppTextStyles.heading4.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppConstants.primaryColor,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${mealPlan.mealDays.length} days • ${totalCalories.round()} total calories',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -362,9 +357,9 @@ class AdminUserMealPlanScreen extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor.withOpacity(0.1),
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
@@ -375,7 +370,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                   'Day $dayNumber',
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppConstants.primaryColor,
+                    color: AppConstants.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -427,8 +422,8 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: const BoxDecoration(
-              color: AppConstants.primaryColor,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
               shape: BoxShape.circle,
             ),
           ),
@@ -527,11 +522,11 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   Color _getMealTypeColor(MealType mealType) {
     switch (mealType) {
       case MealType.breakfast:
-        return AppConstants.warningColor;
+        return AppConstants.warningColor.withOpacity(0.6);
       case MealType.lunch:
-        return AppConstants.proteinColor;
+        return AppConstants.proteinColor.withOpacity(0.6);
       case MealType.dinner:
-        return AppConstants.primaryColor;
+        return AppConstants.primaryColor.withOpacity(0.6);
       case MealType.snack:
         return AppConstants.secondaryColor;
     }
