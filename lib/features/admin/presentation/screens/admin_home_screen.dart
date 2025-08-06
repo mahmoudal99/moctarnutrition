@@ -2,11 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-class AdminHomeScreen extends StatelessWidget {
+class AdminHomeScreen extends StatefulWidget {
   final String adminName;
 
   const AdminHomeScreen({Key? key, this.adminName = 'Moctar'})
       : super(key: key);
+
+  @override
+  State<AdminHomeScreen> createState() => _AdminHomeScreenState();
+}
+
+class _AdminHomeScreenState extends State<AdminHomeScreen> {
+  String selectedPeriod = 'This Month';
+  
+  final List<String> timePeriods = [
+    'Today',
+    'This Week',
+    'This Month',
+    'Last Month',
+    'This Year',
+    'Last Year',
+  ];
+
+  void _onPeriodChanged(String? newPeriod) {
+    if (newPeriod != null) {
+      setState(() {
+        selectedPeriod = newPeriod;
+      });
+      // Here you can add logic to fetch data based on the selected period
+      _fetchDataForPeriod(newPeriod);
+    }
+  }
+
+  void _fetchDataForPeriod(String period) {
+    // TODO: Implement data fetching logic based on selected period
+    // This is where you would typically make API calls or update the statistics
+    print('Fetching data for period: $period');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +59,7 @@ class AdminHomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Welcome back, $adminName!', style: AppTextStyles.heading3),
+              Text('Welcome back, ${widget.adminName}!', style: AppTextStyles.heading3),
               const SizedBox(height: 8),
               // Text('This is your admin dashboard.',
               //     style: AppTextStyles.bodyMedium
@@ -36,11 +68,16 @@ class AdminHomeScreen extends StatelessWidget {
               // Sales Card
               _SalesCard(lastUpdated: lastUpdated),
               const SizedBox(height: 18),
-              _StatisticsCard(stats: [
-                _SalesStat('Earnings', '€12,235.99', '+20.46%', true),
-                _SalesStat('Sales', '€31,890.00', '-3.46%', false),
-                _SalesStat('Product Views', ' 129,781', '+8.30%', true),
-              ]),
+              _StatisticsCard(
+                stats: [
+                  _SalesStat('Earnings', '€12,235.99', '+20.46%', true),
+                  _SalesStat('Sales', '€31,890.00', '-3.46%', false),
+                  _SalesStat('Product Views', ' 129,781', '+8.30%', true),
+                ],
+                selectedPeriod: selectedPeriod,
+                timePeriods: timePeriods,
+                onPeriodChanged: _onPeriodChanged,
+              ),
               const SizedBox(height: 28),
               // Metrics grid
               GridView.count(
@@ -257,8 +294,18 @@ class _SalesStatWidget extends StatelessWidget {
 
 class _StatisticsCard extends StatelessWidget {
   final List<_SalesStat> stats;
+  final String selectedPeriod;
+  final List<String> timePeriods;
+  final Function(String?) onPeriodChanged;
 
-  const _StatisticsCard({required this.stats});
+  const _StatisticsCard({
+    required this.stats,
+    required this.selectedPeriod,
+    required this.timePeriods,
+    required this.onPeriodChanged,
+  });
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -278,23 +325,44 @@ class _StatisticsCard extends StatelessWidget {
                 Text('Statistics',
                     style: AppTextStyles.bodyLarge
                         .copyWith(fontWeight: FontWeight.bold)),
-                // Placeholder for filter dropdown
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Text('This Month',
-                          style: AppTextStyles.caption
-                              .copyWith(color: AppConstants.textSecondary)),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.keyboard_arrow_down_rounded,
-                          size: 16, color: AppConstants.textSecondary),
-                    ],
+                // Functional filter dropdown
+                PopupMenuButton<String>(
+                  onSelected: onPeriodChanged,
+                  itemBuilder: (BuildContext context) {
+                    return timePeriods.map((String period) {
+                      return PopupMenuItem<String>(
+                        value: period,
+                        child: Text(
+                          period,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: period == selectedPeriod 
+                                ? AppConstants.primaryColor 
+                                : AppConstants.textPrimary,
+                            fontWeight: period == selectedPeriod 
+                                ? FontWeight.w600 
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      );
+                    }).toList();
+                  },
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(selectedPeriod,
+                            style: AppTextStyles.caption
+                                .copyWith(color: AppConstants.textSecondary)),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.keyboard_arrow_down_rounded,
+                            size: 16, color: AppConstants.textSecondary),
+                      ],
+                    ),
                   ),
                 ),
               ],
