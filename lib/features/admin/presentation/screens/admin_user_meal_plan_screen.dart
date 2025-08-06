@@ -214,7 +214,8 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                   ),
                 ),
                 child: IconButton(
-                  onPressed: () => _showDeleteConfirmation(context, mealPlanId!),
+                  onPressed: () =>
+                      _showDeleteConfirmation(context, mealPlanId!),
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
                   tooltip: 'Delete Meal Plan (Debug)',
                 ),
@@ -318,14 +319,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: AppConstants.primaryColor,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${totalCalories.round()} total calories',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
+                )
               ],
             ),
           ),
@@ -665,7 +659,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                       .collection('meal_plans')
                       .doc(mealPlanId)
                       .delete();
-                  
+
                   // Also remove the mealPlanId from the user document
                   await FirebaseFirestore.instance
                       .collection('users')
@@ -673,9 +667,9 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                       .update({
                     'mealPlanId': FieldValue.delete(),
                   });
-                  
+
                   Navigator.of(context).pop();
-                  
+
                   // Show success message
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -683,7 +677,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                       backgroundColor: Colors.green,
                     ),
                   );
-                  
+
                   onMealPlanCreated?.call(); // Refresh the screen
                 } catch (e) {
                   print('Error deleting meal plan: $e');
