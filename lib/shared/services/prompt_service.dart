@@ -17,7 +17,14 @@ class PromptService {
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
 
     return '''
-You are a professional nutritionist. Generate a meal plan for Day $dayIndex in JSON format, strictly adhering to the user's dietary restrictions and preferences.
+You are a professional nutritionist based in Ireland, Dublin. Generate a meal plan for Day $dayIndex in JSON format, strictly adhering to the user's dietary restrictions and preferences.
+
+### Target Market Context
+- **Location**: Ireland, Dublin
+- **Local Supermarkets**: Users shop at Lidl, Aldi, Tesco, Spar, and SuperValu
+- **Ingredient Availability**: Focus on ingredients commonly available in Irish supermarkets
+- **Seasonal Considerations**: Consider Irish seasonal produce and local availability
+- **Budget Considerations**: Use cost-effective ingredients available at discount supermarkets (Lidl, Aldi)
 
 ### User Profile
 - Age: ${preferences.age} years
@@ -73,6 +80,9 @@ You are a professional nutritionist. Generate a meal plan for Day $dayIndex in J
   - Examples: "chicken breast, raw" not "chicken", "almond flour" not "flour"
   - Include preparation state: "cooked", "raw", "skinless", "boneless"
   - Specify variety: "brown rice" not "rice", "extra virgin olive oil" not "oil"
+- **Irish Supermarket Focus**: Prioritize ingredients available at Lidl, Aldi, Tesco, Spar, and SuperValu
+  - Use Irish brand names where appropriate (e.g., "Avonmore milk", "Kerrygold butter")
+  - Consider budget-friendly options from discount supermarkets
 - Standardize units for consistency:
   - Weight: grams (g) for solids, milliliters (ml) for liquids
   - Count: pieces for whole items (e.g., "1 egg", "2 slices bread")
@@ -200,7 +210,14 @@ Before submitting your response, verify:
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
 
     return '''
-You are a professional nutritionist. Generate a $days-day personalized meal plan in JSON format, strictly adhering to the user's dietary restrictions and preferences.
+You are a professional nutritionist based in Ireland, Dublin. Generate a $days-day personalized meal plan in JSON format, strictly adhering to the user's dietary restrictions and preferences.
+
+### Target Market Context
+- **Location**: Ireland, Dublin
+- **Local Supermarkets**: Users shop at Lidl, Aldi, Tesco, Spar, and SuperValu
+- **Ingredient Availability**: Focus on ingredients commonly available in Irish supermarkets
+- **Seasonal Considerations**: Consider Irish seasonal produce and local availability
+- **Budget Considerations**: Use cost-effective ingredients available at discount supermarkets (Lidl, Aldi)
 
 ### User Profile
 - Age: ${preferences.age} years
@@ -259,6 +276,9 @@ You are a professional nutritionist. Generate a $days-day personalized meal plan
   - Examples: "chicken breast, raw" not "chicken", "almond flour" not "flour"
   - Include preparation state: "cooked", "raw", "skinless", "boneless"
   - Specify variety: "brown rice" not "rice", "extra virgin olive oil" not "oil"
+- **Irish Supermarket Focus**: Prioritize ingredients available at Lidl, Aldi, Tesco, Spar, and SuperValu
+  - Use Irish brand names where appropriate (e.g., "Avonmore milk", "Kerrygold butter")
+  - Consider budget-friendly options from discount supermarkets
 - Standardize units for consistency:
   - Weight: grams (g) for solids, milliliters (ml) for liquids
   - Count: pieces for whole items (e.g., "1 egg", "2 slices bread")

@@ -5,7 +5,7 @@ import '../models/user_model.dart';
 import '../models/meal_model.dart';
 import 'prompt_service.dart';
 import 'parser_service.dart';
-import 'mock_data_service.dart';
+
 import 'config_service.dart';
 import 'cache_service.dart';
 import 'rate_limit_service.dart';
@@ -55,13 +55,16 @@ class AIMealService {
       final content = data['choices'][0]['message']['content'];
       print('Day $dayIndex response received successfully');
 
-      final mealDay = ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
-      
+      final mealDay =
+          ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
+
       // Validate that all required meals are present
       if (!_validateMealDay(mealDay, preferences)) {
-        print('Day $dayIndex validation failed - missing required meals. Regenerating...');
+        print(
+            'Day $dayIndex validation failed - missing required meals. Regenerating...');
         // Try one more time with a more explicit prompt
-        return await _generateSingleDayWithContextRetry(preferences, dayIndex, previousDays, mealDay);
+        return await _generateSingleDayWithContextRetry(
+            preferences, dayIndex, previousDays, mealDay);
       }
 
       return mealDay;
@@ -82,7 +85,7 @@ class AIMealService {
   ) async {
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
     final missingMeals = _getMissingMealTypes(failedMealDay, requiredMeals);
-    
+
     final retryPrompt = '''
 ${PromptService.buildSingleDayPromptWithContext(preferences, dayIndex, previousDays.isNotEmpty ? previousDays : null)}
 
@@ -129,64 +132,64 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
       final content = data['choices'][0]['message']['content'];
       print('Day $dayIndex retry response received successfully');
 
-      final mealDay = ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
-      
+      final mealDay =
+          ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
+
       // Validate again
       if (!_validateMealDay(mealDay, preferences)) {
-        print('Day $dayIndex retry validation failed - using fallback meal plan');
-        return _generateFallbackMealDay(preferences, dayIndex, requiredMeals);
+        print(
+            'Day $dayIndex retry validation failed - throwing exception for testing');
+        throw Exception(
+            'AI validation failed for day $dayIndex - missing required meals');
       }
 
       return mealDay;
     } else {
-      print('API Error for day $dayIndex retry: ${response.statusCode} - ${response.body}');
-      final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
-      return _generateFallbackMealDay(preferences, dayIndex, requiredMeals);
+      print(
+          'API Error for day $dayIndex retry: ${response.statusCode} - ${response.body}');
+      throw Exception(
+          'API retry failed for day $dayIndex: ${response.statusCode}');
     }
   }
 
   /// Validate that a meal day contains all required meals
-  static bool _validateMealDay(MealDay mealDay, DietPlanPreferences preferences) {
+  static bool _validateMealDay(
+      MealDay mealDay, DietPlanPreferences preferences) {
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
     final presentMealTypes = mealDay.meals.map((m) => m.type).toSet();
-    
+
     for (final requiredType in requiredMeals) {
       if (!presentMealTypes.contains(requiredType)) {
         print('Missing required meal type: ${requiredType.name}');
         return false;
       }
     }
-    
+
     print('Meal day validation passed - all required meals present');
     return true;
   }
 
   /// Get missing meal types from a meal day
-  static List<MealType> _getMissingMealTypes(MealDay mealDay, List<MealType> requiredMeals) {
+  static List<MealType> _getMissingMealTypes(
+      MealDay mealDay, List<MealType> requiredMeals) {
     final presentMealTypes = mealDay.meals.map((m) => m.type).toSet();
-    return requiredMeals.where((type) => !presentMealTypes.contains(type)).toList();
-  }
-
-  /// Generate a fallback meal day with all required meals
-  static MealDay _generateFallbackMealDay(
-    DietPlanPreferences preferences,
-    int dayIndex,
-    List<MealType> requiredMeals,
-  ) {
-    print('Generating fallback meal day for day $dayIndex');
-    return MockDataService.generateMockMealDay(preferences, dayIndex, requiredMeals);
+    return requiredMeals
+        .where((type) => !presentMealTypes.contains(type))
+        .toList();
   }
 
   /// Helper to determine required meal types based on meal frequency
   static List<MealType> _getRequiredMealTypes(String mealFrequency) {
     // Always require breakfast, lunch, and dinner as core meals
     final requiredMeals = [MealType.breakfast, MealType.lunch, MealType.dinner];
-    
+
     // Add snacks based on meal frequency string
-    if (mealFrequency.contains('snack') || mealFrequency.contains('4') || mealFrequency.contains('5')) {
+    if (mealFrequency.contains('snack') ||
+        mealFrequency.contains('4') ||
+        mealFrequency.contains('5')) {
       requiredMeals.add(MealType.snack);
     }
-    
+
     return requiredMeals;
   }
 
@@ -194,15 +197,16 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
   static bool _hasEnoughFreeTokens(int days) {
     // Estimate tokens needed: ~1,400 tokens per day based on your usage data
     final estimatedTokensNeeded = days * 1400;
-    
+
     // Get remaining free tokens (2.5M for GPT-4o-mini)
     final remainingFreeTokens = 2500000; // TODO: Get actual remaining tokens
-    
+
     final hasEnough = remainingFreeTokens >= estimatedTokensNeeded;
-    
-    print('Token check: Need ~$estimatedTokensNeeded tokens, have ~$remainingFreeTokens remaining');
+
+    print(
+        'Token check: Need ~$estimatedTokensNeeded tokens, have ~$remainingFreeTokens remaining');
     print('Has enough free tokens: $hasEnough');
-    
+
     return hasEnough;
   }
 
@@ -228,10 +232,10 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
 
       // Check if we have enough free tokens remaining
       if (!_hasEnoughFreeTokens(days)) {
-        print('Insufficient free tokens remaining, using fallback meal plan');
-        final fallbackPlan = MockDataService.generateMockMealPlan(preferences, days);
-        onProgress?.call(days, days);
-        return fallbackPlan;
+        print(
+            'Insufficient free tokens remaining - throwing exception for testing');
+        throw Exception(
+            'Insufficient free tokens remaining for $days-day meal plan');
       }
 
       // Determine optimal batch size for processing
@@ -250,46 +254,39 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
 
         // Create futures for parallel processing within the batch
         final futures = <Future<MealDay>>[];
-        int batchCompletedDays = 0;
 
         for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
-          futures.add(
-              _generateSingleDayWithContext(preferences, dayIndex, mealDays)
-                  .then((mealDay) {
-            // Report individual day completion
-            batchCompletedDays++;
-            final totalCompleted = mealDays.length + batchCompletedDays;
-            onProgress?.call(totalCompleted, days);
-            return mealDay;
-          }));
+          futures.add(_generateSingleDayWithContext(preferences, dayIndex, mealDays));
         }
 
         // Wait for all days in the batch to complete
         try {
           final batchResults = await Future.wait(futures);
           mealDays.addAll(batchResults);
+          
+          // Update progress after batch completion
+          print('Batch completed: ${mealDays.length}/$days days total');
+          onProgress?.call(mealDays.length, days);
         } catch (e) {
           print('Batch failed with error: $e');
-          
+
           // If batch fails due to rate limits, fall back to sequential processing
           if (e.toString().contains('RateLimitException')) {
-            print('Rate limit hit during batch processing, falling back to sequential processing...');
-            await _generateSequentialFallback(preferences, batchStart, batchEnd, mealDays, onProgress, days);
+            print(
+                'Rate limit hit during batch processing, falling back to sequential processing...');
+            await _generateSequentialFallback(
+                preferences, batchStart, batchEnd, mealDays, onProgress, days);
           } else {
-            // For other errors, try to generate fallback meal days
-            print('Generating fallback meal days for batch $batchStart-$batchEnd');
-            for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
-              final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
-              final fallbackDay = _generateFallbackMealDay(preferences, dayIndex, requiredMeals);
-              mealDays.add(fallbackDay);
-              onProgress?.call(mealDays.length, days);
-            }
+            // For other errors, throw exception for testing
+            print(
+                'Batch processing failed for batch $batchStart-$batchEnd - throwing exception for testing');
+            throw Exception('Batch processing failed: $e');
           }
         }
 
         // Small delay between batches to be respectful to the API
         if (batchEnd < days) {
-          await Future.delayed(Duration(milliseconds: 5000)); // Increased from 3000ms
+          await Future.delayed(Duration(milliseconds: 1000)); // Reduced for faster processing
         }
       }
 
@@ -329,18 +326,14 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
         CacheService.cacheMealPlan(preferences, days, mealPlan);
       }
 
+      // Final progress update
+      print('Progress: $days/$days days completed - Meal plan generation finished!');
+      onProgress?.call(days, days);
+
       return mealPlan;
     } catch (e) {
       print('AI Service Error: $e');
-      
-      // If all else fails, generate a complete mock meal plan
-      print('Generating fallback mock meal plan due to error: $e');
-      final fallbackPlan = MockDataService.generateMockMealPlan(preferences, days);
-      
-      // Report completion for fallback
-      onProgress?.call(days, days);
-      
-      return fallbackPlan;
+      throw Exception('Meal plan generation failed: $e');
     }
   }
 
@@ -354,34 +347,32 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
     int totalDays,
   ) async {
     print('Generating days $batchStart-$batchEnd sequentially...');
-    
+
     for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
       try {
-        final mealDay = await _generateSingleDayWithContext(preferences, dayIndex, mealDays);
+        final mealDay = await _generateSingleDayWithContext(
+            preferences, dayIndex, mealDays);
         mealDays.add(mealDay);
         onProgress?.call(mealDays.length, totalDays);
-        
+
         // Add delay between sequential calls to respect rate limits
         if (dayIndex < batchEnd) {
-          await Future.delayed(Duration(milliseconds: 5000)); // Increased from 2000ms
+          await Future.delayed(Duration(milliseconds: 1000)); // Reduced for faster processing
         }
       } catch (e) {
         print('Sequential generation failed for day $dayIndex: $e');
-        
-        // Generate fallback meal day
-        final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
-        final fallbackDay = _generateFallbackMealDay(preferences, dayIndex, requiredMeals);
-        mealDays.add(fallbackDay);
-        onProgress?.call(mealDays.length, totalDays);
+        throw Exception('Sequential generation failed for day $dayIndex: $e');
       }
     }
   }
 
   /// Calculate optimal batch size for parallel processing
   static int _calculateOptimalBatchSize(int totalDays) {
-    // Very conservative approach to avoid hitting OpenAI rate limits
+    // Restore concurrent processing for better performance
     if (totalDays <= 1) return totalDays; // Single day: process immediately
-    return 1; // Always process one day at a time to avoid rate limits
+    if (totalDays <= 3) return totalDays; // Small plans: process all at once
+    if (totalDays <= 7) return 3; // Medium plans: process in batches of 3
+    return 4; // Large plans: process in batches of 4
   }
 
   /// Generate a 1-day preview meal plan (for preview step)
@@ -408,14 +399,6 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
     }
   }
 
-  /// Generate mock meal plan as fallback
-  static MealPlanModel generateMockMealPlan(
-    DietPlanPreferences preferences,
-    int days,
-  ) {
-    return MockDataService.generateMockMealPlan(preferences, days);
-  }
-
   /// Helper method for string capitalization
   static String capitalize(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
@@ -439,7 +422,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
   /// Test method to validate meal plan generation with required meals
   static Future<void> testMealPlanValidation() async {
     print('🧪 Testing meal plan validation...');
-    
+
     final testPreferences = DietPlanPreferences(
       age: 30,
       gender: 'Male',
@@ -470,7 +453,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
 
       print('✅ Test completed successfully');
       print('Generated ${mealPlan.mealDays.length} days');
-      
+
       for (int i = 0; i < mealPlan.mealDays.length; i++) {
         final day = mealPlan.mealDays[i];
         print('Day ${i + 1}: ${day.meals.length} meals');

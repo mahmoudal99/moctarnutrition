@@ -254,12 +254,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   Widget _buildMealPlanOverviewCard(MealPlanModel mealPlan) {
     final totalCalories = mealPlan.mealDays.fold<double>(
       0,
-      (sum, day) =>
-          sum +
-          day.meals.fold<double>(
-            0,
-            (daySum, meal) => daySum + meal.nutrition.calories,
-          ),
+      (sum, day) => sum + day.totalCalories,
     );
 
     return Container(
@@ -321,10 +316,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   }
 
   Widget _buildMealDayCard(MealDay day, int dayNumber) {
-    final totalCalories = day.meals.fold<double>(
-      0,
-      (sum, meal) => sum + meal.nutrition.calories,
-    );
+    final totalCalories = day.totalCalories;
 
     // Group meals by type
     final Map<MealType, List<Meal>> mealsByType = {};

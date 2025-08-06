@@ -82,6 +82,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         preferences: dietPlanPreferences,
         days: _selectedDays,
         onProgress: (completedDays, totalDays) {
+          print('[AdminMealPlanSetupScreen] Progress update: $completedDays/$totalDays');
           setState(() {
             _completedDays = completedDays;
             _totalDays = totalDays;
@@ -224,7 +225,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                 const SizedBox(height: AppConstants.spacingS),
                 Text(
                   _totalDays > 0
-                      ? 'Generated  [32m$_completedDays [0m of $_totalDays days (${((_completedDays / _totalDays) * 100).toInt()}%)'
+                      ? 'Generated $_completedDays of $_totalDays days (${((_completedDays / _totalDays) * 100).toInt()}%)'
                       : 'Preparing your meal plan...',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppConstants.textSecondary,
