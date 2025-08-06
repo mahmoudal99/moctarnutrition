@@ -272,6 +272,9 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                     child: _buildMealDayCard(day, index + 1),
                   );
                 }),
+                SizedBox(
+                  height: 96,
+                )
               ],
             ),
           ),
@@ -405,7 +408,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
               children: [
                 Text(
                   'Day $dayNumber',
-                  style: AppTextStyles.bodyLarge.copyWith(
+                  style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppConstants.primaryColor,
                   ),
@@ -413,8 +416,8 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                 const Spacer(),
                 Text(
                   '${totalCalories.round()} kcal',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.grey[600],
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[700],
                     fontWeight: FontWeight.w500,
                   ),
                 ),
