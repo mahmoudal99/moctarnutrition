@@ -19,9 +19,19 @@ class MealPlanView extends StatefulWidget {
   State<MealPlanView> createState() => _MealPlanViewState();
 }
 
-class _MealPlanViewState extends State<MealPlanView> {
+class _MealPlanViewState extends State<MealPlanView>
+    with TickerProviderStateMixin {
   late PageController _pageController;
+  late ScrollController _scrollController;
+  late AnimationController _nutritionAnimationController;
+  late Animation<double> _nutritionScaleAnimation;
+  late Animation<double> _nutritionOpacityAnimation;
+  late Animation<double> _pillOpacityAnimation;
+  late Animation<double> _pillScaleAnimation;
+  
   int _currentDayIndex = 0;
+  double _scrollOffset = 0.0;
+  static const double _scrollThreshold = 50.0;
 
   @override
   void initState() {
@@ -29,46 +39,224 @@ class _MealPlanViewState extends State<MealPlanView> {
     _currentDayIndex = _getCurrentDayIndex();
     // Start with the current day index for circular scrolling
     _pageController = PageController(initialPage: _currentDayIndex);
+    
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    
+    _nutritionAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _nutritionScaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _nutritionAnimationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _nutritionOpacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _nutritionAnimationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _pillOpacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _nutritionAnimationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _pillScaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _nutritionAnimationController,
+      curve: Curves.elasticOut,
+    ));
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _scrollController.dispose();
+    _nutritionAnimationController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    setState(() {
+      _scrollOffset = _scrollController.offset;
+    });
+    
+    if (_scrollOffset > _scrollThreshold && _nutritionAnimationController.value == 0) {
+      _nutritionAnimationController.forward();
+    } else if (_scrollOffset <= _scrollThreshold && _nutritionAnimationController.value == 1) {
+      _nutritionAnimationController.reverse();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        // Day indicator
-        _buildDayIndicator(),
+        // Main scrollable content
+        SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
+              // Day indicator
+              _buildDayIndicator(),
 
-        // Day-specific nutrition summary
-        Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.spacingL,
-              vertical: AppConstants.spacingS),
-          child: NutritionSummaryCard(
-            mealDay: widget.mealPlan.mealDays[_currentDayIndex],
-            dayNumber: _currentDayIndex + 1,
+              // Day-specific nutrition summary
+              AnimatedBuilder(
+                animation: _nutritionAnimationController,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: 1.0 - (_nutritionScaleAnimation.value * 0.1),
+                    child: Opacity(
+                      opacity: _nutritionOpacityAnimation.value,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppConstants.spacingL,
+                            vertical: AppConstants.spacingS),
+                        child: NutritionSummaryCard(
+                          mealDay: widget.mealPlan.mealDays[_currentDayIndex],
+                          dayNumber: _currentDayIndex + 1,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // Swipeable day content
+              Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.6, // Use 60% of screen height
+                ),
+                child: PageView.builder(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(), // Disable PageView scrolling
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentDayIndex = index;
+                    });
+                  },
+                  itemCount: widget.mealPlan.mealDays.length,
+                  itemBuilder: (context, index) {
+                    final mealDay = widget.mealPlan.mealDays[index];
+                    return SingleChildScrollView(
+                      physics: const NeverScrollableScrollPhysics(), // Disable content scrolling
+                      child: _buildDayContent(mealDay, index + 1),
+                    );
+                  },
+                ),
+              ),
+              
+              // Add bottom padding for scroll space
+              const SizedBox(height: 128),
+            ],
           ),
         ),
+        
+        // Floating pill nutrition summary
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 20,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: AnimatedBuilder(
+              animation: _nutritionAnimationController,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _pillScaleAnimation.value,
+                  child: Opacity(
+                    opacity: _pillOpacityAnimation.value,
+                    child: _buildPillNutritionSummary(),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-        // Swipeable day content
-        Expanded(
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentDayIndex = index;
-              });
-            },
-            itemCount: widget.mealPlan.mealDays.length,
-            itemBuilder: (context, index) {
-              final mealDay = widget.mealPlan.mealDays[index];
-              return _buildDayContent(mealDay, index + 1);
-            },
+  Widget _buildPillNutritionSummary() {
+    final mealDay = widget.mealPlan.mealDays[_currentDayIndex];
+    final totalCalories = mealDay.meals.fold<double>(
+      0, (sum, meal) => sum + meal.nutrition.calories);
+    final totalProtein = mealDay.meals.fold<double>(
+      0, (sum, meal) => sum + meal.nutrition.protein);
+    final totalCarbs = mealDay.meals.fold<double>(
+      0, (sum, meal) => sum + meal.nutrition.carbs);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingM,
+        vertical: AppConstants.spacingS,
+      ),
+      decoration: BoxDecoration(
+        color: AppConstants.surfaceColor,
+        borderRadius: BorderRadius.circular(50),
+        border: Border.all(
+          color: AppConstants.textTertiary.withOpacity(0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildPillNutritionItem(
+            Icons.local_fire_department,
+            '${totalCalories.toInt()}',
+            AppConstants.accentColor,
+          ),
+          const SizedBox(width: AppConstants.spacingM),
+          _buildPillNutritionItem(
+            Icons.fitness_center,
+            '${totalProtein.toStringAsFixed(1)}g',
+            AppConstants.successColor,
+          ),
+          const SizedBox(width: AppConstants.spacingM),
+          _buildPillNutritionItem(
+            Icons.grain,
+            '${totalCarbs.toStringAsFixed(1)}g',
+            AppConstants.warningColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPillNutritionItem(IconData icon, String value, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: color,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          value,
+          style: AppTextStyles.caption.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
@@ -128,7 +316,7 @@ class _MealPlanViewState extends State<MealPlanView> {
       MealType.snack,
     ];
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,9 +345,6 @@ class _MealPlanViewState extends State<MealPlanView> {
               ],
             );
           }),
-
-          // Add some bottom padding
-          const SizedBox(height: 128),
         ],
       ),
     );
