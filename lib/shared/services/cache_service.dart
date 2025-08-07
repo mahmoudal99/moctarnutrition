@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:logger/logger.dart';
 import '../models/user_model.dart';
 import '../models/meal_model.dart';
 
 /// Service for caching meal plans to avoid redundant API calls
 class CacheService {
+  static final _logger = Logger();
   static final Map<String, CachedMealPlan> _cache = {};
   static const int _maxCacheSize = 50; // Maximum number of cached plans
   static const Duration _cacheExpiry = Duration(hours: 24); // Cache for 24 hours
@@ -48,11 +50,11 @@ class CacheService {
         return null;
       }
       
-      print('Cache hit: Found meal plan for $days days');
+      _logger.i('Cache hit: Found meal plan for $days days');
       return cached;
     }
 
-    print('Cache miss: No meal plan found for $days days');
+    _logger.d('Cache miss: No meal plan found for $days days');
     return null;
   }
 
@@ -72,7 +74,7 @@ class CacheService {
       days: days,
     );
 
-    print('Cached meal plan for $days days (cache size: ${_cache.length})');
+    _logger.i('Cached meal plan for $days days (cache size: ${_cache.length})');
   }
 
   /// Remove expired entries from cache
@@ -101,13 +103,13 @@ class CacheService {
       }
     }
 
-    print('Cache cleanup: Removed ${expiredKeys.length} expired entries');
+    _logger.i('Cache cleanup: Removed ${expiredKeys.length} expired entries');
   }
 
   /// Clear all cached meal plans
   static void clearCache() {
     _cache.clear();
-    print('Cache cleared');
+    _logger.i('Cache cleared');
   }
 
   /// Get cache statistics

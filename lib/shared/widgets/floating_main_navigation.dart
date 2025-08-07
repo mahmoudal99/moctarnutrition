@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:logger/logger.dart';
 import '../../core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -19,14 +20,15 @@ class FloatingMainNavigation extends StatefulWidget {
 }
 
 class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
+  static final _logger = Logger();
   int _currentIndex = 0;
 
   List<_NavItem> _buildNavItems(UserModel? user) {
-    print(
+    _logger.d(
         'FloatingMainNavigation - Building nav items for user: ${user?.name ?? 'null'} with role: ${user?.role ?? 'null'}');
 
     if (user != null && user.role == UserRole.admin) {
-      print('FloatingMainNavigation - Building ADMIN navigation items');
+      _logger.d('FloatingMainNavigation - Building ADMIN navigation items');
       return [
         const _NavItem(
           icon: Icons.home,
@@ -46,7 +48,7 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
       ];
     }
     // Non-admins: original tabs
-    print('FloatingMainNavigation - Building USER navigation items');
+    _logger.d('FloatingMainNavigation - Building USER navigation items');
     return [
       const _NavItem(
         icon: Icons.fitness_center,
@@ -73,11 +75,11 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
         final user = authProvider.userModel;
 
         // Debug logging
-        print('FloatingMainNavigation - AuthProvider state:');
-        print('  isLoading: ${authProvider.isLoading}');
-        print('  isAuthenticated: ${authProvider.isAuthenticated}');
-        print('  user: ${user?.name ?? 'null'}');
-        print('  user role: ${user?.role ?? 'null'}');
+        _logger.d('FloatingMainNavigation - AuthProvider state:');
+        _logger.d('  isLoading: ${authProvider.isLoading}');
+        _logger.d('  isAuthenticated: ${authProvider.isAuthenticated}');
+        _logger.d('  user: ${user?.name ?? 'null'}');
+        _logger.d('  user role: ${user?.role ?? 'null'}');
 
         final items = _buildNavItems(user);
         // Find the current index based on the current route

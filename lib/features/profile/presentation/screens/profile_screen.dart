@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/models/user_model.dart';
@@ -12,6 +13,7 @@ import '../../../../shared/utils/avatar_utils.dart';
 import '../../../onboarding/presentation/screens/get_started_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
+  static final _logger = Logger();
   const ProfileScreen({super.key});
 
   @override
@@ -22,11 +24,11 @@ class ProfileScreen extends StatelessWidget {
         final authUser = authProvider.firebaseUser;
 
         // Debug logging
-        print('Profile Screen - AuthProvider state:');
-        print('  isAuthenticated: ${authProvider.isAuthenticated}');
-        print('  isLoading: ${authProvider.isLoading}');
-        print('  userModel: ${user?.name ?? 'null'}');
-        print('  firebaseUser: ${authUser?.email ?? 'null'}');
+        _logger.d('Profile Screen - AuthProvider state:');
+        _logger.d('  isAuthenticated: ${authProvider.isAuthenticated}');
+        _logger.d('  isLoading: ${authProvider.isLoading}');
+        _logger.d('  userModel: ${user?.name ?? 'null'}');
+        _logger.d('  firebaseUser: ${authUser?.email ?? 'null'}');
 
         if (authProvider.isLoading) {
           return const Scaffold(

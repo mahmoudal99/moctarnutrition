@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
@@ -29,6 +30,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
+  static final _logger = Logger();
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -903,9 +905,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _completeOnboarding() async {
     // Debug: Print selected preferences before saving
-    print('Onboarding complete:');
-    print('  Dietary Restrictions:  [32m [1m [4m [7m${_selectedDietaryRestrictions} [0m');
-    print('  Workout Styles:  [34m [1m [4m [7m${_selectedWorkoutStyles} [0m');
+    _logger.i('Onboarding complete:');
+    _logger.i('  Dietary Restrictions: ${_selectedDietaryRestrictions}');
+    _logger.i('  Workout Styles: ${_selectedWorkoutStyles}');
     // Create user preferences
     final preferences = UserPreferences(
       fitnessGoal: _selectedFitnessGoal,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/checkin_provider.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
@@ -18,6 +19,7 @@ class CheckinScreen extends StatefulWidget {
 }
 
 class _CheckinScreenState extends State<CheckinScreen> {
+  static final _logger = Logger();
   @override
   void initState() {
     super.initState();
@@ -68,20 +70,20 @@ class _CheckinScreenState extends State<CheckinScreen> {
       ),
       body: Consumer2<CheckinProvider, app_auth.AuthProvider>(
         builder: (context, checkinProvider, authProvider, child) {
-          print('CheckinScreen - isLoading: ${checkinProvider.isLoading}');
-          print('CheckinScreen - userCheckins.length: ${checkinProvider.userCheckins.length}');
-          print('CheckinScreen - error: ${checkinProvider.error}');
+          _logger.d('CheckinScreen - isLoading: ${checkinProvider.isLoading}');
+          _logger.d('CheckinScreen - userCheckins.length: ${checkinProvider.userCheckins.length}');
+          _logger.d('CheckinScreen - error: ${checkinProvider.error}');
           
           if (checkinProvider.isLoading &&
               checkinProvider.userCheckins.isEmpty) {
-            print('CheckinScreen - Showing loading indicator');
+            _logger.d('CheckinScreen - Showing loading indicator');
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
           if (checkinProvider.error != null) {
-            print('CheckinScreen - Showing error state');
+            _logger.d('CheckinScreen - Showing error state');
             return _buildErrorState(checkinProvider.error!);
           }
 
@@ -165,13 +167,13 @@ class _CheckinScreenState extends State<CheckinScreen> {
   }
 
   Widget _buildHistorySection(CheckinProvider checkinProvider) {
-    print('_buildHistorySection - userCheckins.length: ${checkinProvider.userCheckins.length}');
-    print('_buildHistorySection - isEmpty: ${checkinProvider.userCheckins.isEmpty}');
+    _logger.d('_buildHistorySection - userCheckins.length: ${checkinProvider.userCheckins.length}');
+    _logger.d('_buildHistorySection - isEmpty: ${checkinProvider.userCheckins.isEmpty}');
     
     if (checkinProvider.userCheckins.isEmpty) {
-      print('_buildHistorySection - Building empty history');
+      _logger.d('_buildHistorySection - Building empty history');
     } else {
-      print('_buildHistorySection - Building history list with ${checkinProvider.userCheckins.take(5).length} items');
+      _logger.d('_buildHistorySection - Building history list with ${checkinProvider.userCheckins.take(5).length} items');
     }
     
     return Column(

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:logger/logger.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/user_local_storage_service.dart';
 import '../services/onboarding_service.dart';
 
 class AuthProvider extends ChangeNotifier {
+  static final _logger = Logger();
   User? _firebaseUser;
   UserModel? _userModel;
   bool _isLoading = false;
@@ -28,22 +30,22 @@ class AuthProvider extends ChangeNotifier {
   /// Initialize authentication state listener
   void _initializeAuthState() {
     AuthService.authStateChanges.listen((User? user) async {
-      print('AuthProvider - Auth state changed: ${user?.email ?? 'null'}');
+      _logger.i('AuthProvider - Auth state changed: ${user?.email ?? 'null'}');
       _firebaseUser = user;
       
       if (user != null) {
         // User is signed in
-        print('AuthProvider - Loading user model for: ${user.uid}');
+        _logger.i('AuthProvider - Loading user model for: ${user.uid}');
         await _loadUserModel(user.uid);
       } else {
         // User is signed out
-        print('AuthProvider - User signed out, clearing data');
+        _logger.i('AuthProvider - User signed out, clearing data');
         _userModel = null;
         await _storageService.clearUser();
       }
       
       _error = null;
-      print('AuthProvider - Notifying listeners');
+      _logger.d('AuthProvider - Notifying listeners');
       notifyListeners();
     });
   }
@@ -58,22 +60,22 @@ class AuthProvider extends ChangeNotifier {
       final cachedUser = await _storageService.loadUser();
       if (cachedUser != null) {
         _userModel = cachedUser;
-        print('Loaded cached user: ${cachedUser.name}');
+        _logger.i('Loaded cached user: ${cachedUser.name}');
       }
 
       // Check if Firebase user is still authenticated
       final currentFirebaseUser = AuthService.currentUser;
       if (currentFirebaseUser != null) {
         _firebaseUser = currentFirebaseUser;
-        print('Firebase user still authenticated: ${currentFirebaseUser.email}');
+        _logger.i('Firebase user still authenticated: ${currentFirebaseUser.email}');
       } else {
         // Firebase user is not authenticated, clear cached data
         _userModel = null;
         await _storageService.clearUser();
-        print('Firebase user not authenticated, cleared cached data');
+        _logger.i('Firebase user not authenticated, cleared cached data');
       }
     } catch (e) {
-      print('Error loading cached user data: $e');
+      _logger.e('Error loading cached user data: $e');
       _error = 'Failed to load cached user data: $e';
     } finally {
       _isLoading = false;
@@ -84,23 +86,23 @@ class AuthProvider extends ChangeNotifier {
   /// Load user model from Firestore
   Future<void> _loadUserModel(String userId) async {
     try {
-      print('AuthProvider - Starting to load user model');
+      _logger.i('AuthProvider - Starting to load user model');
       _isLoading = true;
       notifyListeners();
 
       final userModel = await AuthService.getCurrentUserModel();
       if (userModel != null) {
-        print('AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
+        _logger.i('AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
         _userModel = userModel;
         await _storageService.saveUser(userModel);
       } else {
-        print('AuthProvider - No user model found');
+        _logger.w('AuthProvider - No user model found');
       }
     } catch (e) {
-      print('AuthProvider - Error loading user model: $e');
+      _logger.e('AuthProvider - Error loading user model: $e');
       _error = 'Failed to load user profile: $e';
     } finally {
-      print('AuthProvider - Finished loading user model, setting isLoading to false');
+      _logger.d('AuthProvider - Finished loading user model, setting isLoading to false');
       _isLoading = false;
       notifyListeners();
     }

@@ -1,7 +1,9 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:logger/logger.dart';
 
 /// Service for managing environment-specific configurations
 class ConfigService {
+  static final _logger = Logger();
   static const String _defaultOpenAIUrl = 'https://api.openai.com/v1/chat/completions';
   static const String _defaultModel = 'gpt-4o-mini'; // Changed from 'gpt-4o' to use 2.5M free tokens/day
   static const double _defaultTemperature = 0.7;
@@ -17,7 +19,7 @@ class ConfigService {
     
     // Log the first and last few characters of the API key for debugging
     final maskedKey = '${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 10)}';
-    print('ConfigService: Using OpenAI API key: $maskedKey');
+    _logger.i('ConfigService: Using OpenAI API key: $maskedKey');
     
     return apiKey;
   }
@@ -89,7 +91,7 @@ class ConfigService {
   static void validateEnvironment() {
     final requiredVars = ['OPENAI_API_KEY'];
     final missingVars = <String>[];
-    print(dotenv.env);
+    _logger.d(dotenv.env);
     for (final varName in requiredVars) {
       final value = dotenv.env[varName];
       if (value == null || value.isEmpty || value == 'your_openai_api_key_here') {

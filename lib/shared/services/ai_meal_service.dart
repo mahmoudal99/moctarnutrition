@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:uuid/uuid.dart';
+import 'package:logger/logger.dart';
 import '../models/user_model.dart';
 import '../models/meal_model.dart';
 import 'prompt_service.dart';
@@ -11,6 +12,7 @@ import 'cache_service.dart';
 import 'rate_limit_service.dart';
 
 class AIMealService {
+  static final _logger = Logger();
   /// Generate a single day meal plan with context from previous days
   static Future<MealDay> _generateSingleDayWithContext(
     DietPlanPreferences preferences,
@@ -53,14 +55,14 @@ class AIMealService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final content = data['choices'][0]['message']['content'];
-      print('Day $dayIndex response received successfully');
+      _logger.i('Day $dayIndex response received successfully');
 
       final mealDay =
           ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
 
       // Validate that all required meals are present
       if (!_validateMealDay(mealDay, preferences)) {
-        print(
+        _logger.w(
             'Day $dayIndex validation failed - missing required meals. Regenerating...');
         // Try one more time with a more explicit prompt
         return await _generateSingleDayWithContextRetry(
@@ -69,7 +71,7 @@ class AIMealService {
 
       return mealDay;
     } else {
-      print(
+      _logger.e(
           'API Error for day $dayIndex: ${response.statusCode} - ${response.body}');
       throw Exception(
           'Failed to generate day $dayIndex: ${response.statusCode}');
@@ -130,14 +132,14 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final content = data['choices'][0]['message']['content'];
-      print('Day $dayIndex retry response received successfully');
+      _logger.i('Day $dayIndex retry response received successfully');
 
       final mealDay =
           ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
 
       // Validate again
       if (!_validateMealDay(mealDay, preferences)) {
-        print(
+        _logger.e(
             'Day $dayIndex retry validation failed - throwing exception for testing');
         throw Exception(
             'AI validation failed for day $dayIndex - missing required meals');
@@ -145,7 +147,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
 
       return mealDay;
     } else {
-      print(
+      _logger.e(
           'API Error for day $dayIndex retry: ${response.statusCode} - ${response.body}');
       throw Exception(
           'API retry failed for day $dayIndex: ${response.statusCode}');
@@ -160,12 +162,12 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
 
     for (final requiredType in requiredMeals) {
       if (!presentMealTypes.contains(requiredType)) {
-        print('Missing required meal type: ${requiredType.name}');
+        _logger.w('Missing required meal type: ${requiredType.name}');
         return false;
       }
     }
 
-    print('Meal day validation passed - all required meals present');
+    _logger.i('Meal day validation passed - all required meals present');
     return true;
   }
 
@@ -203,9 +205,9 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
 
     final hasEnough = remainingFreeTokens >= estimatedTokensNeeded;
 
-    print(
+    _logger.d(
         'Token check: Need ~$estimatedTokensNeeded tokens, have ~$remainingFreeTokens remaining');
-    print('Has enough free tokens: $hasEnough');
+    _logger.d('Has enough free tokens: $hasEnough');
 
     return hasEnough;
   }
@@ -217,14 +219,14 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
     Function(int completedDays, int totalDays)? onProgress,
   }) async {
     try {
-      print(
+      _logger.i(
           'Generating $days-day meal plan with caching and parallel processing...');
 
       // Check cache first
       if (CacheService.isEnabled) {
         final cached = CacheService.getCachedMealPlan(preferences, days);
         if (cached != null) {
-          print('Using cached meal plan for $days days');
+          _logger.i('Using cached meal plan for $days days');
           onProgress?.call(days, days); // Report full completion
           return cached.mealPlan;
         }
@@ -242,7 +244,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
       final optimalBatchSize = _calculateOptimalBatchSize(days);
       final List<MealDay> mealDays = [];
 
-      print('Processing $days days in batches of $optimalBatchSize');
+      _logger.i('Processing $days days in batches of $optimalBatchSize');
 
       // Process days in batches to avoid overwhelming the API
       for (int batchStart = 1;
@@ -250,7 +252,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
           batchStart += optimalBatchSize) {
         final batchEnd = (batchStart + optimalBatchSize - 1).clamp(1, days);
 
-        print('Processing batch: days $batchStart to $batchEnd');
+        _logger.d('Processing batch: days $batchStart to $batchEnd');
 
         // Create futures for parallel processing within the batch
         final futures = <Future<MealDay>>[];
@@ -265,20 +267,20 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
           mealDays.addAll(batchResults);
           
           // Update progress after batch completion
-          print('Batch completed: ${mealDays.length}/$days days total');
+          _logger.i('Batch completed: ${mealDays.length}/$days days total');
           onProgress?.call(mealDays.length, days);
         } catch (e) {
-          print('Batch failed with error: $e');
+          _logger.e('Batch failed with error: $e');
 
           // If batch fails due to rate limits, fall back to sequential processing
           if (e.toString().contains('RateLimitException')) {
-            print(
+            _logger.w(
                 'Rate limit hit during batch processing, falling back to sequential processing...');
             await _generateSequentialFallback(
                 preferences, batchStart, batchEnd, mealDays, onProgress, days);
           } else {
             // For other errors, throw exception for testing
-            print(
+            _logger.e(
                 'Batch processing failed for batch $batchStart-$batchEnd - throwing exception for testing');
             throw Exception('Batch processing failed: $e');
           }
@@ -327,12 +329,12 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
       }
 
       // Final progress update
-      print('Progress: $days/$days days completed - Meal plan generation finished!');
+      _logger.i('Progress: $days/$days days completed - Meal plan generation finished!');
       onProgress?.call(days, days);
 
       return mealPlan;
     } catch (e) {
-      print('AI Service Error: $e');
+      _logger.e('AI Service Error: $e');
       throw Exception('Meal plan generation failed: $e');
     }
   }
@@ -346,7 +348,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
     Function(int completedDays, int totalDays)? onProgress,
     int totalDays,
   ) async {
-    print('Generating days $batchStart-$batchEnd sequentially...');
+    _logger.i('Generating days $batchStart-$batchEnd sequentially...');
 
     for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
       try {
@@ -360,7 +362,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
           await Future.delayed(Duration(milliseconds: 1000)); // Reduced for faster processing
         }
       } catch (e) {
-        print('Sequential generation failed for day $dayIndex: $e');
+        _logger.e('Sequential generation failed for day $dayIndex: $e');
         throw Exception('Sequential generation failed for day $dayIndex: $e');
       }
     }
@@ -394,7 +396,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
       }
       return preview;
     } catch (e) {
-      print('Preview generation failed: $e');
+      _logger.e('Preview generation failed: $e');
       throw Exception('Failed to generate preview: $e');
     }
   }
@@ -416,12 +418,12 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
   static void resetAll() {
     CacheService.clearCache();
     RateLimitService.resetRateLimit();
-    print('All caches and rate limits reset');
+    _logger.i('All caches and rate limits reset');
   }
 
   /// Test method to validate meal plan generation with required meals
   static Future<void> testMealPlanValidation() async {
-    print('🧪 Testing meal plan validation...');
+    _logger.i('🧪 Testing meal plan validation...');
 
     final testPreferences = DietPlanPreferences(
       age: 30,
@@ -447,22 +449,22 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
         preferences: testPreferences,
         days: 1,
         onProgress: (completed, total) {
-          print('Progress: $completed/$total days completed');
+          _logger.d('Progress: $completed/$total days completed');
         },
       );
 
-      print('✅ Test completed successfully');
-      print('Generated ${mealPlan.mealDays.length} days');
+      _logger.i('✅ Test completed successfully');
+      _logger.i('Generated ${mealPlan.mealDays.length} days');
 
       for (int i = 0; i < mealPlan.mealDays.length; i++) {
         final day = mealPlan.mealDays[i];
-        print('Day ${i + 1}: ${day.meals.length} meals');
+        _logger.i('Day ${i + 1}: ${day.meals.length} meals');
         for (final meal in day.meals) {
-          print('  - ${meal.type.name}: ${meal.name}');
+          _logger.d('  - ${meal.type.name}: ${meal.name}');
         }
       }
     } catch (e) {
-      print('❌ Test failed: $e');
+      _logger.e('❌ Test failed: $e');
     }
   }
 }

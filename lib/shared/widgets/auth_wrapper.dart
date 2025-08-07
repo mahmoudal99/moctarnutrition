@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 import '../models/user_model.dart';
 import '../providers/auth_provider.dart';
 import '../services/onboarding_service.dart';
@@ -18,6 +19,7 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
+  static final _logger = Logger();
   String? _initialRoute;
   bool _isLoading = true;
 
@@ -55,11 +57,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         // Debug logging
-        print('AuthWrapper - AuthProvider state:');
-        print('  isAuthenticated: ${authProvider.isAuthenticated}');
-        print('  isLoading: ${authProvider.isLoading}');
-        print('  userModel: ${authProvider.userModel?.name ?? 'null'}');
-        print('  firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
+        _logger.d('AuthWrapper - AuthProvider state:');
+        _logger.d('  isAuthenticated: ${authProvider.isAuthenticated}');
+        _logger.d('  isLoading: ${authProvider.isLoading}');
+        _logger.d('  userModel: ${authProvider.userModel?.name ?? 'null'}');
+        _logger.d('  firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
 
         // Show loading screen while AuthProvider is initializing
         if (authProvider.isLoading) {
@@ -68,7 +70,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
         // If user is not authenticated, show appropriate screen based on onboarding state
         if (!authProvider.isAuthenticated) {
-          print('AuthWrapper - User not authenticated, showing route: $_initialRoute');
+          _logger.d('AuthWrapper - User not authenticated, showing route: $_initialRoute');
           // Force navigation to get-started when user logs out
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted && _initialRoute != '/get-started') {

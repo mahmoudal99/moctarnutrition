@@ -2,6 +2,7 @@ import 'package:champions_gym_app/shared/services/onboarding_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/providers/auth_provider.dart';
@@ -17,6 +18,7 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  static final _logger = Logger();
   late bool _isSignUp; // Will be initialized in initState
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -439,14 +441,14 @@ class _AuthScreenState extends State<AuthScreen> {
       // Wait for user data to be loaded before navigating
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       if (authProvider.userModel != null) {
-        print('AuthScreen - User data loaded, navigating to home');
+        _logger.i('AuthScreen - User data loaded, navigating to home');
         context.go('/home');
       } else {
-        print('AuthScreen - Waiting for user data to load...');
+        _logger.d('AuthScreen - Waiting for user data to load...');
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
-          print('AuthScreen - User data loaded after delay, navigating to home');
+          _logger.i('AuthScreen - User data loaded after delay, navigating to home');
           context.go('/home');
         }
       }
@@ -468,14 +470,14 @@ class _AuthScreenState extends State<AuthScreen> {
     if (success && mounted) {
       // Wait for user data to be loaded before navigating
       if (authProvider.userModel != null) {
-        print('AuthScreen - User data loaded, navigating to home');
+        _logger.i('AuthScreen - User data loaded, navigating to home');
         context.go('/home');
       } else {
-        print('AuthScreen - Waiting for user data to load...');
+        _logger.d('AuthScreen - Waiting for user data to load...');
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
-          print('AuthScreen - User data loaded after delay, navigating to home');
+          _logger.i('AuthScreen - User data loaded after delay, navigating to home');
           context.go('/home');
         }
       }
@@ -496,14 +498,14 @@ class _AuthScreenState extends State<AuthScreen> {
     if (success && mounted) {
       // Wait for user data to be loaded before navigating
       if (authProvider.userModel != null) {
-        print('AuthScreen - User data loaded, navigating to home');
+        _logger.i('AuthScreen - User data loaded, navigating to home');
         context.go('/home');
       } else {
-        print('AuthScreen - Waiting for user data to load...');
+        _logger.d('AuthScreen - Waiting for user data to load...');
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
-          print('AuthScreen - User data loaded after delay, navigating to home');
+          _logger.i('AuthScreen - User data loaded after delay, navigating to home');
           context.go('/home');
         }
       }
@@ -531,14 +533,14 @@ class _AuthScreenState extends State<AuthScreen> {
     if (success && mounted) {
       // Wait for user data to be loaded before navigating
       if (authProvider.userModel != null) {
-        print('AuthScreen - User data loaded, navigating to home');
+        _logger.i('AuthScreen - User data loaded, navigating to home');
         context.go('/home');
       } else {
-        print('AuthScreen - Waiting for user data to load...');
+        _logger.d('AuthScreen - Waiting for user data to load...');
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
-          print('AuthScreen - User data loaded after delay, navigating to home');
+          _logger.i('AuthScreen - User data loaded after delay, navigating to home');
           context.go('/home');
         }
       }
@@ -553,11 +555,11 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _handleBackToOnboarding() async {
-    print('Back to Onboarding button pressed');
+    _logger.i('Back to Onboarding button pressed');
     // Reset onboarding state to show get started screen
     await OnboardingService.resetOnboardingState();
     if (mounted) {
-      print('Navigating to get-started screen');
+      _logger.i('Navigating to get-started screen');
       // Navigate to get started screen directly
       context.go('/get-started');
     }

@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:logger/logger.dart';
 
 /// Utility class for cleaning and fixing JSON responses from AI
 class JsonUtils {
+  static final _logger = Logger();
   /// Clean and fix common JSON issues from AI responses
   static String cleanAndFixJson(String aiResponse) {
     // Remove markdown code fences if present
@@ -51,8 +53,8 @@ class JsonUtils {
     final closeBrackets = ']'.allMatches(jsonString).length;
 
     if (openBraces != closeBraces || openBrackets != closeBrackets) {
-      print('JSON appears to be truncated. Open braces: $openBraces, Close braces: $closeBraces');
-      print('Open brackets: $openBrackets, Close brackets: $closeBrackets');
+      _logger.w('JSON appears to be truncated. Open braces: $openBraces, Close braces: $closeBraces');
+      _logger.w('Open brackets: $openBrackets, Close brackets: $closeBrackets');
       throw Exception('AI response was truncated. Please try again.');
     }
   }
@@ -117,8 +119,8 @@ class JsonUtils {
       final data = jsonDecode(jsonString);
       return Map<String, dynamic>.from(data);
     } catch (e) {
-      print('JSON parsing failed${context != null ? ' for $context' : ''}: $e');
-      print('JSON string: $jsonString');
+      _logger.e('JSON parsing failed${context != null ? ' for $context' : ''}: $e');
+      _logger.e('JSON string: $jsonString');
       throw Exception('Failed to parse JSON${context != null ? ' for $context' : ''}: $e');
     }
   }

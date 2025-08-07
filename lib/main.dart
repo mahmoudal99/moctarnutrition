@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:logger/logger.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 import 'features/auth/presentation/screens/auth_screen.dart';
@@ -35,92 +36,94 @@ import 'shared/services/config_service.dart';
 import 'shared/models/checkin_model.dart';
 
 late final GoRouter _router;
+final _logger = Logger();
 
 GoRouter createRouter(AuthProvider authProvider) {
   return GoRouter(
-  initialLocation: '/',
+    initialLocation: '/',
     refreshListenable: authProvider,
-  routes: [
-    // Main route that handles authentication flow
-    GoRoute(
-      path: '/',
-      builder: (context, state) {
+    routes: [
+      // Main route that handles authentication flow
+      GoRoute(
+        path: '/',
+        builder: (context, state) {
           final authProvider =
               Provider.of<AuthProvider>(context, listen: false);
-            if (authProvider.isLoading) {
-              return const SplashScreen();
-            }
-            if (!authProvider.isAuthenticated) {
-              return const GetStartedScreen();
-            }
+          if (authProvider.isLoading) {
+            return const SplashScreen();
+          }
+          if (!authProvider.isAuthenticated) {
+            return const GetStartedScreen();
+          }
           if (authProvider.userModel?.role == UserRole.admin) {
             // The redirect will handle navigation, just show a placeholder
             return const SizedBox.shrink();
           }
-            return const FloatingMainNavigation(child: WorkoutsScreen());
-      },
-    ),
+          return const FloatingMainNavigation(child: WorkoutsScreen());
+        },
+      ),
 
-    // Get Started Route
-    GoRoute(
-      path: '/get-started',
-      builder: (context, state) => const GetStartedScreen(),
-    ),
+      // Get Started Route
+      GoRoute(
+        path: '/get-started',
+        builder: (context, state) => const GetStartedScreen(),
+      ),
 
-    // Auth Route (for sign in - existing users)
-    GoRoute(
-      path: '/auth',
-      builder: (context, state) => const AuthScreen(),
-    ),
+      // Auth Route (for sign in - existing users)
+      GoRoute(
+        path: '/auth',
+        builder: (context, state) => const AuthScreen(),
+      ),
 
-    // Auth Route (for sign up - new users after onboarding)
-    GoRoute(
-      path: '/auth-signup',
-      builder: (context, state) => const AuthScreen(isSignUp: true),
-    ),
+      // Auth Route (for sign up - new users after onboarding)
+      GoRoute(
+        path: '/auth-signup',
+        builder: (context, state) => const AuthScreen(isSignUp: true),
+      ),
 
-    // Password Reset Route
-    GoRoute(
-      path: '/password-reset',
-      builder: (context, state) => const PasswordResetScreen(),
-    ),
+      // Password Reset Route
+      GoRoute(
+        path: '/password-reset',
+        builder: (context, state) => const PasswordResetScreen(),
+      ),
 
-    // Onboarding Route
-    GoRoute(
-      path: '/onboarding',
-      builder: (context, state) => const OnboardingScreen(),
-    ),
+      // Onboarding Route
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
 
-    // Subscription Route
-    GoRoute(
-      path: '/subscription',
-      builder: (context, state) => const SubscriptionScreen(),
-    ),
+      // Subscription Route
+      GoRoute(
+        path: '/subscription',
+        builder: (context, state) => const SubscriptionScreen(),
+      ),
 
-    // Main App Routes (protected)
-    ShellRoute(
-      builder: (context, state, child) => FloatingMainNavigation(child: child),
-      routes: [
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const WorkoutsScreen(),
-        ),
-        GoRoute(
-          path: '/workouts',
-          builder: (context, state) => const WorkoutsScreen(),
-        ),
-        GoRoute(
-          path: '/meal-prep',
-          builder: (context, state) => const MealPrepScreen(),
-        ),
-        GoRoute(
-          path: '/trainers',
-          builder: (context, state) => const TrainersScreen(),
-        ),
-        GoRoute(
-          path: '/admin',
-          builder: (context, state) => const AdminDashboardScreen(),
-        ),
+      // Main App Routes (protected)
+      ShellRoute(
+        builder: (context, state, child) =>
+            FloatingMainNavigation(child: child),
+        routes: [
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const WorkoutsScreen(),
+          ),
+          GoRoute(
+            path: '/workouts',
+            builder: (context, state) => const WorkoutsScreen(),
+          ),
+          GoRoute(
+            path: '/meal-prep',
+            builder: (context, state) => const MealPrepScreen(),
+          ),
+          GoRoute(
+            path: '/trainers',
+            builder: (context, state) => const TrainersScreen(),
+          ),
+          GoRoute(
+            path: '/admin',
+            builder: (context, state) => const AdminDashboardScreen(),
+          ),
           GoRoute(
             path: '/admin-users',
             builder: (context, state) => const AdminUserListScreen(),
@@ -129,65 +132,71 @@ GoRouter createRouter(AuthProvider authProvider) {
             path: '/admin-home',
             builder: (context, state) => const AdminHomeScreen(),
           ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
-        ),
-        GoRoute(
-          path: '/checkin',
-          builder: (context, state) => const CheckinScreen(),
-        ),
-        GoRoute(
-          path: '/checkin/form',
-          builder: (context, state) => const CheckinFormScreen(),
-        ),
-        GoRoute(
-          path: '/checkin/details',
-          builder: (context, state) {
-            final checkin = state.extra as CheckinModel;
-            return CheckinDetailsScreen(checkin: checkin);
-          },
-        ),
-        GoRoute(
-          path: '/checkin/history',
-          builder: (context, state) => const CheckinHistoryScreen(),
-        ),
-      ],
-    ),
-    
-    // Admin User Detail Route (outside shell route - no bottom navigation)
-    GoRoute(
-      path: '/admin/user-detail',
-      builder: (context, state) {
-        final user = state.extra as UserModel;
-        return AdminUserDetailScreen(user: user);
-      },
-    ),
-  ],
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: '/checkin',
+            builder: (context, state) => const CheckinScreen(),
+          ),
+          GoRoute(
+            path: '/checkin/form',
+            builder: (context, state) => const CheckinFormScreen(),
+          ),
+          GoRoute(
+            path: '/checkin/details',
+            builder: (context, state) {
+              final checkin = state.extra as CheckinModel;
+              return CheckinDetailsScreen(checkin: checkin);
+            },
+          ),
+          GoRoute(
+            path: '/checkin/history',
+            builder: (context, state) => const CheckinHistoryScreen(),
+          ),
+        ],
+      ),
+
+      // Admin User Detail Route (outside shell route - no bottom navigation)
+      GoRoute(
+        path: '/admin/user-detail',
+        builder: (context, state) {
+          final user = state.extra as UserModel;
+          return AdminUserDetailScreen(user: user);
+        },
+      ),
+    ],
     redirect: (context, state) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       // Debug logging
-      print('Router redirect - AuthProvider state:');
-      print('  isLoading: ${authProvider.isLoading}');
-      print('  isAuthenticated: ${authProvider.isAuthenticated}');
-      print('  userModel: ${authProvider.userModel?.name ?? 'null'}');
-      print('  user role: ${authProvider.userModel?.role ?? 'null'}');
-      print('  current route: ${state.uri.toString()}');
-      
+      _logger.d('Router redirect - AuthProvider state:');
+      _logger.d('  isLoading: ${authProvider.isLoading}');
+      _logger.d('  isAuthenticated: ${authProvider.isAuthenticated}');
+      _logger.d('  userModel: ${authProvider.userModel?.name ?? 'null'}');
+      _logger.d('  user role: ${authProvider.userModel?.role ?? 'null'}');
+      _logger.d('  current route: ${state.uri.toString()}');
+
       if (authProvider.isLoading) return null;
       final isAdmin = authProvider.userModel?.role == UserRole.admin;
       final isAuthenticated = authProvider.isAuthenticated;
-      const adminRoutes = ['/admin-home', '/admin-users', '/admin/user-detail', '/profile', '/trainers'];
+      const adminRoutes = [
+        '/admin-home',
+        '/admin-users',
+        '/admin/user-detail',
+        '/profile',
+        '/trainers'
+      ];
       final currentRoute = state.uri.toString();
-      
-      // If admin and authenticated, redirect to /admin-home only if not on an admin route
+
+            // If admin and authenticated, redirect to /admin-home only if not on an admin route
       if (isAuthenticated && isAdmin && !adminRoutes.contains(currentRoute)) {
-        print('Router redirect - Redirecting admin to /admin-home');
+        _logger.d('Router redirect - Redirecting admin to /admin-home');
         return '/admin-home';
       }
       
-      print('Router redirect - No redirect needed');
+      _logger.d('Router redirect - No redirect needed');
       // Otherwise, no redirect
       return null;
     },
@@ -200,19 +209,19 @@ void main() async {
   // Initialize Firebase
   try {
     await Firebase.initializeApp();
-    print('Firebase initialized successfully');
+    _logger.i('Firebase initialized successfully');
   } catch (e) {
-    print('Firebase initialization error: $e');
+    _logger.e('Firebase initialization error: $e');
     // Continue without Firebase for development
   }
 
   // Load environment variables
   try {
     await dotenv.load();
-    print('Environment file loaded successfully');
+    _logger.i('Environment file loaded successfully');
   } catch (e) {
-    print('Warning: Could not load .env file: $e');
-    print(
+    _logger.w('Warning: Could not load .env file: $e');
+    _logger.w(
         'Please ensure you have copied .env.example to .env and configured your API key');
     // Continue with default configuration
   }
@@ -220,11 +229,11 @@ void main() async {
   // Validate environment configuration
   try {
     ConfigService.validateEnvironment();
-    print('Environment configuration validated successfully');
-    print('Config summary: ${ConfigService.getConfigSummary()}');
+    _logger.i('Environment configuration validated successfully');
+    _logger.i('Config summary: ${ConfigService.getConfigSummary()}');
   } catch (e) {
-    print('Environment configuration error: $e');
-    print('Please check your .env file and ensure OPENAI_API_KEY is set');
+    _logger.e('Environment configuration error: $e');
+    _logger.e('Please check your .env file and ensure OPENAI_API_KEY is set');
     // In production, you might want to show a user-friendly error
     // or fall back to a safe default configuration
   }
@@ -232,9 +241,9 @@ void main() async {
   // Initialize background upload service
   try {
     await BackgroundUploadService.initialize();
-    print('Background upload service initialized successfully');
+    _logger.i('Background upload service initialized successfully');
   } catch (e) {
-    print('Warning: Could not initialize background upload service: $e');
+    _logger.w('Warning: Could not initialize background upload service: $e');
     // Continue without background upload service
   }
 

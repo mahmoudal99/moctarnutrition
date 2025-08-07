@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
 import '../../../../shared/providers/auth_provider.dart';
@@ -16,6 +17,7 @@ class MealPrepScreen extends StatefulWidget {
 }
 
 class _MealPrepScreenState extends State<MealPrepScreen> {
+  static final _logger = Logger();
   MealPlanModel? _currentMealPlan;
 
   @override
@@ -53,7 +55,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         final mealPlanProvider =
             Provider.of<MealPlanProvider>(context, listen: false);
         mealPlanProvider.setMealPlan(firestoreMealPlan);
-        print('Loaded meal plan from Firestore: ${firestoreMealPlan.title}');
+        _logger.i('Loaded meal plan from Firestore: ${firestoreMealPlan.title}');
         return;
       }
 
@@ -68,14 +70,14 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           final mealPlanProvider =
               Provider.of<MealPlanProvider>(context, listen: false);
           mealPlanProvider.setMealPlan(savedMealPlan);
-          print(
+          _logger.i(
               'Loaded saved meal plan from local storage for user ${user.id}: ${savedMealPlan.title}');
         }
       }
 
       // No meal plan exists - will show waiting state
     } catch (e) {
-      print('Error loading saved data: $e');
+      _logger.e('Error loading saved data: $e');
       // Will show waiting state
     }
   }

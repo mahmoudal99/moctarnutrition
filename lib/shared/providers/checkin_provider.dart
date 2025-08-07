@@ -2,10 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logger/logger.dart';
 import '../models/checkin_model.dart';
 import '../services/checkin_service.dart';
 
 class CheckinProvider extends ChangeNotifier {
+  static final _logger = Logger();
   CheckinModel? _currentWeekCheckin;
   List<CheckinModel> _userCheckins = [];
   CheckinProgressSummary? _progressSummary;
@@ -67,23 +69,23 @@ class CheckinProvider extends ChangeNotifier {
         throw Exception('User not authenticated');
       }
 
-      print('Loading check-ins for user: ${user.uid}');
+      _logger.i('Loading check-ins for user: ${user.uid}');
       final checkins = await CheckinService.getUserCheckins(
         user.uid,
         limit: 20,
         lastDocument: _lastDocument,
       );
 
-      print('Loaded ${checkins.length} check-ins');
+      _logger.i('Loaded ${checkins.length} check-ins');
       for (final checkin in checkins) {
-        print('Check-in: ${checkin.id} - Week: ${checkin.weekStartDate} - Status: ${checkin.status}');
+        _logger.d('Check-in: ${checkin.id} - Week: ${checkin.weekStartDate} - Status: ${checkin.status}');
       }
 
       if (refresh) {
-        print('Refreshing - setting _userCheckins to ${checkins.length} items');
+        _logger.d('Refreshing - setting _userCheckins to ${checkins.length} items');
         _userCheckins = checkins;
       } else {
-        print('Adding ${checkins.length} items to existing list');
+        _logger.d('Adding ${checkins.length} items to existing list');
         _userCheckins.addAll(checkins);
       }
 
@@ -92,11 +94,11 @@ class CheckinProvider extends ChangeNotifier {
         _lastDocument = await _getLastDocument(user.uid);
       }
 
-      print('Total check-ins in provider after assignment: ${_userCheckins.length}');
-      print('Provider _userCheckins content: ${_userCheckins.map((c) => '${c.id}:${c.status}').toList()}');
+      _logger.d('Total check-ins in provider after assignment: ${_userCheckins.length}');
+      _logger.d('Provider _userCheckins content: ${_userCheckins.map((c) => '${c.id}:${c.status}').toList()}');
       notifyListeners();
     } catch (e) {
-      print('Error loading check-ins: $e');
+      _logger.e('Error loading check-ins: $e');
       _setError('Failed to load check-ins: $e');
     } finally {
       _setLoading(false);
@@ -279,23 +281,23 @@ class CheckinProvider extends ChangeNotifier {
 
   /// Refresh all check-in data
   Future<void> refresh() async {
-    print('Refresh started');
+    _logger.i('Refresh started');
     try {
-      print('Loading current week check-in...');
+      _logger.d('Loading current week check-in...');
       await loadCurrentWeekCheckin();
-      print('Current week check-in loaded');
+      _logger.d('Current week check-in loaded');
       
-      print('Loading user check-ins...');
+      _logger.d('Loading user check-ins...');
       await loadUserCheckins(refresh: true);
-      print('User check-ins loaded');
+      _logger.d('User check-ins loaded');
       
-      print('Loading progress summary...');
+      _logger.d('Loading progress summary...');
       await loadProgressSummary();
-      print('Progress summary loaded');
+      _logger.d('Progress summary loaded');
       
-      print('Refresh completed successfully');
+      _logger.i('Refresh completed successfully');
     } catch (e) {
-      print('Error during refresh: $e');
+      _logger.e('Error during refresh: $e');
       rethrow;
     }
   }

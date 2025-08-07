@@ -1,6 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
 
 class OnboardingService {
+  static final _logger = Logger();
   static const String _hasSeenOnboardingKey = 'has_seen_onboarding';
   static const String _hasSeenGetStartedKey = 'has_seen_get_started';
 
@@ -33,7 +35,7 @@ class OnboardingService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_hasSeenOnboardingKey);
     await prefs.remove(_hasSeenGetStartedKey);
-    print('Onboarding state reset successfully');
+    _logger.i('Onboarding state reset successfully');
   }
 
   /// Get the initial route based on onboarding state
