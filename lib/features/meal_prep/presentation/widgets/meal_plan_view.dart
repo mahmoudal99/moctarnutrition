@@ -142,7 +142,6 @@ class _MealPlanViewState extends State<MealPlanView>
                 ),
                 child: PageView.builder(
                   controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(), // Disable PageView scrolling
                   onPageChanged: (index) {
                     setState(() {
                       _currentDayIndex = index;
@@ -152,7 +151,7 @@ class _MealPlanViewState extends State<MealPlanView>
                   itemBuilder: (context, index) {
                     final mealDay = widget.mealPlan.mealDays[index];
                     return SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(), // Disable content scrolling
+                      physics: const NeverScrollableScrollPhysics(), // Disable content scrolling only
                       child: _buildDayContent(mealDay, index + 1),
                     );
                   },
