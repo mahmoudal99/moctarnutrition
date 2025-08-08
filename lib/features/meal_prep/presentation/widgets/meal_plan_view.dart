@@ -425,7 +425,7 @@ class _MealPlanViewState extends State<MealPlanView>
       case MealType.dinner:
         return "dinner.svg";
       case MealType.snack:
-        return "lunch.svg";
+        return "snack.svg";
     }
   }
 

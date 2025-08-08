@@ -553,7 +553,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
       case MealType.dinner:
         return "dinner.svg";
       case MealType.snack:
-        return "lunch.svg";
+        return "snack.svg";
     }
   }
 
