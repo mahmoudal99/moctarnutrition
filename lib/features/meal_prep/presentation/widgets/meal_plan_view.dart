@@ -138,7 +138,7 @@ class _MealPlanViewState extends State<MealPlanView>
               // Swipeable day content
               Container(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.6, // Use 60% of screen height
+                  maxHeight: MediaQuery.of(context).size.height * 1, // Use 60% of screen height
                 ),
                 child: PageView.builder(
                   controller: _pageController,
@@ -159,7 +159,7 @@ class _MealPlanViewState extends State<MealPlanView>
               ),
               
               // Add bottom padding for scroll space
-              const SizedBox(height: 128),
+              const SizedBox(height: 100),
             ],
           ),
         ),
