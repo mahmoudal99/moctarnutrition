@@ -319,6 +319,8 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           userPreferences: _userPreferences,
           selectedDays: _selectedDays,
           userName: widget.userName,
+          cheatDay: _cheatDay,
+          targetCalories: _targetCalories,
         );
       default:
         return const SizedBox.shrink();

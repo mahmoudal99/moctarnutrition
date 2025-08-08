@@ -427,6 +427,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           userPreferences: prefs,
           selectedDays: _selectedDays,
           userName: widget.user.name,
+          cheatDay: _cheatDay,
+          targetCalories: _targetCalories,
         );
       default:
         return const SizedBox.shrink();

@@ -7,12 +7,16 @@ class FinalReviewStep extends StatelessWidget {
   final UserPreferences userPreferences;
   final int selectedDays;
   final String? userName;
+  final String? cheatDay;
+  final int targetCalories;
 
   const FinalReviewStep({
     super.key,
     required this.userPreferences,
     required this.selectedDays,
     this.userName,
+    this.cheatDay,
+    required this.targetCalories,
   });
 
   String _fitnessGoalName(FitnessGoal goal) {
@@ -42,6 +46,8 @@ class FinalReviewStep extends StatelessWidget {
         return Icons.no_food;
       case 'workout':
         return Icons.fitness_center;
+      case 'cheat':
+        return Icons.cake;
       default:
         return Icons.info_outline;
     }
@@ -82,9 +88,21 @@ class FinalReviewStep extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     _reviewRow(
+                      icon: _iconFor('calories'),
+                      label: 'Daily Calories',
+                      value: '$targetCalories calories',
+                    ),
+                    const SizedBox(height: 16),
+                    _reviewRow(
                       icon: _iconFor('goal'),
                       label: 'Fitness Goal',
                       value: _fitnessGoalName(userPreferences.fitnessGoal),
+                    ),
+                    const SizedBox(height: 16),
+                    _reviewRow(
+                      icon: _iconFor('cheat'),
+                      label: 'Cheat Day',
+                      value: cheatDay ?? 'No cheat day',
                     ),
                     const SizedBox(height: 16),
                     _reviewRow(
