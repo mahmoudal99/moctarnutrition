@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../shared/models/user_model.dart';
+import 'personalized_title.dart';
 
 class FinalReviewStep extends StatelessWidget {
   final UserPreferences userPreferences;
   final int selectedDays;
+  final String? userName;
 
   const FinalReviewStep({
     super.key,
     required this.userPreferences,
     required this.selectedDays,
+    this.userName,
   });
 
   String _fitnessGoalName(FitnessGoal goal) {
@@ -46,65 +49,67 @@ class FinalReviewStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppConstants.surfaceColor.withOpacity(0.98),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: AppConstants.spacingL),
-              Text(
-                'Final Review',
-                style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppConstants.spacingL),
+            PersonalizedTitle(
+              userName: userName,
+              title: '{name}\'s Final Review',
+              fallbackTitle: 'Final Review',
+              style:
+                  AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppConstants.spacingL),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.radiusL),
               ),
-              const SizedBox(height: AppConstants.spacingL),
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppConstants.radiusL),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppConstants.spacingL),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _reviewRow(
-                        icon: _iconFor('days'),
-                        label: 'Plan Duration',
-                        value: '$selectedDays days',
-                      ),
-                      const SizedBox(height: 16),
-                      _reviewRow(
-                        icon: _iconFor('goal'),
-                        label: 'Fitness Goal',
-                        value: _fitnessGoalName(userPreferences.fitnessGoal),
-                      ),
-                      const SizedBox(height: 16),
-                      _reviewRow(
-                        icon: _iconFor('restrictions'),
-                        label: 'Dietary Restrictions',
-                        value: (userPreferences.dietaryRestrictions.isEmpty ||
-                                (userPreferences.dietaryRestrictions.length == 1 &&
-                                    userPreferences.dietaryRestrictions.first == 'None'))
-                            ? 'None'
-                            : userPreferences.dietaryRestrictions.join(', '),
-                      ),
-                      const SizedBox(height: 16),
-                      _reviewRow(
-                        icon: _iconFor('workout'),
-                        label: 'Preferred Workouts',
-                        value: userPreferences.preferredWorkoutStyles.join(', '),
-                      ),
-                    ],
-                  ),
+              child: Padding(
+                padding: const EdgeInsets.all(AppConstants.spacingL),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _reviewRow(
+                      icon: _iconFor('days'),
+                      label: 'Plan Duration',
+                      value: '$selectedDays days',
+                    ),
+                    const SizedBox(height: 16),
+                    _reviewRow(
+                      icon: _iconFor('goal'),
+                      label: 'Fitness Goal',
+                      value: _fitnessGoalName(userPreferences.fitnessGoal),
+                    ),
+                    const SizedBox(height: 16),
+                    _reviewRow(
+                      icon: _iconFor('restrictions'),
+                      label: 'Dietary Restrictions',
+                      value: (userPreferences.dietaryRestrictions.isEmpty ||
+                              (userPreferences.dietaryRestrictions.length ==
+                                      1 &&
+                                  userPreferences.dietaryRestrictions.first ==
+                                      'None'))
+                          ? 'None'
+                          : userPreferences.dietaryRestrictions.join(', '),
+                    ),
+                    const SizedBox(height: 16),
+                    _reviewRow(
+                      icon: _iconFor('workout'),
+                      label: 'Preferred Workouts',
+                      value: userPreferences.preferredWorkoutStyles.join(', '),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppConstants.spacingXL),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppConstants.spacingXL),
+          ],
         ),
       ),
     );
@@ -124,7 +129,7 @@ class FinalReviewStep extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           padding: const EdgeInsets.all(10),
-          child: Icon(icon, color: AppConstants.primaryColor, size: 24),
+          child: Icon(icon, color: AppConstants.primaryColor, size: 20),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -140,7 +145,8 @@ class FinalReviewStep extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 value,
-                style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyMedium
+                    .copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -148,4 +154,4 @@ class FinalReviewStep extends StatelessWidget {
       ],
     );
   }
-} 
+}

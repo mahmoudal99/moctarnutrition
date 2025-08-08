@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
+import 'personalized_title.dart';
 
 class CheatDayStep extends StatelessWidget {
   final String? selectedDay;
   final ValueChanged<String?> onSelect;
+  final String? userName;
 
   const CheatDayStep({
     super.key,
     required this.selectedDay,
     required this.onSelect,
+    this.userName,
   });
 
   @override
@@ -26,16 +29,17 @@ class CheatDayStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Choose their cheat day',
-          style: AppTextStyles.heading4,
+        PersonalizedTitle(
+          userName: userName,
+          title: 'Choose {name}\'s cheat day',
+          fallbackTitle: 'Choose your cheat day',
         ),
         const SizedBox(height: AppConstants.spacingS),
-        Text(
-          'Select one day per week where you can enjoy your favorite foods',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppConstants.textSecondary,
-          ),
+        PersonalizedTitle(
+          userName: userName,
+          title: 'Select one day per week where {name} can enjoy their favorite foods',
+          fallbackTitle: 'Select one day per week where you can enjoy your favorite foods',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
         ),
         const SizedBox(height: AppConstants.spacingL),
         Expanded(
@@ -87,7 +91,7 @@ class CheatDayStep extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           child: Row(
             children: [
               Icon(
@@ -100,7 +104,7 @@ class CheatDayStep extends StatelessWidget {
               Expanded(
                 child: Text(
                   day,
-                  style: AppTextStyles.bodyLarge.copyWith(
+                  style: AppTextStyles.bodyMedium.copyWith(
                     color: isSelected
                         ? AppConstants.surfaceColor
                         : AppConstants.textPrimary,

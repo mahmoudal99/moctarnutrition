@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
+import 'personalized_title.dart';
 
 class PlanDurationStep extends StatelessWidget {
   final bool weeklyRotation;
   final ValueChanged<bool> onToggleWeeklyRotation;
   final bool remindersEnabled;
   final ValueChanged<bool> onToggleReminders;
+  final String? userName;
 
   const PlanDurationStep({
     super.key,
@@ -13,6 +15,7 @@ class PlanDurationStep extends StatelessWidget {
     required this.onToggleWeeklyRotation,
     required this.remindersEnabled,
     required this.onToggleReminders,
+    this.userName,
   });
 
   @override
@@ -21,9 +24,10 @@ class PlanDurationStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Plan Duration & Reminders',
-            style: AppTextStyles.heading4,
+          PersonalizedTitle(
+            userName: userName,
+            title: '{name}\'s Plan Duration & Reminders',
+            fallbackTitle: 'Plan Duration & Reminders',
           ),
           const SizedBox(height: AppConstants.spacingL),
           Row(

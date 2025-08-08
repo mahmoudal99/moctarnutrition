@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
+import 'personalized_title.dart';
 
 class CaloriesStep extends StatelessWidget {
   final int targetCalories;
   final ValueChanged<int> onChanged;
+  final String? userName;
 
   const CaloriesStep({
     super.key,
     required this.targetCalories,
     required this.onChanged,
+    this.userName,
   });
 
   @override
@@ -16,9 +19,10 @@ class CaloriesStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Set Your Daily Calorie Target',
-          style: AppTextStyles.heading4,
+        PersonalizedTitle(
+          userName: userName,
+          title: 'Set {name}\'s Daily Calorie Target',
+          fallbackTitle: 'Set Your Daily Calorie Target',
         ),
         const SizedBox(height: AppConstants.spacingL),
         Slider(
@@ -39,4 +43,4 @@ class CaloriesStep extends StatelessWidget {
       ],
     );
   }
-} 
+}

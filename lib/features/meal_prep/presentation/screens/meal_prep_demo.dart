@@ -200,6 +200,7 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
               foodsToAvoid: ['Shellfish'],
               favoriteFoods: ['Chicken', 'Rice', 'Vegetables'],
             ),
+            userName: 'John',
             onMealPlanGenerated: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Meal plan generated!')),

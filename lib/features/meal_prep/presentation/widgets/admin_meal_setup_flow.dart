@@ -15,11 +15,13 @@ import 'setup_steps/final_review_step.dart';
 
 class AdminMealSetupFlow extends StatefulWidget {
   final UserPreferences targetUserPreferences;
+  final String? userName;
   final VoidCallback? onMealPlanGenerated;
 
   const AdminMealSetupFlow({
     super.key,
     required this.targetUserPreferences,
+    this.userName,
     this.onMealPlanGenerated,
   });
 
@@ -282,21 +284,25 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
         return GoalSelectionStep(
           selected: _selectedNutritionGoal,
           onSelect: (goal) => setState(() => _selectedNutritionGoal = goal),
+          userName: widget.userName,
         );
       case 1:
         return MealFrequencyStep(
           selected: _mealFrequency,
           onSelect: (frequency) => setState(() => _mealFrequency = frequency),
+          userName: widget.userName,
         );
       case 2:
         return CaloriesStep(
           targetCalories: _targetCalories,
           onChanged: (calories) => setState(() => _targetCalories = calories),
+          userName: widget.userName,
         );
       case 3:
         return CheatDayStep(
           selectedDay: _cheatDay,
           onSelect: (day) => setState(() => _cheatDay = day),
+          userName: widget.userName,
         );
       case 4:
         return PlanDurationStep(
@@ -306,11 +312,13 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           remindersEnabled: _remindersEnabled,
           onToggleReminders: (value) =>
               setState(() => _remindersEnabled = value),
+          userName: widget.userName,
         );
       case 5:
         return FinalReviewStep(
           userPreferences: _userPreferences,
           selectedDays: _selectedDays,
+          userName: widget.userName,
         );
       default:
         return const SizedBox.shrink();
@@ -404,34 +412,75 @@ class _ProgressDots extends StatelessWidget {
 
   const _ProgressDots({required this.current, required this.total});
 
+  // Use the same colors as user onboarding for first 4 steps, then distinct colors for last 2
   static const List<Color> _stepColors = [
-    AppConstants.primaryColor,
-    AppConstants.secondaryColor,
-    AppConstants.accentColor,
-    AppConstants.warningColor,
-    AppConstants.successColor,
-    AppConstants.primaryColor,
+    AppConstants.primaryColor,    // Step 0: Goal Selection (Green - main goal)
+    AppConstants.accentColor,     // Step 1: Meal Frequency (Dark Green - meal planning)
+    AppConstants.secondaryColor,  // Step 2: Calories (Light Green - energy/nutrition)
+    AppConstants.warningColor,    // Step 3: Cheat Day (Orange - indulgence)
+    Colors.purple,                // Step 4: Plan Duration (Purple - commitment)
+    Colors.blue,                  // Step 5: Final Review (Blue - completion)
+  ];
+
+  // Step titles for better context
+  static const List<String> _stepTitles = [
+    'Goal',
+    'Frequency', 
+    'Calories',
+    'Cheat Day',
+    'Duration',
+    'Review',
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(total, (i) {
-        final color = i <= current
-            ? _stepColors[i % _stepColors.length]
-            : AppConstants.textTertiary.withOpacity(0.2);
-        return AnimatedContainer(
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(total, (i) {
+            // Each dot shows its own color when completed, current step color when current, or gray when not reached
+            Color color;
+            if (i < current) {
+              // Completed steps show their own color
+              color = _stepColors[i];
+              print('Step $i (completed): ${color.toString()}'); // Debug
+            } else if (i == current) {
+              // Current step shows its own color
+              color = _stepColors[i];
+              print('Step $i (current): ${color.toString()}'); // Debug
+            } else {
+              // Future steps show gray
+              color = AppConstants.textTertiary.withOpacity(0.2);
+              print('Step $i (future): ${color.toString()}'); // Debug
+            }
+            
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: i == current ? 18 : 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(6),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(height: 8),
+        // Add step indicator text
+        AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: i == current ? 18 : 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(6),
+          child: Text(
+            '${current + 1} of $total • ${_stepTitles[current]}',
+            key: ValueKey(current),
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 11,
+              color: AppConstants.textTertiary,
+            ),
           ),
-        );
-      }),
+        ),
+      ],
     );
   }
 }

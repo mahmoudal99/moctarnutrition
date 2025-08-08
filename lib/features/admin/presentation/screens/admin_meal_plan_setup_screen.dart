@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/services/ai_meal_service.dart';
@@ -40,18 +41,21 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   }
 
   void _onNextStep() {
+    HapticFeedback.mediumImpact();
     setState(() {
       _setupStep++;
     });
   }
 
   void _onBackStep() {
+    HapticFeedback.lightImpact();
     setState(() {
       if (_setupStep > 0) _setupStep--;
     });
   }
 
   Future<void> _onSavePlan() async {
+    HapticFeedback.heavyImpact();
     setState(() {
       _isLoading = true;
     });
@@ -282,29 +286,85 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     }
   }
 
+  String _getStepTitle(int step) {
+    switch (step) {
+      case 0:
+        return 'Goal';
+      case 1:
+        return 'Frequency';
+      case 2:
+        return 'Calories';
+      case 3:
+        return 'Cheat Day';
+      case 4:
+        return 'Duration';
+      case 5:
+        return 'Review';
+      default:
+        return '';
+    }
+  }
+
   Widget _buildStepContent(UserPreferences prefs) {
     return Column(
       children: [
-        // Progress indicator
+        // Progress indicator with colored dots
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(6, (i) {
-              final color = i <= _setupStep
-                  ? AppConstants.primaryColor
-                  : AppConstants.textTertiary.withOpacity(0.2);
-              return AnimatedContainer(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(6, (i) {
+                  // Use the same colors as user onboarding for first 4 steps, then distinct colors for last 2
+                  final List<Color> stepColors = [
+                    AppConstants.primaryColor,    // Step 0: Goal Selection (Green - main goal)
+                    AppConstants.accentColor,     // Step 1: Meal Frequency (Dark Green - meal planning)
+                    AppConstants.secondaryColor,  // Step 2: Calories (Light Green - energy/nutrition)
+                    AppConstants.warningColor,    // Step 3: Cheat Day (Orange - indulgence)
+                    Colors.purple,                // Step 4: Plan Duration (Purple - commitment)
+                    Colors.blue,                  // Step 5: Final Review (Blue - completion)
+                  ];
+                  
+                  // Each dot shows its own color when completed, current step color when current, or gray when not reached
+                  Color color;
+                  if (i < _setupStep) {
+                    // Completed steps show their own color
+                    color = stepColors[i];
+                  } else if (i == _setupStep) {
+                    // Current step shows its own color
+                    color = stepColors[i];
+                  } else {
+                    // Future steps show gray
+                    color = AppConstants.textTertiary.withOpacity(0.2);
+                  }
+                  
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: i == _setupStep ? 18 : 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 8),
+              // Add step indicator text
+              AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: i == _setupStep ? 18 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(6),
+                child: Text(
+                  '${_setupStep + 1} of 6',
+                  key: ValueKey(_setupStep),
+                  style: AppTextStyles.caption.copyWith(
+                    fontSize: 11,
+                    color: AppConstants.textTertiary,
+                  ),
                 ),
-              );
-            }),
+              ),
+            ],
           ),
         ),
         
@@ -321,6 +381,9 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           padding: const EdgeInsets.all(16.0),
           child: _buildNavigationButtons(),
         ),
+        SizedBox(
+          height: 24,
+        )
       ],
     );
   }
@@ -331,21 +394,25 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         return GoalSelectionStep(
           selected: _selectedNutritionGoal,
           onSelect: (goal) => setState(() => _selectedNutritionGoal = goal),
+          userName: widget.user.name,
         );
       case 1:
         return MealFrequencyStep(
           selected: _mealFrequency,
           onSelect: (frequency) => setState(() => _mealFrequency = frequency),
+          userName: widget.user.name,
         );
       case 2:
         return CaloriesStep(
           targetCalories: _targetCalories,
           onChanged: (calories) => setState(() => _targetCalories = calories),
+          userName: widget.user.name,
         );
       case 3:
         return CheatDayStep(
           selectedDay: _cheatDay,
           onSelect: (day) => setState(() => _cheatDay = day),
+          userName: widget.user.name,
         );
       case 4:
         return PlanDurationStep(
@@ -353,11 +420,13 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           onToggleWeeklyRotation: (value) => setState(() => _weeklyRotation = value),
           remindersEnabled: _remindersEnabled,
           onToggleReminders: (value) => setState(() => _remindersEnabled = value),
+          userName: widget.user.name,
         );
       case 5:
         return FinalReviewStep(
           userPreferences: prefs,
           selectedDays: _selectedDays,
+          userName: widget.user.name,
         );
       default:
         return const SizedBox.shrink();

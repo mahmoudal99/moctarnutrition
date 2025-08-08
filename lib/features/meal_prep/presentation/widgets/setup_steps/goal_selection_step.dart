@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
+import 'personalized_title.dart';
 
 enum NutritionGoal { loseFat, buildMuscle, improveEnergy, maintainWeight }
 
@@ -34,11 +35,13 @@ extension NutritionGoalExt on NutritionGoal {
 class GoalSelectionStep extends StatelessWidget {
   final NutritionGoal? selected;
   final ValueChanged<NutritionGoal> onSelect;
+  final String? userName;
 
   const GoalSelectionStep({
     super.key,
     required this.selected,
     required this.onSelect,
+    this.userName,
   });
 
   @override
@@ -46,9 +49,10 @@ class GoalSelectionStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          "What's your primary nutrition goal?",
-          style: AppTextStyles.heading4,
+        PersonalizedTitle(
+          userName: userName,
+          title: "What's {name}'s primary nutrition goal?",
+          fallbackTitle: "What's your primary nutrition goal?",
         ),
         const SizedBox(height: AppConstants.spacingL),
         Wrap(
@@ -88,4 +92,4 @@ class GoalSelectionStep extends StatelessWidget {
       ],
     );
   }
-} 
+}

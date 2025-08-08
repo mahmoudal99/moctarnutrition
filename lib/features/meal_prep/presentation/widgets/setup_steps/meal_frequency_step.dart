@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
+import 'personalized_title.dart';
 
 enum MealFrequencyOption {
   threeMeals,
@@ -13,11 +14,13 @@ enum MealFrequencyOption {
 class MealFrequencyStep extends StatelessWidget {
   final MealFrequencyOption? selected;
   final ValueChanged<MealFrequencyOption> onSelect;
+  final String? userName;
 
   const MealFrequencyStep({
     super.key,
     required this.selected,
     required this.onSelect,
+    this.userName,
   });
 
   @override
@@ -25,9 +28,10 @@ class MealFrequencyStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'How many meals would you like per day?',
-          style: AppTextStyles.heading4,
+        PersonalizedTitle(
+          userName: userName,
+          title: 'How many meals would {name} like per day?',
+          fallbackTitle: 'How many meals would you like per day?',
         ),
         const SizedBox(height: AppConstants.spacingL),
         Expanded(
@@ -111,7 +115,7 @@ class MealFrequencyStep extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           child: Row(
             children: [
               Icon(
@@ -124,7 +128,7 @@ class MealFrequencyStep extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: AppTextStyles.bodyLarge.copyWith(
+                  style: AppTextStyles.bodyMedium.copyWith(
                     color: selected
                         ? AppConstants.surfaceColor
                         : AppConstants.textPrimary,
