@@ -270,7 +270,6 @@ class _MealPlanViewState extends State<MealPlanView>
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingL,
-        vertical: AppConstants.spacingM,
       ),
       child: Column(
         children: [
@@ -280,7 +279,6 @@ class _MealPlanViewState extends State<MealPlanView>
           //   style: AppTextStyles.heading4,
           // ),
           const SizedBox(height: AppConstants.spacingM),
-
           // Day dots indicator with letters
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

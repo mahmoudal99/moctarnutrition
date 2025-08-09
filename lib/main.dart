@@ -17,6 +17,7 @@ import 'features/checkin/presentation/screens/checkin_screen.dart';
 import 'features/checkin/presentation/screens/checkin_form_screen.dart';
 import 'features/checkin/presentation/screens/checkin_details_screen.dart';
 import 'features/checkin/presentation/screens/checkin_history_screen.dart';
+import 'features/progress/presentation/screens/progress_screen.dart';
 import 'features/admin/presentation/screens/admin_user_list_screen.dart';
 import 'features/admin/presentation/screens/admin_user_detail_screen.dart';
 import 'features/admin/presentation/screens/admin_home_screen.dart';
@@ -154,6 +155,10 @@ GoRouter createRouter(AuthProvider authProvider) {
           GoRoute(
             path: '/checkin/history',
             builder: (context, state) => const CheckinHistoryScreen(),
+          ),
+          GoRoute(
+            path: '/progress',
+            builder: (context, state) => const ProgressScreen(),
           ),
         ],
       ),
