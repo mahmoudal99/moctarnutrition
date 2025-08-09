@@ -20,9 +20,13 @@ class BackgroundUploadService {
       FlutterLocalNotificationsPlugin();
 
   static Future<void> initialize() async {
-    // Initialize notifications
+    // Initialize notifications with passive settings (no auto permission requests)
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings();
+    const iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
     
     const initSettings = InitializationSettings(
       android: androidSettings,

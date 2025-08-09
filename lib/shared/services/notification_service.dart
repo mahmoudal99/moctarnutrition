@@ -54,24 +54,12 @@ class NotificationService {
   /// Check if notification permissions are granted
   static Future<bool> areNotificationsEnabled() async {
     try {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        // For iOS, we'll use a simple approach - try to get the implementation
-        // and assume if we can get it, basic notifications are possible
-        final iosImpl = _flutterLocalNotificationsPlugin
-            .resolvePlatformSpecificImplementation<
-                IOSFlutterLocalNotificationsPlugin>();
-
-        if (iosImpl == null) return false;
-
-        // Since checkPermissions API seems to have changed, let's use the
-        // permission_handler for iOS as well for consistency
-        final status = await Permission.notification.status;
-        return status == PermissionStatus.granted;
-      } else {
-        // For Android, use permission_handler
-        final status = await Permission.notification.status;
-        return status == PermissionStatus.granted;
-      }
+      final status = await Permission.notification.status;
+      final isGranted = status == PermissionStatus.granted;
+      
+      _logger.d('Checking notification permission: status=$status, isGranted=$isGranted');
+      
+      return isGranted;
     } catch (e) {
       _logger.e('Error checking notification permission: $e');
       return false;
@@ -176,7 +164,7 @@ class NotificationService {
       );
 
       await _flutterLocalNotificationsPlugin.show(
-        0,
+        1,
         'Champions Gym',
         'Notifications are now enabled! 💪',
         notificationDetails,
