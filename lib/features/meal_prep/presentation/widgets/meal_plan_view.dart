@@ -28,7 +28,7 @@ class _MealPlanViewState extends State<MealPlanView>
   late Animation<double> _nutritionOpacityAnimation;
   late Animation<double> _pillOpacityAnimation;
   late Animation<double> _pillScaleAnimation;
-  
+
   int _currentDayIndex = 0;
   double _scrollOffset = 0.0;
   static const double _scrollThreshold = 50.0;
@@ -39,15 +39,15 @@ class _MealPlanViewState extends State<MealPlanView>
     _currentDayIndex = _getCurrentDayIndex();
     // Start with the current day index for circular scrolling
     _pageController = PageController(initialPage: _currentDayIndex);
-    
+
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    
+
     _nutritionAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _nutritionScaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
@@ -55,7 +55,7 @@ class _MealPlanViewState extends State<MealPlanView>
       parent: _nutritionAnimationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _nutritionOpacityAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
@@ -63,7 +63,7 @@ class _MealPlanViewState extends State<MealPlanView>
       parent: _nutritionAnimationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _pillOpacityAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -71,7 +71,7 @@ class _MealPlanViewState extends State<MealPlanView>
       parent: _nutritionAnimationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _pillScaleAnimation = Tween<double>(
       begin: 0.8,
       end: 1.0,
@@ -93,10 +93,12 @@ class _MealPlanViewState extends State<MealPlanView>
     setState(() {
       _scrollOffset = _scrollController.offset;
     });
-    
-    if (_scrollOffset > _scrollThreshold && _nutritionAnimationController.value == 0) {
+
+    if (_scrollOffset > _scrollThreshold &&
+        _nutritionAnimationController.value == 0) {
       _nutritionAnimationController.forward();
-    } else if (_scrollOffset <= _scrollThreshold && _nutritionAnimationController.value == 1) {
+    } else if (_scrollOffset <= _scrollThreshold &&
+        _nutritionAnimationController.value == 1) {
       _nutritionAnimationController.reverse();
     }
   }
@@ -138,7 +140,8 @@ class _MealPlanViewState extends State<MealPlanView>
               // Swipeable day content
               Container(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 1, // Use 60% of screen height
+                  maxHeight: MediaQuery.of(context).size.height *
+                      1, // Use 60% of screen height
                 ),
                 child: PageView.builder(
                   controller: _pageController,
@@ -151,19 +154,20 @@ class _MealPlanViewState extends State<MealPlanView>
                   itemBuilder: (context, index) {
                     final mealDay = widget.mealPlan.mealDays[index];
                     return SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(), // Disable content scrolling only
+                      physics: const NeverScrollableScrollPhysics(),
+                      // Disable content scrolling only
                       child: _buildDayContent(mealDay, index + 1),
                     );
                   },
                 ),
               ),
-              
+
               // Add bottom padding for scroll space
               const SizedBox(height: 100),
             ],
           ),
         ),
-        
+
         // Floating pill nutrition summary
         Positioned(
           top: MediaQuery.of(context).padding.top + 20,
@@ -190,12 +194,12 @@ class _MealPlanViewState extends State<MealPlanView>
 
   Widget _buildPillNutritionSummary() {
     final mealDay = widget.mealPlan.mealDays[_currentDayIndex];
-    final totalCalories = mealDay.meals.fold<double>(
-      0, (sum, meal) => sum + meal.nutrition.calories);
-    final totalProtein = mealDay.meals.fold<double>(
-      0, (sum, meal) => sum + meal.nutrition.protein);
-    final totalCarbs = mealDay.meals.fold<double>(
-      0, (sum, meal) => sum + meal.nutrition.carbs);
+    final totalCalories = mealDay.meals
+        .fold<double>(0, (sum, meal) => sum + meal.nutrition.calories);
+    final totalProtein = mealDay.meals
+        .fold<double>(0, (sum, meal) => sum + meal.nutrition.protein);
+    final totalCarbs = mealDay.meals
+        .fold<double>(0, (sum, meal) => sum + meal.nutrition.carbs);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -271,26 +275,67 @@ class _MealPlanViewState extends State<MealPlanView>
       child: Column(
         children: [
           // Day title
-          Text(
-            _getDayTitle(_currentDayIndex),
-            style: AppTextStyles.heading4,
-          ),
-          const SizedBox(height: AppConstants.spacingS),
+          // Text(
+          //   _getDayTitle(_currentDayIndex),
+          //   style: AppTextStyles.heading4,
+          // ),
+          const SizedBox(height: AppConstants.spacingM),
 
-          // Day dots indicator
+          // Day dots indicator with letters
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
               widget.mealPlan.mealDays.length,
-              (index) => Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: index == _currentDayIndex
-                      ? AppConstants.primaryColor
-                      : AppConstants.textTertiary,
+              (index) => GestureDetector(
+                onTap: () {
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    children: [
+                      // Day letter
+                      Text(
+                        _getDayLetter(index),
+                        style: AppTextStyles.caption.copyWith(
+                          color: index == _currentDayIndex
+                              ? AppConstants.primaryColor
+                              : AppConstants.textSecondary,
+                          fontWeight: index == _currentDayIndex
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      // Enhanced dot
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: index == _currentDayIndex ? 12 : 8,
+                        height: index == _currentDayIndex ? 12 : 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: index == _currentDayIndex
+                              ? AppConstants.primaryColor
+                              : AppConstants.textTertiary.withOpacity(0.3),
+                          boxShadow: index == _currentDayIndex
+                              ? [
+                                  BoxShadow(
+                                    color: AppConstants.primaryColor
+                                        .withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -365,6 +410,15 @@ class _MealPlanViewState extends State<MealPlanView>
     return 'Day ${dayIndex + 1}';
   }
 
+  String _getDayLetter(int dayIndex) {
+    final dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    if (dayIndex < dayLetters.length) {
+      return dayLetters[dayIndex];
+    }
+    // For plans longer than a week, cycle through the letters
+    return dayLetters[dayIndex % 7];
+  }
+
   Widget _buildMealTypeSection(MealType mealType) {
     return Padding(
       padding: const EdgeInsets.only(
@@ -374,7 +428,8 @@ class _MealPlanViewState extends State<MealPlanView>
         children: [
           SvgPicture.asset(
             "assets/images/${_getMealTypeIcon(mealType)}",
-            colorFilter: ColorFilter.mode(_getMealTypeColor(mealType), BlendMode.srcIn),
+            colorFilter:
+                ColorFilter.mode(_getMealTypeColor(mealType), BlendMode.srcIn),
             height: 20,
           ),
           const SizedBox(width: AppConstants.spacingS),

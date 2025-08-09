@@ -667,8 +667,6 @@ class _MealDetailScreenState extends State<MealDetailScreen>
           _buildInfoRow('Prep Time', '${meal.prepTime} min', Icons.timer),
           _buildInfoRow('Cook Time', '${meal.cookTime} min', Icons.restaurant),
           _buildInfoRow('Servings', '${meal.servings}', Icons.people),
-          _buildInfoRow(
-              'Cuisine', _getCuisineName(meal.cuisineType), Icons.flag),
           if (meal.tags.isNotEmpty)
             _buildInfoRow('Tags', meal.tags.join(', '), Icons.label),
         ],

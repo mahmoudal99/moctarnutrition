@@ -240,7 +240,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                   final day = entry.value;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 24),
-                    child: _buildMealDayCard(day, index + 1),
+                    child: _buildMealDayCard(day, index),
                   );
                 }),
                 const SizedBox(
@@ -328,7 +328,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMealDayCard(MealDay day, int dayNumber) {
+  Widget _buildMealDayCard(MealDay day, int dayIndex) {
     final totalCalories = day.totalCalories;
 
     // Group meals by type
@@ -372,7 +372,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'Day $dayNumber',
+                  _getDayName(dayIndex),
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppConstants.textPrimary,
@@ -695,5 +695,25 @@ class AdminUserMealPlanScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _getDayName(int dayIndex) {
+    final dayNames = [
+      'Monday',
+      'Tuesday', 
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    
+    // Handle cases where there might be more than 7 days
+    if (dayIndex < dayNames.length) {
+      return dayNames[dayIndex];
+    } else {
+      // For plans longer than a week, cycle through the days
+      return dayNames[dayIndex % 7];
+    }
   }
 }
