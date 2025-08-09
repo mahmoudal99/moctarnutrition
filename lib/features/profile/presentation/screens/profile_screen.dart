@@ -11,6 +11,7 @@ import '../../../../shared/services/auth_service.dart';
 import '../../../../shared/services/onboarding_service.dart';
 import '../../../../shared/utils/avatar_utils.dart';
 import '../../../onboarding/presentation/screens/get_started_screen.dart';
+import '../widgets/notifications_toggle.dart';
 
 class ProfileScreen extends StatelessWidget {
   static final _logger = Logger();
@@ -29,15 +30,6 @@ class ProfileScreen extends StatelessWidget {
         _logger.d('  isLoading: ${authProvider.isLoading}');
         _logger.d('  userModel: ${user?.name ?? 'null'}');
         _logger.d('  firebaseUser: ${authUser?.email ?? 'null'}');
-
-        if (authProvider.isLoading) {
-          return const Scaffold(
-            backgroundColor: AppConstants.backgroundColor,
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
 
         if (user == null || authUser == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -71,7 +63,8 @@ class ProfileScreen extends StatelessWidget {
                 ],
                 const SizedBox(height: 24),
                 const _SectionHeader(title: 'Settings'),
-                ...settings.map((item) => _SettingsTile(item: item)),
+                const NotificationsToggle(),
+                ...settings.where((item) => item.label != 'Notifications').map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 24),
                 const _SectionHeader(title: 'Support'),
                 ...support.map((item) => _SettingsTile(item: item)),
@@ -664,11 +657,6 @@ List<_MockCTA> _getCTAItems(BuildContext context, UserModel user) {
 
 List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
   return [
-    const _MockSettingsItem(
-      label: 'Notifications',
-      icon: Icons.notifications,
-      trailing: Switch(value: true, onChanged: null),
-    ),
     const _MockSettingsItem(
       label: 'Reminders',
       icon: Icons.alarm,
