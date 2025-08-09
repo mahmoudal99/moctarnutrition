@@ -66,9 +66,8 @@ class ProfileScreen extends StatelessWidget {
                   // _StatsGrid(stats: stats),
                   const SizedBox(height: 20),
                   _QuickAccessGrid(items: quickAccess),
-                  const SizedBox(height: 20),
-                  _CTASection(items: ctaList),
-                  const SizedBox(height: 28),
+                  // const SizedBox(height: 20),
+                  // _CTASection(items: ctaList),
                 ],
                 const SizedBox(height: 24),
                 const _SectionHeader(title: 'Settings'),
@@ -694,13 +693,13 @@ List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
         // TODO: Navigate to nutrition preferences
       },
     ),
-    _MockSettingsItem(
-      label: 'Payment Info',
-      icon: Icons.credit_card,
-      onTap: () {
-        // TODO: Navigate to payment settings
-      },
-    ),
+    // _MockSettingsItem(
+    //   label: 'Payment Info',
+    //   icon: Icons.credit_card,
+    //   onTap: () {
+    //     // TODO: Navigate to payment settings
+    //   },
+    // ),
     _MockSettingsItem(
       label: 'Account Settings',
       icon: Icons.settings,
