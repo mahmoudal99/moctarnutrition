@@ -422,6 +422,7 @@ class _MoodTab extends StatelessWidget {
               _MoodChart(data: data),
               const SizedBox(height: 20),
               _MoodDataList(data: data),
+              const SizedBox(height: 128),
             ],
           ),
         );
@@ -561,7 +562,6 @@ class _WeightChart extends StatelessWidget {
     final padding = weightRange * 0.1;
 
     return Container(
-      height: 300,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -582,7 +582,8 @@ class _WeightChart extends StatelessWidget {
             style: AppTextStyles.heading5,
           ),
           const SizedBox(height: 16),
-          Expanded(
+          SizedBox(
+            height: 220,
             child: LineChart(
               LineChartData(
                 gridData: FlGridData(
@@ -731,7 +732,6 @@ class _MoodChart extends StatelessWidget {
     }).toList();
 
     return Container(
-      height: 300,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -795,7 +795,8 @@ class _MoodChart extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Expanded(
+          SizedBox(
+            height: 220,
             child: LineChart(
               LineChartData(
                 gridData: FlGridData(
