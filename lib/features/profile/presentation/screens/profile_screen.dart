@@ -12,6 +12,7 @@ import '../../../../shared/services/onboarding_service.dart';
 import '../../../../shared/utils/avatar_utils.dart';
 import '../../../onboarding/presentation/screens/get_started_screen.dart';
 import '../widgets/notifications_toggle.dart';
+import '../widgets/reminders_toggle.dart';
 
 class ProfileScreen extends StatelessWidget {
   static final _logger = Logger();
@@ -64,7 +65,8 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 const _SectionHeader(title: 'Settings'),
                 const NotificationsToggle(),
-                ...settings.where((item) => item.label != 'Notifications').map((item) => _SettingsTile(item: item)),
+                const RemindersToggle(),
+                ...settings.where((item) => item.label != 'Notifications' && item.label != 'Reminders').map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 24),
                 const _SectionHeader(title: 'Support'),
                 ...support.map((item) => _SettingsTile(item: item)),

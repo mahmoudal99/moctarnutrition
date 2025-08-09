@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:logger/logger.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 /// Service to handle notification permissions and local notifications
 class NotificationService {
@@ -16,6 +18,9 @@ class NotificationService {
     if (_isInitialized) return;
 
     try {
+      // Initialize timezone data
+      tz.initializeTimeZones();
+      
       // Initialize local notifications plugin
       const AndroidInitializationSettings initializationSettingsAndroid =
           AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -54,12 +59,37 @@ class NotificationService {
   /// Check if notification permissions are granted
   static Future<bool> areNotificationsEnabled() async {
     try {
-      final status = await Permission.notification.status;
-      final isGranted = status == PermissionStatus.granted;
-      
-      _logger.d('Checking notification permission: status=$status, isGranted=$isGranted');
-      
-      return isGranted;
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        // For iOS, check through flutter_local_notifications directly
+        final iosImpl = _flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+        
+        if (iosImpl == null) {
+          _logger.d('iOS implementation not available');
+          return false;
+        }
+
+        // Use the same method as in the permission request to check permissions
+        try {
+          final bool? result = await iosImpl.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+          _logger.d('iOS notification permission check result: $result');
+          return result ?? false;
+        } catch (e) {
+          _logger.e('Error checking iOS notification permissions: $e');
+          return false;
+        }
+      } else {
+        // For Android, use permission_handler
+        final status = await Permission.notification.status;
+        final isGranted = status == PermissionStatus.granted;
+        _logger.d('Android notification permission: status=$status, isGranted=$isGranted');
+        return isGranted;
+      }
     } catch (e) {
       _logger.e('Error checking notification permission: $e');
       return false;
@@ -174,6 +204,91 @@ class NotificationService {
     } catch (e) {
       _logger.e('Error showing test notification: $e');
     }
+  }
+
+  /// Schedule weekly check-in reminders for Sundays at 9 AM
+  static Future<void> scheduleWeeklyCheckinReminder() async {
+    try {
+      if (!await areNotificationsEnabled()) {
+        _logger.w('Cannot schedule reminder: permission not granted');
+        return;
+      }
+
+      // Cancel any existing weekly reminders first
+      await cancelWeeklyCheckinReminder();
+
+      // Get next Sunday at 9 AM
+      final nextSunday = _getNextSunday9AM();
+      
+      const AndroidNotificationDetails androidNotificationDetails =
+          AndroidNotificationDetails(
+        'weekly_checkin',
+        'Weekly Check-in Reminders',
+        channelDescription: 'Weekly reminders to complete check-in',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+
+      const DarwinNotificationDetails iosNotificationDetails =
+          DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: androidNotificationDetails,
+        iOS: iosNotificationDetails,
+      );
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        2, // Unique ID for weekly reminders
+        'Weekly Check-in Reminder 📊',
+        'Don\'t forget to complete your weekly check-in! Track your progress and stay motivated 💪',
+        nextSunday,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      );
+
+      _logger.i('Weekly check-in reminder scheduled for: $nextSunday');
+    } catch (e) {
+      _logger.e('Error scheduling weekly reminder: $e');
+    }
+  }
+
+  /// Cancel weekly check-in reminder
+  static Future<void> cancelWeeklyCheckinReminder() async {
+    try {
+      await _flutterLocalNotificationsPlugin.cancel(2);
+      _logger.i('Weekly check-in reminder cancelled');
+    } catch (e) {
+      _logger.e('Error cancelling weekly reminder: $e');
+    }
+  }
+
+  /// Get next Sunday at 9 AM in local timezone
+  static tz.TZDateTime _getNextSunday9AM() {
+    final now = tz.TZDateTime.now(tz.local);
+    final daysUntilSunday = (DateTime.sunday - now.weekday) % 7;
+    
+    var nextSunday = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day + daysUntilSunday,
+      9, // 9 AM
+      0, // 0 minutes
+    );
+
+    // If it's already past 9 AM on Sunday, schedule for next week
+    if (nextSunday.isBefore(now)) {
+      nextSunday = nextSunday.add(const Duration(days: 7));
+    }
+
+    return nextSunday;
   }
 
   /// Cancel all notifications

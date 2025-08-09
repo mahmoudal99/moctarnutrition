@@ -125,6 +125,12 @@ class _NotificationsToggleState extends State<NotificationsToggle> with WidgetsB
         'Notifications',
         style: AppTextStyles.bodyMedium,
       ),
+      subtitle: Text(
+        'Allow app to send notifications and alerts',
+        style: AppTextStyles.caption.copyWith(
+          color: AppConstants.textTertiary,
+        ),
+      ),
       trailing: _isInitialized
           ? Switch(
               value: _notificationsEnabled,
