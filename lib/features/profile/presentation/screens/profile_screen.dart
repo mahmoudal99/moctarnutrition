@@ -719,13 +719,6 @@ List<_MockSettingsItem> _getPrivacyItems(BuildContext context) {
       },
     ),
     _MockSettingsItem(
-      label: 'Data Usage',
-      icon: Icons.data_usage,
-      onTap: () {
-        // TODO: Navigate to data usage screen
-      },
-    ),
-    _MockSettingsItem(
       label: 'Delete Account',
       icon: Icons.delete_forever,
       onTap: () {
