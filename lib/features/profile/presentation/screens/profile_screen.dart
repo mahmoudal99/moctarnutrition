@@ -14,6 +14,7 @@ import '../widgets/notifications_toggle.dart';
 import '../widgets/reminders_toggle.dart';
 import 'bug_report_screen.dart';
 import 'feedback_screen.dart';
+import 'privacy_policy_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   static final _logger = Logger();
@@ -45,6 +46,7 @@ class ProfileScreen extends StatelessWidget {
         _getUserStats(user);
         final quickAccess = _getQuickAccessItems(context);
         final settings = _getSettingsItems(context);
+        final privacy = _getPrivacyItems(context);
         final support = _getSupportItems(context);
 
         return Scaffold(
@@ -67,6 +69,9 @@ class ProfileScreen extends StatelessWidget {
                 const NotificationsToggle(),
                 const RemindersToggle(),
                 ...settings.where((item) => item.label != 'Notifications' && item.label != 'Reminders').map((item) => _SettingsTile(item: item)),
+                const SizedBox(height: 24),
+                const _SectionHeader(title: 'Privacy'),
+                ...privacy.map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 24),
                 const _SectionHeader(title: 'Support'),
                 ...support.map((item) => _SettingsTile(item: item)),
@@ -695,6 +700,36 @@ List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
       icon: Icons.settings,
       onTap: () {
         // TODO: Navigate to account settings
+      },
+    ),
+  ];
+}
+
+List<_MockSettingsItem> _getPrivacyItems(BuildContext context) {
+  return [
+    _MockSettingsItem(
+      label: 'Privacy Policy',
+      icon: Icons.privacy_tip,
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const PrivacyPolicyScreen(),
+          ),
+        );
+      },
+    ),
+    _MockSettingsItem(
+      label: 'Data Usage',
+      icon: Icons.data_usage,
+      onTap: () {
+        // TODO: Navigate to data usage screen
+      },
+    ),
+    _MockSettingsItem(
+      label: 'Delete Account',
+      icon: Icons.delete_forever,
+      onTap: () {
+        // TODO: Show delete account confirmation dialog
       },
     ),
   ];
