@@ -22,6 +22,9 @@ class AppConstants {
   static const Color textSecondary = Color(0xFF6B7280);
   static const Color textTertiary = Color(0xFF9CA3AF);
   
+  // Border Colors
+  static const Color borderColor = Color(0xFFE5E7EB);
+  
   // Gradient Colors
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primaryColor, secondaryColor],

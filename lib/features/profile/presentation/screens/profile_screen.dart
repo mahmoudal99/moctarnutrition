@@ -8,11 +8,11 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/services/auth_service.dart';
-import '../../../../shared/services/onboarding_service.dart';
 import '../../../../shared/utils/avatar_utils.dart';
 import '../../../onboarding/presentation/screens/get_started_screen.dart';
 import '../widgets/notifications_toggle.dart';
 import '../widgets/reminders_toggle.dart';
+import 'bug_report_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   static final _logger = Logger();
@@ -43,7 +43,6 @@ class ProfileScreen extends StatelessWidget {
 
         _getUserStats(user);
         final quickAccess = _getQuickAccessItems(context);
-        final ctaList = _getCTAItems(context, user);
         final settings = _getSettingsItems(context);
         final support = _getSupportItems(context);
 
@@ -713,7 +712,11 @@ List<_MockSettingsItem> _getSupportItems(BuildContext context) {
       label: 'Report a Bug',
       icon: Icons.bug_report,
       onTap: () {
-        // TODO: Open bug report
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const BugReportScreen(),
+          ),
+        );
       },
     ),
     _MockSettingsItem(
