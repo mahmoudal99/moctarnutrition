@@ -263,12 +263,14 @@ class JSONValidationService {
     }
     
     final nutrition = ingredient['nutrition'] as Map<String, dynamic>;
-    final requiredNutrition = ['calories', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'sodium'];
+    
+    // Only require essential nutrition fields
+    final requiredNutrition = ['calories', 'protein', 'carbs', 'fat'];
     
     for (final nutrient in requiredNutrition) {
       if (!nutrition.containsKey(nutrient)) {
         return _createValidationError(
-          'Ingredient $ingredientIndex nutrition missing: $nutrient',
+          'Ingredient $ingredientIndex nutrition missing essential field: $nutrient',
           jsonEncode(ingredient),
         );
       }
@@ -277,6 +279,16 @@ class JSONValidationService {
           'Ingredient $ingredientIndex nutrition $nutrient must be a number',
           jsonEncode(ingredient),
         );
+      }
+    }
+    
+    // Add default values for optional nutrition fields if missing
+    final optionalNutrition = ['fiber', 'sugar', 'sodium'];
+    for (final nutrient in optionalNutrition) {
+      if (!nutrition.containsKey(nutrient)) {
+        nutrition[nutrient] = 0.0; // Default to 0 for missing optional fields
+      } else if (nutrition[nutrient] is! num) {
+        nutrition[nutrient] = 0.0; // Default to 0 for invalid values
       }
     }
     

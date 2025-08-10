@@ -63,6 +63,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
   }
 
   void _generateMealPlan() async {
+    if (_isLoading) return;
 
     final dietPlanPreferences = DietPlanPreferences(
       age: _userPreferences.age,
@@ -97,10 +98,10 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
       final mealPlan = await AIMealService.generateMealPlan(
         preferences: dietPlanPreferences,
         days: _selectedDays,
-        onProgress: (completedDays, totalDays) {
+        onProgress: (completedMeals, totalMeals) {
           setState(() {
-            _completedDays = completedDays;
-            _totalDays = totalDays;
+            _completedDays = completedMeals;
+            _totalDays = totalMeals;
           });
         },
       );
@@ -252,7 +253,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
                 const SizedBox(height: AppConstants.spacingS),
                 Text(
                   _totalDays > 0
-                      ? 'Generated $_completedDays of $_totalDays days (${((_completedDays /
+                      ? 'Generated $_completedDays of $_totalDays meals (${((_completedDays /
                       _totalDays) * 100).toInt()}%)'
                       : 'Preparing your meal plan...',
                   style: AppTextStyles.bodySmall.copyWith(

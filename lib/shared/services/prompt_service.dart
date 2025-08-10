@@ -47,7 +47,7 @@ class PromptService {
                         "sugar": {"type": "number"},
                         "sodium": {"type": "number"}
                       },
-                      "required": ["calories", "protein", "carbs", "fat", "fiber", "sugar", "sodium"]
+                      "required": ["calories", "protein", "carbs", "fat"]
                     }
                   },
                   "required": ["name", "amount", "unit", "nutrition"]
@@ -222,7 +222,7 @@ You are a professional nutritionist in Ireland. Generate a $days-day meal plan.
                               "sugar": {"type": "number"},
                               "sodium": {"type": "number"}
                             },
-                            "required": ["calories", "protein", "carbs", "fat", "fiber", "sugar", "sodium"]
+                            "required": ["calories", "protein", "carbs", "fat"]
                           }
                         },
                         "required": ["name", "amount", "unit", "nutrition"]

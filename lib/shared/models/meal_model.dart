@@ -343,9 +343,9 @@ class NutritionInfo {
       protein: (json['protein'] as num).toDouble(),
       carbs: (json['carbs'] as num).toDouble(),
       fat: (json['fat'] as num).toDouble(),
-      fiber: (json['fiber'] as num).toDouble(),
-      sugar: (json['sugar'] as num).toDouble(),
-      sodium: (json['sodium'] as num).toDouble(),
+      fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
+      sugar: (json['sugar'] as num?)?.toDouble() ?? 0.0,
+      sodium: (json['sodium'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

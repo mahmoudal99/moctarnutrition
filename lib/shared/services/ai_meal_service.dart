@@ -22,6 +22,7 @@ class AIMealService {
     DietPlanPreferences preferences,
     int dayIndex,
     List<MealDay> previousDays,
+    Function(int completedMeals)? onDayProgress,
   ) async {
     final dayPrompt = PromptService.buildSingleDayPromptWithContext(
       preferences,
@@ -69,6 +70,9 @@ class AIMealService {
           dayIndex,
         );
 
+        // Update progress for all meals in this day
+        onDayProgress?.call(mealDay.meals.length);
+
         return mealDay;
       } catch (e) {
         if (e is ValidationException) {
@@ -78,6 +82,7 @@ class AIMealService {
             dayIndex, 
             previousDays, 
             null,
+            onDayProgress,
           );
         }
         rethrow;
@@ -96,6 +101,7 @@ class AIMealService {
     int dayIndex,
     List<MealDay> previousDays,
     MealDay? failedMealDay,
+    Function(int completedMeals)? onDayProgress,
   ) async {
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
 
@@ -153,6 +159,9 @@ Please regenerate the meal plan following the JSON schema exactly.
           dayIndex,
         );
 
+        // Update progress for all meals in this day
+        onDayProgress?.call(mealDay.meals.length);
+
         return mealDay;
       } catch (e) {
         if (e is ValidationException) {
@@ -207,7 +216,7 @@ Please regenerate the meal plan following the JSON schema exactly.
   static Future<MealPlanModel> generateMealPlan({
     required DietPlanPreferences preferences,
     required int days,
-    Function(int completedDays, int totalDays)? onProgress,
+    Function(int completedMeals, int totalMeals)? onProgress,
   }) async {
     try {
       _logger.i(
@@ -218,7 +227,9 @@ Please regenerate the meal plan following the JSON schema exactly.
         final cached = CacheService.getCachedMealPlan(preferences, days);
         if (cached != null) {
           _logger.i('Using cached meal plan for $days days');
-          onProgress?.call(days, days); // Report full completion
+          // Calculate total meals for cached plan
+          final totalMeals = cached.mealPlan.mealDays.fold<int>(0, (sum, day) => sum + day.meals.length);
+          onProgress?.call(totalMeals, totalMeals); // Report full completion
           return cached.mealPlan;
         }
       }
@@ -231,11 +242,16 @@ Please regenerate the meal plan following the JSON schema exactly.
             'Insufficient free tokens remaining for $days-day meal plan');
       }
 
+      // Calculate total meals expected
+      final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
+      final totalMeals = days * requiredMeals.length;
+      int completedMeals = 0;
+
       // Determine optimal batch size for processing
       final optimalBatchSize = _calculateOptimalBatchSize(days);
       final List<MealDay> mealDays = [];
 
-      _logger.i('Processing $days days in batches of $optimalBatchSize');
+      _logger.i('Processing $days days in batches of $optimalBatchSize (total meals: $totalMeals)');
 
       // Process days in batches to avoid overwhelming the API
       for (int batchStart = 1;
@@ -249,7 +265,16 @@ Please regenerate the meal plan following the JSON schema exactly.
         final futures = <Future<MealDay>>[];
 
         for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
-          futures.add(_generateSingleDayWithContext(preferences, dayIndex, mealDays));
+          futures.add(_generateSingleDayWithContext(
+            preferences, 
+            dayIndex, 
+            mealDays,
+            (dayCompletedMeals) {
+              // Update progress as meals are completed within each day
+              completedMeals += dayCompletedMeals;
+              onProgress?.call(completedMeals, totalMeals);
+            },
+          ));
         }
 
         // Wait for all days in the batch to complete
@@ -259,16 +284,17 @@ Please regenerate the meal plan following the JSON schema exactly.
           
           // Update progress after batch completion
           _logger.i('Batch completed: ${mealDays.length}/$days days total');
-          onProgress?.call(mealDays.length, days);
         } catch (e) {
           _logger.e('Batch failed with error: $e');
 
-          // If batch fails due to rate limits, fall back to sequential processing
-          if (e.toString().contains('RateLimitException')) {
+          // If batch fails due to rate limits or validation errors, fall back to sequential processing
+          if (e.toString().contains('RateLimitException') || 
+              e.toString().contains('ValidationException') ||
+              e.toString().contains('JSON validation failed')) {
             _logger.w(
-                'Rate limit hit during batch processing, falling back to sequential processing...');
+                'Batch processing failed, falling back to sequential processing...');
             await _generateSequentialFallback(
-                preferences, batchStart, batchEnd, mealDays, onProgress, days);
+                preferences, batchStart, batchEnd, mealDays, onProgress, totalMeals, completedMeals);
           } else {
             // For other errors, throw exception for testing
             _logger.e(
@@ -320,8 +346,8 @@ Please regenerate the meal plan following the JSON schema exactly.
       }
 
       // Final progress update
-      _logger.i('Progress: $days/$days days completed - Meal plan generation finished!');
-      onProgress?.call(days, days);
+      _logger.i('Progress: $totalMeals/$totalMeals meals completed - Meal plan generation finished!');
+      onProgress?.call(totalMeals, totalMeals);
 
       return mealPlan;
     } catch (e) {
@@ -336,25 +362,40 @@ Please regenerate the meal plan following the JSON schema exactly.
     int batchStart,
     int batchEnd,
     List<MealDay> mealDays,
-    Function(int completedDays, int totalDays)? onProgress,
-    int totalDays,
+    Function(int completedMeals, int totalMeals)? onProgress,
+    int totalMeals,
+    int completedMeals,
   ) async {
     _logger.i('Generating days $batchStart-$batchEnd sequentially...');
+
+    int failedDays = 0;
+    final int totalDaysInBatch = batchEnd - batchStart + 1;
 
     for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
       try {
         final mealDay = await _generateSingleDayWithContext(
-            preferences, dayIndex, mealDays);
+            preferences, dayIndex, mealDays, (dayCompletedMeals) {
+          // Update progress for sequential fallback
+          completedMeals += dayCompletedMeals;
+          onProgress?.call(completedMeals, totalMeals);
+        });
         mealDays.add(mealDay);
-        onProgress?.call(mealDays.length, totalDays);
-
+        
         // Add delay between sequential calls to respect rate limits
         if (dayIndex < batchEnd) {
           await Future.delayed(Duration(milliseconds: 1000)); // Reduced for faster processing
         }
       } catch (e) {
+        failedDays++;
         _logger.e('Sequential generation failed for day $dayIndex: $e');
-        throw Exception('Sequential generation failed for day $dayIndex: $e');
+        
+        // If all days in the batch failed, throw an exception
+        if (failedDays >= totalDaysInBatch) {
+          throw Exception('All days in batch $batchStart-$batchEnd failed: $e');
+        }
+        
+        // Otherwise, continue with the next day
+        _logger.w('Continuing with remaining days in batch...');
       }
     }
   }
@@ -439,8 +480,8 @@ Please regenerate the meal plan following the JSON schema exactly.
       final mealPlan = await generateMealPlan(
         preferences: testPreferences,
         days: 1,
-        onProgress: (completed, total) {
-          _logger.d('Progress: $completed/$total days completed');
+        onProgress: (completedMeals, totalMeals) {
+          _logger.d('Progress: $completedMeals/$totalMeals meals completed');
         },
       );
 
