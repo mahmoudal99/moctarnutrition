@@ -6,10 +6,14 @@ import '../models/user_model.dart';
 import '../models/meal_model.dart';
 import 'prompt_service.dart';
 import 'parser_service.dart';
+import 'json_validation_service.dart';
 
 import 'config_service.dart';
 import 'cache_service.dart';
 import 'rate_limit_service.dart';
+
+// Import ValidationException from parser service
+import 'parser_service.dart' show ValidationException;
 
 class AIMealService {
   static final _logger = Logger();
@@ -57,19 +61,27 @@ class AIMealService {
       final content = data['choices'][0]['message']['content'];
       _logger.i('Day $dayIndex response received successfully');
 
-      final mealDay =
-          ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
+      try {
+        // Parse the AI response (validation happens inside the parser)
+        final mealDay = await ParserService.parseSingleDayFromAI(
+          content, 
+          preferences, 
+          dayIndex,
+        );
 
-      // Validate that all required meals are present
-      if (!_validateMealDay(mealDay, preferences)) {
-        _logger.w(
-            'Day $dayIndex validation failed - missing required meals. Regenerating...');
-        // Try one more time with a more explicit prompt
-        return await _generateSingleDayWithContextRetry(
-            preferences, dayIndex, previousDays, mealDay);
+        return mealDay;
+      } catch (e) {
+        if (e is ValidationException) {
+          _logger.w('Day $dayIndex validation failed: ${e.message}. Regenerating...');
+          return await _generateSingleDayWithContextRetry(
+            preferences, 
+            dayIndex, 
+            previousDays, 
+            null,
+          );
+        }
+        rethrow;
       }
-
-      return mealDay;
     } else {
       _logger.e(
           'API Error for day $dayIndex: ${response.statusCode} - ${response.body}');
@@ -83,23 +95,22 @@ class AIMealService {
     DietPlanPreferences preferences,
     int dayIndex,
     List<MealDay> previousDays,
-    MealDay failedMealDay,
+    MealDay? failedMealDay,
   ) async {
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
-    final missingMeals = _getMissingMealTypes(failedMealDay, requiredMeals);
 
     final retryPrompt = '''
 ${PromptService.buildSingleDayPromptWithContext(preferences, dayIndex, previousDays.isNotEmpty ? previousDays : null)}
 
 ### URGENT: PREVIOUS ATTEMPT FAILED
-Your previous response was missing the following required meal types: ${missingMeals.map((type) => type.name).join(', ')}.
+Your previous response had validation errors. Please ensure:
 
-You MUST include ALL of these meal types:
-${requiredMeals.map((type) => '- ${type.name}').join('\n')}
+1. You include exactly ${requiredMeals.length} meals: ${requiredMeals.map((type) => type.name).join(', ')}
+2. All required fields are present in the JSON structure
+3. All ingredient nutrition data is provided
+4. No meal or day totals are calculated
 
-The current response only had: ${failedMealDay.meals.map((m) => m.type.name).join(', ')}
-
-Please regenerate the meal plan ensuring ALL required meal types are included.
+Please regenerate the meal plan following the JSON schema exactly.
 ''';
 
     final requestBody = {
@@ -134,18 +145,22 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
       final content = data['choices'][0]['message']['content'];
       _logger.i('Day $dayIndex retry response received successfully');
 
-      final mealDay =
-          ParserService.parseSingleDayFromAI(content, preferences, dayIndex);
+      try {
+        // Parse the AI response (validation happens inside the parser)
+        final mealDay = await ParserService.parseSingleDayFromAI(
+          content, 
+          preferences, 
+          dayIndex,
+        );
 
-      // Validate again
-      if (!_validateMealDay(mealDay, preferences)) {
-        _logger.e(
-            'Day $dayIndex retry validation failed - throwing exception for testing');
-        throw Exception(
-            'AI validation failed for day $dayIndex - missing required meals');
+        return mealDay;
+      } catch (e) {
+        if (e is ValidationException) {
+          _logger.e('Day $dayIndex retry validation failed: ${e.message}');
+          throw Exception('AI validation failed for day $dayIndex: ${e.message}');
+        }
+        rethrow;
       }
-
-      return mealDay;
     } else {
       _logger.e(
           'API Error for day $dayIndex retry: ${response.statusCode} - ${response.body}');
@@ -154,31 +169,7 @@ Please regenerate the meal plan ensuring ALL required meal types are included.
     }
   }
 
-  /// Validate that a meal day contains all required meals
-  static bool _validateMealDay(
-      MealDay mealDay, DietPlanPreferences preferences) {
-    final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
-    final presentMealTypes = mealDay.meals.map((m) => m.type).toSet();
 
-    for (final requiredType in requiredMeals) {
-      if (!presentMealTypes.contains(requiredType)) {
-        _logger.w('Missing required meal type: ${requiredType.name}');
-        return false;
-      }
-    }
-
-    _logger.i('Meal day validation passed - all required meals present');
-    return true;
-  }
-
-  /// Get missing meal types from a meal day
-  static List<MealType> _getMissingMealTypes(
-      MealDay mealDay, List<MealType> requiredMeals) {
-    final presentMealTypes = mealDay.meals.map((m) => m.type).toSet();
-    return requiredMeals
-        .where((type) => !presentMealTypes.contains(type))
-        .toList();
-  }
 
   /// Helper to determine required meal types based on meal frequency
   static List<MealType> _getRequiredMealTypes(String mealFrequency) {

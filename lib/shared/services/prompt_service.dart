@@ -4,7 +4,74 @@ import '../models/meal_model.dart';
 
 /// Service for generating AI prompts for meal plan generation
 class PromptService {
-  /// Build a prompt for generating a single day
+  /// Compact JSON schema for meal plan generation
+  static const String _jsonSchema = '''
+{
+  "type": "object",
+  "properties": {
+    "mealDay": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "date": {"type": "string", "format": "date"},
+        "meals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "description": {"type": "string"},
+              "type": {"type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"]},
+              "cuisineType": {"type": "string"},
+              "prepTime": {"type": "integer"},
+              "cookTime": {"type": "integer"},
+              "servings": {"type": "integer"},
+              "ingredients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "unit": {"type": "string"},
+                    "notes": {"type": "string"},
+                    "nutrition": {
+                      "type": "object",
+                      "properties": {
+                        "calories": {"type": "number"},
+                        "protein": {"type": "number"},
+                        "carbs": {"type": "number"},
+                        "fat": {"type": "number"},
+                        "fiber": {"type": "number"},
+                        "sugar": {"type": "number"},
+                        "sodium": {"type": "number"}
+                      },
+                      "required": ["calories", "protein", "carbs", "fat", "fiber", "sugar", "sodium"]
+                    }
+                  },
+                  "required": ["name", "amount", "unit", "nutrition"]
+                }
+              },
+              "instructions": {"type": "array", "items": {"type": "string"}},
+              "tags": {"type": "array", "items": {"type": "string"}},
+              "isVegetarian": {"type": "boolean"},
+              "isVegan": {"type": "boolean"},
+              "isGlutenFree": {"type": "boolean"},
+              "isDairyFree": {"type": "boolean"}
+            },
+            "required": ["id", "name", "description", "type", "cuisineType", "prepTime", "cookTime", "servings", "ingredients", "instructions", "tags", "isVegetarian", "isVegan", "isGlutenFree", "isDairyFree"]
+          }
+        }
+      },
+      "required": ["id", "date", "meals"]
+    }
+  },
+  "required": ["mealDay"]
+}
+''';
+
+  /// Build a compact prompt for generating a single day
   static String buildSingleDayPrompt(
     DietPlanPreferences preferences,
     int dayIndex,
@@ -20,173 +87,36 @@ class PromptService {
     final dayOfWeek = _getDayOfWeek(dayDate);
     final isCheatDay = preferences.cheatDay != null && dayOfWeek == preferences.cheatDay;
     final cheatDayInstructions = isCheatDay 
-        ? 'This is a CHEAT DAY (${preferences.cheatDay}). Allow for slightly more indulgent meals while maintaining nutritional balance. Include favorite foods and comfort dishes. You can be more flexible with calorie targets and include treats, but still maintain healthy portions and nutritional variety.'
+        ? 'CHEAT DAY: Allow slightly more indulgent meals while maintaining nutritional balance.'
         : '';
 
     return '''
-You are a professional nutritionist based in Ireland, Dublin. Generate a meal plan for Day $dayIndex in JSON format, strictly adhering to the user's dietary restrictions and preferences.
+You are a professional nutritionist in Ireland. Generate a meal plan for Day $dayIndex.
 
-### Target Market Context
-- **Location**: Ireland, Dublin
-- **Local Supermarkets**: Users shop at Lidl, Aldi, Tesco, Spar, and SuperValu
-- **Ingredient Availability**: Focus on ingredients commonly available in Irish supermarkets
-- **Seasonal Considerations**: Consider Irish seasonal produce and local availability
-- **Budget Considerations**: Use cost-effective ingredients available at discount supermarkets (Lidl, Aldi)
-
-### User Profile
-- Age: ${preferences.age} years
-- Gender: ${preferences.gender}
-- Weight: ${preferences.weight} kg
-- Height: ${preferences.height} cm
-- BMI: $bmi
-- Fitness Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}
-- Activity Level: ${_getActivityLevelDescription(preferences.activityLevel)}
-- Nutrition Goal: ${preferences.nutritionGoal}
-- Target Calories: ${preferences.targetCalories}/day
-
-### Nutrition Preferences
-- Preferred Cuisines: ${preferences.preferredCuisines.join(', ').isEmpty ? 'Any' : preferences.preferredCuisines.join(', ')}
-- Favorite Foods: ${preferences.favoriteFoods.join(', ').isEmpty ? 'None' : preferences.favoriteFoods.join(', ')}
-- Foods to Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
-- Meal Frequency: ${preferences.mealFrequency} meals/day
-- Cheat Day: ${preferences.cheatDay ?? 'None'}
-${isCheatDay ? '- **CURRENT DAY IS CHEAT DAY**' : ''}
-
-### Dietary Restrictions (CRITICAL)
+**User Profile:**
+- Age: ${preferences.age}, Weight: ${preferences.weight}kg, Height: ${preferences.height}cm, BMI: $bmi
+- Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}, Target: ${preferences.targetCalories} cal/day
+- Activity: ${_getActivityLevelDescription(preferences.activityLevel)}
 - Restrictions: ${preferences.dietaryRestrictions.join(', ').isEmpty ? 'None' : preferences.dietaryRestrictions.join(', ')}
-- Rules:
-  - Vegan: No animal products (meat, fish, dairy, eggs, honey).
-  - Vegetarian: No meat or fish; dairy and eggs allowed.
-  - Gluten-Free: No wheat, barley, rye, or gluten-containing ingredients.
-  - Dairy-Free: No milk, cheese, yogurt, or dairy products.
-- ALWAYS respect these restrictions. Double-check all ingredients.
+- Cuisines: ${preferences.preferredCuisines.join(', ').isEmpty ? 'Any' : preferences.preferredCuisines.join(', ')}
+- Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
 
-### CRITICAL MEAL REQUIREMENTS
-- You MUST include exactly ${requiredMeals.length} meals for Day $dayIndex.
-- Required meal types: ${requiredMeals.map((type) => type.name).join(', ')}.
-- You CANNOT skip any of these meal types.
-- Each meal type must be included exactly once.
-- If additional meals are needed, add them as "snack" type.
+**Requirements:**
+- Include exactly ${requiredMeals.length} meals: ${requiredMeals.map((type) => type.name).join(', ')}
+- Use precise ingredient names matching USDA database
+- Focus on Irish supermarket availability (Lidl, Aldi, Tesco, Spar, SuperValu)
+- Each ingredient must include estimated nutrition per specified amount
+- Do NOT calculate meal or day totals
+${isCheatDay ? '- $cheatDayInstructions' : ''}
 
-### Requirements
-- Generate ${preferences.mealFrequency} meals for Day $dayIndex.
-- Total daily calories: ${preferences.targetCalories}.
-${isCheatDay ? '- **CHEAT DAY INSTRUCTIONS**: $cheatDayInstructions' : ''}
-- Each meal must include:
-  - Name: Unique and descriptive.
-  - Description: Brief, appealing summary.
-  - Type: Must be one of the required meal types (${requiredMeals.map((type) => type.name).join(', ')}).
-  - Ingredients: Detailed list with precise names, amounts, units, and nutritional data per ingredient.
-  - Instructions: Clear, step-by-step, practical for home cooking.
-  - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (calculated from ingredients).
-  - Prep Time, Cook Time: In minutes.
-  - Servings: 1.
-  - Cuisine Type: From preferred cuisines or varied.
-  - Tags: e.g., vegetarian, vegan, gluten-free, based on meal content.
-  - Flags: isVegetarian, isVegan, isGlutenFree, isDairyFree (true/false).
+**JSON Schema:**
+$_jsonSchema
 
-### Ingredient Specifications (CRITICAL FOR VERIFICATION)
-- Use precise ingredient names that match USDA FoodData Central database:
-  - Examples: "chicken breast, raw" not "chicken", "almond flour" not "flour"
-  - Include preparation state: "cooked", "raw", "skinless", "boneless"
-  - Specify variety: "brown rice" not "rice", "extra virgin olive oil" not "oil"
-- **Irish Supermarket Focus**: Prioritize ingredients available at Lidl, Aldi, Tesco, Spar, and SuperValu
-  - Use Irish brand names where appropriate (e.g., "Avonmore milk", "Kerrygold butter")
-  - Consider budget-friendly options from discount supermarkets
-- Standardize units for consistency:
-  - Weight: grams (g) for solids, milliliters (ml) for liquids
-  - Count: pieces for whole items (e.g., "1 egg", "2 slices bread")
-  - Volume: cups, tablespoons, teaspoons (specify if packed/level)
-- Each ingredient must include nutritional data per specified amount:
-  - Calories, protein (g), carbs (g), fat (g), fiber (g), sugar (g), sodium (mg)
-  - Base calculations on USDA FoodData Central or similar verified sources
-  - Account for preparation method (cooked vs raw, etc.)
-
-### Nutrition Guidelines
-- Balance macronutrients based on fitness goal:
-  - Weight Loss: ~40% carbs, 30% protein, 30% fat.
-  - Muscle Gain: ~40% carbs, 35% protein, 25% fat.
-  - Maintenance: ~50% carbs, 25% protein, 25% fat.
-  - Endurance: ~55% carbs, 20% protein, 25% fat.
-  - Strength: ~45% carbs, 30% protein, 25% fat.
-- Nutrition ranges per meal:
-  - Protein: 10-40g (higher for main meals, lower for snacks)
-  - Carbs: 20-80g (higher for breakfast/lunch, moderate for dinner)
-  - Fat: 5-30g (distribute evenly across meals)
-  - Fiber: 2-10g (aim for 25-35g total daily)
-  - Sugar: <10g per meal (natural sugars preferred)
-  - Sodium: <800mg per meal (aim for <2300mg daily)
-- Ensure variety in flavors, cuisines, and ingredients.
-- Adjust portions for weight, activity level, and fitness goal.
-- Meals must be practical, using common ingredients and simple techniques.
-
-### JSON Format
-{
-  "mealDay": {
-    "id": "day_$dayIndex",
-    "date": "$formattedDate",
-    "totalCalories": ${preferences.targetCalories},
-    "totalProtein": <sum of meal proteins>,
-    "totalCarbs": <sum of meal carbs>,
-    "totalFat": <sum of meal fats>,
-    "meals": [
-      {
-        "id": "meal_<unique_id>",
-        "name": "<meal_name>",
-        "description": "<meal_description>",
-        "type": "<breakfast|lunch|dinner|snack>",
-        "cuisineType": "<cuisine>",
-        "prepTime": <minutes>,
-        "cookTime": <minutes>,
-        "servings": 1,
-        "ingredients": [
-          {
-            "name": "<precise_ingredient_name>",
-            "amount": <amount>,
-            "unit": "<unit>",
-            "notes": "<preparation_notes>",
-            "nutrition": {
-              "calories": <calories_per_amount>,
-              "protein": <protein_g_per_amount>,
-              "carbs": <carbs_g_per_amount>,
-              "fat": <fat_g_per_amount>,
-              "fiber": <fiber_g_per_amount>,
-              "sugar": <sugar_g_per_amount>,
-              "sodium": <sodium_mg_per_amount>
-            }
-          }
-        ],
-        "instructions": ["<step1>", "<step2>"],
-        "nutrition": {
-          "calories": <calories>,
-          "protein": <grams>,
-          "carbs": <grams>,
-          "fat": <grams>,
-          "fiber": <grams>,
-          "sugar": <grams>,
-          "sodium": <milligrams>
-        },
-        "tags": ["<tag1>", "<tag2>"],
-        "isVegetarian": <true|false>,
-        "isVegan": <true|false>,
-        "isGlutenFree": <true|false>,
-        "isDairyFree": <true|false>
-      }
-    ]
-  }
-}
-
-### VALIDATION CHECKLIST
-Before submitting your response, verify:
-1. You have included exactly ${requiredMeals.length} meals
-2. Each required meal type (${requiredMeals.map((type) => type.name).join(', ')}) is present exactly once
-3. All meals have valid JSON structure
-4. All ingredients respect dietary restrictions
-5. Total calories are approximately ${preferences.targetCalories}
+Respond with JSON only. No commentary.
 ''';
   }
 
-  /// Build a single day prompt with context from previous days
+  /// Build a compact prompt for generating a single day with context
   static String buildSingleDayPromptWithContext(
     DietPlanPreferences preferences,
     int dayIndex,
@@ -197,13 +127,13 @@ Before submitting your response, verify:
       final previousMeals = previousDays
           .map((day) => day.meals.map((m) => m.name).join(', '))
           .join('; ');
-      context = '\n\n### Previous Days Context\n- Previous days\' main dishes: $previousMeals\n- Avoid repeating these dishes. Ensure variety in ingredients, cooking methods, and cuisines.';
+      context = '\n**Previous Days:** $previousMeals - Ensure variety in ingredients and cuisines.';
     }
     
     return buildSingleDayPrompt(preferences, dayIndex) + context;
   }
 
-  /// Build a detailed prompt for the AI
+  /// Build a compact prompt for multi-day meal plans
   static String buildMealPlanPrompt(
     DietPlanPreferences preferences,
     int days,
@@ -220,171 +150,106 @@ Before submitting your response, verify:
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
 
     return '''
-You are a professional nutritionist based in Ireland, Dublin. Generate a $days-day personalized meal plan in JSON format, strictly adhering to the user's dietary restrictions and preferences.
+You are a professional nutritionist in Ireland. Generate a $days-day meal plan.
 
-### Target Market Context
-- **Location**: Ireland, Dublin
-- **Local Supermarkets**: Users shop at Lidl, Aldi, Tesco, Spar, and SuperValu
-- **Ingredient Availability**: Focus on ingredients commonly available in Irish supermarkets
-- **Seasonal Considerations**: Consider Irish seasonal produce and local availability
-- **Budget Considerations**: Use cost-effective ingredients available at discount supermarkets (Lidl, Aldi)
-
-### User Profile
-- Age: ${preferences.age} years
-- Gender: ${preferences.gender}
-- Weight: ${preferences.weight} kg
-- Height: ${preferences.height} cm
-- BMI: $bmi
-- Fitness Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}
-- Activity Level: ${_getActivityLevelDescription(preferences.activityLevel)}
-- Nutrition Goal: ${preferences.nutritionGoal}
-- Target Calories: ${preferences.targetCalories}/day
-
-### Nutrition Preferences
-- Preferred Cuisines: ${preferences.preferredCuisines.join(', ').isEmpty ? 'Any' : preferences.preferredCuisines.join(', ')}
-- Favorite Foods: ${preferences.favoriteFoods.join(', ').isEmpty ? 'None' : preferences.favoriteFoods.join(', ')}
-- Foods to Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
-- Meal Frequency: ${preferences.mealFrequency} meals/day
+**User Profile:**
+- Age: ${preferences.age}, Weight: ${preferences.weight}kg, Height: ${preferences.height}cm, BMI: $bmi
+- Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}, Target: ${preferences.targetCalories} cal/day
+- Activity: ${_getActivityLevelDescription(preferences.activityLevel)}
+- Restrictions: ${preferences.dietaryRestrictions.join(', ').isEmpty ? 'None' : preferences.dietaryRestrictions.join(', ')}
+- Cuisines: ${preferences.preferredCuisines.join(', ').isEmpty ? 'Any' : preferences.preferredCuisines.join(', ')}
+- Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
 - Cheat Day: ${preferences.cheatDay ?? 'None'}
 - Weekly Rotation: ${preferences.weeklyRotation ? 'Yes' : 'No'}
 
-### Dietary Restrictions (CRITICAL)
-- Restrictions: ${preferences.dietaryRestrictions.join(', ').isEmpty ? 'None' : preferences.dietaryRestrictions.join(', ')}
-- Rules:
-  - Vegan: No animal products (meat, fish, dairy, eggs, honey).
-  - Vegetarian: No meat or fish; dairy and eggs allowed.
-  - Gluten-Free: No wheat, barley, rye, or gluten-containing ingredients.
-  - Dairy-Free: No milk, cheese, yogurt, or dairy products.
-- ALWAYS respect these restrictions. Double-check all ingredients.
+**Requirements:**
+- Each day: exactly ${requiredMeals.length} meals (${requiredMeals.map((type) => type.name).join(', ')})
+- Use precise ingredient names matching USDA database
+- Focus on Irish supermarket availability
+- Each ingredient must include estimated nutrition per specified amount
+- Do NOT calculate meal, day, or plan totals
+- ${preferences.weeklyRotation ? 'Make each day unique' : 'Repeat same day structure'}
 
-### CRITICAL MEAL REQUIREMENTS
-- For EACH day, you MUST include exactly ${requiredMeals.length} meals.
-- Required meal types for each day: ${requiredMeals.map((type) => type.name).join(', ')}.
-- You CANNOT skip any of these meal types on any day.
-- Each meal type must be included exactly once per day.
-- If additional meals are needed, add them as "snack" type.
-
-### Requirements
-- Generate $days days of ${preferences.mealFrequency} meals each.
-- Total daily calories: ${preferences.targetCalories}.
-- Cheat Day: ${preferences.cheatDay != null ? 'On ${preferences.cheatDay}, allow for slightly more indulgent meals while maintaining nutritional balance. Include favorite foods and comfort dishes.' : 'No cheat day specified - maintain consistent healthy eating throughout the week.'}
-- Each meal must include:
-  - Name: Unique and descriptive.
-  - Description: Brief, appealing summary.
-  - Type: Must be one of the required meal types (${requiredMeals.map((type) => type.name).join(', ')}).
-  - Ingredients: Detailed list with precise names, amounts, units, and nutritional data per ingredient.
-  - Instructions: Clear, step-by-step, practical for home cooking.
-  - Nutrition: Calories, protein, carbs, fat, fiber, sugar, sodium (calculated from ingredients).
-  - Prep Time, Cook Time: In minutes.
-  - Servings: 1.
-  - Cuisine Type: From preferred cuisines or varied.
-  - Tags: e.g., vegetarian, vegan, gluten-free, based on meal content.
-  - Flags: isVegetarian, isVegan, isGlutenFree, isDairyFree (true/false).
-
-### Ingredient Specifications (CRITICAL FOR VERIFICATION)
-- Use precise ingredient names that match USDA FoodData Central database:
-  - Examples: "chicken breast, raw" not "chicken", "almond flour" not "flour"
-  - Include preparation state: "cooked", "raw", "skinless", "boneless"
-  - Specify variety: "brown rice" not "rice", "extra virgin olive oil" not "oil"
-- **Irish Supermarket Focus**: Prioritize ingredients available at Lidl, Aldi, Tesco, Spar, and SuperValu
-  - Use Irish brand names where appropriate (e.g., "Avonmore milk", "Kerrygold butter")
-  - Consider budget-friendly options from discount supermarkets
-- Standardize units for consistency:
-  - Weight: grams (g) for solids, milliliters (ml) for liquids
-  - Count: pieces for whole items (e.g., "1 egg", "2 slices bread")
-  - Volume: cups, tablespoons, teaspoons (specify if packed/level)
-- Each ingredient must include nutritional data per specified amount:
-  - Calories, protein (g), carbs (g), fat (g), fiber (g), sugar (g), sodium (mg)
-  - Base calculations on USDA FoodData Central or similar verified sources
-  - Account for preparation method (cooked vs raw, etc.)
-
-### Nutrition Guidelines
-- Balance macronutrients based on fitness goal:
-  - Weight Loss: ~40% carbs, 30% protein, 30% fat.
-  - Muscle Gain: ~40% carbs, 35% protein, 25% fat.
-  - Maintenance: ~50% carbs, 25% protein, 25% fat.
-  - Endurance: ~55% carbs, 20% protein, 25% fat.
-  - Strength: ~45% carbs, 30% protein, 25% fat.
-- Nutrition ranges per meal:
-  - Protein: 10-40g (higher for main meals, lower for snacks)
-  - Carbs: 20-80g (higher for breakfast/lunch, moderate for dinner)
-  - Fat: 5-30g (distribute evenly across meals)
-  - Fiber: 2-10g (aim for 25-35g total daily)
-  - Sugar: <10g per meal (natural sugars preferred)
-  - Sodium: <800mg per meal (aim for <2300mg daily)
-- Ensure variety in flavors, cuisines, and ingredients across days.
-- Adjust portions for weight, activity level, and fitness goal.
-- Meals must be practical, using common ingredients and simple techniques.
-- If weekly rotation is enabled, make each day unique; otherwise, repeat the same day.
-
-### JSON Format
+**JSON Schema:**
 {
-  "mealPlan": {
-    "title": "Personalized $days-Day Meal Plan",
-    "description": "AI-generated meal plan for ${_getFitnessGoalDescription(preferences.fitnessGoal)} and ${preferences.nutritionGoal}",
-    "startDate": "$formattedStartDate",
-    "endDate": "$formattedEndDate",
-    "totalCalories": ${preferences.targetCalories * days},
-    "totalProtein": <sum of all meal proteins>,
-    "totalCarbs": <sum of all meal carbs>,
-    "totalFat": <sum of all meal fats>,
-    "dietaryTags": ["${preferences.dietaryRestrictions.join('", "')}"],
-    "mealDays": [
-      {
-        "id": "day_1",
-        "date": "$formattedStartDate",
-        "totalCalories": ${preferences.targetCalories},
-        "totalProtein": <sum of day 1 meal proteins>,
-        "totalCarbs": <sum of day 1 meal carbs>,
-        "totalFat": <sum of day 1 meal fats>,
-        "meals": [
-          {
-            "id": "meal_<unique_id>",
-            "name": "<meal_name>",
-            "description": "<meal_description>",
-            "type": "<breakfast|lunch|dinner|snack>",
-            "cuisineType": "<cuisine>",
-            "prepTime": <minutes>,
-            "cookTime": <minutes>,
-            "servings": 1,
-            "ingredients": [
-              {
-                "name": "<precise_ingredient_name>",
-                "amount": <amount>,
-                "unit": "<unit>",
-                "notes": "<preparation_notes>",
-                "nutrition": {
-                  "calories": <calories_per_amount>,
-                  "protein": <protein_g_per_amount>,
-                  "carbs": <carbs_g_per_amount>,
-                  "fat": <fat_g_per_amount>,
-                  "fiber": <fiber_g_per_amount>,
-                  "sugar": <sugar_g_per_amount>,
-                  "sodium": <sodium_mg_per_amount>
+  "type": "object",
+  "properties": {
+    "mealPlan": {
+      "type": "object",
+      "properties": {
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "startDate": {"type": "string", "format": "date"},
+        "endDate": {"type": "string", "format": "date"},
+        "dietaryTags": {"type": "array", "items": {"type": "string"}},
+        "mealDays": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "date": {"type": "string", "format": "date"},
+              "meals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string"},
+                    "name": {"type": "string"},
+                    "description": {"type": "string"},
+                    "type": {"type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"]},
+                    "cuisineType": {"type": "string"},
+                    "prepTime": {"type": "integer"},
+                    "cookTime": {"type": "integer"},
+                    "servings": {"type": "integer"},
+                    "ingredients": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {"type": "string"},
+                          "amount": {"type": "number"},
+                          "unit": {"type": "string"},
+                          "notes": {"type": "string"},
+                          "nutrition": {
+                            "type": "object",
+                            "properties": {
+                              "calories": {"type": "number"},
+                              "protein": {"type": "number"},
+                              "carbs": {"type": "number"},
+                              "fat": {"type": "number"},
+                              "fiber": {"type": "number"},
+                              "sugar": {"type": "number"},
+                              "sodium": {"type": "number"}
+                            },
+                            "required": ["calories", "protein", "carbs", "fat", "fiber", "sugar", "sodium"]
+                          }
+                        },
+                        "required": ["name", "amount", "unit", "nutrition"]
+                      }
+                    },
+                    "instructions": {"type": "array", "items": {"type": "string"}},
+                    "tags": {"type": "array", "items": {"type": "string"}},
+                    "isVegetarian": {"type": "boolean"},
+                    "isVegan": {"type": "boolean"},
+                    "isGlutenFree": {"type": "boolean"},
+                    "isDairyFree": {"type": "boolean"}
+                  },
+                  "required": ["id", "name", "description", "type", "cuisineType", "prepTime", "cookTime", "servings", "ingredients", "instructions", "tags", "isVegetarian", "isVegan", "isGlutenFree", "isDairyFree"]
                 }
               }
-            ],
-            "instructions": ["<step1>", "<step2>"],
-            "nutrition": {
-              "calories": <calories>,
-              "protein": <grams>,
-              "carbs": <grams>,
-              "fat": <grams>,
-              "fiber": <grams>,
-              "sugar": <grams>,
-              "sodium": <milligrams>
             },
-            "tags": ["<tag1>", "<tag2>"],
-            "isVegetarian": <true|false>,
-            "isVegan": <true|false>,
-            "isGlutenFree": <true|false>,
-            "isDairyFree": <true|false>
+            "required": ["id", "date", "meals"]
           }
-        ]
-      }
-    ]
-  }
+        }
+      },
+      "required": ["title", "description", "startDate", "endDate", "dietaryTags", "mealDays"]
+    }
+  },
+  "required": ["mealPlan"]
 }
+
+Respond with JSON only. No commentary.
 ''';
   }
 
@@ -407,15 +272,15 @@ You are a professional nutritionist based in Ireland, Dublin. Generate a $days-d
   static String _getActivityLevelDescription(ActivityLevel level) {
     switch (level) {
       case ActivityLevel.sedentary:
-        return 'Sedentary (little to no exercise)';
+        return 'Sedentary';
       case ActivityLevel.lightlyActive:
-        return 'Lightly Active (light exercise 1-3 days/week)';
+        return 'Lightly Active';
       case ActivityLevel.moderatelyActive:
-        return 'Moderately Active (moderate exercise 3-5 days/week)';
+        return 'Moderately Active';
       case ActivityLevel.veryActive:
-        return 'Very Active (hard exercise 6-7 days/week)';
+        return 'Very Active';
       case ActivityLevel.extremelyActive:
-        return 'Extremely Active (very hard exercise, physical job)';
+        return 'Extremely Active';
     }
   }
 

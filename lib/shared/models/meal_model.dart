@@ -18,10 +18,10 @@ class MealPlanModel {
   final DateTime startDate;
   final DateTime endDate;
   final List<MealDay> mealDays;
-  final double totalCalories;
-  final double totalProtein;
-  final double totalCarbs;
-  final double totalFat;
+  double totalCalories; // Made mutable for nutrition calculations
+  double totalProtein; // Made mutable for nutrition calculations
+  double totalCarbs; // Made mutable for nutrition calculations
+  double totalFat; // Made mutable for nutrition calculations
   final List<String> dietaryTags;
   final bool isAIGenerated;
   final DateTime createdAt;
@@ -92,10 +92,10 @@ class MealPlanModel {
       mealDays: (json['mealDays'] as List<dynamic>)
           .map((e) => MealDay.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalCalories: (json['totalCalories'] as num).toDouble(),
-      totalProtein: (json['totalProtein'] as num).toDouble(),
-      totalCarbs: (json['totalCarbs'] as num).toDouble(),
-      totalFat: (json['totalFat'] as num).toDouble(),
+      totalCalories: (json['totalCalories'] as num?)?.toDouble() ?? 0.0,
+      totalProtein: (json['totalProtein'] as num?)?.toDouble() ?? 0.0,
+      totalCarbs: (json['totalCarbs'] as num?)?.toDouble() ?? 0.0,
+      totalFat: (json['totalFat'] as num?)?.toDouble() ?? 0.0,
       dietaryTags: List<String>.from(json['dietaryTags'] ?? []),
       isAIGenerated: json['isAIGenerated'] as bool? ?? true,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -150,10 +150,10 @@ class MealDay {
       meals: (json['meals'] as List<dynamic>)
           .map((e) => Meal.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalCalories: (json['totalCalories'] as num).toDouble(),
-      totalProtein: (json['totalProtein'] as num).toDouble(),
-      totalCarbs: (json['totalCarbs'] as num).toDouble(),
-      totalFat: (json['totalFat'] as num).toDouble(),
+      totalCalories: (json['totalCalories'] as num?)?.toDouble() ?? 0.0,
+      totalProtein: (json['totalProtein'] as num?)?.toDouble() ?? 0.0,
+      totalCarbs: (json['totalCarbs'] as num?)?.toDouble() ?? 0.0,
+      totalFat: (json['totalFat'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -239,8 +239,9 @@ class Meal {
       prepTime: json['prepTime'] as int,
       cookTime: json['cookTime'] as int,
       servings: json['servings'] as int,
-      nutrition:
-          NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>),
+      nutrition: json['nutrition'] != null 
+          ? NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>)
+          : NutritionInfo.empty(),
       tags: List<String>.from(json['tags'] ?? []),
       dietaryTags: List<String>.from(json['dietaryTags'] ?? []),
       isVegetarian: json['isVegetarian'] as bool? ?? false,
@@ -345,6 +346,19 @@ class NutritionInfo {
       fiber: (json['fiber'] as num).toDouble(),
       sugar: (json['sugar'] as num).toDouble(),
       sodium: (json['sodium'] as num).toDouble(),
+    );
+  }
+
+  /// Creates an empty NutritionInfo instance with all values set to 0
+  factory NutritionInfo.empty() {
+    return NutritionInfo(
+      calories: 0.0,
+      protein: 0.0,
+      carbs: 0.0,
+      fat: 0.0,
+      fiber: 0.0,
+      sugar: 0.0,
+      sodium: 0.0,
     );
   }
 

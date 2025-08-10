@@ -2,15 +2,26 @@ import 'package:uuid/uuid.dart';
 import '../models/user_model.dart';
 import '../models/meal_model.dart';
 import 'json_utils.dart';
+import 'nutrition_calculation_service.dart';
+import 'json_validation_service.dart';
+
+/// Custom exception for validation failures
+class ValidationException implements Exception {
+  final String message;
+  ValidationException(this.message);
+  
+  @override
+  String toString() => 'ValidationException: $message';
+}
 
 /// Service for parsing AI responses into meal plan models
 class ParserService {
   /// Parse single day AI response into MealDay
-  static MealDay parseSingleDayFromAI(
+  static Future<MealDay> parseSingleDayFromAI(
     String aiResponse,
     DietPlanPreferences preferences,
     int dayIndex,
-  ) {
+  ) async {
     try {
       print('Parsing single day AI response for day $dayIndex...');
       print('AI Response length: ${aiResponse.length}');
@@ -20,12 +31,19 @@ class ParserService {
       print('FULL AI RESPONSE FOR DAY $dayIndex:');
       print(aiResponse);
 
-      // Clean and fix the JSON
-      final cleanedJson = JsonUtils.cleanAndFixJson(aiResponse);
-      print('CLEANED JSON FOR DAY $dayIndex:');
-      print(cleanedJson);
-      
-      final data = JsonUtils.parseJson(cleanedJson, context: 'day $dayIndex');
+      // Validate the JSON response first
+      final validationResult = JSONValidationService.validateSingleDayResponse(
+        aiResponse,
+        preferences,
+        dayIndex,
+      );
+
+      if (!validationResult['isValid']) {
+        throw ValidationException('JSON validation failed: ${validationResult['message']}');
+      }
+
+      // Use the validated data
+      final data = validationResult['data'];
       final mealDayData = data['mealDay'];
       
       // Debug: Check ingredients in parsed data
@@ -49,51 +67,36 @@ class ParserService {
       // Generate unique IDs for the meal day and meals
       mealDayData['id'] = const Uuid().v4();
 
-      // Calculate nutrition totals from meals if they're missing or 0
+      // Process meals and generate unique IDs
       if (mealDayData['meals'] != null) {
         final meals = (mealDayData['meals'] as List).map((mealData) {
           final mealMap = Map<String, dynamic>.from(mealData);
           // Generate unique ID for each meal
           mealMap['id'] = const Uuid().v4();
-          if (mealMap['nutrition'] != null &&
-              mealMap['nutrition']['calories'] is double) {
-            mealMap['nutrition']['calories'] =
-                (mealMap['nutrition']['calories'] as double).toInt();
-          }
+          
+          // Remove any model-provided meal nutrition (we'll calculate it ourselves)
+          mealMap.remove('nutrition');
+          
           return mealMap;
         }).toList();
         mealDayData['meals'] = meals;
 
-        // Calculate day totals from meals
-        double dayProtein = 0;
-        double dayCarbs = 0;
-        double dayFat = 0;
-
-        for (final meal in meals) {
-          if (meal['nutrition'] != null) {
-            final nutrition = meal['nutrition'] as Map<String, dynamic>;
-            dayProtein += JsonUtils.safeToDouble(nutrition['protein']);
-            dayCarbs += JsonUtils.safeToDouble(nutrition['carbs']);
-            dayFat += JsonUtils.safeToDouble(nutrition['fat']);
-          }
-        }
-
-        // Update day totals if they're missing or 0
-        if (JsonUtils.safeToDouble(mealDayData['totalProtein']) == 0 || mealDayData['totalProtein'] == null) {
-          mealDayData['totalProtein'] = dayProtein;
-        }
-        if (JsonUtils.safeToDouble(mealDayData['totalCarbs']) == 0 || mealDayData['totalCarbs'] == null) {
-          mealDayData['totalCarbs'] = dayCarbs;
-        }
-        if (JsonUtils.safeToDouble(mealDayData['totalFat']) == 0 || mealDayData['totalFat'] == null) {
-          mealDayData['totalFat'] = dayFat;
-        }
+        // Remove any model-provided day totals (we'll calculate them ourselves)
+        mealDayData.remove('totalCalories');
+        mealDayData.remove('totalProtein');
+        mealDayData.remove('totalCarbs');
+        mealDayData.remove('totalFat');
 
         // Validate meal types
         _validateMealTypes(meals, preferences, dayIndex);
       }
 
-      return MealDay.fromJson(mealDayData);
+      final mealDay = MealDay.fromJson(mealDayData);
+      
+      // Apply calculated nutrition to all meals and the meal day
+      _applyCalculatedNutrition(mealDay);
+      
+      return mealDay;
     } catch (e) {
       print('JSON parsing failed for day $dayIndex: $e');
       throw Exception('Failed to parse AI response for day $dayIndex: $e');
@@ -237,5 +240,23 @@ class ParserService {
     }
     
     return requiredMeals;
+  }
+
+  /// Apply calculated nutrition to a meal day and all its meals
+  static void _applyCalculatedNutrition(MealDay mealDay) {
+    try {
+      // Calculate nutrition for each meal
+      for (final meal in mealDay.meals) {
+        NutritionCalculationService.applyCalculatedNutritionToMeal(meal);
+      }
+      
+      // Calculate nutrition for the meal day
+      NutritionCalculationService.applyCalculatedNutritionToMealDay(mealDay);
+      
+      print('✅ Applied calculated nutrition to meal day ${mealDay.date}');
+    } catch (e) {
+      print('❌ Error applying calculated nutrition: $e');
+      // Continue without failing the entire parsing process
+    }
   }
 } 
