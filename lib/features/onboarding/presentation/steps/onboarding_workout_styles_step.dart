@@ -35,6 +35,8 @@ class OnboardingWorkoutStylesStep extends StatelessWidget {
     switch (style) {
       case 'Strength Training':
         return Icons.fitness_center;
+      case 'Body Building':
+        return Icons.sports_gymnastics;
       case 'Cardio':
         return Icons.favorite;
       case 'HIIT':
@@ -50,6 +52,8 @@ class OnboardingWorkoutStylesStep extends StatelessWidget {
     switch (style) {
       case 'Strength Training':
         return 'Build muscle and strength';
+      case 'Body Building':
+        return 'Focus on muscle hypertrophy and definition';
       case 'Cardio':
         return 'Improve cardiovascular health';
       case 'HIIT':

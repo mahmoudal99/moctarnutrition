@@ -21,6 +21,7 @@ import 'features/progress/presentation/screens/progress_screen.dart';
 import 'features/admin/presentation/screens/admin_user_list_screen.dart';
 import 'features/admin/presentation/screens/admin_user_detail_screen.dart';
 import 'features/admin/presentation/screens/admin_home_screen.dart';
+import 'features/workouts/presentation/screens/workouts_screen.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'shared/services/background_upload_service.dart';
 
@@ -33,6 +34,7 @@ import 'shared/providers/user_provider.dart';
 import 'shared/providers/meal_plan_provider.dart';
 import 'shared/providers/auth_provider.dart';
 import 'shared/providers/checkin_provider.dart';
+import 'shared/providers/workout_provider.dart';
 import 'shared/services/config_service.dart';
 import 'shared/models/checkin_model.dart';
 
@@ -262,6 +264,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
         ChangeNotifierProvider(create: (_) => MealPlanProvider()),
         ChangeNotifierProvider(create: (_) => CheckinProvider()),
+        ChangeNotifierProvider(create: (_) => WorkoutProvider()),
       ],
       child: const ChampionsGymApp(),
     ),
@@ -296,19 +299,7 @@ class TrainersScreen extends StatelessWidget {
   }
 }
 
-class WorkoutsScreen extends StatelessWidget {
-  const WorkoutsScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Workouts')),
-      body: const Center(
-        child: Text('Workouts Screen - Coming Soon'),
-      ),
-    );
-  }
-}
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
