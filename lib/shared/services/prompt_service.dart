@@ -106,11 +106,23 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
 - Use precise ingredient names matching USDA database
 - Focus on Irish supermarket availability (Lidl, Aldi, Tesco, Spar, SuperValu)
 - Each ingredient must include estimated nutrition per specified amount
-- Do NOT calculate meal or day totals
+- Calculate daily calorie needs as Total Daily Energy Expenditure (TDEE), including basal metabolism (BMR), digestion (TEF), exercise (EAT), and daily non-exercise activities (NEAT)
+- Set the target calories as TDEE adjusted for the user's goal (weight loss, muscle gain, maintenance)
+- Distribute total daily calories approximately as:
+  - Breakfast: 20-25%
+  - Lunch: 30-35%
+  - Dinner: 30-35%
+  - Snacks (if any): 10-15%
+- Each meal's ingredient calories must sum closely to the meal's allocated calories
+- Total daily calories across all meals must match the target within ±5%
+- Prioritize macronutrient balance and nutrient-dense foods, focusing on adequate protein, healthy fats, and quality carbohydrates according to client preferences and restrictions
+- Avoid arbitrary or random calorie splits; model the reasoning process of a personal trainer tailoring meal plans based on client profile, lifestyle, and goals
 
 **One-Shot Example:**
 
 **Input:** 30-year-old male, 80kg, 180cm, weight loss goal, 2000 cal/day, moderately active, no restrictions, prefers Irish/Italian cuisine, avoids processed foods, 3 meals + 1 snack
+
+**Calorie Distribution Target:** Breakfast ~500 cal (25%), Lunch ~650 cal (32.5%), Dinner ~650 cal (32.5%), Snack ~200 cal (10%)
 
 **Output:**
 ```json
@@ -121,8 +133,8 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
     "meals": [
       {
         "id": "breakfast-1",
-        "name": "Irish Oatmeal with Berries and Nuts",
-        "description": "Hearty Irish steel-cut oats with fresh berries and mixed nuts",
+        "name": "Irish Oatmeal with Berries, Nuts, and Greek Yogurt",
+        "description": "Hearty Irish steel-cut oats with fresh berries, mixed nuts, and protein-rich Greek yogurt",
         "type": "breakfast",
         "cuisineType": "irish",
         "prepTime": 10,
@@ -131,101 +143,146 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
         "ingredients": [
           {
             "name": "steel cut oats",
-            "amount": 50,
+            "amount": 60,
             "unit": "g",
             "notes": "Irish steel-cut oats",
             "nutrition": {
-              "calories": 180,
-              "protein": 6,
-              "carbs": 32,
-              "fat": 3,
-              "fiber": 4,
+              "calories": 216,
+              "protein": 7,
+              "carbs": 38,
+              "fat": 4,
+              "fiber": 5,
               "sugar": 1,
               "sodium": 0
             }
           },
           {
             "name": "mixed berries",
-            "amount": 75,
+            "amount": 100,
             "unit": "g",
             "notes": "Fresh strawberries, blueberries, raspberries",
             "nutrition": {
-              "calories": 45,
+              "calories": 60,
               "protein": 1,
-              "carbs": 11,
+              "carbs": 15,
               "fat": 0,
-              "fiber": 3,
-              "sugar": 8,
+              "fiber": 4,
+              "sugar": 10,
               "sodium": 0
             }
           },
           {
             "name": "mixed nuts",
-            "amount": 20,
+            "amount": 25,
             "unit": "g",
             "notes": "Almonds, walnuts, hazelnuts",
             "nutrition": {
-              "calories": 120,
-              "protein": 4,
-              "carbs": 4,
-              "fat": 11,
-              "fiber": 2,
+              "calories": 150,
+              "protein": 5,
+              "carbs": 5,
+              "fat": 14,
+              "fiber": 3,
               "sugar": 1,
+              "sodium": 0
+            }
+          },
+          {
+            "name": "greek yogurt",
+            "amount": 100,
+            "unit": "g",
+            "notes": "Plain Greek yogurt",
+            "nutrition": {
+              "calories": 59,
+              "protein": 10,
+              "carbs": 3,
+              "fat": 0,
+              "fiber": 0,
+              "sugar": 3,
+              "sodium": 36
+            }
+          },
+          {
+            "name": "honey",
+            "amount": 10,
+            "unit": "g",
+            "notes": "Natural honey for sweetness",
+            "nutrition": {
+              "calories": 30,
+              "protein": 0,
+              "carbs": 8,
+              "fat": 0,
+              "fiber": 0,
+              "sugar": 8,
               "sodium": 0
             }
           }
         ],
         "instructions": [
-          "Bring 200ml water to boil in a saucepan",
+          "Bring 240ml water to boil in a saucepan",
           "Add steel-cut oats and reduce heat to low",
           "Simmer for 15-20 minutes, stirring occasionally",
-          "Top with fresh berries and mixed nuts",
+          "Top with fresh berries, mixed nuts, Greek yogurt, and honey",
           "Serve hot"
         ],
-        "tags": ["breakfast", "healthy", "fiber-rich"],
+        "tags": ["breakfast", "healthy", "fiber-rich", "protein"],
         "isVegetarian": true,
         "isVegan": false,
         "isGlutenFree": false,
-        "isDairyFree": true
+        "isDairyFree": false
       },
       {
         "id": "lunch-1",
-        "name": "Grilled Chicken Salad with Irish Cheddar",
-        "description": "Fresh mixed greens with grilled chicken breast and Irish cheddar",
+        "name": "Grilled Chicken Salad with Irish Cheddar and Quinoa",
+        "description": "Fresh mixed greens with grilled chicken breast, Irish cheddar, and protein-rich quinoa",
         "type": "lunch",
         "cuisineType": "irish",
         "prepTime": 15,
-        "cookTime": 12,
+        "cookTime": 15,
         "servings": 1,
         "ingredients": [
           {
             "name": "chicken breast",
-            "amount": 120,
+            "amount": 150,
             "unit": "g",
             "notes": "Skinless, boneless chicken breast",
             "nutrition": {
-              "calories": 200,
-              "protein": 36,
+              "calories": 250,
+              "protein": 45,
               "carbs": 0,
-              "fat": 4,
+              "fat": 5,
               "fiber": 0,
               "sugar": 0,
-              "sodium": 80
+              "sodium": 100
+            }
+          },
+          {
+            "name": "quinoa",
+            "amount": 60,
+            "unit": "g",
+            "notes": "Cooked quinoa",
+            "nutrition": {
+              "calories": 222,
+              "protein": 8,
+              "carbs": 40,
+              "fat": 4,
+              "fiber": 5,
+              "sugar": 1,
+              "sodium": 10
             }
           },
           {
             "name": "mixed salad greens",
-            "amount": 60,
+            "amount": 80,
             "unit": "g",
             "notes": "Lettuce, spinach, rocket",
             "nutrition": {
-              "calories": 15,
-              "protein": 2,
-              "carbs": 3,
+              "calories": 20,
+              "protein": 3,
+              "carbs": 4,
               "fat": 0,
-              "fiber": 2,
+              "fiber": 3,
               "sugar": 1,
-              "sodium": 10
+              "sodium": 13
             }
           },
           {
@@ -245,14 +302,14 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
           },
           {
             "name": "olive oil",
-            "amount": 10,
+            "amount": 15,
             "unit": "ml",
             "notes": "Extra virgin olive oil for dressing",
             "nutrition": {
-              "calories": 90,
+              "calories": 135,
               "protein": 0,
               "carbs": 0,
-              "fat": 10,
+              "fat": 15,
               "fiber": 0,
               "sugar": 0,
               "sodium": 0
@@ -260,14 +317,15 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
           }
         ],
         "instructions": [
+          "Cook quinoa according to package instructions",
           "Season chicken breast with salt and pepper",
-          "Grill chicken for 6 minutes per side until cooked through",
+          "Grill chicken for 6-7 minutes per side until cooked through",
           "Wash and prepare mixed greens",
           "Slice Irish cheddar into small cubes",
-          "Combine greens, cheese, and sliced chicken",
+          "Combine greens, quinoa, cheese, and sliced chicken",
           "Drizzle with olive oil and serve"
         ],
-        "tags": ["lunch", "protein-rich", "low-carb"],
+        "tags": ["lunch", "protein-rich", "quinoa", "balanced"],
         "isVegetarian": false,
         "isVegan": false,
         "isGlutenFree": true,
@@ -275,27 +333,42 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
       },
       {
         "id": "dinner-1",
-        "name": "Baked Salmon with Roasted Vegetables",
-        "description": "Atlantic salmon with seasonal Irish vegetables",
+        "name": "Baked Salmon with Roasted Vegetables and Brown Rice",
+        "description": "Atlantic salmon with seasonal Irish vegetables and whole grain brown rice",
         "type": "dinner",
         "cuisineType": "irish",
         "prepTime": 15,
-        "cookTime": 25,
+        "cookTime": 30,
         "servings": 1,
         "ingredients": [
           {
             "name": "atlantic salmon fillet",
-            "amount": 150,
+            "amount": 180,
             "unit": "g",
             "notes": "Fresh Atlantic salmon",
             "nutrition": {
-              "calories": 280,
-              "protein": 34,
+              "calories": 336,
+              "protein": 41,
               "carbs": 0,
-              "fat": 16,
+              "fat": 19,
               "fiber": 0,
               "sugar": 0,
-              "sodium": 60
+              "sodium": 72
+            }
+          },
+          {
+            "name": "brown rice",
+            "amount": 80,
+            "unit": "g",
+            "notes": "Cooked brown rice",
+            "nutrition": {
+              "calories": 296,
+              "protein": 6,
+              "carbs": 62,
+              "fat": 2,
+              "fiber": 3,
+              "sugar": 1,
+              "sodium": 5
             }
           },
           {
@@ -330,14 +403,14 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
           },
           {
             "name": "olive oil",
-            "amount": 15,
+            "amount": 10,
             "unit": "ml",
             "notes": "For roasting vegetables",
             "nutrition": {
-              "calories": 135,
+              "calories": 90,
               "protein": 0,
               "carbs": 0,
-              "fat": 15,
+              "fat": 10,
               "fiber": 0,
               "sugar": 0,
               "sodium": 0
@@ -345,15 +418,16 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
           }
         ],
         "instructions": [
+          "Cook brown rice according to package instructions",
           "Preheat oven to 200°C",
           "Cut carrots and broccoli into uniform pieces",
           "Toss vegetables with olive oil, salt, and pepper",
           "Place salmon on a baking sheet",
           "Arrange vegetables around salmon",
           "Bake for 20-25 minutes until salmon is flaky",
-          "Serve hot"
+          "Serve salmon and vegetables over brown rice"
         ],
-        "tags": ["dinner", "omega-3", "vegetables"],
+        "tags": ["dinner", "omega-3", "vegetables", "whole-grain"],
         "isVegetarian": false,
         "isVegan": false,
         "isGlutenFree": true,
@@ -361,8 +435,8 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
       },
       {
         "id": "snack-1",
-        "name": "Apple with Almond Butter",
-        "description": "Fresh Irish apple with natural almond butter",
+        "name": "Apple with Almond Butter and Greek Yogurt",
+        "description": "Fresh Irish apple with natural almond butter and protein-rich Greek yogurt",
         "type": "snack",
         "cuisineType": "irish",
         "prepTime": 5,
@@ -386,30 +460,45 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
           },
           {
             "name": "almond butter",
-            "amount": 15,
+            "amount": 20,
             "unit": "g",
             "notes": "Natural almond butter",
             "nutrition": {
-              "calories": 90,
-              "protein": 3,
-              "carbs": 3,
-              "fat": 8,
-              "fiber": 1,
+              "calories": 120,
+              "protein": 4,
+              "carbs": 4,
+              "fat": 11,
+              "fiber": 2,
               "sugar": 1,
               "sodium": 0
+            }
+          },
+          {
+            "name": "greek yogurt",
+            "amount": 50,
+            "unit": "g",
+            "notes": "Plain Greek yogurt",
+            "nutrition": {
+              "calories": 30,
+              "protein": 5,
+              "carbs": 2,
+              "fat": 0,
+              "fiber": 0,
+              "sugar": 2,
+              "sodium": 18
             }
           }
         ],
         "instructions": [
           "Wash and slice apple into wedges",
-          "Serve with 1 tablespoon almond butter",
-          "Enjoy as a healthy snack"
+          "Serve with almond butter and Greek yogurt",
+          "Enjoy as a healthy protein-rich snack"
         ],
-        "tags": ["snack", "fiber", "healthy fats"],
+        "tags": ["snack", "fiber", "healthy fats", "protein"],
         "isVegetarian": true,
-        "isVegan": true,
+        "isVegan": false,
         "isGlutenFree": true,
-        "isDairyFree": true
+        "isDairyFree": false
       }
     ]
   }
@@ -476,7 +565,17 @@ You are a professional nutritionist in Ireland. Generate a $days-day meal plan.
 - Use precise ingredient names matching USDA database
 - Focus on Irish supermarket availability
 - Each ingredient must include estimated nutrition per specified amount
-- Do NOT calculate meal, day, or plan totals
+- Calculate daily calorie needs as Total Daily Energy Expenditure (TDEE), including basal metabolism (BMR), digestion (TEF), exercise (EAT), and daily non-exercise activities (NEAT)
+- Set the target calories as TDEE adjusted for the user's goal (weight loss, muscle gain, maintenance)
+- Distribute total daily calories approximately as:
+  - Breakfast: 20-25%
+  - Lunch: 30-35%
+  - Dinner: 30-35%
+  - Snacks (if any): 10-15%
+- Each meal's ingredient calories must sum closely to the meal's allocated calories
+- Total daily calories across all meals must match the target within ±5%
+- Prioritize macronutrient balance and nutrient-dense foods, focusing on adequate protein, healthy fats, and quality carbohydrates according to client preferences and restrictions
+- Avoid arbitrary or random calorie splits; model the reasoning process of a personal trainer tailoring meal plans based on client profile, lifestyle, and goals
 - ${preferences.weeklyRotation ? 'Make each day unique' : 'Repeat same day structure'}
 
 **JSON Schema:**

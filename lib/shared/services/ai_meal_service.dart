@@ -195,6 +195,29 @@ Please regenerate the meal plan following the JSON schema exactly.
     return requiredMeals;
   }
 
+  /// Helper to get expected calorie distribution for meal types
+  static Map<MealType, double> _getCalorieDistribution(String mealFrequency, int targetCalories) {
+    final distribution = <MealType, double>{};
+    final hasSnacks = mealFrequency.toLowerCase().contains('snack') ||
+        mealFrequency.contains('4') ||
+        mealFrequency.contains('5');
+
+    if (hasSnacks) {
+      // With snacks: Breakfast 25%, Lunch 30%, Dinner 35%, Snacks 10%
+      distribution[MealType.breakfast] = targetCalories * 0.25;
+      distribution[MealType.lunch] = targetCalories * 0.30;
+      distribution[MealType.dinner] = targetCalories * 0.35;
+      distribution[MealType.snack] = targetCalories * 0.10;
+    } else {
+      // Without snacks: Breakfast 30%, Lunch 35%, Dinner 35%
+      distribution[MealType.breakfast] = targetCalories * 0.30;
+      distribution[MealType.lunch] = targetCalories * 0.35;
+      distribution[MealType.dinner] = targetCalories * 0.35;
+    }
+
+    return distribution;
+  }
+
   /// Check if there are enough free tokens remaining for meal plan generation
   static bool _hasEnoughFreeTokens(int days) {
     // Estimate tokens needed: ~1,400 tokens per day based on your usage data
@@ -316,11 +339,25 @@ Please regenerate the meal plan following the JSON schema exactly.
       double totalProtein = 0;
       double totalCarbs = 0;
       double totalFat = 0;
+      double totalCalories = 0;
 
       for (final day in mealDays) {
         totalProtein += day.totalProtein;
         totalCarbs += day.totalCarbs;
         totalFat += day.totalFat;
+        totalCalories += day.totalCalories;
+      }
+
+      // Validate that the generated calories match the target
+      final targetTotalCalories = preferences.targetCalories * days;
+      final calorieDiff = (totalCalories - targetTotalCalories).abs();
+      final caloriePercentDiff = (calorieDiff / targetTotalCalories) * 100;
+
+      if (caloriePercentDiff > 5) {
+        _logger.w('⚠️ WARNING: Generated meal plan calories (${totalCalories.toStringAsFixed(0)}) differ by ${caloriePercentDiff.toStringAsFixed(1)}% from target (${targetTotalCalories.toStringAsFixed(0)})');
+        _logger.w('This exceeds the ±5% tolerance. Consider regenerating the meal plan.');
+      } else {
+        _logger.i('✅ Generated meal plan calories (${totalCalories.toStringAsFixed(0)}) are within ±5% of target (${targetTotalCalories.toStringAsFixed(0)})');
       }
 
       final mealPlan = MealPlanModel(
@@ -331,7 +368,7 @@ Please regenerate the meal plan following the JSON schema exactly.
         startDate: DateTime.now(),
         endDate: DateTime.now().add(Duration(days: days - 1)),
         mealDays: mealDays,
-        totalCalories: (preferences.targetCalories * days).toDouble(),
+        totalCalories: totalCalories, // Use actual calculated calories instead of target
         totalProtein: totalProtein,
         totalCarbs: totalCarbs,
         totalFat: totalFat,
