@@ -185,8 +185,8 @@ Please regenerate the meal plan following the JSON schema exactly.
     // Always require breakfast, lunch, and dinner as core meals
     final requiredMeals = [MealType.breakfast, MealType.lunch, MealType.dinner];
 
-    // Add snacks based on meal frequency string
-    if (mealFrequency.contains('snack') ||
+    // Add snacks based on meal frequency string (case-insensitive)
+    if (mealFrequency.toLowerCase().contains('snack') ||
         mealFrequency.contains('4') ||
         mealFrequency.contains('5')) {
       requiredMeals.add(MealType.snack);

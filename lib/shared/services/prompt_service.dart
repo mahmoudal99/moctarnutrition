@@ -107,7 +107,316 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
 - Focus on Irish supermarket availability (Lidl, Aldi, Tesco, Spar, SuperValu)
 - Each ingredient must include estimated nutrition per specified amount
 - Do NOT calculate meal or day totals
-${isCheatDay ? '- $cheatDayInstructions' : ''}
+
+**One-Shot Example:**
+
+**Input:** 30-year-old male, 80kg, 180cm, weight loss goal, 2000 cal/day, moderately active, no restrictions, prefers Irish/Italian cuisine, avoids processed foods, 3 meals + 1 snack
+
+**Output:**
+```json
+{
+  "mealDay": {
+    "id": "day-1",
+    "date": "2024-01-15",
+    "meals": [
+      {
+        "id": "breakfast-1",
+        "name": "Irish Oatmeal with Berries and Nuts",
+        "description": "Hearty Irish steel-cut oats with fresh berries and mixed nuts",
+        "type": "breakfast",
+        "cuisineType": "irish",
+        "prepTime": 10,
+        "cookTime": 20,
+        "servings": 1,
+        "ingredients": [
+          {
+            "name": "steel cut oats",
+            "amount": 50,
+            "unit": "g",
+            "notes": "Irish steel-cut oats",
+            "nutrition": {
+              "calories": 180,
+              "protein": 6,
+              "carbs": 32,
+              "fat": 3,
+              "fiber": 4,
+              "sugar": 1,
+              "sodium": 0
+            }
+          },
+          {
+            "name": "mixed berries",
+            "amount": 75,
+            "unit": "g",
+            "notes": "Fresh strawberries, blueberries, raspberries",
+            "nutrition": {
+              "calories": 45,
+              "protein": 1,
+              "carbs": 11,
+              "fat": 0,
+              "fiber": 3,
+              "sugar": 8,
+              "sodium": 0
+            }
+          },
+          {
+            "name": "mixed nuts",
+            "amount": 20,
+            "unit": "g",
+            "notes": "Almonds, walnuts, hazelnuts",
+            "nutrition": {
+              "calories": 120,
+              "protein": 4,
+              "carbs": 4,
+              "fat": 11,
+              "fiber": 2,
+              "sugar": 1,
+              "sodium": 0
+            }
+          }
+        ],
+        "instructions": [
+          "Bring 200ml water to boil in a saucepan",
+          "Add steel-cut oats and reduce heat to low",
+          "Simmer for 15-20 minutes, stirring occasionally",
+          "Top with fresh berries and mixed nuts",
+          "Serve hot"
+        ],
+        "tags": ["breakfast", "healthy", "fiber-rich"],
+        "isVegetarian": true,
+        "isVegan": false,
+        "isGlutenFree": false,
+        "isDairyFree": true
+      },
+      {
+        "id": "lunch-1",
+        "name": "Grilled Chicken Salad with Irish Cheddar",
+        "description": "Fresh mixed greens with grilled chicken breast and Irish cheddar",
+        "type": "lunch",
+        "cuisineType": "irish",
+        "prepTime": 15,
+        "cookTime": 12,
+        "servings": 1,
+        "ingredients": [
+          {
+            "name": "chicken breast",
+            "amount": 120,
+            "unit": "g",
+            "notes": "Skinless, boneless chicken breast",
+            "nutrition": {
+              "calories": 200,
+              "protein": 36,
+              "carbs": 0,
+              "fat": 4,
+              "fiber": 0,
+              "sugar": 0,
+              "sodium": 80
+            }
+          },
+          {
+            "name": "mixed salad greens",
+            "amount": 60,
+            "unit": "g",
+            "notes": "Lettuce, spinach, rocket",
+            "nutrition": {
+              "calories": 15,
+              "protein": 2,
+              "carbs": 3,
+              "fat": 0,
+              "fiber": 2,
+              "sugar": 1,
+              "sodium": 10
+            }
+          },
+          {
+            "name": "irish cheddar cheese",
+            "amount": 30,
+            "unit": "g",
+            "notes": "Mature Irish cheddar",
+            "nutrition": {
+              "calories": 120,
+              "protein": 8,
+              "carbs": 0,
+              "fat": 10,
+              "fiber": 0,
+              "sugar": 0,
+              "sodium": 200
+            }
+          },
+          {
+            "name": "olive oil",
+            "amount": 10,
+            "unit": "ml",
+            "notes": "Extra virgin olive oil for dressing",
+            "nutrition": {
+              "calories": 90,
+              "protein": 0,
+              "carbs": 0,
+              "fat": 10,
+              "fiber": 0,
+              "sugar": 0,
+              "sodium": 0
+            }
+          }
+        ],
+        "instructions": [
+          "Season chicken breast with salt and pepper",
+          "Grill chicken for 6 minutes per side until cooked through",
+          "Wash and prepare mixed greens",
+          "Slice Irish cheddar into small cubes",
+          "Combine greens, cheese, and sliced chicken",
+          "Drizzle with olive oil and serve"
+        ],
+        "tags": ["lunch", "protein-rich", "low-carb"],
+        "isVegetarian": false,
+        "isVegan": false,
+        "isGlutenFree": true,
+        "isDairyFree": false
+      },
+      {
+        "id": "dinner-1",
+        "name": "Baked Salmon with Roasted Vegetables",
+        "description": "Atlantic salmon with seasonal Irish vegetables",
+        "type": "dinner",
+        "cuisineType": "irish",
+        "prepTime": 15,
+        "cookTime": 25,
+        "servings": 1,
+        "ingredients": [
+          {
+            "name": "atlantic salmon fillet",
+            "amount": 150,
+            "unit": "g",
+            "notes": "Fresh Atlantic salmon",
+            "nutrition": {
+              "calories": 280,
+              "protein": 34,
+              "carbs": 0,
+              "fat": 16,
+              "fiber": 0,
+              "sugar": 0,
+              "sodium": 60
+            }
+          },
+          {
+            "name": "carrots",
+            "amount": 100,
+            "unit": "g",
+            "notes": "Fresh Irish carrots",
+            "nutrition": {
+              "calories": 40,
+              "protein": 1,
+              "carbs": 9,
+              "fat": 0,
+              "fiber": 3,
+              "sugar": 5,
+              "sodium": 30
+            }
+          },
+          {
+            "name": "broccoli",
+            "amount": 100,
+            "unit": "g",
+            "notes": "Fresh broccoli florets",
+            "nutrition": {
+              "calories": 35,
+              "protein": 3,
+              "carbs": 7,
+              "fat": 0,
+              "fiber": 3,
+              "sugar": 2,
+              "sodium": 30
+            }
+          },
+          {
+            "name": "olive oil",
+            "amount": 15,
+            "unit": "ml",
+            "notes": "For roasting vegetables",
+            "nutrition": {
+              "calories": 135,
+              "protein": 0,
+              "carbs": 0,
+              "fat": 15,
+              "fiber": 0,
+              "sugar": 0,
+              "sodium": 0
+            }
+          }
+        ],
+        "instructions": [
+          "Preheat oven to 200°C",
+          "Cut carrots and broccoli into uniform pieces",
+          "Toss vegetables with olive oil, salt, and pepper",
+          "Place salmon on a baking sheet",
+          "Arrange vegetables around salmon",
+          "Bake for 20-25 minutes until salmon is flaky",
+          "Serve hot"
+        ],
+        "tags": ["dinner", "omega-3", "vegetables"],
+        "isVegetarian": false,
+        "isVegan": false,
+        "isGlutenFree": true,
+        "isDairyFree": true
+      },
+      {
+        "id": "snack-1",
+        "name": "Apple with Almond Butter",
+        "description": "Fresh Irish apple with natural almond butter",
+        "type": "snack",
+        "cuisineType": "irish",
+        "prepTime": 5,
+        "cookTime": 0,
+        "servings": 1,
+        "ingredients": [
+          {
+            "name": "apple",
+            "amount": 150,
+            "unit": "g",
+            "notes": "Fresh Irish apple",
+            "nutrition": {
+              "calories": 80,
+              "protein": 0,
+              "carbs": 20,
+              "fat": 0,
+              "fiber": 4,
+              "sugar": 15,
+              "sodium": 0
+            }
+          },
+          {
+            "name": "almond butter",
+            "amount": 15,
+            "unit": "g",
+            "notes": "Natural almond butter",
+            "nutrition": {
+              "calories": 90,
+              "protein": 3,
+              "carbs": 3,
+              "fat": 8,
+              "fiber": 1,
+              "sugar": 1,
+              "sodium": 0
+            }
+          }
+        ],
+        "instructions": [
+          "Wash and slice apple into wedges",
+          "Serve with 1 tablespoon almond butter",
+          "Enjoy as a healthy snack"
+        ],
+        "tags": ["snack", "fiber", "healthy fats"],
+        "isVegetarian": true,
+        "isVegan": true,
+        "isGlutenFree": true,
+        "isDairyFree": true
+      }
+    ]
+  }
+}
+```
+
+$cheatDayInstructions
 
 **JSON Schema:**
 $_jsonSchema
@@ -289,8 +598,8 @@ Respond with JSON only. No commentary.
     // Always require breakfast, lunch, and dinner as core meals
     final requiredMeals = [MealType.breakfast, MealType.lunch, MealType.dinner];
     
-    // Add snacks based on meal frequency string
-    if (mealFrequency.contains('snack') || mealFrequency.contains('4') || mealFrequency.contains('5')) {
+    // Add snacks based on meal frequency string (case-insensitive)
+    if (mealFrequency.toLowerCase().contains('snack') || mealFrequency.contains('4') || mealFrequency.contains('5')) {
       requiredMeals.add(MealType.snack);
     }
     
