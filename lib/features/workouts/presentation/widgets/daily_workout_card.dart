@@ -52,7 +52,7 @@ class DailyWorkoutCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isToday
                             ? AppConstants.primaryColor
-                            : AppConstants.textTertiary.withOpacity(0.08),
+                            : AppConstants.primaryColor.withOpacity(0.1),
                         borderRadius:
                             BorderRadius.circular(AppConstants.radiusS),
                       ),
@@ -60,7 +60,7 @@ class DailyWorkoutCard extends StatelessWidget {
                         _getDayIcon(),
                         color: isToday
                             ? AppConstants.surfaceColor
-                            : AppConstants.textSecondary,
+                            : AppConstants.primaryColor,
                         size: 20,
                       ),
                     ),
@@ -109,13 +109,14 @@ class DailyWorkoutCard extends StatelessWidget {
                             dailyWorkout.title,
                             style: AppTextStyles.bodySmall.copyWith(
                               fontWeight: FontWeight.w500,
+                              color: AppConstants.textPrimary,
                             ),
                           ),
                         ],
                       ),
                     ),
                     if (!dailyWorkout.isRestDay) ...[
-                      Icon(
+                      const Icon(
                         Icons.chevron_right,
                         color: AppConstants.textTertiary,
                         size: 20,
@@ -129,7 +130,9 @@ class DailyWorkoutCard extends StatelessWidget {
                 else ...[
                   Text(
                     dailyWorkout.description,
-                    style: AppTextStyles.caption,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppConstants.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: AppConstants.spacingS),
                   Row(
@@ -160,12 +163,15 @@ class DailyWorkoutCard extends StatelessWidget {
         Icon(
           icon,
           size: 14,
-          color: AppConstants.textSecondary,
+          color: AppConstants.primaryColor,
         ),
         const SizedBox(width: AppConstants.spacingXS),
         Text(
           text,
-          style: AppTextStyles.caption,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppConstants.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -241,7 +247,7 @@ class _WorkoutDetailsSheet extends StatelessWidget {
             padding: const EdgeInsets.all(AppConstants.spacingM),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.fitness_center,
                   color: AppConstants.primaryColor,
                   size: 24,
@@ -322,7 +328,9 @@ class _WorkoutCard extends StatelessWidget {
           const SizedBox(height: AppConstants.spacingXS),
           Text(
             workout.description,
-            style: AppTextStyles.caption,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppConstants.textSecondary,
+            ),
           ),
           const SizedBox(height: AppConstants.spacingM),
           Text(
@@ -383,13 +391,16 @@ class _ExerciseItem extends StatelessWidget {
                 Text(
                   exercise.name,
                   style: AppTextStyles.bodySmall.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    color: AppConstants.textPrimary,
                   ),
                 ),
-                Text(
-                  exercise.description,
-                  style: AppTextStyles.caption,
-                ),
+                // Text(
+                //   exercise.description,
+                //   style: AppTextStyles.bodySmall.copyWith(
+                //     color: AppConstants.textSecondary,
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -399,15 +410,19 @@ class _ExerciseItem extends StatelessWidget {
             children: [
               Text(
                 '${exercise.sets} sets',
-                style: AppTextStyles.caption.copyWith(
+                style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: AppConstants.primaryColor,
                 ),
               ),
               Text(
                 exercise.duration != null
                     ? '${exercise.duration}s'
                     : '${exercise.reps} reps',
-                style: AppTextStyles.caption,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppConstants.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
