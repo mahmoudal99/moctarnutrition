@@ -41,6 +41,10 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   }
 
   void _onNextStep() {
+    if (!_isCurrentStepValid()) {
+      HapticFeedback.lightImpact();
+      return;
+    }
     HapticFeedback.mediumImpact();
     setState(() {
       _setupStep++;
@@ -54,7 +58,93 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     });
   }
 
+  // Add validation method to check if current step is complete
+  bool _isCurrentStepValid() {
+    bool isValid;
+    switch (_setupStep) {
+      case 0:
+        isValid = _selectedNutritionGoal != null;
+        break;
+      case 1:
+        isValid = _mealFrequency != null;
+        break;
+      case 2:
+        isValid = _targetCalories >= 1200 && _targetCalories <= 4000;
+        break;
+      case 3:
+        // Cheat day should have a selection (either a day or null for "No cheat day")
+        // The step allows selecting null, so we need to check if user has made any selection
+        // Since the step starts with null and user can select null, we'll consider it always valid
+        isValid = true;
+        break;
+      case 4:
+        // Plan duration step has default values (_weeklyRotation = true, _remindersEnabled = false)
+        // and both options are always valid, so this step is always complete
+        isValid = true;
+        break;
+      case 5:
+        // Final review step - check all required fields
+        isValid = _selectedNutritionGoal != null && 
+                  _mealFrequency != null && 
+                  _targetCalories >= 1200 && 
+                  _targetCalories <= 4000;
+        break;
+      default:
+        isValid = false;
+        break;
+    }
+    
+    // Debug logging
+    print('[AdminMealPlanSetupScreen] Step $_setupStep validation: $isValid');
+    if (_setupStep == 0) print('[AdminMealPlanSetupScreen] Nutrition goal: $_selectedNutritionGoal');
+    if (_setupStep == 1) print('[AdminMealPlanSetupScreen] Meal frequency: $_mealFrequency');
+    if (_setupStep == 2) print('[AdminMealPlanSetupScreen] Target calories: $_targetCalories');
+    if (_setupStep == 5) {
+      print('[AdminMealPlanSetupScreen] Final validation - Nutrition goal: $_selectedNutritionGoal, Meal frequency: $_mealFrequency, Calories: $_targetCalories');
+    }
+    
+    return isValid;
+  }
+
+  // Get validation message for current step
+  String _getValidationMessage() {
+    switch (_setupStep) {
+      case 0:
+        return 'Please select a nutrition goal to continue';
+      case 1:
+        return 'Please select a meal frequency to continue';
+      case 2:
+        if (_targetCalories < 1200) {
+          return 'Calorie target must be at least 1,200 calories';
+        } else if (_targetCalories > 4000) {
+          return 'Calorie target must be no more than 4,000 calories';
+        }
+        return 'Please set a valid calorie target';
+      case 3:
+        // Cheat day is optional, so this should never be reached
+        return 'Please make a selection for cheat day';
+      case 4:
+        // Plan duration step has default values, so this should never be reached
+        return 'Please configure plan duration and reminders';
+      case 5:
+        if (_selectedNutritionGoal == null) {
+          return 'Please select a nutrition goal';
+        } else if (_mealFrequency == null) {
+          return 'Please select a meal frequency';
+        } else if (_targetCalories < 1200 || _targetCalories > 4000) {
+          return 'Please set a valid calorie target (1,200-4,000 calories)';
+        }
+        return 'Please complete all required fields';
+      default:
+        return 'Please complete this step to continue';
+    }
+  }
+
   Future<void> _onSavePlan() async {
+    if (!_isCurrentStepValid()) {
+      HapticFeedback.lightImpact();
+      return;
+    }
     HapticFeedback.heavyImpact();
     setState(() {
       _isLoading = true;
@@ -332,8 +422,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                     // Completed steps show their own color
                     color = stepColors[i];
                   } else if (i == _setupStep) {
-                    // Current step shows its own color
-                    color = stepColors[i];
+                    // Current step shows warning color if invalid, or its own color if valid
+                    color = _isCurrentStepValid() ? stepColors[i] : (AppConstants.warningColor ?? Colors.orange);
                   } else {
                     // Future steps show gray
                     color = AppConstants.textTertiary.withOpacity(0.2);
@@ -372,7 +462,47 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _buildCurrentStep(prefs),
+            child: Column(
+              children: [
+                Expanded(child: _buildCurrentStep(prefs)),
+                // Show validation message if current step is not valid
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: !_isCurrentStepValid() 
+                    ? Container(
+                        key: ValueKey('validation_$_setupStep'),
+                        margin: const EdgeInsets.only(top: AppConstants.spacingM),
+                        padding: const EdgeInsets.all(AppConstants.spacingM),
+                        decoration: BoxDecoration(
+                          color: AppConstants.warningColor?.withOpacity(0.1) ?? Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                          border: Border.all(
+                            color: AppConstants.warningColor?.withOpacity(0.3) ?? Colors.orange.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: AppConstants.warningColor ?? Colors.orange,
+                            ),
+                            const SizedBox(width: AppConstants.spacingS),
+                            Expanded(
+                              child: Text(
+                                _getValidationMessage(),
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppConstants.warningColor ?? Colors.orange,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+                ),
+              ],
+            ),
           ),
         ),
         
@@ -436,6 +566,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   }
 
   Widget _buildNavigationButtons() {
+    final isCurrentStepValid = _isCurrentStepValid();
+    
     return Row(
       children: [
         if (_setupStep > 0)
@@ -448,7 +580,17 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         if (_setupStep > 0) const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
-            onPressed: _setupStep == 5 ? _onSavePlan : _onNextStep,
+            onPressed: isCurrentStepValid 
+                ? (_setupStep == 5 ? _onSavePlan : _onNextStep)
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isCurrentStepValid 
+                  ? AppConstants.primaryColor 
+                  : AppConstants.textTertiary.withOpacity(0.3),
+              foregroundColor: isCurrentStepValid 
+                  ? AppConstants.surfaceColor 
+                  : AppConstants.textSecondary,
+            ),
             child: Text(_setupStep == 5 ? 'Generate Plan' : 'Next'),
           ),
         ),
