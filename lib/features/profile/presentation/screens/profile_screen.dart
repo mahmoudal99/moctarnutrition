@@ -13,6 +13,7 @@ import '../../../onboarding/presentation/screens/get_started_screen.dart';
 import '../widgets/notifications_toggle.dart';
 import '../widgets/reminders_toggle.dart';
 import 'bug_report_screen.dart';
+import 'feedback_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   static final _logger = Logger();
@@ -723,7 +724,11 @@ List<_MockSettingsItem> _getSupportItems(BuildContext context) {
       label: 'Feedback',
       icon: Icons.feedback,
       onTap: () {
-        // TODO: Open feedback form
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const FeedbackScreen(),
+          ),
+        );
       },
     ),
   ];
