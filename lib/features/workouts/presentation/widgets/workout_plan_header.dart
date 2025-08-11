@@ -131,6 +131,8 @@ class WorkoutPlanHeader extends StatelessWidget {
         return Icons.timer;
       case WorkoutPlanType.running:
         return Icons.directions_run;
+      case WorkoutPlanType.ai_generated:
+        return Icons.psychology;
     }
   }
 
@@ -146,6 +148,8 @@ class WorkoutPlanHeader extends StatelessWidget {
         return 'HIIT';
       case WorkoutPlanType.running:
         return 'Running';
+      case WorkoutPlanType.ai_generated:
+        return 'AI Generated';
     }
   }
 

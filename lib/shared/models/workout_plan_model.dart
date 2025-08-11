@@ -1,6 +1,6 @@
 import 'workout_model.dart';
 
-enum WorkoutPlanType { strength, bodybuilding, cardio, hiit, running }
+enum WorkoutPlanType { strength, bodybuilding, cardio, hiit, running, ai_generated }
 
 class WorkoutPlanModel {
   final String id;

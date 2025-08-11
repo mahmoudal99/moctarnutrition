@@ -38,11 +38,196 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       _logger.d(
           'Loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
       await workoutProvider.loadWorkoutPlan(
-          authProvider.userModel!.id, workoutStyles);
+          authProvider.userModel!.id, workoutStyles, authProvider.userModel);
     } else {
       _logger.w(
           'Cannot load workout plan: user not authenticated or userModel is null');
     }
+  }
+
+  Widget _buildLoadingState() {
+    return Scaffold(
+      backgroundColor: AppConstants.backgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 140,
+            floating: false,
+            pinned: true,
+            backgroundColor: AppConstants.surfaceColor,
+            elevation: 0,
+            leading: Container(
+              margin: const EdgeInsets.all(8),
+              child: _getUserProfileIcon(),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                color: AppConstants.surfaceColor,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppConstants.spacingM,
+                    AppConstants.spacingXL,
+                    AppConstants.spacingM,
+                    AppConstants.spacingM,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Hi ${_getUserName()}!',
+                        style: AppTextStyles.heading3.copyWith(
+                          color: AppConstants.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingXS),
+                      Text(
+                        'Preparing your workout plan...',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppConstants.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.spacingL),
+              child: Column(
+                children: [
+                  // Loading animation
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: AppConstants.surfaceColor,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusL),
+                      boxShadow: AppConstants.shadowM,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppConstants.primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                          ),
+                          child: const Icon(
+                            Icons.fitness_center,
+                            color: AppConstants.primaryColor,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(height: AppConstants.spacingM),
+                        const CircularProgressIndicator(
+                          color: AppConstants.primaryColor,
+                          strokeWidth: 3,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingXL),
+                  Text(
+                    'Creating Your Perfect Workout',
+                    style: AppTextStyles.heading4.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppConstants.spacingM),
+                  Text(
+                    'We\'re analyzing your preferences and fitness goals to create a personalized workout plan just for you.',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppConstants.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppConstants.spacingXL),
+                  // Loading steps
+                  _buildLoadingStep(
+                    'Analyzing your fitness goals',
+                    Icons.track_changes,
+                    true,
+                  ),
+                  const SizedBox(height: AppConstants.spacingM),
+                  _buildLoadingStep(
+                    'Designing workout routines',
+                    Icons.fitness_center,
+                    true,
+                  ),
+                  const SizedBox(height: AppConstants.spacingM),
+                  _buildLoadingStep(
+                    'Optimizing for your schedule',
+                    Icons.schedule,
+                    false,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingStep(String text, IconData icon, bool isCompleted) {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      decoration: BoxDecoration(
+        color: AppConstants.surfaceColor,
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        border: Border.all(
+          color: isCompleted 
+              ? AppConstants.primaryColor.withOpacity(0.3)
+              : AppConstants.textTertiary.withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: isCompleted
+                  ? AppConstants.primaryColor
+                  : AppConstants.textTertiary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppConstants.radiusS),
+            ),
+            child: Icon(
+              icon,
+              color: isCompleted
+                  ? AppConstants.surfaceColor
+                  : AppConstants.textTertiary,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: AppConstants.spacingM),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isCompleted
+                    ? AppConstants.textPrimary
+                    : AppConstants.textSecondary,
+                fontWeight: isCompleted ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ),
+          if (isCompleted)
+            Icon(
+              Icons.check_circle,
+              color: AppConstants.primaryColor,
+              size: 20,
+            ),
+        ],
+      ),
+    );
   }
 
   String _getUserName() {
@@ -94,11 +279,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       body: Consumer<WorkoutProvider>(
         builder: (context, workoutProvider, child) {
           if (workoutProvider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AppConstants.primaryColor,
-              ),
-            );
+            return _buildLoadingState();
           }
 
           if (workoutProvider.error != null) {

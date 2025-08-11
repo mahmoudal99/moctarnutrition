@@ -1,5 +1,7 @@
 import '../../../shared/models/workout_model.dart';
 import '../../../shared/models/workout_plan_model.dart';
+import '../../../shared/models/user_model.dart';
+import '../../../shared/services/ai_workout_service.dart';
 
 class WorkoutService {
   static final WorkoutService _instance = WorkoutService._internal();
@@ -570,5 +572,10 @@ class WorkoutService {
       return getBodyBuildingPlan(userId);
     }
     return null; // For other workout styles, return null (AI will handle)
+  }
+
+  // Generate AI workout plan for user
+  Future<WorkoutPlanModel> generateAIWorkoutPlan(UserModel user, String userId) async {
+    return await AIWorkoutService.generateWorkoutPlan(user, userId);
   }
 } 

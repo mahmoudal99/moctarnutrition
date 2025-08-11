@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import '../models/workout_plan_model.dart';
+import '../models/user_model.dart';
 import '../../features/workouts/data/workout_service.dart';
+import '../services/workout_plan_storage_service.dart';
 
 class WorkoutProvider extends ChangeNotifier {
   static final _logger = Logger();
@@ -17,21 +19,62 @@ class WorkoutProvider extends ChangeNotifier {
   final WorkoutService _workoutService = WorkoutService();
 
   // Load workout plan based on user's selected workout styles
-  Future<void> loadWorkoutPlan(String userId, List<String> workoutStyles) async {
+  Future<void> loadWorkoutPlan(String userId, List<String> workoutStyles, UserModel? user) async {
     _setLoading(true);
     _error = null;
 
     _logger.d('Loading workout plan for user $userId with styles: $workoutStyles');
 
     try {
-      final workoutPlan = _workoutService.getWorkoutPlanForUser(userId, workoutStyles);
+      // First, try to load from Firestore
+      final storedWorkoutPlan = await WorkoutPlanStorageService.getWorkoutPlan(userId);
       
-      if (workoutPlan != null) {
-        _logger.d('Workout plan loaded successfully: ${workoutPlan.title}');
-        _currentWorkoutPlan = workoutPlan;
+      if (storedWorkoutPlan != null) {
+        _logger.d('Found stored workout plan: ${storedWorkoutPlan.title}');
+        _currentWorkoutPlan = storedWorkoutPlan;
+        return;
+      }
+
+      // If no stored plan, check for predefined plans
+      final predefinedWorkoutPlan = _workoutService.getWorkoutPlanForUser(userId, workoutStyles);
+      
+      if (predefinedWorkoutPlan != null) {
+        _logger.d('Using predefined workout plan: ${predefinedWorkoutPlan.title}');
+        _currentWorkoutPlan = predefinedWorkoutPlan;
+        
+        // Save predefined plan to Firestore for consistency
+        try {
+          await WorkoutPlanStorageService.saveWorkoutPlan(predefinedWorkoutPlan);
+          _logger.d('Predefined workout plan saved to Firestore');
+        } catch (e) {
+          _logger.w('Failed to save predefined workout plan to Firestore: $e');
+          // Don't fail the operation if saving to Firestore fails
+        }
       } else {
-        _logger.i('No predefined workout plan found for styles: $workoutStyles');
-        _error = 'No predefined workout plan available for your selected styles. AI-generated plans coming soon!';
+        _logger.i('No predefined workout plan found for styles: $workoutStyles. Generating AI plan...');
+        
+        if (user != null) {
+          try {
+            final aiWorkoutPlan = await _workoutService.generateAIWorkoutPlan(user, userId);
+            _logger.d('AI workout plan generated successfully: ${aiWorkoutPlan.title}');
+            
+            // Save AI-generated plan to Firestore
+            try {
+              await WorkoutPlanStorageService.saveWorkoutPlan(aiWorkoutPlan);
+              _logger.d('AI workout plan saved to Firestore');
+            } catch (e) {
+              _logger.w('Failed to save AI workout plan to Firestore: $e');
+              // Don't fail the operation if saving to Firestore fails
+            }
+            
+            _currentWorkoutPlan = aiWorkoutPlan;
+          } catch (e) {
+            _logger.e('Failed to generate AI workout plan: $e');
+            _error = 'Failed to generate personalized workout plan. Please try again later.';
+          }
+        } else {
+          _error = 'Unable to generate personalized workout plan. Please update your profile preferences.';
+        }
       }
     } catch (e) {
       _logger.e('Error loading workout plan: $e');
@@ -73,6 +116,28 @@ class WorkoutProvider extends ChangeNotifier {
     _currentWorkoutPlan = null;
     _error = null;
     notifyListeners();
+  }
+
+  // Regenerate workout plan (for when user changes preferences)
+  Future<void> regenerateWorkoutPlan(String userId, List<String> workoutStyles, UserModel user) async {
+    _logger.i('Regenerating workout plan for user: $userId');
+    
+    try {
+      // Deactivate current workout plans
+      await WorkoutPlanStorageService.deactivateUserWorkoutPlans(userId);
+      
+      // Clear current plan
+      _currentWorkoutPlan = null;
+      notifyListeners();
+      
+      // Load new plan (this will generate new AI plan or use predefined)
+      await loadWorkoutPlan(userId, workoutStyles, user);
+      
+      _logger.i('Workout plan regenerated successfully');
+    } catch (e) {
+      _logger.e('Failed to regenerate workout plan: $e');
+      _error = 'Failed to regenerate workout plan. Please try again.';
+    }
   }
 
   void _setLoading(bool loading) {
