@@ -21,9 +21,7 @@ class DailyWorkoutCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            if (!dailyWorkout.isRestDay) {
-              _showWorkoutDetails(context);
-            }
+            _showWorkoutDetails(context);
           },
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
           child: Container(
@@ -46,25 +44,6 @@ class DailyWorkoutCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: isToday
-                            ? AppConstants.primaryColor
-                            : AppConstants.primaryColor.withOpacity(0.1),
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.radiusS),
-                      ),
-                      child: Icon(
-                        _getDayIcon(),
-                        color: isToday
-                            ? AppConstants.surfaceColor
-                            : AppConstants.primaryColor,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: AppConstants.spacingM),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,19 +94,36 @@ class DailyWorkoutCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (!dailyWorkout.isRestDay) ...[
-                      const Icon(
-                        Icons.chevron_right,
-                        color: AppConstants.textTertiary,
-                        size: 20,
-                      ),
-                    ],
+                    const Icon(
+                      Icons.chevron_right,
+                      color: AppConstants.textTertiary,
+                      size: 20,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 0),
-                if (dailyWorkout.isRestDay)
-                  ...[]
-                else ...[
+                if (dailyWorkout.isRestDay) ...[
+                  Text(
+                    dailyWorkout.restDay ?? 'Time to rest and recover!',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppConstants.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingS),
+                  Row(
+                    children: [
+                      _buildWorkoutInfo(
+                        Icons.bedtime,
+                        'Rest Day',
+                      ),
+                      const SizedBox(width: AppConstants.spacingM),
+                      _buildWorkoutInfo(
+                        Icons.healing,
+                        'Recovery',
+                      ),
+                    ],
+                  ),
+                ] else ...[
                   Text(
                     dailyWorkout.description,
                     style: AppTextStyles.bodySmall.copyWith(
@@ -247,12 +243,6 @@ class _WorkoutDetailsSheet extends StatelessWidget {
             padding: const EdgeInsets.all(AppConstants.spacingM),
             child: Row(
               children: [
-                const Icon(
-                  Icons.fitness_center,
-                  color: AppConstants.primaryColor,
-                  size: 24,
-                ),
-                const SizedBox(width: AppConstants.spacingM),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,19 +270,229 @@ class _WorkoutDetailsSheet extends StatelessWidget {
             ),
           ),
           const Divider(),
-          // Workout list
+          // Content based on whether it's a rest day or workout day
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(AppConstants.spacingM),
-              itemCount: dailyWorkout.workouts.length,
-              itemBuilder: (context, index) {
-                final workout = dailyWorkout.workouts[index];
-                return _WorkoutCard(workout: workout);
-              },
+            child: dailyWorkout.isRestDay
+                ? _buildRestDayContent(context)
+                : _buildWorkoutContent(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRestDayContent(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.spacingL),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          // Rest day title
+          Text(
+            _getRestDayTitle(),
+            style: AppTextStyles.heading4.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppConstants.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+          // Rest day message
+          Text(
+            dailyWorkout.restDay ?? 'Time to rest and recover!',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppConstants.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppConstants.spacingXL),
+          // Benefits of rest
+          Container(
+            padding: const EdgeInsets.all(AppConstants.spacingM),
+            decoration: BoxDecoration(
+              color: AppConstants.backgroundColor,
+              borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              border: Border.all(
+                color: AppConstants.textTertiary.withOpacity(0.2),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Why Rest Days Matter:',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppConstants.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                ..._getRestDayBenefits(),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  IconData _getRestDayIcon() {
+    final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
+    
+    if (restDayMessage.contains('active') || restDayMessage.contains('light')) {
+      return Icons.directions_walk;
+    } else if (restDayMessage.contains('stretch') || restDayMessage.contains('flexibility')) {
+      return Icons.accessibility;
+    } else if (restDayMessage.contains('yoga') || restDayMessage.contains('meditation')) {
+      return Icons.self_improvement;
+    } else {
+      return Icons.bedtime;
+    }
+  }
+
+  String _getRestDayTitle() {
+    final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
+    
+    if (restDayMessage.contains('active')) {
+      return 'Active Recovery';
+    } else if (restDayMessage.contains('stretch')) {
+      return 'Stretching Day';
+    } else if (restDayMessage.contains('yoga')) {
+      return 'Yoga Day';
+    } else {
+      return 'Rest Day';
+    }
+  }
+
+  List<Widget> _getRestDayBenefits() {
+    final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
+    final benefits = <Widget>[];
+    
+    if (restDayMessage.contains('active') || restDayMessage.contains('light')) {
+      benefits.addAll([
+        _buildRestBenefit(
+          Icons.directions_walk,
+          'Active Recovery',
+          'Light movement promotes blood flow and recovery',
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        _buildRestBenefit(
+          Icons.healing,
+          'Muscle Repair',
+          'Gentle activity helps muscles recover faster',
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        _buildRestBenefit(
+          Icons.psychology,
+          'Mental Clarity',
+          'Light exercise reduces stress and improves mood',
+        ),
+      ]);
+    } else if (restDayMessage.contains('stretch') || restDayMessage.contains('flexibility')) {
+      benefits.addAll([
+        _buildRestBenefit(
+          Icons.accessibility,
+          'Flexibility',
+          'Improves range of motion and joint health',
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        _buildRestBenefit(
+          Icons.healing,
+          'Muscle Recovery',
+          'Stretching helps release muscle tension',
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        _buildRestBenefit(
+          Icons.trending_up,
+          'Injury Prevention',
+          'Better flexibility reduces injury risk',
+        ),
+      ]);
+    } else if (restDayMessage.contains('yoga') || restDayMessage.contains('meditation')) {
+      benefits.addAll([
+        _buildRestBenefit(
+          Icons.self_improvement,
+          'Mind-Body Connection',
+          'Yoga promotes mental and physical balance',
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        _buildRestBenefit(
+          Icons.psychology,
+          'Stress Relief',
+          'Meditation and breathing reduce stress',
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        _buildRestBenefit(
+          Icons.healing,
+          'Recovery',
+          'Gentle poses aid muscle recovery',
+        ),
+      ]);
+    } else {
+      benefits.addAll([
+        _buildRestBenefit(
+          Icons.healing,
+          'Muscle Recovery',
+          'Allows muscles to repair and grow stronger',
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        _buildRestBenefit(
+          Icons.psychology,
+          'Mental Refresh',
+          'Reduces mental fatigue and improves focus',
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        _buildRestBenefit(
+          Icons.trending_up,
+          'Performance Boost',
+          'Prevents overtraining and improves future workouts',
+        ),
+      ]);
+    }
+    
+    return benefits;
+  }
+
+  Widget _buildRestBenefit(IconData icon, String title, String description) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: AppConstants.primaryColor,
+        ),
+        const SizedBox(width: AppConstants.spacingS),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppConstants.textPrimary,
+                ),
+              ),
+              Text(
+                description,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWorkoutContent(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      itemCount: dailyWorkout.workouts.length,
+      itemBuilder: (context, index) {
+        final workout = dailyWorkout.workouts[index];
+        return _WorkoutCard(workout: workout);
+      },
     );
   }
 }
