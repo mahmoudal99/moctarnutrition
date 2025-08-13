@@ -1,3 +1,5 @@
+import 'package:champions_gym_app/shared/models/workout_plan_model.dart';
+import 'package:champions_gym_app/shared/models/workout_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -22,8 +24,33 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadWorkoutPlan();
+      _loadWorkoutPlanIfNeeded();
     });
+  }
+
+  Future<void> _loadWorkoutPlanIfNeeded() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    Provider.of<UserProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
+
+    // Only load if user is authenticated and no current workout plan exists
+    if (authProvider.isAuthenticated && 
+        authProvider.userModel != null && 
+        workoutProvider.currentWorkoutPlan == null) {
+      
+      final workoutStyles =
+          authProvider.userModel!.preferences.preferredWorkoutStyles;
+      _logger.d(
+          'Loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
+      await workoutProvider.loadWorkoutPlan(
+          authProvider.userModel!.id, workoutStyles, authProvider.userModel);
+    } else if (workoutProvider.currentWorkoutPlan != null) {
+      _logger.d('Workout plan already loaded, skipping API call');
+    } else {
+      _logger.w(
+          'Cannot load workout plan: user not authenticated or userModel is null');
+    }
   }
 
   Future<void> _loadWorkoutPlan() async {
@@ -36,12 +63,30 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       final workoutStyles =
           authProvider.userModel!.preferences.preferredWorkoutStyles;
       _logger.d(
-          'Loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
+          'Force loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
       await workoutProvider.loadWorkoutPlan(
           authProvider.userModel!.id, workoutStyles, authProvider.userModel);
     } else {
       _logger.w(
           'Cannot load workout plan: user not authenticated or userModel is null');
+    }
+  }
+
+  Future<void> _refreshWorkoutPlan() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
+
+    if (authProvider.isAuthenticated && authProvider.userModel != null) {
+      // Clear local cache to force refresh from server
+      await workoutProvider.clearLocalCache();
+      
+      final workoutStyles =
+          authProvider.userModel!.preferences.preferredWorkoutStyles;
+      _logger.d(
+          'Refreshing workout plan for user ${authProvider.userModel!.id}');
+      await workoutProvider.loadWorkoutPlan(
+          authProvider.userModel!.id, workoutStyles, authProvider.userModel);
     }
   }
 
@@ -220,7 +265,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             ),
           ),
           if (isCompleted)
-            Icon(
+            const Icon(
               Icons.check_circle,
               color: AppConstants.primaryColor,
               size: 20,
@@ -238,6 +283,47 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       return name.split(' ').first;
     }
     return 'there';
+  }
+
+  String _getWorkoutMessage(DailyWorkout? todayWorkout) {
+    if (todayWorkout == null) {
+      return 'Ready for your workout?';
+    }
+
+    if (todayWorkout.isRestDay) {
+      return 'Time to rest and recover!';
+    }
+
+    // Check if it's a specific type of workout day
+    final workoutCount = todayWorkout.workouts.length;
+    final estimatedDuration = todayWorkout.estimatedDuration;
+    
+    if (workoutCount == 1) {
+      final workout = todayWorkout.workouts.first;
+      final category = workout.category.toString().split('.').last.toLowerCase();
+      
+      // Provide more specific messages based on workout category
+      switch (workout.category) {
+        case WorkoutCategory.strength:
+          return 'Ready to build strength?';
+        case WorkoutCategory.cardio:
+          return 'Ready to boost your cardio?';
+        case WorkoutCategory.hiit:
+          return 'Ready for an intense HIIT session?';
+        case WorkoutCategory.flexibility:
+          return 'Ready to improve flexibility?';
+        case WorkoutCategory.yoga:
+          return 'Ready for your yoga practice?';
+        case WorkoutCategory.pilates:
+          return 'Ready for your Pilates session?';
+        default:
+          return 'Ready for your $category workout?';
+      }
+    } else if (workoutCount > 1) {
+      return 'Ready for your ${workoutCount}-workout session?';
+    } else {
+      return 'Ready for your workout?';
+    }
   }
 
   Widget _getUserProfileIcon() {
@@ -383,7 +469,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     final workoutPlan = workoutProvider.currentWorkoutPlan!;
     final todayWorkout = workoutProvider.getTodayWorkout();
 
-    return CustomScrollView(
+    return RefreshIndicator(
+      onRefresh: _refreshWorkoutPlan,
+      child: CustomScrollView(
       slivers: [
         SliverAppBar(
           expandedHeight: 140,
@@ -418,7 +506,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     ),
                     const SizedBox(height: AppConstants.spacingXS),
                     Text(
-                      'Ready for your workout?',
+                      _getWorkoutMessage(todayWorkout),
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppConstants.textSecondary,
                       ),
@@ -453,7 +541,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   'Weekly Plan',
                   style: AppTextStyles.heading4,
                 ),
-                const SizedBox(height: AppConstants.spacingM),
               ],
             ),
           ),
@@ -482,6 +569,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           child: SizedBox(height: 128),
         ),
       ],
+      ),
     );
   }
 }

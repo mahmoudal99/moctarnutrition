@@ -1,3 +1,5 @@
+import 'package:champions_gym_app/features/profile/presentation/screens/nutrition_preferences_screen.dart';
+import 'package:champions_gym_app/features/profile/presentation/screens/workout_preferences_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +20,7 @@ import 'privacy_policy_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   static final _logger = Logger();
+
   const ProfileScreen({super.key});
 
   @override
@@ -68,7 +71,11 @@ class ProfileScreen extends StatelessWidget {
                 const _SectionHeader(title: 'Settings'),
                 const NotificationsToggle(),
                 const RemindersToggle(),
-                ...settings.where((item) => item.label != 'Notifications' && item.label != 'Reminders').map((item) => _SettingsTile(item: item)),
+                ...settings
+                    .where((item) =>
+                        item.label != 'Notifications' &&
+                        item.label != 'Reminders')
+                    .map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 24),
                 const _SectionHeader(title: 'Privacy'),
                 ...privacy.map((item) => _SettingsTile(item: item)),
@@ -678,14 +685,22 @@ List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
       label: 'Workout Preferences',
       icon: Icons.fitness_center,
       onTap: () {
-        // TODO: Navigate to workout preferences
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const WorkoutPreferencesScreen(),
+          ),
+        );
       },
     ),
     _MockSettingsItem(
       label: 'Nutrition Preferences',
       icon: Icons.restaurant,
       onTap: () {
-        // TODO: Navigate to nutrition preferences
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const NutritionPreferencesScreen(),
+          ),
+        );
       },
     ),
     // _MockSettingsItem(

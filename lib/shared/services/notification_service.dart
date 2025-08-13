@@ -242,7 +242,7 @@ class NotificationService {
       );
 
       await _flutterLocalNotificationsPlugin.zonedSchedule(
-        2, // Unique ID for weekly reminders
+        2,
         'Weekly Check-in Reminder 📊',
         'Don\'t forget to complete your weekly check-in! Track your progress and stay motivated 💪',
         nextSunday,

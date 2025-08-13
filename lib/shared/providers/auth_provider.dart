@@ -5,6 +5,7 @@ import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/user_local_storage_service.dart';
 import '../services/onboarding_service.dart';
+import '../services/workout_plan_local_storage_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   static final _logger = Logger();
@@ -42,6 +43,7 @@ class AuthProvider extends ChangeNotifier {
         _logger.i('AuthProvider - User signed out, clearing data');
         _userModel = null;
         await _storageService.clearUser();
+        await WorkoutPlanLocalStorageService.clearWorkoutPlan();
       }
       
       _error = null;
@@ -248,6 +250,9 @@ class AuthProvider extends ChangeNotifier {
       
       // Reset onboarding state when user signs out
       await OnboardingService.resetOnboardingState();
+      
+      // Clear workout plan cache when user signs out
+      await WorkoutPlanLocalStorageService.clearWorkoutPlan();
     } catch (e) {
       _error = e.toString();
     } finally {
