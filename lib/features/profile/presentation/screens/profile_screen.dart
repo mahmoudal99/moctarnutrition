@@ -676,7 +676,9 @@ void _showDeleteAccountDialog(BuildContext context) {
           ),
           actions: [
             TextButton(
-              onPressed: authProvider.isLoading ? null : () => Navigator.of(context).pop(),
+              onPressed: authProvider.isLoading
+                  ? null
+                  : () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
@@ -709,15 +711,16 @@ void _showDeleteAccountDialog(BuildContext context) {
 }
 
 void _handleDeleteAccount(BuildContext context) async {
-  final authProvider = Provider.of<app_auth.AuthProvider>(context, listen: false);
-  
+  final authProvider =
+      Provider.of<app_auth.AuthProvider>(context, listen: false);
+
   try {
     final success = await authProvider.deleteAccount();
-    
+
     if (success && context.mounted) {
       // Navigate to get started screen after successful deletion
       context.go('/get-started');
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Account deleted successfully'),
