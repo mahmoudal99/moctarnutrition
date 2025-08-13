@@ -95,6 +95,16 @@ class AuthProvider extends ChangeNotifier {
       final userModel = await AuthService.getCurrentUserModel();
       if (userModel != null) {
         _logger.i('AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
+        
+        // Check if this is a different user than the previously cached one
+        final cachedUser = await _storageService.loadUser();
+        final isDifferentUser = cachedUser?.id != userModel.id;
+        
+        if (isDifferentUser) {
+          _logger.i('AuthProvider - Different user detected, clearing workout plan cache');
+          await WorkoutPlanLocalStorageService.clearWorkoutPlan();
+        }
+        
         _userModel = userModel;
         await _storageService.saveUser(userModel);
       } else {

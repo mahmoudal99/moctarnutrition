@@ -28,29 +28,39 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     });
   }
 
+
+
   Future<void> _loadWorkoutPlanIfNeeded() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     Provider.of<UserProvider>(context, listen: false);
     final workoutProvider =
         Provider.of<WorkoutProvider>(context, listen: false);
 
-    // Only load if user is authenticated and no current workout plan exists
-    if (authProvider.isAuthenticated && 
-        authProvider.userModel != null && 
-        workoutProvider.currentWorkoutPlan == null) {
-      
-      final workoutStyles =
-          authProvider.userModel!.preferences.preferredWorkoutStyles;
-      _logger.d(
-          'Loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
-      await workoutProvider.loadWorkoutPlan(
-          authProvider.userModel!.id, workoutStyles, authProvider.userModel);
-    } else if (workoutProvider.currentWorkoutPlan != null) {
-      _logger.d('Workout plan already loaded, skipping API call');
-    } else {
-      _logger.w(
-          'Cannot load workout plan: user not authenticated or userModel is null');
+    // Check if user is authenticated
+    if (!authProvider.isAuthenticated || authProvider.userModel == null) {
+      _logger.w('Cannot load workout plan: user not authenticated or userModel is null');
+      return;
     }
+
+    // Check if the current workout plan belongs to the current user
+    final currentWorkoutPlan = workoutProvider.currentWorkoutPlan;
+    if (currentWorkoutPlan != null) {
+      if (currentWorkoutPlan.userId == authProvider.userModel!.id) {
+        _logger.d('Workout plan already loaded for current user, skipping API call');
+        return;
+      } else {
+        _logger.d('Workout plan belongs to different user, clearing and reloading');
+        await workoutProvider.clearWorkoutPlanForUserChange();
+      }
+    }
+
+    // Load workout plan for current user
+    final workoutStyles =
+        authProvider.userModel!.preferences.preferredWorkoutStyles;
+    _logger.d(
+        'Loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
+    await workoutProvider.loadWorkoutPlan(
+        authProvider.userModel!.id, workoutStyles, authProvider.userModel);
   }
 
   Future<void> _loadWorkoutPlan() async {
@@ -362,8 +372,18 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      body: Consumer<WorkoutProvider>(
-        builder: (context, workoutProvider, child) {
+      body: Consumer2<AuthProvider, WorkoutProvider>(
+        builder: (context, authProvider, workoutProvider, child) {
+          // Check if user changed and workout plan needs to be reloaded
+          if (authProvider.isAuthenticated && 
+              authProvider.userModel != null && 
+              workoutProvider.currentWorkoutPlan != null &&
+              workoutProvider.currentWorkoutPlan!.userId != authProvider.userModel!.id) {
+            _logger.d('User changed, reloading workout plan');
+            // Use Future.microtask to avoid build-time side effects
+            Future.microtask(() => _loadWorkoutPlanIfNeeded());
+          }
+
           if (workoutProvider.isLoading) {
             return _buildLoadingState();
           }

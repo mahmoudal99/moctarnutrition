@@ -146,6 +146,14 @@ class WorkoutProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Clear workout plan for user change
+  Future<void> clearWorkoutPlanForUserChange() async {
+    _logger.d('Clearing workout plan for user change');
+    _currentWorkoutPlan = null;
+    _error = null;
+    notifyListeners();
+  }
+
   // Clear local cache
   Future<void> clearLocalCache() async {
     try {
