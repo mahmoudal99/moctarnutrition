@@ -424,6 +424,99 @@ class AuthService {
     }
   }
 
+  /// Delete user account
+  static Future<void> deleteAccount() async {
+    try {
+      _logger.i('Attempting to delete user account');
+      
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No user is currently signed in');
+      }
+
+      final userId = currentUser.uid;
+      
+      // Delete all user data from Firestore
+      await _retryFirestoreOperation(() async {
+        _logger.i('Deleting all user data from Firestore: $userId');
+        
+        // Delete user document
+        await _firestore.collection('users').doc(userId).delete();
+        _logger.i('User document deleted successfully');
+        
+        // Delete all check-ins for the user
+        await _deleteUserCheckins(userId);
+        
+        // Delete all workout plans for the user
+        await _deleteUserWorkoutPlans(userId);
+        
+        _logger.i('All user data deleted successfully');
+      });
+
+      // Delete Firebase Auth account
+      _logger.i('Deleting Firebase Auth account: $userId');
+      await currentUser.delete();
+      _logger.i('Firebase Auth account deleted successfully');
+
+      // Clear local storage
+      await _storageService.clearUser();
+      
+      _logger.i('User account deleted successfully');
+    } on FirebaseAuthException catch (e) {
+      _logger.e('Firebase Auth error during account deletion: ${e.code} - ${e.message}');
+      throw _handleFirebaseAuthException(e);
+    } catch (e) {
+      _logger.e('Unexpected error during account deletion: $e');
+      throw Exception('Failed to delete account: $e');
+    }
+  }
+
+  /// Delete all check-ins for a user
+  static Future<void> _deleteUserCheckins(String userId) async {
+    try {
+      _logger.i('Deleting all check-ins for user: $userId');
+      
+      final querySnapshot = await _firestore
+          .collection('checkins')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      final batch = _firestore.batch();
+      for (final doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      
+      await batch.commit();
+      _logger.i('Deleted ${querySnapshot.docs.length} check-ins for user: $userId');
+    } catch (e) {
+      _logger.e('Error deleting user check-ins: $e');
+      // Don't rethrow - we want to continue with account deletion even if check-in deletion fails
+    }
+  }
+
+  /// Delete all workout plans for a user
+  static Future<void> _deleteUserWorkoutPlans(String userId) async {
+    try {
+      _logger.i('Deleting all workout plans for user: $userId');
+      
+      final querySnapshot = await _firestore
+          .collection('workout_plans')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      final batch = _firestore.batch();
+      for (final doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      
+      await batch.commit();
+      _logger.i('Deleted ${querySnapshot.docs.length} workout plans for user: $userId');
+    } catch (e) {
+      _logger.e('Error deleting user workout plans: $e');
+      // Don't rethrow - we want to continue with account deletion even if workout plan deletion fails
+    }
+  }
+
   /// Get current user model
   static Future<UserModel?> getCurrentUserModel() async {
     final user = currentUser;
@@ -527,6 +620,12 @@ class AuthService {
         return Exception('The password reset link has expired. Please request a new one.');
       case 'user-mismatch':
         return Exception('The email address doesn\'t match the reset link. Please use the correct email.');
+      case 'requires-recent-login':
+        return Exception('For security reasons, please sign in again before deleting your account.');
+      case 'user-token-expired':
+        return Exception('Your session has expired. Please sign in again.');
+      case 'invalid-credential':
+        return Exception('Invalid credentials. Please check your email and password.');
       default:
         return Exception('Authentication failed: ${e.message}');
     }

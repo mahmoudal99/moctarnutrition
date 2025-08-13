@@ -302,6 +302,35 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Delete user account
+  Future<bool> deleteAccount() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      await AuthService.deleteAccount();
+      
+      // Clear local state
+      _firebaseUser = null;
+      _userModel = null;
+      
+      // Reset onboarding state when user deletes account
+      await OnboardingService.resetOnboardingState();
+      
+      // Clear workout plan cache when user deletes account
+      await WorkoutPlanLocalStorageService.clearWorkoutPlan();
+      
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// Clear error
   void clearError() {
     _error = null;
