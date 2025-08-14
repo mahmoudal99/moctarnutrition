@@ -143,6 +143,21 @@ class UserPreferences {
   final List<String> preferredCuisines;
   final List<String> foodsToAvoid;
   final List<String> favoriteFoods;
+  
+  // Allergies & Intolerances
+  final List<Map<String, dynamic>> allergies;
+  
+  // Meal Timing Preferences
+  final Map<String, dynamic>? mealTimingPreferences;
+  
+  // Batch Cooking Preferences
+  final Map<String, dynamic>? batchCookingPreferences;
+  
+  // Protein Targets
+  final Map<String, dynamic>? proteinTargets;
+  
+  // Calorie Targets
+  final Map<String, dynamic>? calorieTargets;
 
   UserPreferences({
     required this.fitnessGoal,
@@ -159,6 +174,11 @@ class UserPreferences {
     this.preferredCuisines = const [],
     this.foodsToAvoid = const [],
     this.favoriteFoods = const [],
+    this.allergies = const [],
+    this.mealTimingPreferences,
+    this.batchCookingPreferences,
+    this.proteinTargets,
+    this.calorieTargets,
   });
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
@@ -183,6 +203,11 @@ class UserPreferences {
       preferredCuisines: List<String>.from(json['preferredCuisines'] ?? []),
       foodsToAvoid: List<String>.from(json['foodsToAvoid'] ?? []),
       favoriteFoods: List<String>.from(json['favoriteFoods'] ?? []),
+      allergies: List<Map<String, dynamic>>.from(json['allergies'] ?? []),
+      mealTimingPreferences: json['mealTimingPreferences'] as Map<String, dynamic>?,
+      batchCookingPreferences: json['batchCookingPreferences'] as Map<String, dynamic>?,
+      proteinTargets: json['proteinTargets'] as Map<String, dynamic>?,
+      calorieTargets: json['calorieTargets'] as Map<String, dynamic>?,
     );
   }
 
@@ -202,6 +227,11 @@ class UserPreferences {
       'preferredCuisines': preferredCuisines,
       'foodsToAvoid': foodsToAvoid,
       'favoriteFoods': favoriteFoods,
+      'allergies': allergies,
+      'mealTimingPreferences': mealTimingPreferences,
+      'batchCookingPreferences': batchCookingPreferences,
+      'proteinTargets': proteinTargets,
+      'calorieTargets': calorieTargets,
     };
   }
 
@@ -220,6 +250,11 @@ class UserPreferences {
     List<String>? preferredCuisines,
     List<String>? foodsToAvoid,
     List<String>? favoriteFoods,
+    List<Map<String, dynamic>>? allergies,
+    Map<String, dynamic>? mealTimingPreferences,
+    Map<String, dynamic>? batchCookingPreferences,
+    Map<String, dynamic>? proteinTargets,
+    Map<String, dynamic>? calorieTargets,
   }) {
     return UserPreferences(
       fitnessGoal: fitnessGoal ?? this.fitnessGoal,
@@ -236,6 +271,11 @@ class UserPreferences {
       preferredCuisines: preferredCuisines ?? this.preferredCuisines,
       foodsToAvoid: foodsToAvoid ?? this.foodsToAvoid,
       favoriteFoods: favoriteFoods ?? this.favoriteFoods,
+      allergies: allergies ?? this.allergies,
+      mealTimingPreferences: mealTimingPreferences ?? this.mealTimingPreferences,
+      batchCookingPreferences: batchCookingPreferences ?? this.batchCookingPreferences,
+      proteinTargets: proteinTargets ?? this.proteinTargets,
+      calorieTargets: calorieTargets ?? this.calorieTargets,
     );
   }
 
@@ -255,6 +295,11 @@ class UserPreferences {
       preferredCuisines: [],
       foodsToAvoid: [],
       favoriteFoods: [],
+      allergies: [],
+      mealTimingPreferences: null,
+      batchCookingPreferences: null,
+      proteinTargets: null,
+      calorieTargets: null,
     );
   }
 } 
@@ -282,7 +327,16 @@ class DietPlanPreferences {
   final bool weeklyRotation;
   final bool remindersEnabled;
 
+  // Calculated nutrition targets
   final int targetCalories;
+  final int? targetProtein; // Daily protein target in grams
+  final Map<String, dynamic>? proteinTargets; // Full protein targets object
+  final Map<String, dynamic>? calorieTargets; // Full calorie targets object
+
+  // Additional onboarding data
+  final List<Map<String, dynamic>>? allergies; // Allergies & intolerances
+  final Map<String, dynamic>? mealTimingPreferences; // Meal timing & frequency
+  final Map<String, dynamic>? batchCookingPreferences; // Batch cooking preferences
 
   DietPlanPreferences({
     required this.age,
@@ -302,5 +356,11 @@ class DietPlanPreferences {
     required this.weeklyRotation,
     required this.remindersEnabled,
     required this.targetCalories,
+    this.targetProtein,
+    this.proteinTargets,
+    this.calorieTargets,
+    this.allergies,
+    this.mealTimingPreferences,
+    this.batchCookingPreferences,
   });
 } 

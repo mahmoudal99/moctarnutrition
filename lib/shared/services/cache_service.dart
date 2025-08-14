@@ -22,6 +22,7 @@ class CacheService {
       'fitnessGoal': preferences.fitnessGoal.name,
       'activityLevel': preferences.activityLevel.name,
       'targetCalories': preferences.targetCalories,
+      'targetProtein': preferences.targetProtein,
       'dietaryRestrictions': preferences.dietaryRestrictions.toList()..sort(),
       'preferredCuisines': preferences.preferredCuisines.toList()..sort(),
       'foodsToAvoid': preferences.foodsToAvoid.toList()..sort(),
@@ -30,6 +31,9 @@ class CacheService {
       'nutritionGoal': preferences.nutritionGoal,
       'weeklyRotation': preferences.weeklyRotation,
       'remindersEnabled': preferences.remindersEnabled,
+      'allergies': preferences.allergies?.map((a) => a['name']).toList()?..sort(),
+      'mealTiming': preferences.mealTimingPreferences,
+      'batchCooking': preferences.batchCookingPreferences,
     };
 
     final jsonString = jsonEncode(data);

@@ -17,6 +17,9 @@ import '../steps/onboarding_workout_styles_step.dart';
 import '../steps/onboarding_welcome_step.dart';
 import '../steps/onboarding_schedule_step.dart';
 import '../steps/onboarding_food_preferences_step.dart';
+import '../steps/onboarding_allergies_step.dart';
+import '../steps/onboarding_meal_timing_step.dart';
+import '../steps/onboarding_batch_cooking_step.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/services/auth_service.dart';
@@ -48,6 +51,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final TextEditingController _cuisineController = TextEditingController();
   final TextEditingController _avoidController = TextEditingController();
   final TextEditingController _favoriteController = TextEditingController();
+
+  // Allergies & Intolerances
+  final List<AllergyItem> _selectedAllergies = [];
+
+  // Meal Timing Preferences
+  MealTimingPreferences? _mealTimingPreferences;
+  
+  // Batch Cooking Preferences
+  BatchCookingPreferences? _batchCookingPreferences;
 
   // User metrics
   int _age = 25;
@@ -124,6 +136,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: "diet.json",
       color: AppConstants.successColor,
     ),
+    OnboardingStep(
+      title: 'Allergies & Intolerances',
+      subtitle: 'Keep you safe and healthy',
+      description:
+          'Tell us about any allergies or intolerances so we can ensure your meal plans are safe.',
+      icon: "heartbeat.json",
+      color: AppConstants.errorColor,
+    ),
+    OnboardingStep(
+      title: 'Meal Count & Timing',
+      subtitle: 'Your eating schedule',
+      description:
+          'Tell us about your meal frequency and preferred eating times.',
+      icon: "calendar.json",
+      color: AppConstants.accentColor,
+    ),
+    OnboardingStep(
+      title: 'Batch Cooking Preferences',
+      subtitle: 'Your meal preparation habits',
+      description:
+          'Tell us about your cooking frequency and batch size preferences.',
+      icon: "diet.json",
+      color: AppConstants.warningColor,
+    ),
   ];
 
   @override
@@ -160,6 +196,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     // Dietary Restrictions step: index 5
     // Workout Styles step: index 6
     // Food Preferences step: index 7
+    // Allergies step: index 8
+    // Meal Timing step: index 9
+    // Batch Cooking step: index 10
     if (_currentPage == 3 && _selectedFitnessGoal == null) {
       return const NeverScrollableScrollPhysics();
     }
@@ -344,6 +383,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return _buildWorkoutStylesStep();
       case 7:
         return _buildFoodPreferencesStep();
+      case 8:
+        return _buildAllergiesStep();
+      case 9:
+        return _buildMealTimingStep();
+      case 10:
+        return _buildBatchCookingStep();
       default:
         return const SizedBox.shrink();
     }
@@ -553,17 +598,52 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Widget _buildAllergiesStep() {
+    return OnboardingAllergiesStep(
+      selectedAllergies: _selectedAllergies,
+      onAllergiesChanged: (allergies) {
+        setState(() {
+          _selectedAllergies.clear();
+          _selectedAllergies.addAll(allergies);
+        });
+      },
+    );
+  }
+
+  Widget _buildMealTimingStep() {
+    return OnboardingMealTimingStep(
+      selectedPreferences: _mealTimingPreferences,
+      onPreferencesChanged: (preferences) {
+        setState(() {
+          _mealTimingPreferences = preferences;
+        });
+      },
+    );
+  }
+
+  Widget _buildBatchCookingStep() {
+    return OnboardingBatchCookingStep(
+      selectedPreferences: _batchCookingPreferences,
+      onPreferencesChanged: (preferences) {
+        setState(() {
+          _batchCookingPreferences = preferences;
+        });
+      },
+    );
+  }
+
   Widget _buildNavigationButtons() {
     final isDietaryStep = _currentPage == 5;
     final isWorkoutStep = _currentPage == 6;
     final isFoodPreferencesStep = _currentPage == 7;
-    final isNextEnabled = !isDietaryStep && !isWorkoutStep && !isFoodPreferencesStep
+    final isAllergiesStep = _currentPage == 8;
+    final isNextEnabled = !isDietaryStep && !isWorkoutStep && !isFoodPreferencesStep && !isAllergiesStep
         ? true
         : isDietaryStep
             ? _selectedDietaryRestrictions.isNotEmpty
             : isWorkoutStep
                 ? _selectedWorkoutStyles.isNotEmpty
-                : true; // Food preferences step is optional
+                : true; // Food preferences and allergies steps are optional
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(
@@ -908,6 +988,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _logger.i('Onboarding complete:');
     _logger.i('  Dietary Restrictions: ${_selectedDietaryRestrictions}');
     _logger.i('  Workout Styles: ${_selectedWorkoutStyles}');
+    // Convert allergies to JSON format for storage
+    final allergiesJson = _selectedAllergies.map((allergy) => allergy.toJson()).toList();
+    
+    // Convert meal timing preferences to JSON format for storage
+    final mealTimingJson = _mealTimingPreferences?.toJson();
+    
+    // Convert batch cooking preferences to JSON format for storage
+    final batchCookingJson = _batchCookingPreferences?.toJson();
+    
     // Create user preferences
     final preferences = UserPreferences(
       fitnessGoal: _selectedFitnessGoal,
@@ -922,6 +1011,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       preferredCuisines: List<String>.from(_preferredCuisines),
       foodsToAvoid: List<String>.from(_foodsToAvoid),
       favoriteFoods: List<String>.from(_favoriteFoods),
+      allergies: allergiesJson,
+      mealTimingPreferences: mealTimingJson,
+      batchCookingPreferences: batchCookingJson,
     );
 
     // Save onboarding data locally (Provider/SharedPreferences)
@@ -947,9 +1039,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await OnboardingService.markOnboardingAsSeen();
     await OnboardingService.markGetStartedAsSeen();
 
-    // Navigate to sign up/sign in or next step (e.g., subscription)
+    // Navigate to protein calculation screen
     if (mounted) {
-      context.push('/subscription');
+      context.push('/protein-calculation');
     }
   }
 

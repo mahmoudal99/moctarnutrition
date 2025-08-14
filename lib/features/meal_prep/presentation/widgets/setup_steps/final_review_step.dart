@@ -9,6 +9,7 @@ class FinalReviewStep extends StatelessWidget {
   final String? userName;
   final String? cheatDay;
   final int targetCalories;
+  final FitnessGoal? selectedFitnessGoal;
 
   const FinalReviewStep({
     super.key,
@@ -17,6 +18,7 @@ class FinalReviewStep extends StatelessWidget {
     this.userName,
     this.cheatDay,
     required this.targetCalories,
+    this.selectedFitnessGoal,
   });
 
   String _fitnessGoalName(FitnessGoal goal) {
@@ -34,6 +36,55 @@ class FinalReviewStep extends StatelessWidget {
     }
   }
 
+  String _getMealFrequencyDisplay() {
+    final mealTimingJson = userPreferences.mealTimingPreferences;
+    if (mealTimingJson == null) {
+      return '3 meals (default)';
+    }
+
+    final mealFrequency = mealTimingJson['mealFrequency'] as String?;
+    if (mealFrequency == null) {
+      return '3 meals (default)';
+    }
+
+    switch (mealFrequency) {
+      case 'threeMeals':
+        return '3 meals';
+      case 'threeMealsOneSnack':
+        return '3 meals + 1 snack';
+      case 'fourMeals':
+        return '4 meals';
+      case 'fourMealsOneSnack':
+        return '4 meals + 1 snack';
+      case 'fiveMeals':
+        return '5 meals';
+      case 'fiveMealsOneSnack':
+        return '5 meals + 1 snack';
+      case 'intermittentFasting':
+        final fastingType = mealTimingJson['fastingType'] as String?;
+        switch (fastingType) {
+          case 'sixteenEight':
+            return '16:8 Intermittent Fasting';
+          case 'eighteenSix':
+            return '18:6 Intermittent Fasting';
+          case 'twentyFour':
+            return '20:4 Intermittent Fasting';
+          case 'alternateDay':
+            return 'Alternate Day Fasting';
+          case 'fiveTwo':
+            return '5:2 Fasting';
+          case 'custom':
+            return 'Custom Fasting';
+          default:
+            return '16:8 Intermittent Fasting';
+        }
+      case 'custom':
+        return 'Custom';
+      default:
+        return '3 meals (default)';
+    }
+  }
+
   IconData _iconFor(String key) {
     switch (key) {
       case 'days':
@@ -48,6 +99,8 @@ class FinalReviewStep extends StatelessWidget {
         return Icons.fitness_center;
       case 'cheat':
         return Icons.cake;
+      case 'meals':
+        return Icons.restaurant;
       default:
         return Icons.info_outline;
     }
@@ -91,12 +144,26 @@ class FinalReviewStep extends StatelessWidget {
                       icon: _iconFor('calories'),
                       label: 'Daily Calories',
                       value: '$targetCalories calories',
+                      isFromClient:
+                          targetCalories == userPreferences.targetCalories,
+                      clientValue: userPreferences.targetCalories > 0
+                          ? '${userPreferences.targetCalories} calories (client)'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     _reviewRow(
                       icon: _iconFor('goal'),
                       label: 'Fitness Goal',
-                      value: _fitnessGoalName(userPreferences.fitnessGoal),
+                      value: selectedFitnessGoal != null ? _fitnessGoalName(selectedFitnessGoal!) : _fitnessGoalName(userPreferences.fitnessGoal),
+                      isFromClient: selectedFitnessGoal == null,
+                      clientValue:
+                          '${_fitnessGoalName(userPreferences.fitnessGoal)} (client)',
+                    ),
+                    const SizedBox(height: 16),
+                    _reviewRow(
+                      icon: _iconFor('meals'),
+                      label: 'Meal Frequency',
+                      value: _getMealFrequencyDisplay(),
                     ),
                     const SizedBox(height: 16),
                     _reviewRow(
@@ -137,28 +204,59 @@ class FinalReviewStep extends StatelessWidget {
     required IconData icon,
     required String label,
     required String value,
+    bool isFromClient = false,
+    String? clientValue,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           decoration: BoxDecoration(
-            color: AppConstants.primaryColor.withOpacity(0.08),
+            color: isFromClient
+                ? AppConstants.successColor.withOpacity(0.08)
+                : AppConstants.primaryColor.withOpacity(0.08),
             borderRadius: BorderRadius.circular(8),
           ),
           padding: const EdgeInsets.all(10),
-          child: Icon(icon, color: AppConstants.primaryColor, size: 20),
+          child: Icon(icon,
+              color: isFromClient
+                  ? AppConstants.successColor
+                  : AppConstants.primaryColor,
+              size: 20),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppConstants.textSecondary,
-                ),
+              Row(
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppConstants.textSecondary,
+                    ),
+                  ),
+                  if (isFromClient) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppConstants.successColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'CLIENT',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppConstants.successColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               const SizedBox(height: 2),
               Text(
@@ -166,6 +264,16 @@ class FinalReviewStep extends StatelessWidget {
                 style: AppTextStyles.bodyMedium
                     .copyWith(fontWeight: FontWeight.w600),
               ),
+              if (clientValue != null && !isFromClient) ...[
+                const SizedBox(height: 2),
+                Text(
+                  clientValue,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.textTertiary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

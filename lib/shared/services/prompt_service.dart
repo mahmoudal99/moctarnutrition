@@ -95,28 +95,45 @@ You are a professional nutritionist in Ireland. Generate a meal plan for Day $da
 
 **User Profile:**
 - Age: ${preferences.age}, Weight: ${preferences.weight}kg, Height: ${preferences.height}cm, BMI: $bmi
-- Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}, Target: ${preferences.targetCalories} cal/day
+- Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}
 - Activity: ${_getActivityLevelDescription(preferences.activityLevel)}
 - Restrictions: ${preferences.dietaryRestrictions.join(', ').isEmpty ? 'None' : preferences.dietaryRestrictions.join(', ')}
 - Cuisines: ${preferences.preferredCuisines.join(', ').isEmpty ? 'Any' : preferences.preferredCuisines.join(', ')}
 - Avoid: ${preferences.foodsToAvoid.join(', ').isEmpty ? 'None' : preferences.foodsToAvoid.join(', ')}
+
+**Allergies & Intolerances (CRITICAL - NEVER INCLUDE THESE):**
+${_getAllergiesInfo(preferences)}
+
+**Meal Timing & Frequency:**
+${_getMealTimingInfo(preferences)}
+
+**Batch Cooking Preferences:**
+${_getBatchCookingInfo(preferences)}
+
+**Nutrition Targets (CRITICAL - MUST BE RESPECTED):**
+- Daily Calories: ${preferences.targetCalories} calories (MUST match within ±5%)
+- Daily Protein: ${preferences.targetProtein ?? 'Not specified'} grams (MUST be met)
+- Protein Distribution: ${_getProteinDistributionInfo(preferences)}
+- Macronutrient Breakdown: ${_getMacroBreakdownInfo(preferences)}
 
 **Requirements:**
 - Include exactly ${requiredMeals.length} meals: ${requiredMeals.map((type) => type.name).join(', ')}
 - Use precise ingredient names matching USDA database
 - Focus on Irish supermarket availability (Lidl, Aldi, Tesco, Spar, SuperValu)
 - Each ingredient must include estimated nutrition per specified amount
-- Calculate daily calorie needs as Total Daily Energy Expenditure (TDEE), including basal metabolism (BMR), digestion (TEF), exercise (EAT), and daily non-exercise activities (NEAT)
-- Set the target calories as TDEE adjusted for the user's goal (weight loss, muscle gain, maintenance)
-- Distribute total daily calories approximately as:
-  - Breakfast: 20-25%
-  - Lunch: 30-35%
-  - Dinner: 30-35%
-  - Snacks (if any): 10-15%
-- Each meal's ingredient calories must sum closely to the meal's allocated calories
-- Total daily calories across all meals must match the target within ±5%
-- Prioritize macronutrient balance and nutrient-dense foods, focusing on adequate protein, healthy fats, and quality carbohydrates according to client preferences and restrictions
-- Avoid arbitrary or random calorie splits; model the reasoning process of a personal trainer tailoring meal plans based on client profile, lifestyle, and goals
+- **CRITICAL**: Total daily calories MUST equal ${preferences.targetCalories} ±5%
+- **CRITICAL**: Total daily protein MUST equal ${preferences.targetProtein ?? 'target'} grams
+- **CRITICAL**: NEVER include any ingredients from the allergies list
+- Distribute calories and protein across meals as follows:
+  - Breakfast: 20-25% of daily calories and protein
+  - Lunch: 30-35% of daily calories and protein  
+  - Dinner: 30-35% of daily calories and protein
+  - Snacks (if any): 10-15% of daily calories and protein
+- Each meal's ingredient calories and protein must sum closely to the meal's allocated amounts
+- Prioritize protein-rich ingredients to meet the daily protein target
+- Ensure macronutrient balance aligns with the calculated targets
+- Consider batch cooking preferences when designing recipes
+- Avoid arbitrary splits; use the exact nutrition targets provided
 
 **One-Shot Example:**
 
@@ -552,7 +569,7 @@ You are a professional nutritionist in Ireland. Generate a $days-day meal plan.
 
 **User Profile:**
 - Age: ${preferences.age}, Weight: ${preferences.weight}kg, Height: ${preferences.height}cm, BMI: $bmi
-- Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}, Target: ${preferences.targetCalories} cal/day
+- Goal: ${_getFitnessGoalDescription(preferences.fitnessGoal)}
 - Activity: ${_getActivityLevelDescription(preferences.activityLevel)}
 - Restrictions: ${preferences.dietaryRestrictions.join(', ').isEmpty ? 'None' : preferences.dietaryRestrictions.join(', ')}
 - Cuisines: ${preferences.preferredCuisines.join(', ').isEmpty ? 'Any' : preferences.preferredCuisines.join(', ')}
@@ -560,22 +577,39 @@ You are a professional nutritionist in Ireland. Generate a $days-day meal plan.
 - Cheat Day: ${preferences.cheatDay ?? 'None'}
 - Weekly Rotation: ${preferences.weeklyRotation ? 'Yes' : 'No'}
 
+**Allergies & Intolerances (CRITICAL - NEVER INCLUDE THESE):**
+${_getAllergiesInfo(preferences)}
+
+**Meal Timing & Frequency:**
+${_getMealTimingInfo(preferences)}
+
+**Batch Cooking Preferences:**
+${_getBatchCookingInfo(preferences)}
+
+**Nutrition Targets (CRITICAL - MUST BE RESPECTED):**
+- Daily Calories: ${preferences.targetCalories} calories (MUST match within ±5%)
+- Daily Protein: ${preferences.targetProtein ?? 'Not specified'} grams (MUST be met)
+- Protein Distribution: ${_getProteinDistributionInfo(preferences)}
+- Macronutrient Breakdown: ${_getMacroBreakdownInfo(preferences)}
+
 **Requirements:**
 - Each day: exactly ${requiredMeals.length} meals (${requiredMeals.map((type) => type.name).join(', ')})
 - Use precise ingredient names matching USDA database
 - Focus on Irish supermarket availability
 - Each ingredient must include estimated nutrition per specified amount
-- Calculate daily calorie needs as Total Daily Energy Expenditure (TDEE), including basal metabolism (BMR), digestion (TEF), exercise (EAT), and daily non-exercise activities (NEAT)
-- Set the target calories as TDEE adjusted for the user's goal (weight loss, muscle gain, maintenance)
-- Distribute total daily calories approximately as:
-  - Breakfast: 20-25%
-  - Lunch: 30-35%
-  - Dinner: 30-35%
-  - Snacks (if any): 10-15%
-- Each meal's ingredient calories must sum closely to the meal's allocated calories
-- Total daily calories across all meals must match the target within ±5%
-- Prioritize macronutrient balance and nutrient-dense foods, focusing on adequate protein, healthy fats, and quality carbohydrates according to client preferences and restrictions
-- Avoid arbitrary or random calorie splits; model the reasoning process of a personal trainer tailoring meal plans based on client profile, lifestyle, and goals
+- **CRITICAL**: Each day's total calories MUST equal ${preferences.targetCalories} ±5%
+- **CRITICAL**: Each day's total protein MUST equal ${preferences.targetProtein ?? 'target'} grams
+- **CRITICAL**: NEVER include any ingredients from the allergies list
+- Distribute calories and protein across meals as follows:
+  - Breakfast: 20-25% of daily calories and protein
+  - Lunch: 30-35% of daily calories and protein  
+  - Dinner: 30-35% of daily calories and protein
+  - Snacks (if any): 10-15% of daily calories and protein
+- Each meal's ingredient calories and protein must sum closely to the meal's allocated amounts
+- Prioritize protein-rich ingredients to meet the daily protein target
+- Ensure macronutrient balance aligns with the calculated targets
+- Consider batch cooking preferences when designing recipes
+- Avoid arbitrary splits; use the exact nutrition targets provided
 - ${preferences.weeklyRotation ? 'Make each day unique' : 'Repeat same day structure'}
 
 **JSON Schema:**
@@ -725,5 +759,133 @@ Respond with JSON only. No commentary.
       default:
         return 'Unknown';
     }
+  }
+
+  /// Helper to get protein distribution information
+  static String _getProteinDistributionInfo(DietPlanPreferences preferences) {
+    if (preferences.proteinTargets == null) {
+      return 'Not specified';
+    }
+    
+    final mealDistribution = preferences.proteinTargets!['mealDistribution'] as List<dynamic>?;
+    if (mealDistribution == null || mealDistribution.isEmpty) {
+      return 'Not specified';
+    }
+    
+    final distribution = mealDistribution.map((meal) {
+      final name = meal['mealName'] ?? 'Unknown';
+      final protein = meal['proteinGrams'] ?? 0;
+      return '$name: ${protein}g';
+    }).join(', ');
+    
+    return distribution;
+  }
+
+  /// Helper to get macro breakdown information
+  static String _getMacroBreakdownInfo(DietPlanPreferences preferences) {
+    if (preferences.calorieTargets == null) {
+      return 'Not specified';
+    }
+    
+    final macros = preferences.calorieTargets!['macros'] as Map<String, dynamic>?;
+    if (macros == null) {
+      return 'Not specified';
+    }
+    
+    final protein = macros['protein'] as Map<String, dynamic>?;
+    final carbs = macros['carbs'] as Map<String, dynamic>?;
+    final fat = macros['fat'] as Map<String, dynamic>?;
+    
+    if (protein == null || carbs == null || fat == null) {
+      return 'Not specified';
+    }
+    
+    return 'Protein: ${protein['grams']}g (${protein['percentage']}%), Carbs: ${carbs['grams']}g (${carbs['percentage']}%), Fat: ${fat['grams']}g (${fat['percentage']}%)';
+  }
+
+  /// Helper to get allergies information
+  static String _getAllergiesInfo(DietPlanPreferences preferences) {
+    if (preferences.allergies == null || preferences.allergies!.isEmpty) {
+      return 'None specified';
+    }
+    
+    final allergyList = preferences.allergies!.map((allergy) {
+      final name = allergy['name'] as String? ?? 'Unknown';
+      final severity = allergy['severity'] as String? ?? 'mild';
+      final notes = allergy['notes'] as String?;
+      
+      String info = '$name ($severity)';
+      if (notes != null && notes.isNotEmpty) {
+        info += ' - $notes';
+      }
+      return info;
+    }).join(', ');
+    
+    return allergyList;
+  }
+
+  /// Helper to get meal timing information
+  static String _getMealTimingInfo(DietPlanPreferences preferences) {
+    if (preferences.mealTimingPreferences == null) {
+      return 'Not specified';
+    }
+    
+    final timing = preferences.mealTimingPreferences!;
+    final mealFrequency = timing['mealFrequency'] as String? ?? 'Not specified';
+    final fastingType = timing['fastingType'] as String?;
+    final breakfastTime = timing['breakfastTime'] as String?;
+    final lunchTime = timing['lunchTime'] as String?;
+    final dinnerTime = timing['dinnerTime'] as String?;
+    final snackTimes = timing['snackTimes'] as List<dynamic>?;
+    final customNotes = timing['customNotes'] as String?;
+    
+    final List<String> info = [];
+    info.add('Frequency: $mealFrequency');
+    
+    if (fastingType != null && fastingType != 'none') {
+      info.add('Fasting: $fastingType');
+    }
+    
+    if (breakfastTime != null) {
+      info.add('Breakfast: $breakfastTime');
+    }
+    if (lunchTime != null) {
+      info.add('Lunch: $lunchTime');
+    }
+    if (dinnerTime != null) {
+      info.add('Dinner: $dinnerTime');
+    }
+    if (snackTimes != null && snackTimes.isNotEmpty) {
+      info.add('Snacks: ${snackTimes.join(', ')}');
+    }
+    if (customNotes != null && customNotes.isNotEmpty) {
+      info.add('Notes: $customNotes');
+    }
+    
+    return info.join(', ');
+  }
+
+  /// Helper to get batch cooking information
+  static String _getBatchCookingInfo(DietPlanPreferences preferences) {
+    if (preferences.batchCookingPreferences == null) {
+      return 'Not specified';
+    }
+    
+    final batchCooking = preferences.batchCookingPreferences!;
+    final frequency = batchCooking['frequency'] as String? ?? 'Not specified';
+    final batchSize = batchCooking['batchSize'] as String? ?? 'Not specified';
+    final preferLeftovers = batchCooking['preferLeftovers'] as bool? ?? true;
+    final customNotes = batchCooking['customNotes'] as String?;
+    
+    final List<String> info = [];
+    info.add('Frequency: $frequency');
+    info.add('Batch Size: $batchSize');
+    info.add('Leftovers: ${preferLeftovers ? 'Yes' : 'No'}');
+    
+    if (customNotes != null && customNotes.isNotEmpty) {
+      info.add('Notes: $customNotes');
+    }
+    
+    return info.join(', ');
   }
 } 

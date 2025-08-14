@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import 'user_local_storage_service.dart';
+import 'meal_plan_storage_service.dart';
 
 class AuthService {
   static final _logger = Logger();
@@ -49,6 +52,39 @@ class AuthService {
       final localUser = await _storageService.loadUser();
       UserModel userModel;
       if (localUser != null) {
+        // Also try to get calculated nutrition targets
+        final prefs = await SharedPreferences.getInstance();
+        final proteinTargetsJson = prefs.getString('temp_protein_targets');
+        final calorieTargetsJson = prefs.getString('temp_calorie_targets');
+        
+        UserPreferences updatedPreferences = localUser.preferences;
+        
+        // Add calculated nutrition targets if available
+        if (proteinTargetsJson != null) {
+          try {
+            final proteinTargets = jsonDecode(proteinTargetsJson);
+            updatedPreferences = updatedPreferences.copyWith(
+              proteinTargets: proteinTargets,
+            );
+            print('SignUp: Added calculated protein targets');
+          } catch (e) {
+            print('SignUp: Error parsing protein targets: $e');
+          }
+        }
+        
+        if (calorieTargetsJson != null) {
+          try {
+            final calorieTargets = jsonDecode(calorieTargetsJson);
+            updatedPreferences = updatedPreferences.copyWith(
+              calorieTargets: calorieTargets,
+              targetCalories: calorieTargets['dailyTarget'] ?? updatedPreferences.targetCalories,
+            );
+            print('SignUp: Added calculated calorie targets');
+          } catch (e) {
+            print('SignUp: Error parsing calorie targets: $e');
+          }
+        }
+        
         userModel = localUser.copyWith(
           id: user.uid,
           email: email,
@@ -56,12 +92,18 @@ class AuthService {
           photoUrl: user.photoURL ?? localUser.photoUrl,
           hasSeenOnboarding: localUser.hasSeenOnboarding,
           hasSeenGetStarted: localUser.hasSeenGetStarted,
-          preferences: localUser.preferences,
+          preferences: updatedPreferences,
           updatedAt: DateTime.now(),
         );
         print('SignUp: Using onboarding data from SharedPreferences:');
         print('  dietaryRestrictions: ${userModel.preferences.dietaryRestrictions}');
         print('  workoutStyles: ${userModel.preferences.preferredWorkoutStyles}');
+        print('  proteinTargets: ${userModel.preferences.proteinTargets != null ? 'Available' : 'Not available'}');
+        print('  calorieTargets: ${userModel.preferences.calorieTargets != null ? 'Available' : 'Not available'}');
+        
+        // Clear temporary nutrition targets
+        await prefs.remove('temp_protein_targets');
+        await prefs.remove('temp_calorie_targets');
         await _storageService.clearUser();
       } else {
         userModel = UserModel(
@@ -169,6 +211,39 @@ class AuthService {
       if (userModel == null) {
         final localUser = await _storageService.loadUser();
         if (localUser != null) {
+          // Also try to get calculated nutrition targets
+          final prefs = await SharedPreferences.getInstance();
+          final proteinTargetsJson = prefs.getString('temp_protein_targets');
+          final calorieTargetsJson = prefs.getString('temp_calorie_targets');
+          
+          UserPreferences updatedPreferences = localUser.preferences;
+          
+          // Add calculated nutrition targets if available
+          if (proteinTargetsJson != null) {
+            try {
+              final proteinTargets = jsonDecode(proteinTargetsJson);
+              updatedPreferences = updatedPreferences.copyWith(
+                proteinTargets: proteinTargets,
+              );
+              print('Google SignIn: Added calculated protein targets');
+            } catch (e) {
+              print('Google SignIn: Error parsing protein targets: $e');
+            }
+          }
+          
+          if (calorieTargetsJson != null) {
+            try {
+              final calorieTargets = jsonDecode(calorieTargetsJson);
+              updatedPreferences = updatedPreferences.copyWith(
+                calorieTargets: calorieTargets,
+                targetCalories: calorieTargets['dailyTarget'] ?? updatedPreferences.targetCalories,
+              );
+              print('Google SignIn: Added calculated calorie targets');
+            } catch (e) {
+              print('Google SignIn: Error parsing calorie targets: $e');
+            }
+          }
+          
           final migratedUser = localUser.copyWith(
             id: user.uid,
             email: user.email ?? localUser.email,
@@ -176,11 +251,15 @@ class AuthService {
             photoUrl: user.photoURL ?? localUser.photoUrl,
             hasSeenOnboarding: localUser.hasSeenOnboarding,
             hasSeenGetStarted: localUser.hasSeenGetStarted,
-            preferences: localUser.preferences,
+            preferences: updatedPreferences,
             updatedAt: DateTime.now(),
           );
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
+          
+          // Clear temporary nutrition targets
+          await prefs.remove('temp_protein_targets');
+          await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
           _logger.i('Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
@@ -249,6 +328,39 @@ class AuthService {
       if (userModel == null) {
         final localUser = await _storageService.loadUser();
         if (localUser != null) {
+          // Also try to get calculated nutrition targets
+          final prefs = await SharedPreferences.getInstance();
+          final proteinTargetsJson = prefs.getString('temp_protein_targets');
+          final calorieTargetsJson = prefs.getString('temp_calorie_targets');
+          
+          UserPreferences updatedPreferences = localUser.preferences;
+          
+          // Add calculated nutrition targets if available
+          if (proteinTargetsJson != null) {
+            try {
+              final proteinTargets = jsonDecode(proteinTargetsJson);
+              updatedPreferences = updatedPreferences.copyWith(
+                proteinTargets: proteinTargets,
+              );
+              print('Apple SignIn: Added calculated protein targets');
+            } catch (e) {
+              print('Apple SignIn: Error parsing protein targets: $e');
+            }
+          }
+          
+          if (calorieTargetsJson != null) {
+            try {
+              final calorieTargets = jsonDecode(calorieTargetsJson);
+              updatedPreferences = updatedPreferences.copyWith(
+                calorieTargets: calorieTargets,
+                targetCalories: calorieTargets['dailyTarget'] ?? updatedPreferences.targetCalories,
+              );
+              print('Apple SignIn: Added calculated calorie targets');
+            } catch (e) {
+              print('Apple SignIn: Error parsing calorie targets: $e');
+            }
+          }
+          
           final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
           final migratedUser = localUser.copyWith(
             id: user.uid,
@@ -256,11 +368,15 @@ class AuthService {
             name: displayName.isNotEmpty ? displayName : localUser.name,
             hasSeenOnboarding: localUser.hasSeenOnboarding,
             hasSeenGetStarted: localUser.hasSeenGetStarted,
-            preferences: localUser.preferences,
+            preferences: updatedPreferences,
             updatedAt: DateTime.now(),
           );
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
+          
+          // Clear temporary nutrition targets
+          await prefs.remove('temp_protein_targets');
+          await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
           _logger.i('Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
@@ -315,17 +431,54 @@ class AuthService {
       if (userModel == null) {
         final localUser = await _storageService.loadUser();
         if (localUser != null) {
+          // Also try to get calculated nutrition targets
+          final prefs = await SharedPreferences.getInstance();
+          final proteinTargetsJson = prefs.getString('temp_protein_targets');
+          final calorieTargetsJson = prefs.getString('temp_calorie_targets');
+          
+          UserPreferences updatedPreferences = localUser.preferences;
+          
+          // Add calculated nutrition targets if available
+          if (proteinTargetsJson != null) {
+            try {
+              final proteinTargets = jsonDecode(proteinTargetsJson);
+              updatedPreferences = updatedPreferences.copyWith(
+                proteinTargets: proteinTargets,
+              );
+              print('Anonymous SignIn: Added calculated protein targets');
+            } catch (e) {
+              print('Anonymous SignIn: Error parsing protein targets: $e');
+            }
+          }
+          
+          if (calorieTargetsJson != null) {
+            try {
+              final calorieTargets = jsonDecode(calorieTargetsJson);
+              updatedPreferences = updatedPreferences.copyWith(
+                calorieTargets: calorieTargets,
+                targetCalories: calorieTargets['dailyTarget'] ?? updatedPreferences.targetCalories,
+              );
+              print('Anonymous SignIn: Added calculated calorie targets');
+            } catch (e) {
+              print('Anonymous SignIn: Error parsing calorie targets: $e');
+            }
+          }
+          
           final migratedUser = localUser.copyWith(
             id: user.uid,
             email: 'guest@championsgym.com',
             name: 'Guest User',
             hasSeenOnboarding: localUser.hasSeenOnboarding,
             hasSeenGetStarted: localUser.hasSeenGetStarted,
-            preferences: localUser.preferences,
+            preferences: updatedPreferences,
             updatedAt: DateTime.now(),
           );
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
+          
+          // Clear temporary nutrition targets
+          await prefs.remove('temp_protein_targets');
+          await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
           _logger.i('Migrated anonymous user from SharedPreferences to Firestore: ${user.uid}');
         } else {
@@ -450,6 +603,9 @@ class AuthService {
         // Delete all workout plans for the user
         await _deleteUserWorkoutPlans(userId);
         
+        // Delete all meal plans for the user
+        await _deleteUserMealPlans(userId);
+        
         _logger.i('All user data deleted successfully');
       });
 
@@ -460,6 +616,12 @@ class AuthService {
 
       // Clear local storage
       await _storageService.clearUser();
+      
+      // Clear meal plan data from local storage
+      await _clearMealPlanData(userId);
+      
+      // Sign out to complete the deletion process
+      await signOut();
       
       _logger.i('User account deleted successfully');
     } on FirebaseAuthException catch (e) {
@@ -514,6 +676,41 @@ class AuthService {
     } catch (e) {
       _logger.e('Error deleting user workout plans: $e');
       // Don't rethrow - we want to continue with account deletion even if workout plan deletion fails
+    }
+  }
+
+  /// Delete all meal plans for a user
+  static Future<void> _deleteUserMealPlans(String userId) async {
+    try {
+      _logger.i('Deleting all meal plans for user: $userId');
+      
+      final querySnapshot = await _firestore
+          .collection('meal_plans')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      final batch = _firestore.batch();
+      for (final doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      
+      await batch.commit();
+      _logger.i('Deleted ${querySnapshot.docs.length} meal plans for user: $userId');
+    } catch (e) {
+      _logger.e('Error deleting user meal plans: $e');
+      // Don't rethrow - we want to continue with account deletion even if meal plan deletion fails
+    }
+  }
+
+  /// Clear meal plan data from local storage
+  static Future<void> _clearMealPlanData(String userId) async {
+    try {
+      _logger.i('Clearing meal plan data from local storage for user: $userId');
+      await MealPlanStorageService.clearMealPlanData(userId);
+      _logger.i('Meal plan data cleared from local storage successfully');
+    } catch (e) {
+      _logger.e('Error clearing meal plan data from local storage: $e');
+      // Don't rethrow - we want to continue with account deletion even if local storage clearing fails
     }
   }
 

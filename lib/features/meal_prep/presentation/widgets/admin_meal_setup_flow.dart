@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
@@ -6,8 +7,7 @@ import '../../../../shared/services/ai_meal_service.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
 
 import 'package:lottie/lottie.dart';
-import 'setup_steps/goal_selection_step.dart' show GoalSelectionStep, NutritionGoal, NutritionGoalExt;
-import 'setup_steps/meal_frequency_step.dart' show MealFrequencyOption, MealFrequencyStep;
+import 'setup_steps/goal_selection_step.dart' show GoalSelectionStep;
 import 'setup_steps/calories_step.dart';
 import 'setup_steps/cheat_day_step.dart';
 import 'setup_steps/plan_duration_step.dart';
@@ -30,15 +30,44 @@ class AdminMealSetupFlow extends StatefulWidget {
 }
 
 class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
+  final _logger = Logger();
   bool _isLoading = false;
   int _setupStep = 0;
-  NutritionGoal? _selectedNutritionGoal;
-  MealFrequencyOption? _mealFrequency;
+  FitnessGoal? _selectedFitnessGoal;
   String? _cheatDay;
   bool _weeklyRotation = true;
   bool _remindersEnabled = false;
   final int _selectedDays = 7;
   int _targetCalories = 2000;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-populate with client's onboarding choices
+    _initializeFromClientPreferences();
+  }
+
+  void _initializeFromClientPreferences() {
+    _logger.i('Initializing from client preferences');
+    _logger.i('Client fitness goal: ${_userPreferences.fitnessGoal}');
+    _logger.i('Client target calories: ${_userPreferences.targetCalories}');
+    
+    // Pre-select fitness goal from client's onboarding choice
+    if (_userPreferences.fitnessGoal != null) {
+      _selectedFitnessGoal = _userPreferences.fitnessGoal!;
+      _logger.i('Pre-selected fitness goal: $_selectedFitnessGoal');
+    } else {
+      _logger.w('No fitness goal found in client preferences');
+    }
+
+    // Pre-populate calories from client's calculated target
+    if (_userPreferences.targetCalories > 0) {
+      _targetCalories = _userPreferences.targetCalories;
+      _logger.i('Pre-selected target calories: $_targetCalories');
+    } else {
+      _logger.w('No target calories found in client preferences');
+    }
+  }
 
   // Progress tracking
   int _completedDays = 0;
@@ -46,8 +75,77 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
 
   UserPreferences get _userPreferences => widget.targetUserPreferences;
 
+  String _getFitnessGoalLabel(FitnessGoal? goal) {
+    if (goal == null) return '';
+
+    switch (goal) {
+      case FitnessGoal.weightLoss:
+        return 'Weight Loss';
+      case FitnessGoal.muscleGain:
+        return 'Muscle Gain';
+      case FitnessGoal.maintenance:
+        return 'Maintenance';
+      case FitnessGoal.endurance:
+        return 'Endurance';
+      case FitnessGoal.strength:
+        return 'Strength';
+    }
+  }
+
+  String _getMealFrequencyFromUserPreferences() {
+    // Get meal timing preferences from user onboarding
+    final mealTimingJson = _userPreferences.mealTimingPreferences;
+    if (mealTimingJson == null) {
+      return 'threeMeals'; // Default fallback
+    }
+
+    final mealFrequency = mealTimingJson['mealFrequency'] as String?;
+    if (mealFrequency == null) {
+      return 'threeMeals'; // Default fallback
+    }
+
+    // Convert onboarding meal frequency to DietPlanPreferences format
+    switch (mealFrequency) {
+      case 'threeMeals':
+        return '3 meals';
+      case 'threeMealsOneSnack':
+        return '3 meals + 1 snack';
+      case 'fourMeals':
+        return '4 meals';
+      case 'fourMealsOneSnack':
+        return '4 meals + 1 snack';
+      case 'fiveMeals':
+        return '5 meals';
+      case 'fiveMealsOneSnack':
+        return '5 meals + 1 snack';
+      case 'intermittentFasting':
+        // For intermittent fasting, we need to check the fasting type
+        final fastingType = mealTimingJson['fastingType'] as String?;
+        switch (fastingType) {
+          case 'sixteenEight':
+            return '16:8 fasting';
+          case 'eighteenSix':
+            return '18:6 fasting';
+          case 'twentyFour':
+            return '20:4 fasting';
+          case 'alternateDay':
+            return 'Alternate day fasting';
+          case 'fiveTwo':
+            return '5:2 fasting';
+          case 'custom':
+            return 'Custom fasting';
+          default:
+            return '16:8 fasting'; // Default fasting protocol
+        }
+      case 'custom':
+        return 'Custom';
+      default:
+        return '3 meals'; // Default fallback
+    }
+  }
+
   void _nextStep() {
-    if (_setupStep < 6) {
+    if (_setupStep < 5) {
       setState(() {
         _setupStep++;
       });
@@ -74,18 +172,22 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
       activityLevel: _userPreferences.activityLevel,
       dietaryRestrictions: _userPreferences.dietaryRestrictions,
       preferredWorkoutStyles: _userPreferences.preferredWorkoutStyles,
-      nutritionGoal: _selectedNutritionGoal?.label ?? '',
+      nutritionGoal: _getFitnessGoalLabel(
+          _selectedFitnessGoal ?? _userPreferences.fitnessGoal),
       preferredCuisines: List<String>.from(_userPreferences.preferredCuisines),
       foodsToAvoid: List<String>.from(_userPreferences.foodsToAvoid),
       favoriteFoods: List<String>.from(_userPreferences.favoriteFoods),
-      mealFrequency: _mealFrequency
-          ?.toString()
-          .split('.')
-          .last ?? '',
+      mealFrequency: _getMealFrequencyFromUserPreferences(),
       cheatDay: _cheatDay,
       weeklyRotation: _weeklyRotation,
       remindersEnabled: _remindersEnabled,
       targetCalories: _targetCalories,
+      targetProtein: _userPreferences.proteinTargets?['dailyTarget'],
+      proteinTargets: _userPreferences.proteinTargets,
+      calorieTargets: _userPreferences.calorieTargets,
+      allergies: _userPreferences.allergies,
+      mealTimingPreferences: _userPreferences.mealTimingPreferences,
+      batchCookingPreferences: _userPreferences.batchCookingPreferences,
     );
 
     setState(() {
@@ -168,7 +270,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: AppConstants.spacingL),
-            _ProgressDots(current: _setupStep, total: 6),
+            _ProgressDots(current: _setupStep, total: 5),
             const SizedBox(height: AppConstants.spacingL),
             Expanded(
               child: Padding(
@@ -206,8 +308,8 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           ),
           const SizedBox(height: AppConstants.spacingL),
           Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
               _getLoadingMessage(),
               style: AppTextStyles.heading4,
@@ -216,8 +318,8 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           ),
           const SizedBox(height: AppConstants.spacingS),
           Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
               'Hang tight while we craft delicious, healthy recipes just for you!',
               style: AppTextStyles.bodyMedium.copyWith(
@@ -228,8 +330,8 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           ),
           const SizedBox(height: AppConstants.spacingL),
           Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Column(
               children: [
                 TweenAnimationBuilder<double>(
@@ -241,8 +343,8 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
                   builder: (context, value, child) {
                     return LinearProgressIndicator(
                       value: value,
-                      backgroundColor: AppConstants.textTertiary.withOpacity(
-                          0.2),
+                      backgroundColor:
+                          AppConstants.textTertiary.withOpacity(0.2),
                       valueColor: const AlwaysStoppedAnimation<Color>(
                         AppConstants.primaryColor,
                       ),
@@ -253,8 +355,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
                 const SizedBox(height: AppConstants.spacingS),
                 Text(
                   _totalDays > 0
-                      ? 'Generated $_completedDays of $_totalDays meals (${((_completedDays /
-                      _totalDays) * 100).toInt()}%)'
+                      ? 'Generated $_completedDays of $_totalDays meals (${((_completedDays / _totalDays) * 100).toInt()}%)'
                       : 'Preparing your meal plan...',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppConstants.textSecondary,
@@ -279,33 +380,30 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
   }
 
   Widget _buildStepContent() {
-
     switch (_setupStep) {
       case 0:
         return GoalSelectionStep(
-          selected: _selectedNutritionGoal,
-          onSelect: (goal) => setState(() => _selectedNutritionGoal = goal),
+          selected: _selectedFitnessGoal,
+          onSelect: (goal) => setState(() => _selectedFitnessGoal = goal),
           userName: widget.userName,
+          clientFitnessGoal: _userPreferences.fitnessGoal,
         );
       case 1:
-        return MealFrequencyStep(
-          selected: _mealFrequency,
-          onSelect: (frequency) => setState(() => _mealFrequency = frequency),
-          userName: widget.userName,
-        );
-      case 2:
         return CaloriesStep(
           targetCalories: _targetCalories,
           onChanged: (calories) => setState(() => _targetCalories = calories),
           userName: widget.userName,
+          clientTargetCalories: _userPreferences.targetCalories > 0
+              ? _userPreferences.targetCalories
+              : null,
         );
-      case 3:
+      case 2:
         return CheatDayStep(
           selectedDay: _cheatDay,
           onSelect: (day) => setState(() => _cheatDay = day),
           userName: widget.userName,
         );
-      case 4:
+      case 3:
         return PlanDurationStep(
           weeklyRotation: _weeklyRotation,
           onToggleWeeklyRotation: (value) =>
@@ -315,13 +413,14 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
               setState(() => _remindersEnabled = value),
           userName: widget.userName,
         );
-      case 5:
+      case 4:
         return FinalReviewStep(
           userPreferences: _userPreferences,
           selectedDays: _selectedDays,
           userName: widget.userName,
           cheatDay: _cheatDay,
           targetCalories: _targetCalories,
+          selectedFitnessGoal: _selectedFitnessGoal,
         );
       default:
         return const SizedBox.shrink();
@@ -336,7 +435,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           height: 52,
           child: CustomButton(
             text: 'Next',
-            onPressed: _selectedNutritionGoal != null ? _nextStep : null,
+            onPressed: _selectedFitnessGoal != null ? _nextStep : null,
           ),
         );
       case 1:
@@ -345,17 +444,26 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           height: 52,
           child: CustomButton(
             text: 'Next',
-            onPressed: _mealFrequency != null ? _nextStep : null,
+            onPressed: _nextStep,
           ),
         );
       case 2:
-        return SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: CustomButton(
-            text: 'Next',
-            onPressed: _nextStep,
-          ),
+        return Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _prevStep,
+                child: const Text('Back'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _nextStep,
+                child: const Text('Next'),
+              ),
+            ),
+          ],
         );
       case 3:
         return Row(
@@ -376,24 +484,6 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           ],
         );
       case 4:
-        return Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _prevStep,
-                child: const Text('Back'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: _nextStep,
-                child: const Text('Next'),
-              ),
-            ),
-          ],
-        );
-      case 5:
         return SizedBox(
           width: double.infinity,
           height: 52,
@@ -417,18 +507,21 @@ class _ProgressDots extends StatelessWidget {
 
   // Use the same colors as user onboarding for first 4 steps, then distinct colors for last 2
   static const List<Color> _stepColors = [
-    AppConstants.primaryColor,    // Step 0: Goal Selection (Green - main goal)
-    AppConstants.accentColor,     // Step 1: Meal Frequency (Dark Green - meal planning)
-    AppConstants.secondaryColor,  // Step 2: Calories (Light Green - energy/nutrition)
-    AppConstants.warningColor,    // Step 3: Cheat Day (Orange - indulgence)
-    Colors.purple,                // Step 4: Plan Duration (Purple - commitment)
-    Colors.blue,                  // Step 5: Final Review (Blue - completion)
+    AppConstants.primaryColor,
+    // Step 0: Goal Selection (Green - main goal)
+    AppConstants.secondaryColor,
+    // Step 1: Calories (Light Green - energy/nutrition)
+    AppConstants.warningColor,
+    // Step 2: Cheat Day (Orange - indulgence)
+    Colors.purple,
+    // Step 3: Plan Duration (Purple - commitment)
+    Colors.blue,
+    // Step 4: Final Review (Blue - completion)
   ];
 
   // Step titles for better context
   static const List<String> _stepTitles = [
     'Goal',
-    'Frequency', 
     'Calories',
     'Cheat Day',
     'Duration',
@@ -447,17 +540,14 @@ class _ProgressDots extends StatelessWidget {
             if (i < current) {
               // Completed steps show their own color
               color = _stepColors[i];
-              print('Step $i (completed): ${color.toString()}'); // Debug
             } else if (i == current) {
               // Current step shows its own color
               color = _stepColors[i];
-              print('Step $i (current): ${color.toString()}'); // Debug
             } else {
               // Future steps show gray
               color = AppConstants.textTertiary.withOpacity(0.2);
-              print('Step $i (future): ${color.toString()}'); // Debug
             }
-            
+
             return AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               margin: const EdgeInsets.symmetric(horizontal: 4),

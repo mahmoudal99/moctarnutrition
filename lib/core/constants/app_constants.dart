@@ -38,6 +38,12 @@ class AppConstants {
     end: Alignment.bottomRight,
   );
   
+  static const LinearGradient secondaryGradient = LinearGradient(
+    colors: [secondaryColor, Color(0xFF6EE7B7)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
   // Spacing
   static const double spacingXS = 4.0;
   static const double spacingS = 8.0;

@@ -10,6 +10,7 @@ import 'features/auth/presentation/screens/auth_screen.dart';
 import 'features/auth/presentation/screens/password_reset_screen.dart';
 import 'features/onboarding/presentation/screens/get_started_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'features/onboarding/presentation/screens/protein_calculation_screen.dart';
 import 'features/subscription/presentation/screens/subscription_screen.dart';
 import 'features/meal_prep/presentation/screens/meal_prep_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
@@ -94,6 +95,12 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
+      ),
+
+      // Protein Calculation Route
+      GoRoute(
+        path: '/protein-calculation',
+        builder: (context, state) => const ProteinCalculationScreen(),
       ),
 
       // Subscription Route

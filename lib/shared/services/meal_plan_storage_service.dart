@@ -116,6 +116,12 @@ class MealPlanStorageService {
       'weeklyRotation': preferences.weeklyRotation,
       'remindersEnabled': preferences.remindersEnabled,
       'targetCalories': preferences.targetCalories,
+      'targetProtein': preferences.targetProtein,
+      'proteinTargets': preferences.proteinTargets,
+      'calorieTargets': preferences.calorieTargets,
+      'allergies': preferences.allergies,
+      'mealTimingPreferences': preferences.mealTimingPreferences,
+      'batchCookingPreferences': preferences.batchCookingPreferences,
     };
   }
 
@@ -144,6 +150,12 @@ class MealPlanStorageService {
       weeklyRotation: json['weeklyRotation'] as bool,
       remindersEnabled: json['remindersEnabled'] as bool,
       targetCalories: json['targetCalories'] as int,
+      targetProtein: json['targetProtein'] as int?,
+      proteinTargets: json['proteinTargets'] as Map<String, dynamic>?,
+      calorieTargets: json['calorieTargets'] as Map<String, dynamic>?,
+      allergies: json['allergies'] as List<Map<String, dynamic>>?,
+      mealTimingPreferences: json['mealTimingPreferences'] as Map<String, dynamic>?,
+      batchCookingPreferences: json['batchCookingPreferences'] as Map<String, dynamic>?,
     );
   }
 } 

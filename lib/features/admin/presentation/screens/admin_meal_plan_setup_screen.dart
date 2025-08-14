@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/services/ai_meal_service.dart';
@@ -8,7 +9,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../meal_prep/presentation/widgets/setup_steps/goal_selection_step.dart';
-import '../../../meal_prep/presentation/widgets/setup_steps/meal_frequency_step.dart';
 import '../../../meal_prep/presentation/widgets/setup_steps/calories_step.dart';
 import '../../../meal_prep/presentation/widgets/setup_steps/cheat_day_step.dart';
 import '../../../meal_prep/presentation/widgets/setup_steps/plan_duration_step.dart';
@@ -23,9 +23,9 @@ class AdminMealPlanSetupScreen extends StatefulWidget {
 }
 
 class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
+  static final _logger = Logger();
   int _setupStep = 0;
-  NutritionGoal? _selectedNutritionGoal;
-  MealFrequencyOption? _mealFrequency;
+  FitnessGoal? _selectedFitnessGoal;
   String? _cheatDay;
   bool _weeklyRotation = true;
   bool _remindersEnabled = false;
@@ -36,8 +36,106 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   int _totalDays = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Pre-populate with client's onboarding choices
+    _initializeFromClientPreferences();
+  }
+
+  void _initializeFromClientPreferences() {
+    _logger.i('Initializing from client preferences');
+    _logger.i('Client fitness goal: ${widget.user.preferences.fitnessGoal}');
+    _logger.i('Client target calories: ${widget.user.preferences.targetCalories}');
+    
+    // Pre-select fitness goal from client's onboarding choice
+    if (widget.user.preferences.fitnessGoal != null) {
+      _selectedFitnessGoal = widget.user.preferences.fitnessGoal!;
+      _logger.i('Pre-selected fitness goal: $_selectedFitnessGoal');
+    } else {
+      _logger.w('No fitness goal found in client preferences');
+    }
+
+    // Pre-populate calories from client's calculated target
+    if (widget.user.preferences.targetCalories > 0) {
+      _targetCalories = widget.user.preferences.targetCalories;
+      _logger.i('Pre-selected target calories: $_targetCalories');
+    } else {
+      _logger.w('No target calories found in client preferences');
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
+  }
+
+  String _getFitnessGoalLabel(FitnessGoal? goal) {
+    if (goal == null) return '';
+    
+    switch (goal) {
+      case FitnessGoal.weightLoss:
+        return 'Weight Loss';
+      case FitnessGoal.muscleGain:
+        return 'Muscle Gain';
+      case FitnessGoal.maintenance:
+        return 'Maintenance';
+      case FitnessGoal.endurance:
+        return 'Endurance';
+      case FitnessGoal.strength:
+        return 'Strength';
+    }
+  }
+
+  String _getMealFrequencyFromUserPreferences() {
+    // Get meal timing preferences from user onboarding
+    final mealTimingJson = widget.user.preferences.mealTimingPreferences;
+    if (mealTimingJson == null) {
+      return '3 meals'; // Default fallback
+    }
+
+    final mealFrequency = mealTimingJson['mealFrequency'] as String?;
+    if (mealFrequency == null) {
+      return '3 meals'; // Default fallback
+    }
+
+    // Convert onboarding meal frequency to DietPlanPreferences format
+    switch (mealFrequency) {
+      case 'threeMeals':
+        return '3 meals';
+      case 'threeMealsOneSnack':
+        return '3 meals + 1 snack';
+      case 'fourMeals':
+        return '4 meals';
+      case 'fourMealsOneSnack':
+        return '4 meals + 1 snack';
+      case 'fiveMeals':
+        return '5 meals';
+      case 'fiveMealsOneSnack':
+        return '5 meals + 1 snack';
+      case 'intermittentFasting':
+        // For intermittent fasting, we need to check the fasting type
+        final fastingType = mealTimingJson['fastingType'] as String?;
+        switch (fastingType) {
+          case 'sixteenEight':
+            return '16:8 fasting';
+          case 'eighteenSix':
+            return '18:6 fasting';
+          case 'twentyFour':
+            return '20:4 fasting';
+          case 'alternateDay':
+            return 'Alternate day fasting';
+          case 'fiveTwo':
+            return '5:2 fasting';
+          case 'custom':
+            return 'Custom fasting';
+          default:
+            return '16:8 fasting'; // Default fasting protocol
+        }
+      case 'custom':
+        return 'Custom';
+      default:
+        return '3 meals'; // Default fallback
+    }
   }
 
   void _onNextStep() {
@@ -63,29 +161,25 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     bool isValid;
     switch (_setupStep) {
       case 0:
-        isValid = _selectedNutritionGoal != null;
+        isValid = _selectedFitnessGoal != null;
         break;
       case 1:
-        isValid = _mealFrequency != null;
-        break;
-      case 2:
         isValid = _targetCalories >= 1200 && _targetCalories <= 4000;
         break;
-      case 3:
+      case 2:
         // Cheat day should have a selection (either a day or null for "No cheat day")
         // The step allows selecting null, so we need to check if user has made any selection
         // Since the step starts with null and user can select null, we'll consider it always valid
         isValid = true;
         break;
-      case 4:
+      case 3:
         // Plan duration step has default values (_weeklyRotation = true, _remindersEnabled = false)
         // and both options are always valid, so this step is always complete
         isValid = true;
         break;
-      case 5:
+      case 4:
         // Final review step - check all required fields
-        isValid = _selectedNutritionGoal != null && 
-                  _mealFrequency != null && 
+        isValid = _selectedFitnessGoal != null && 
                   _targetCalories >= 1200 && 
                   _targetCalories <= 4000;
         break;
@@ -95,12 +189,11 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     }
     
     // Debug logging
-    print('[AdminMealPlanSetupScreen] Step $_setupStep validation: $isValid');
-    if (_setupStep == 0) print('[AdminMealPlanSetupScreen] Nutrition goal: $_selectedNutritionGoal');
-    if (_setupStep == 1) print('[AdminMealPlanSetupScreen] Meal frequency: $_mealFrequency');
-    if (_setupStep == 2) print('[AdminMealPlanSetupScreen] Target calories: $_targetCalories');
-    if (_setupStep == 5) {
-      print('[AdminMealPlanSetupScreen] Final validation - Nutrition goal: $_selectedNutritionGoal, Meal frequency: $_mealFrequency, Calories: $_targetCalories');
+    _logger.i('Step $_setupStep validation: $isValid');
+    if (_setupStep == 0) _logger.d('Fitness goal: $_selectedFitnessGoal');
+    if (_setupStep == 1) _logger.d('Target calories: $_targetCalories');
+    if (_setupStep == 4) {
+      _logger.i('Final validation - Fitness goal: $_selectedFitnessGoal, Calories: $_targetCalories');
     }
     
     return isValid;
@@ -112,25 +205,21 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       case 0:
         return 'Please select a nutrition goal to continue';
       case 1:
-        return 'Please select a meal frequency to continue';
-      case 2:
         if (_targetCalories < 1200) {
           return 'Calorie target must be at least 1,200 calories';
         } else if (_targetCalories > 4000) {
           return 'Calorie target must be no more than 4,000 calories';
         }
         return 'Please set a valid calorie target';
-      case 3:
+      case 2:
         // Cheat day is optional, so this should never be reached
         return 'Please make a selection for cheat day';
-      case 4:
+      case 3:
         // Plan duration step has default values, so this should never be reached
         return 'Please configure plan duration and reminders';
-      case 5:
-        if (_selectedNutritionGoal == null) {
+      case 4:
+        if (_selectedFitnessGoal == null) {
           return 'Please select a nutrition goal';
-        } else if (_mealFrequency == null) {
-          return 'Please select a meal frequency';
         } else if (_targetCalories < 1200 || _targetCalories > 4000) {
           return 'Please set a valid calorie target (1,200-4,000 calories)';
         }
@@ -152,7 +241,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     try {
       final prefs = widget.user.preferences;
       final userId = widget.user.id;
-      print('[AdminMealPlanSetupScreen] Generating meal plan for userId: $userId');
+      _logger.i('Generating meal plan for userId: $userId');
       final dietPlanPreferences = DietPlanPreferences(
         age: prefs.age,
         gender: prefs.gender,
@@ -162,40 +251,46 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         activityLevel: prefs.activityLevel,
         dietaryRestrictions: prefs.dietaryRestrictions,
         preferredWorkoutStyles: prefs.preferredWorkoutStyles,
-        nutritionGoal: _selectedNutritionGoal?.label ?? '',
+        nutritionGoal: _getFitnessGoalLabel(_selectedFitnessGoal ?? prefs.fitnessGoal),
         preferredCuisines: List<String>.from(prefs.preferredCuisines),
         foodsToAvoid: List<String>.from(prefs.foodsToAvoid),
         favoriteFoods: List<String>.from(prefs.favoriteFoods),
-        mealFrequency: _mealFrequency?.toString().split('.').last ?? '',
+        mealFrequency: _getMealFrequencyFromUserPreferences(),
         cheatDay: _cheatDay,
         weeklyRotation: _weeklyRotation,
         remindersEnabled: _remindersEnabled,
         targetCalories: _targetCalories,
+        targetProtein: prefs.proteinTargets?['dailyTarget'],
+        proteinTargets: prefs.proteinTargets,
+        calorieTargets: prefs.calorieTargets,
+        allergies: prefs.allergies,
+        mealTimingPreferences: prefs.mealTimingPreferences,
+        batchCookingPreferences: prefs.batchCookingPreferences,
       );
       final mealPlan = await AIMealService.generateMealPlan(
         preferences: dietPlanPreferences,
         days: _selectedDays,
         onProgress: (completedMeals, totalMeals) {
-          print('[AdminMealPlanSetupScreen] Progress update: $completedMeals/$totalMeals meals');
+          _logger.d('Progress update: $completedMeals/$totalMeals meals');
           setState(() {
             _completedDays = completedMeals;
             _totalDays = totalMeals;
           });
         },
       );
-      print('[AdminMealPlanSetupScreen] Meal plan generated: ${mealPlan.toJson()}');
+      _logger.i('Meal plan generated: ${mealPlan.toJson()}');
       
       // Debug: Check ingredients for each meal
       for (int i = 0; i < mealPlan.mealDays.length; i++) {
         final day = mealPlan.mealDays[i];
-        print('[AdminMealPlanSetupScreen] Day ${i + 1}:');
+        _logger.d('Day ${i + 1}:');
         for (int j = 0; j < day.meals.length; j++) {
           final meal = day.meals[j];
-          print('[AdminMealPlanSetupScreen]   Meal ${j + 1} (${meal.type.name}): ${meal.name}');
-          print('[AdminMealPlanSetupScreen]     Ingredients:');
+          _logger.d('  Meal ${j + 1} (${meal.type.name}): ${meal.name}');
+          _logger.d('    Ingredients:');
           for (int k = 0; k < meal.ingredients.length; k++) {
             final ingredient = meal.ingredients[k];
-            print('[AdminMealPlanSetupScreen]       ${k + 1}. ${ingredient.name} - ${ingredient.amount} ${ingredient.unit}');
+            _logger.d('      ${k + 1}. ${ingredient.name} - ${ingredient.amount} ${ingredient.unit}');
           }
         }
       }
@@ -205,14 +300,14 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       
       // Ensure the meal plan has the correct userId
       final mealPlanWithUser = mealPlan.copyWith(userId: userId);
-      print('[AdminMealPlanSetupScreen] Saving meal plan to Firestore with userId: $userId');
+      _logger.i('Saving meal plan to Firestore with userId: $userId');
       final mealPlanRef = await FirebaseFirestore.instance.collection('meal_plans').add(mealPlanWithUser.toJson());
-      print('[AdminMealPlanSetupScreen] Meal plan saved with ID: ${mealPlanRef.id}');
+      _logger.i('Meal plan saved with ID: ${mealPlanRef.id}');
       // Update user's mealPlanId
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'mealPlanId': mealPlanRef.id,
       });
-      print('[AdminMealPlanSetupScreen] Updated user document with mealPlanId: ${mealPlanRef.id}');
+      _logger.i('Updated user document with mealPlanId: ${mealPlanRef.id}');
       
       if (mounted) {
         // Show appropriate message based on whether it was a fallback plan
@@ -236,8 +331,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         Navigator.of(context).pop(true); // Return success
       }
     } catch (e, stack) {
-      print('[AdminMealPlanSetupScreen] Error generating or saving meal plan: $e');
-      print(stack);
+      _logger.e('Error generating or saving meal plan: $e', error: e, stackTrace: stack);
       setState(() {
         _isLoading = false;
         _completedDays = 0;
@@ -522,29 +616,25 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     switch (_setupStep) {
       case 0:
         return GoalSelectionStep(
-          selected: _selectedNutritionGoal,
-          onSelect: (goal) => setState(() => _selectedNutritionGoal = goal),
+          selected: _selectedFitnessGoal,
+          onSelect: (goal) => setState(() => _selectedFitnessGoal = goal),
           userName: widget.user.name,
+          clientFitnessGoal: widget.user.preferences.fitnessGoal,
         );
       case 1:
-        return MealFrequencyStep(
-          selected: _mealFrequency,
-          onSelect: (frequency) => setState(() => _mealFrequency = frequency),
-          userName: widget.user.name,
-        );
-      case 2:
         return CaloriesStep(
           targetCalories: _targetCalories,
           onChanged: (calories) => setState(() => _targetCalories = calories),
           userName: widget.user.name,
+          clientTargetCalories: widget.user.preferences.targetCalories > 0 ? widget.user.preferences.targetCalories : null,
         );
-      case 3:
+      case 2:
         return CheatDayStep(
           selectedDay: _cheatDay,
           onSelect: (day) => setState(() => _cheatDay = day),
           userName: widget.user.name,
         );
-      case 4:
+      case 3:
         return PlanDurationStep(
           weeklyRotation: _weeklyRotation,
           onToggleWeeklyRotation: (value) => setState(() => _weeklyRotation = value),
@@ -552,7 +642,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           onToggleReminders: (value) => setState(() => _remindersEnabled = value),
           userName: widget.user.name,
         );
-      case 5:
+      case 4:
         return FinalReviewStep(
           userPreferences: prefs,
           selectedDays: _selectedDays,
@@ -579,10 +669,10 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           ),
         if (_setupStep > 0) const SizedBox(width: 12),
         Expanded(
-          child: ElevatedButton(
-            onPressed: isCurrentStepValid 
-                ? (_setupStep == 5 ? _onSavePlan : _onNextStep)
-                : null,
+                      child: ElevatedButton(
+              onPressed: isCurrentStepValid 
+                  ? (_setupStep == 4 ? _onSavePlan : _onNextStep)
+                  : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: isCurrentStepValid 
                   ? AppConstants.primaryColor 
@@ -591,7 +681,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                   ? AppConstants.surfaceColor 
                   : AppConstants.textSecondary,
             ),
-            child: Text(_setupStep == 5 ? 'Generate Plan' : 'Next'),
+                          child: Text(_setupStep == 4 ? 'Generate Plan' : 'Next'),
           ),
         ),
       ],
@@ -601,6 +691,9 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final prefs = widget.user.preferences;
+    _logger.d('Building admin meal plan setup screen');
+    _logger.d('User preferences fitness goal: ${prefs.fitnessGoal}');
+    _logger.d('Selected fitness goal: $_selectedFitnessGoal');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Generate Meal Plan'),
