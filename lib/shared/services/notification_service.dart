@@ -12,6 +12,19 @@ class NotificationService {
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   static bool _isInitialized = false;
+  static int _nextNotificationId = 1000; // Start from 1000 to avoid conflicts
+
+  /// Notification ID constants for different types
+  static const int TEST_NOTIFICATION_ID = 1;
+  static const int WEEKLY_CHECKIN_REMINDER_ID = 2;
+  static const int WORKOUT_REMINDER_ID = 3;
+  static const int MEAL_REMINDER_ID = 4;
+  static const int PROGRESS_REMINDER_ID = 5;
+
+  /// Generate a unique notification ID
+  static int _generateNotificationId() {
+    return _nextNotificationId++;
+  }
 
   /// Initialize the notification service
   static Future<void> initialize() async {
@@ -194,7 +207,7 @@ class NotificationService {
       );
 
       await _flutterLocalNotificationsPlugin.show(
-        1,
+        TEST_NOTIFICATION_ID,
         'Champions Gym',
         'Notifications are now enabled! 💪',
         notificationDetails,
@@ -242,7 +255,7 @@ class NotificationService {
       );
 
       await _flutterLocalNotificationsPlugin.zonedSchedule(
-        2,
+        WEEKLY_CHECKIN_REMINDER_ID,
         'Weekly Check-in Reminder 📊',
         'Don\'t forget to complete your weekly check-in! Track your progress and stay motivated 💪',
         nextSunday,
@@ -262,10 +275,135 @@ class NotificationService {
   /// Cancel weekly check-in reminder
   static Future<void> cancelWeeklyCheckinReminder() async {
     try {
-      await _flutterLocalNotificationsPlugin.cancel(2);
+      await _flutterLocalNotificationsPlugin.cancel(WEEKLY_CHECKIN_REMINDER_ID);
       _logger.i('Weekly check-in reminder cancelled');
     } catch (e) {
       _logger.e('Error cancelling weekly reminder: $e');
+    }
+  }
+
+  /// Schedule workout reminder
+  static Future<void> scheduleWorkoutReminder({
+    required DateTime scheduledTime,
+    String title = 'Workout Reminder 💪',
+    String body = 'Time for your workout! Stay consistent and crush your goals!',
+  }) async {
+    try {
+      if (!await areNotificationsEnabled()) {
+        _logger.w('Cannot schedule workout reminder: permission not granted');
+        return;
+      }
+
+      const AndroidNotificationDetails androidNotificationDetails =
+          AndroidNotificationDetails(
+        'workout_reminders',
+        'Workout Reminders',
+        channelDescription: 'Reminders for scheduled workouts',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+
+      const DarwinNotificationDetails iosNotificationDetails =
+          DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: androidNotificationDetails,
+        iOS: iosNotificationDetails,
+      );
+
+      final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        _generateNotificationId(),
+        title,
+        body,
+        tzScheduledTime,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+
+      _logger.i('Workout reminder scheduled for: $scheduledTime');
+    } catch (e) {
+      _logger.e('Error scheduling workout reminder: $e');
+    }
+  }
+
+  /// Schedule meal reminder
+  static Future<void> scheduleMealReminder({
+    required DateTime scheduledTime,
+    String mealType = 'meal',
+    String title = 'Meal Reminder 🍽️',
+    String body = 'Time to eat! Don\'t forget to log your meal.',
+  }) async {
+    try {
+      if (!await areNotificationsEnabled()) {
+        _logger.w('Cannot schedule meal reminder: permission not granted');
+        return;
+      }
+
+      const AndroidNotificationDetails androidNotificationDetails =
+          AndroidNotificationDetails(
+        'meal_reminders',
+        'Meal Reminders',
+        channelDescription: 'Reminders for meal times',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+
+      const DarwinNotificationDetails iosNotificationDetails =
+          DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: androidNotificationDetails,
+        iOS: iosNotificationDetails,
+      );
+
+      final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        _generateNotificationId(),
+        title,
+        body,
+        tzScheduledTime,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+
+      _logger.i('Meal reminder scheduled for: $scheduledTime');
+    } catch (e) {
+      _logger.e('Error scheduling meal reminder: $e');
+    }
+  }
+
+  /// Cancel specific notification by ID
+  static Future<void> cancelNotification(int notificationId) async {
+    try {
+      await _flutterLocalNotificationsPlugin.cancel(notificationId);
+      _logger.i('Notification cancelled: $notificationId');
+    } catch (e) {
+      _logger.e('Error cancelling notification $notificationId: $e');
+    }
+  }
+
+  /// Cancel all notifications of a specific type
+  static Future<void> cancelNotificationType(int notificationTypeId) async {
+    try {
+      await _flutterLocalNotificationsPlugin.cancel(notificationTypeId);
+      _logger.i('Notification type cancelled: $notificationTypeId');
+    } catch (e) {
+      _logger.e('Error cancelling notification type $notificationTypeId: $e');
     }
   }
 
