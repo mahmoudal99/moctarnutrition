@@ -34,13 +34,6 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
     'Cardio',
     'HIIT',
     'Running',
-    'Yoga',
-    'Pilates',
-    'CrossFit',
-    'Swimming',
-    'Cycling',
-    'Boxing',
-    'Martial Arts',
   ];
 
   @override

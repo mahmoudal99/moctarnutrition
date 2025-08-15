@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
+import '../../../../shared/models/user_model.dart';
 import 'meal_card.dart';
 import 'nutrition_summary_card.dart';
 
 class MealPlanView extends StatefulWidget {
   final MealPlanModel mealPlan;
   final VoidCallback? onMealTap;
+  final UserModel? user; // Add user parameter for cheat day info
+  final String? cheatDay; // Add cheat day parameter
 
   const MealPlanView({
     super.key,
     required this.mealPlan,
     this.onMealTap,
+    this.user, // Add user parameter
+    this.cheatDay, // Add cheat day parameter
   });
 
   @override
@@ -296,18 +301,25 @@ class _MealPlanViewState extends State<MealPlanView>
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Column(
                     children: [
-                      // Day letter
-                      Text(
-                        _getDayLetter(index),
-                        style: AppTextStyles.caption.copyWith(
-                          color: index == _currentDayIndex
-                              ? AppConstants.primaryColor
-                              : AppConstants.textSecondary,
-                          fontWeight: index == _currentDayIndex
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                          fontSize: 12,
-                        ),
+                      // Day letter with cheat day icon
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _getDayLetter(index),
+                            style: AppTextStyles.caption.copyWith(
+                              color: index == _currentDayIndex
+                                  ? AppConstants.primaryColor
+                                  : AppConstants.textSecondary,
+                              fontWeight: index == _currentDayIndex
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              fontSize: 12,
+                            ),
+                          ),
+                          // Show cheat day icon if this day is a cheat day
+                          if (_isCheatDay(index)) _buildCheatDayIcon(),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       // Enhanced dot
@@ -495,5 +507,38 @@ class _MealPlanViewState extends State<MealPlanView>
 
     // If current day is beyond available meal days, show the first day
     return 0;
+  }
+
+  /// Check if a given day index is a cheat day
+  bool _isCheatDay(int dayIndex) {
+    if (widget.cheatDay == null) return false;
+    
+    final dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final currentDayName = dayNames[dayIndex % 7];
+    return widget.cheatDay == currentDayName;
+  }
+
+  /// Get the cheat day icon widget
+  Widget _buildCheatDayIcon() {
+    return Tooltip(
+      message: 'Cheat Day - Indulge a little!',
+      child: Container(
+        margin: const EdgeInsets.only(left: 8),
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppConstants.warningColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppConstants.warningColor.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          Icons.celebration,
+          size: 16,
+          color: AppConstants.warningColor,
+        ),
+      ),
+    );
   }
 }

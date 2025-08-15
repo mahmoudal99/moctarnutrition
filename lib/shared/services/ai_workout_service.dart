@@ -127,13 +127,43 @@ User Profile:
 - Fitness Goal: ${_getFitnessGoalDescription(prefs.fitnessGoal)}
 - Preferred Workout Styles: ${prefs.preferredWorkoutStyles.join(', ')}
 
-Requirements:
-1. Create a 7-day workout plan with appropriate rest days
-2. Include exercises suitable for the user's fitness level and goals
-3. Consider the user's preferred workout styles
-4. Provide detailed exercise instructions
-5. Include proper warm-up and cool-down recommendations
-6. Ensure exercises are safe and appropriate for the user's age and fitness level
+CRITICAL PROGRAMMING REQUIREMENTS (MUST FOLLOW EXACTLY):
+1. Each major muscle group MUST be trained at least 2× per week - NO EXCEPTIONS
+2. Aim for 10–20 sets per muscle group weekly, split across multiple workouts (2–4 sessions, 2–3 exercises per session)
+3. Each workout session MUST include: dynamic warm-up, 2–3 exercises per target muscle, cool-down/stretching
+4. Use evidence-based rep and set ranges: 3–4 sets of 8–12 reps for muscle gain, 3–5 sets of 3–6 reps for strength
+5. Program at least one full rest or active recovery day per week
+6. Ensure progressive overload and sufficient rest between sets (60-180 seconds)
+7. Every exercise must include sets, reps, tempo, rest time, and detailed form cues
+
+MUSCLE GROUP TRAINING FREQUENCY (CRITICAL):
+- Chest: Train 2-3 times per week with 2-3 exercises per session
+- Back: Train 2-3 times per week with 2-3 exercises per session  
+- Shoulders: Train 2-3 times per week with 2-3 exercises per session
+- Biceps: Train 2-3 times per week with 2-3 exercises per session
+- Triceps: Train 2-3 times per week with 2-3 exercises per session
+- Legs (Quads/Hamstrings): Train 2-3 times per week with 2-3 exercises per session
+- Core: Train 2-3 times per week with 2-3 exercises per session
+
+VOLUME REQUIREMENTS (MUST MEET):
+- Beginner: 8–10 weekly sets per muscle group
+- Intermediate: 12–15 weekly sets per muscle group
+- Advanced: 15–20 weekly sets per muscle group
+- Each exercise: 3-4 sets minimum
+- Each muscle group: 2-3 different exercises per session
+
+WORKOUT SPLIT GUIDELINES:
+- Beginner: Use full-body or upper/lower splits with 8–10 weekly sets per muscle group
+- Intermediate: Use push/pull/legs or upper/lower splits with 12–15 weekly sets per muscle group  
+- Advanced: Use specialized splits with 15–20 weekly sets per muscle group
+- Never increase total weekly volume by more than 10–20% per month
+
+EXERCISE SELECTION:
+- Focus on compound movements for efficiency
+- Include both strength and cardio elements as appropriate
+- Vary exercises throughout the week to prevent plateaus
+- Consider equipment availability and user preferences
+- Ensure exercises are safe and appropriate for the user's age and fitness level
 
 Please generate the workout plan in the following JSON format:
 {
@@ -145,13 +175,13 @@ Please generate the workout plan in the following JSON format:
       "id": "day_1",
       "dayName": "Monday",
       "title": "Workout Title",
-      "description": "Workout description",
+      "description": "Workout description with target muscle groups and training focus",
       "estimatedDuration": 45,
       "workouts": [
         {
           "id": "workout_1",
           "title": "Workout Name",
-          "description": "Workout description",
+          "description": "Detailed workout description with training focus",
           "difficulty": "beginner",
           "category": "strength",
           "estimatedDuration": 30,
@@ -159,13 +189,15 @@ Please generate the workout plan in the following JSON format:
             {
               "id": "exercise_1",
               "name": "Exercise Name",
-              "description": "Detailed exercise description with form cues",
+              "description": "Detailed exercise description with form cues, tempo, and breathing instructions",
               "sets": 3,
               "reps": 12,
+              "tempo": "2-0-2-0",
               "muscleGroups": ["Chest", "Triceps"],
               "order": 1,
               "equipment": "Dumbbells",
-              "restTime": 60
+              "restTime": 60,
+              "formCues": "Keep chest up, engage core, control the movement"
             }
           ]
         }
@@ -174,41 +206,72 @@ Please generate the workout plan in the following JSON format:
   ]
 }
 
-Important:
+VALIDATION CHECKLIST (MUST VERIFY BEFORE RESPONDING):
+✓ Each major muscle group appears in at least 2 different workout days
+✓ Each muscle group has 2-3 different exercises per session
+✓ Each exercise has 3-4 sets minimum
+✓ Total weekly sets per muscle group: 8-20 sets
+✓ Each workout includes warm-up and cool-down
+✓ Rest days are included (1-2 days per week)
+✓ Every exercise includes tempo, rest time, and form cues
+
+IMPORTANT REQUIREMENTS:
 - Use realistic exercise names and descriptions
-- Include proper form cues and safety instructions
-- Vary exercises throughout the week
-- Include rest days where appropriate
+- Include proper form cues, tempo, and safety instructions for every exercise
+- Vary exercises throughout the week to target all major muscle groups
+- Include rest days or active recovery days where appropriate
 - Make sure all exercises are suitable for the user's fitness level
-- Include equipment requirements if applicable
+- Include equipment requirements and alternatives if applicable
+- Ensure progressive overload principles are built into the program
+- Provide clear warm-up and cool-down recommendations for each session
+
+FINAL REMINDER: If you generate a plan with only 1 workout per muscle group or less than 3 sets per exercise, you have FAILED to follow the requirements. Regenerate the plan.
 ''';
   }
 
   /// Get system prompt for workout generation
   static String _getSystemPrompt() {
-    return '''You are a professional fitness trainer and workout planner. Generate detailed, personalized workout plans in JSON format. 
+    return '''You are a professional fitness trainer and workout planner with expertise in evidence-based exercise programming. Generate detailed, personalized workout plans in JSON format following scientific best practices.
 
 Key responsibilities:
-1. Create safe and effective workout routines
+1. Create safe and effective workout routines based on exercise science
 2. Consider user's fitness level, goals, and preferences
-3. Provide clear exercise descriptions with form cues
-4. Include appropriate rest periods and recovery
+3. Provide clear exercise descriptions with form cues and safety instructions
+4. Include appropriate rest periods and recovery protocols
 5. Ensure exercises are suitable for the user's age and fitness level
 6. Always respond with valid JSON format
 
+Evidence-based programming guidelines (MANDATORY):
+- Each major muscle group MUST be trained at least 2× per week - NEVER create plans with only 1 workout per muscle group
+- Aim for 10–20 sets per muscle group weekly, split across multiple workouts (2-4 sessions)
+- Use evidence-based rep and set ranges: 3–4 sets of 8–12 reps for muscle gain, 3–5 sets of 3–6 reps for strength
+- Program at least one full rest or active recovery day per week
+- Ensure progressive overload and sufficient rest between sets (60-180 seconds)
+- Include proper form/safety guidance for every exercise
+- Each muscle group must have 2-3 different exercises per session
+- Each exercise must have minimum 3 sets (never less than 3 sets)
+
+Workout structure guidelines:
+- Each session: dynamic warm-up, 2–3 exercises per target muscle, cool-down/stretching
+- Use Push/Pull/Legs, Upper/Lower, or Full-Body splits based on user level
+- Beginner routines: 8–10 weekly sets, 1–2 exercises per muscle per session
+- Intermediate/Advanced: Increase volume and variety as experience improves
+- Never increase total weekly volume by more than 10–20% per month
+
 Exercise guidelines:
 - Use proper exercise names and terminology
-- Include detailed form instructions
-- Specify appropriate sets, reps, and rest times
-- Consider equipment availability
+- Include detailed form instructions with tempo and breathing cues
+- Specify appropriate sets, reps, rest times, and equipment
 - Focus on compound movements for efficiency
 - Include both strength and cardio elements as appropriate
+- Every exercise must list sets, reps, tempo, rest, and form cues
 
 Safety first:
 - Never recommend exercises that could be dangerous
-- Consider user's physical limitations
+- Consider user's physical limitations and injury history
 - Include proper warm-up recommendations
-- Suggest modifications for different fitness levels''';
+- Suggest modifications for different fitness levels
+- Advise against overtraining and excessive volume increases''';
   }
 
   /// Parse workout plan from AI response
@@ -336,11 +399,13 @@ Safety first:
       description: json['description'] as String,
       sets: json['sets'] as int,
       reps: json['reps'] as int,
+      tempo: json['tempo'] as String?,
       duration: json['duration'] as int?,
       restTime: json['restTime'] as int?,
       equipment: json['equipment'] as String?,
       muscleGroups: List<String>.from(json['muscleGroups'] ?? []),
       order: json['order'] as int,
+      formCues: json['formCues'] as String?,
     );
   }
 

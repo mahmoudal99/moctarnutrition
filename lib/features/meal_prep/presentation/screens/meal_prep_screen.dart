@@ -19,6 +19,7 @@ class MealPrepScreen extends StatefulWidget {
 class _MealPrepScreenState extends State<MealPrepScreen> {
   static final _logger = Logger();
   MealPlanModel? _currentMealPlan;
+  String? _cheatDay;
 
   @override
   void initState() {
@@ -56,6 +57,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             Provider.of<MealPlanProvider>(context, listen: false);
         mealPlanProvider.setMealPlan(firestoreMealPlan);
         _logger.i('Loaded meal plan from Firestore: ${firestoreMealPlan.title}');
+        
+        // Load cheat day from diet preferences
+        await _loadCheatDay(user!.id);
         return;
       }
 
@@ -72,6 +76,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           mealPlanProvider.setMealPlan(savedMealPlan);
           _logger.i(
               'Loaded saved meal plan from local storage for user ${user.id}: ${savedMealPlan.title}');
+          
+          // Load cheat day from diet preferences
+          await _loadCheatDay(user.id);
         }
       }
 
@@ -79,6 +86,21 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     } catch (e) {
       _logger.e('Error loading saved data: $e');
       // Will show waiting state
+    }
+  }
+
+  /// Load cheat day from diet preferences
+  Future<void> _loadCheatDay(String userId) async {
+    try {
+      final dietPreferences = await MealPlanStorageService.loadDietPreferences(userId);
+      if (dietPreferences != null) {
+        setState(() {
+          _cheatDay = dietPreferences.cheatDay;
+        });
+        _logger.i('Loaded cheat day: $_cheatDay');
+      }
+    } catch (e) {
+      _logger.e('Error loading cheat day: $e');
     }
   }
 
@@ -92,6 +114,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         ),
         body: MealPlanView(
           mealPlan: _currentMealPlan!,
+          user: Provider.of<AuthProvider>(context, listen: false).userModel,
+          cheatDay: _cheatDay,
         ),
       );
     }

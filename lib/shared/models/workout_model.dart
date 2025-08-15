@@ -153,11 +153,13 @@ class Exercise {
   final String? imageUrl;
   final int sets;
   final int reps;
+  final String? tempo; // e.g., "2-0-2-0" for eccentric-pause-concentric-pause
   final int? duration; // in seconds
   final int? restTime; // in seconds
   final String? equipment;
   final List<String> muscleGroups;
   final int order;
+  final String? formCues; // Specific form instructions and cues
 
   Exercise({
     required this.id,
@@ -167,11 +169,13 @@ class Exercise {
     this.imageUrl,
     required this.sets,
     required this.reps,
+    this.tempo,
     this.duration,
     this.restTime,
     this.equipment,
     required this.muscleGroups,
     required this.order,
+    this.formCues,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) {
@@ -183,11 +187,13 @@ class Exercise {
       imageUrl: json['imageUrl'] as String?,
       sets: json['sets'] as int,
       reps: json['reps'] as int,
+      tempo: json['tempo'] as String?,
       duration: json['duration'] as int?,
       restTime: json['restTime'] as int?,
       equipment: json['equipment'] as String?,
       muscleGroups: List<String>.from(json['muscleGroups'] ?? []),
       order: json['order'] as int,
+      formCues: json['formCues'] as String?,
     );
   }
 
@@ -200,11 +206,13 @@ class Exercise {
       'imageUrl': imageUrl,
       'sets': sets,
       'reps': reps,
+      'tempo': tempo,
       'duration': duration,
       'restTime': restTime,
       'equipment': equipment,
       'muscleGroups': muscleGroups,
       'order': order,
+      'formCues': formCues,
     };
   }
 } 
