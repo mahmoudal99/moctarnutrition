@@ -66,11 +66,13 @@ class AdminInfoCard extends StatelessWidget {
 class AdminInfoRow extends StatelessWidget {
   final String label;
   final String value;
+  final Color? valueColor;
 
   const AdminInfoRow({
     Key? key,
     required this.label,
     required this.value,
+    this.valueColor,
   }) : super(key: key);
 
   @override
@@ -94,7 +96,7 @@ class AdminInfoRow extends StatelessWidget {
             child: Text(
               value,
               style: AppTextStyles.bodySmall.copyWith(
-                color: Colors.grey[800],
+                color: valueColor ?? Colors.grey[800],
                 fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.ellipsis,

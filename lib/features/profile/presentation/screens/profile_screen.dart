@@ -800,11 +800,6 @@ List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
       icon: Icons.alarm,
       trailing: Switch(value: false, onChanged: null),
     ),
-    // const _MockSettingsItem(
-    //   label: 'Dark Mode',
-    //   icon: Icons.dark_mode,
-    //   trailing: Switch(value: false, onChanged: null),
-    // ),
     _MockSettingsItem(
       label: 'Workout Preferences',
       icon: Icons.fitness_center,

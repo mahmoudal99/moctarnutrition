@@ -120,6 +120,32 @@ class AdminUserProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
+                  // Physical Information
+                  AdminInfoCard(
+                    title: 'Physical Information',
+                    icon: Icons.person_outline,
+                    children: [
+                      AdminInfoRow(
+                          label: 'Age',
+                          value: '${user.preferences.age} years'),
+                      AdminInfoRow(
+                          label: 'Weight',
+                          value: '${user.preferences.weight} kg'),
+                      AdminInfoRow(
+                          label: 'Height',
+                          value: '${user.preferences.height} cm'),
+                      AdminInfoRow(
+                          label: 'Gender',
+                          value: user.preferences.gender),
+                      AdminInfoRow(
+                        label: 'BMI',
+                        value: _calculateBMIDisplay(),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // Fitness Information
                   AdminInfoCard(
                     title: 'Fitness Profile',
@@ -138,28 +164,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                         label: 'Target Calories',
                         value: '${user.preferences.targetCalories} kcal',
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Physical Information
-                  AdminInfoCard(
-                    title: 'Physical Information',
-                    icon: Icons.person_outline,
-                    children: [
-                      AdminInfoRow(
-                          label: 'Age',
-                          value: '${user.preferences.age} years'),
-                      AdminInfoRow(
-                          label: 'Weight',
-                          value: '${user.preferences.weight} kg'),
-                      AdminInfoRow(
-                          label: 'Height',
-                          value: '${user.preferences.height} cm'),
-                      AdminInfoRow(
-                          label: 'Gender',
-                          value: user.preferences.gender),
                     ],
                   ),
 
@@ -189,6 +193,255 @@ class AdminUserProfileScreen extends StatelessWidget {
                     ],
                   ),
 
+                  const SizedBox(height: 16),
+
+                  // Food Preferences
+                  if (user.preferences.preferredCuisines.isNotEmpty ||
+                      user.preferences.foodsToAvoid.isNotEmpty ||
+                      user.preferences.favoriteFoods.isNotEmpty)
+                    AdminInfoCard(
+                      title: 'Food Preferences',
+                      icon: Icons.restaurant_outlined,
+                      children: [
+                        if (user.preferences.preferredCuisines.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Preferred Cuisines',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: user.preferences.preferredCuisines.map((cuisine) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppConstants.accentColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: AppConstants.accentColor.withOpacity(0.3),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        cuisine,
+                                        style: AppTextStyles.caption.copyWith(
+                                          color: AppConstants.accentColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        if (user.preferences.favoriteFoods.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Favorite Foods',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: user.preferences.favoriteFoods.map((food) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppConstants.primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: AppConstants.primaryColor.withOpacity(0.3),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        food,
+                                        style: AppTextStyles.caption.copyWith(
+                                          color: AppConstants.primaryColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        if (user.preferences.foodsToAvoid.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Foods to Avoid',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: user.preferences.foodsToAvoid.map((food) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppConstants.errorColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: AppConstants.errorColor.withOpacity(0.3),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        food,
+                                        style: AppTextStyles.caption.copyWith(
+                                          color: AppConstants.errorColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+
+                  if (user.preferences.preferredCuisines.isNotEmpty ||
+                      user.preferences.foodsToAvoid.isNotEmpty ||
+                      user.preferences.favoriteFoods.isNotEmpty)
+                    const SizedBox(height: 16),
+
+                  // Allergies & Intolerances
+                  if (user.preferences.allergies.isNotEmpty)
+                    AdminInfoCard(
+                      title: 'Allergies & Intolerances',
+                      icon: Icons.warning_amber_outlined,
+                      children: user.preferences.allergies.map((allergy) {
+                        final severity = allergy['severity'] as String? ?? 'mild';
+                        final notes = allergy['notes'] as String?;
+                        return AdminInfoRow(
+                          label: allergy['name'] as String? ?? 'Unknown',
+                          value: '${_getSeverityLabel(severity)}${notes != null ? ' - $notes' : ''}',
+                          valueColor: _getSeverityColor(severity),
+                        );
+                      }).toList(),
+                    ),
+
+                  if (user.preferences.allergies.isNotEmpty)
+                    const SizedBox(height: 16),
+
+                  // Meal Timing Preferences
+                  if (user.preferences.mealTimingPreferences != null)
+                    AdminInfoCard(
+                      title: 'Meal Timing',
+                      icon: Icons.schedule_outlined,
+                      children: _buildMealTimingInfo(),
+                    ),
+
+                  if (user.preferences.mealTimingPreferences != null)
+                    const SizedBox(height: 16),
+
+                  // Batch Cooking Preferences
+                  if (user.preferences.batchCookingPreferences != null)
+                    AdminInfoCard(
+                      title: 'Batch Cooking',
+                      icon: Icons.kitchen_outlined,
+                      children: _buildBatchCookingInfo(),
+                    ),
+
+                  if (user.preferences.batchCookingPreferences != null)
+                    const SizedBox(height: 16),
+
+                  // Nutritional Information
+                  if (user.preferences.proteinTargets != null ||
+                      user.preferences.calorieTargets != null)
+                    AdminInfoCard(
+                      title: 'Nutritional Information',
+                      icon: Icons.monitor_weight_outlined,
+                      children: [
+                        if (user.preferences.proteinTargets != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Protein Targets',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                _buildProteinTargetsInfo(),
+                              ],
+                            ),
+                          ),
+                        ],
+                        if (user.preferences.calorieTargets != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Calorie & Macro Targets',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                _buildCalorieTargetsInfo(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+
+                  if (user.preferences.proteinTargets != null ||
+                      user.preferences.calorieTargets != null)
+                    const SizedBox(height: 16),
+
                   const SizedBox(height: 128),
                 ],
               ),
@@ -196,6 +449,656 @@ class AdminUserProfileScreen extends StatelessWidget {
           ),
         )
       ],
+    );
+  }
+
+  String _calculateBMIDisplay() {
+    final heightInMeters = user.preferences.height / 100;
+    final bmi = user.preferences.weight / (heightInMeters * heightInMeters);
+    final bmiCategory = _getBMICategory(bmi);
+    return '${bmi.toStringAsFixed(1)} (${bmiCategory})';
+  }
+
+  String _getBMICategory(double bmi) {
+    if (bmi < 18.5) return 'Underweight';
+    if (bmi < 25) return 'Normal';
+    if (bmi < 30) return 'Overweight';
+    return 'Obese';
+  }
+
+  List<AdminInfoRow> _buildMealTimingInfo() {
+    final timing = user.preferences.mealTimingPreferences;
+    if (timing == null) return [];
+
+    final List<AdminInfoRow> rows = [];
+    
+    // Meal frequency
+    final frequency = timing['mealFrequency'] as String?;
+    if (frequency != null) {
+      rows.add(AdminInfoRow(
+        label: 'Meal Frequency',
+        value: _getMealFrequencyLabel(frequency),
+      ));
+    }
+
+    // Fasting type
+    final fastingType = timing['fastingType'] as String?;
+    if (fastingType != null && fastingType != 'none') {
+      rows.add(AdminInfoRow(
+        label: 'Fasting Type',
+        value: _getFastingTypeLabel(fastingType),
+      ));
+    }
+
+    // Meal times
+    if (timing['breakfastTime'] != null) {
+      rows.add(AdminInfoRow(
+        label: 'Breakfast Time',
+        value: timing['breakfastTime'] as String,
+      ));
+    }
+
+    if (timing['lunchTime'] != null) {
+      rows.add(AdminInfoRow(
+        label: 'Lunch Time',
+        value: timing['lunchTime'] as String,
+      ));
+    }
+
+    if (timing['dinnerTime'] != null) {
+      rows.add(AdminInfoRow(
+        label: 'Dinner Time',
+        value: timing['dinnerTime'] as String,
+      ));
+    }
+
+    // Snack times
+    final snackTimes = timing['snackTimes'] as List<dynamic>?;
+    if (snackTimes != null && snackTimes.isNotEmpty) {
+      rows.add(AdminInfoRow(
+        label: 'Snack Times',
+        value: snackTimes.join(', '),
+      ));
+    }
+
+    // Custom notes
+    final customNotes = timing['customNotes'] as String?;
+    if (customNotes != null && customNotes.isNotEmpty) {
+      rows.add(AdminInfoRow(
+        label: 'Notes',
+        value: customNotes,
+      ));
+    }
+
+    return rows;
+  }
+
+  List<AdminInfoRow> _buildBatchCookingInfo() {
+    final cooking = user.preferences.batchCookingPreferences;
+    if (cooking == null) return [];
+
+    final List<AdminInfoRow> rows = [];
+    
+    // Cooking frequency
+    final frequency = cooking['frequency'] as String?;
+    if (frequency != null) {
+      rows.add(AdminInfoRow(
+        label: 'Cooking Frequency',
+        value: _getBatchCookingFrequencyLabel(frequency),
+      ));
+    }
+
+    // Batch size
+    final batchSize = cooking['batchSize'] as String?;
+    if (batchSize != null) {
+      rows.add(AdminInfoRow(
+        label: 'Batch Size',
+        value: _getBatchSizeLabel(batchSize),
+      ));
+    }
+
+    // Leftovers preference
+    final preferLeftovers = cooking['preferLeftovers'] as bool?;
+    if (preferLeftovers != null) {
+      rows.add(AdminInfoRow(
+        label: 'Prefers Leftovers',
+        value: preferLeftovers ? 'Yes' : 'No',
+      ));
+    }
+
+    // Custom notes
+    final customNotes = cooking['customNotes'] as String?;
+    if (customNotes != null && customNotes.isNotEmpty) {
+      rows.add(AdminInfoRow(
+        label: 'Notes',
+        value: customNotes,
+      ));
+    }
+
+    return rows;
+  }
+
+  String _getMealFrequencyLabel(String frequency) {
+    switch (frequency) {
+      case 'threeMeals':
+        return '3 meals per day';
+      case 'threeMealsOneSnack':
+        return '3 meals + 1 snack';
+      case 'fourMeals':
+        return '4 meals per day';
+      case 'fourMealsOneSnack':
+        return '4 meals + 1 snack';
+      case 'fiveMeals':
+        return '5 meals per day';
+      case 'fiveMealsOneSnack':
+        return '5 meals + 1 snack';
+      case 'intermittentFasting':
+        return 'Intermittent Fasting';
+      case 'custom':
+        return 'Custom Schedule';
+      default:
+        return frequency;
+    }
+  }
+
+  String _getFastingTypeLabel(String fastingType) {
+    switch (fastingType) {
+      case 'sixteenEight':
+        return '16:8 Fasting';
+      case 'eighteenSix':
+        return '18:6 Fasting';
+      case 'twentyFour':
+        return '20:4 Fasting';
+      case 'alternateDay':
+        return 'Alternate Day Fasting';
+      case 'fiveTwo':
+        return '5:2 Fasting';
+      case 'custom':
+        return 'Custom Fasting';
+      default:
+        return fastingType;
+    }
+  }
+
+  String _getBatchCookingFrequencyLabel(String frequency) {
+    switch (frequency) {
+      case 'daily':
+        return 'Daily';
+      case 'twiceAWeek':
+        return 'Twice a week';
+      case 'weekly':
+        return 'Weekly';
+      case 'biweekly':
+        return 'Every 2 weeks';
+      case 'monthly':
+        return 'Monthly';
+      case 'never':
+        return 'Never';
+      default:
+        return frequency;
+    }
+  }
+
+  String _getBatchSizeLabel(String batchSize) {
+    switch (batchSize) {
+      case 'singleMeal':
+        return 'Single meal';
+      case 'twoMeals':
+        return '2 meals';
+      case 'threeMeals':
+        return '3 meals';
+      case 'fourMeals':
+        return '4 meals';
+      case 'fiveMeals':
+        return '5 meals';
+      case 'weeklyPrep':
+        return 'Weekly preparation';
+      case 'custom':
+        return 'Custom';
+      default:
+        return batchSize;
+    }
+  }
+
+  String _getSeverityLabel(String severity) {
+    switch (severity) {
+      case 'mild':
+        return 'Mild';
+      case 'moderate':
+        return 'Moderate';
+      case 'severe':
+        return 'Severe';
+      case 'anaphylaxis':
+        return 'Anaphylaxis';
+      default:
+        return severity;
+    }
+  }
+
+  Color _getSeverityColor(String severity) {
+    switch (severity) {
+      case 'mild':
+        return AppConstants.successColor;
+      case 'moderate':
+        return AppConstants.warningColor;
+      case 'severe':
+        return AppConstants.errorColor;
+      case 'anaphylaxis':
+        return Colors.red.shade800;
+      default:
+        return AppConstants.textSecondary;
+    }
+  }
+
+  Widget _buildProteinTargetsInfo() {
+    final proteinTargets = user.preferences.proteinTargets;
+    if (proteinTargets == null) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Daily protein target
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppConstants.successColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppConstants.successColor.withOpacity(0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.fitness_center,
+                color: AppConstants.successColor,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Daily Protein Target',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${proteinTargets['dailyTarget']}g',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppConstants.successColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        
+        // Protein per kg/lb
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '${proteinTargets['proteinPerKg']?.toStringAsFixed(1) ?? 'N/A'}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppConstants.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'g/kg',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '${proteinTargets['proteinPerLb']?.toStringAsFixed(1) ?? 'N/A'}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppConstants.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'g/lb',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        
+        // Additional info
+        if (proteinTargets['weightBase'] != null || proteinTargets['fitnessGoal'] != null) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              if (proteinTargets['fitnessGoal'] != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppConstants.accentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppConstants.accentColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    proteinTargets['fitnessGoal'] as String,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.accentColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              if (proteinTargets['weightBase'] != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppConstants.secondaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppConstants.secondaryColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    'Based on ${proteinTargets['weightBase']}',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.secondaryColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCalorieTargetsInfo() {
+    final calorieTargets = user.preferences.calorieTargets;
+    if (calorieTargets == null) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Daily calorie target
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppConstants.accentColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppConstants.accentColor.withOpacity(0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.local_fire_department,
+                color: AppConstants.accentColor,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Daily Calorie Target',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${calorieTargets['dailyTarget']} kcal',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppConstants.accentColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        
+        // RMR and TDEE
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppConstants.warningColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'RMR',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      '${calorieTargets['rmr']} kcal',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppConstants.warningColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppConstants.warningColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'TDEE',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      '${calorieTargets['tdee']} kcal',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppConstants.warningColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        
+        // Macronutrient breakdown
+        if (calorieTargets['macros'] != null) ...[
+          Text(
+            'Macronutrient Breakdown',
+            style: AppTextStyles.caption.copyWith(
+              color: AppConstants.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _buildMacroBreakdown(calorieTargets['macros'] as Map<String, dynamic>),
+        ],
+        
+        // Additional info
+        if (calorieTargets['fitnessGoal'] != null || calorieTargets['activityLevel'] != null) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              if (calorieTargets['fitnessGoal'] != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppConstants.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppConstants.primaryColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    calorieTargets['fitnessGoal'] as String,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.primaryColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              if (calorieTargets['activityLevel'] != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppConstants.secondaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppConstants.secondaryColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    calorieTargets['activityLevel'] as String,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.secondaryColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMacroBreakdown(Map<String, dynamic> macros) {
+    return Column(
+      children: [
+        // Protein
+        _buildMacroRow(
+          'Protein',
+          macros['protein'] as Map<String, dynamic>?,
+          AppConstants.successColor,
+          Icons.fitness_center,
+        ),
+        const SizedBox(height: 4),
+        // Carbs
+        _buildMacroRow(
+          'Carbs',
+          macros['carbs'] as Map<String, dynamic>?,
+          AppConstants.warningColor,
+          Icons.grain,
+        ),
+        const SizedBox(height: 4),
+        // Fat
+        _buildMacroRow(
+          'Fat',
+          macros['fat'] as Map<String, dynamic>?,
+          AppConstants.errorColor,
+          Icons.opacity,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMacroRow(String name, Map<String, dynamic>? macro, Color color, IconData icon) {
+    if (macro == null) return const SizedBox.shrink();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: color.withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              name,
+              style: AppTextStyles.caption.copyWith(
+                color: AppConstants.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(
+            '${macro['grams']}g',
+            style: AppTextStyles.caption.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${macro['percentage']}%',
+            style: AppTextStyles.caption.copyWith(
+              color: AppConstants.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
