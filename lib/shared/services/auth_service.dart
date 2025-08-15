@@ -560,19 +560,25 @@ class AuthService {
   /// Update user profile
   static Future<void> updateUserProfile(UserModel userModel) async {
     try {
-      _logger.i('Updating user profile: ${userModel.id}');
+      _logger.i('AuthService - Updating user profile: ${userModel.id}');
+      _logger.d('AuthService - New name: "${userModel.name}"');
       
       await _updateUserDocument(userModel);
+      _logger.i('AuthService - Firestore document updated');
       
       // Update Firebase Auth display name if it changed
       final currentUser = _auth.currentUser;
       if (currentUser != null && currentUser.displayName != userModel.name) {
+        _logger.d('AuthService - Updating Firebase Auth display name from "${currentUser.displayName}" to "${userModel.name}"');
         await currentUser.updateDisplayName(userModel.name);
+        _logger.i('AuthService - Firebase Auth display name updated');
+      } else {
+        _logger.d('AuthService - Firebase Auth display name unchanged or user not found');
       }
       
-      _logger.i('User profile updated successfully');
+      _logger.i('AuthService - User profile updated successfully');
     } catch (e) {
-      _logger.e('Error updating user profile: $e');
+      _logger.e('AuthService - Error updating user profile: $e');
       throw Exception('Failed to update profile: $e');
     }
   }
@@ -765,9 +771,11 @@ class AuthService {
         throw Exception('User not authenticated');
       }
       
-      _logger.i('Updating user document for: ${userModel.id}');
+      _logger.i('AuthService - Updating user document for: ${userModel.id}');
+      _logger.d('AuthService - User data to update: ${userModel.toJson()}');
+      
       await _firestore.collection('users').doc(userModel.id).update(userModel.toJson());
-      _logger.i('User document updated successfully');
+      _logger.i('AuthService - User document updated successfully');
     });
   }
 

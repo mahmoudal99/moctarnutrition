@@ -9,7 +9,6 @@ import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/models/user_model.dart';
-import '../../../../shared/services/auth_service.dart';
 import '../../../../shared/utils/avatar_utils.dart';
 import '../../../onboarding/presentation/screens/get_started_screen.dart';
 import '../widgets/notifications_toggle.dart';
@@ -554,72 +553,87 @@ String _formatDate(DateTime date) {
 void _showEditProfileDialog(
     BuildContext context, UserModel user, app_auth.AuthProvider authProvider) {
   final nameController = TextEditingController(text: user.name ?? '');
+  final logger = Logger();
+  bool isLoading = false;
 
   showDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Edit Profile'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: nameController,
-            decoration: const InputDecoration(
-              labelText: 'Full Name',
-              hintText: 'Enter your full name',
-            ),
-            textCapitalization: TextCapitalization.words,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Edit Profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Full Name',
+                  hintText: 'Enter your full name',
+                ),
+                textCapitalization: TextCapitalization.words,
+              ),
+            ],
           ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            final newName = nameController.text.trim();
-            if (newName.isNotEmpty && newName != user.name) {
-              // Update user profile
-              final updatedUser = user.copyWith(
-                name: newName,
-                updatedAt: DateTime.now(),
-              );
-
-              try {
-                await AuthService.updateUserProfile(updatedUser);
-
-                // Update the AuthProvider to reflect changes immediately
-                await authProvider.updateUserProfile(updatedUser);
-
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Profile updated successfully'),
-                      backgroundColor: AppConstants.successColor,
-                    ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading ? null : () async {
+                final newName = nameController.text.trim();
+                logger.d('Edit profile - New name: "$newName", Current name: "${user.name}"');
+                
+                if (newName.isNotEmpty && newName != user.name) {
+                  setState(() {
+                    isLoading = true;
+                  });
+                  
+                  // Update user profile
+                  final updatedUser = user.copyWith(
+                    name: newName,
+                    updatedAt: DateTime.now(),
                   );
-                }
-              } catch (e) {
-                if (context.mounted) {
+                  
+                  logger.d('Edit profile - Updating user profile with new name: "$newName"');
+
+                  try {
+                    // Update the AuthProvider which will handle both Firebase and local storage
+                    final success = await authProvider.updateUserProfile(updatedUser);
+                    
+                    logger.d('Edit profile - Update result: $success');
+
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      // Profile update handled silently - the UI will reflect the changes automatically
+                    }
+                  } catch (e) {
+                    logger.e('Edit profile - Error updating profile: $e');
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      // Error handled silently - user can try again if needed
+                    }
+                  }
+                } else {
+                  logger.d('Edit profile - No changes or empty name, closing dialog');
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to update profile: $e'),
-                      backgroundColor: AppConstants.errorColor,
-                    ),
-                  );
                 }
-              }
-            } else {
-              Navigator.of(context).pop();
-            }
-          },
-          child: const Text('Save'),
-        ),
-      ],
+              },
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text('Save'),
+            ),
+          ],
+        );
+      },
     ),
   );
 }

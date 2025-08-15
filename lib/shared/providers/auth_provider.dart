@@ -293,17 +293,24 @@ class AuthProvider extends ChangeNotifier {
   /// Update user profile
   Future<bool> updateUserProfile(UserModel userModel) async {
     try {
+      _logger.i('AuthProvider - Starting profile update for user: ${userModel.id}');
+      _logger.d('AuthProvider - New name: "${userModel.name}"');
+      
       _isLoading = true;
       _error = null;
       notifyListeners();
 
       await AuthService.updateUserProfile(userModel);
+      _logger.i('AuthProvider - AuthService update completed');
       
       _userModel = userModel;
       await _storageService.saveUser(userModel);
+      _logger.i('AuthProvider - Local storage update completed');
       
+      _logger.i('AuthProvider - Profile update successful');
       return true;
     } catch (e) {
+      _logger.e('AuthProvider - Error updating profile: $e');
       _error = e.toString();
       return false;
     } finally {
