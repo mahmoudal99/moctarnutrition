@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/notification_service.dart';
@@ -14,7 +13,7 @@ class RemindersToggle extends StatefulWidget {
 }
 
 class _RemindersToggleState extends State<RemindersToggle> {
-  static final Logger _logger = Logger();
+  static final _logger = AppLogger.instance;
   static const String _remindersPrefKey = 'reminders_enabled';
   
   bool _remindersEnabled = false;
@@ -42,7 +41,10 @@ class _RemindersToggleState extends State<RemindersToggle> {
     } catch (e) {
       _logger.e('Error loading reminders preference: $e');
       if (mounted) {
-        setState(() => _isInitialized = true);
+        setState(() {
+          _remindersEnabled = false;
+          _isInitialized = true;
+        });
       }
     }
   }
