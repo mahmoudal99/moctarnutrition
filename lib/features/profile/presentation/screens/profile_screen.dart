@@ -1,5 +1,6 @@
 import 'package:champions_gym_app/features/profile/presentation/screens/nutrition_preferences_screen.dart';
 import 'package:champions_gym_app/features/profile/presentation/screens/workout_preferences_screen.dart';
+import 'package:champions_gym_app/features/profile/presentation/screens/help_center_screen.dart';
 import 'package:champions_gym_app/shared/widgets/version_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -872,7 +873,11 @@ List<_MockSettingsItem> _getSupportItems(BuildContext context) {
       label: 'Help Center',
       icon: Icons.help_outline,
       onTap: () {
-        // TODO: Open help center
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const HelpCenterScreen(),
+          ),
+        );
       },
     ),
     _MockSettingsItem(

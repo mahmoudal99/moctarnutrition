@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -44,13 +45,8 @@ class _VersionTextState extends State<VersionText> {
       onTap: () => _showWhatsNewModal(context),
       child: Center(
         child: Text(
-          "Moctar Nutrition v${packageInfo != null ? packageInfo!.version : ""} [${packageInfo != null ? packageInfo!.buildNumber : ""}]",
-          style: TextStyle(
-            color: theme.brightness == Brightness.dark
-                ? Colors.grey[300]
-                : Colors.grey,
-          ),
-        ),
+            "Moctar Nutrition v${packageInfo != null ? packageInfo!.version : ""} [${packageInfo != null ? packageInfo!.buildNumber : ""}]",
+            style: AppTextStyles.caption),
       ),
     );
   }
