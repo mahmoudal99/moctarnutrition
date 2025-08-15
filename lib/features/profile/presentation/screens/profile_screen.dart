@@ -1,5 +1,6 @@
 import 'package:champions_gym_app/features/profile/presentation/screens/nutrition_preferences_screen.dart';
 import 'package:champions_gym_app/features/profile/presentation/screens/workout_preferences_screen.dart';
+import 'package:champions_gym_app/shared/widgets/version_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -83,6 +84,8 @@ class ProfileScreen extends StatelessWidget {
                 ...support.map((item) => _SettingsTile(item: item)),
                 const SizedBox(height: 32),
                 _LogoutButton(),
+                const SizedBox(height: 32),
+                const VersionText(),
                 const SizedBox(height: 96),
               ],
             ),
@@ -581,45 +584,51 @@ void _showEditProfileDialog(
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: isLoading ? null : () async {
-                final newName = nameController.text.trim();
-                logger.d('Edit profile - New name: "$newName", Current name: "${user.name}"');
-                
-                if (newName.isNotEmpty && newName != user.name) {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  
-                  // Update user profile
-                  final updatedUser = user.copyWith(
-                    name: newName,
-                    updatedAt: DateTime.now(),
-                  );
-                  
-                  logger.d('Edit profile - Updating user profile with new name: "$newName"');
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      final newName = nameController.text.trim();
+                      logger.d(
+                          'Edit profile - New name: "$newName", Current name: "${user.name}"');
 
-                  try {
-                    // Update the AuthProvider which will handle both Firebase and local storage
-                    final success = await authProvider.updateUserProfile(updatedUser);
-                    
-                    logger.d('Edit profile - Update result: $success');
+                      if (newName.isNotEmpty && newName != user.name) {
+                        setState(() {
+                          isLoading = true;
+                        });
 
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                      // Profile update handled silently - the UI will reflect the changes automatically
-                    }
-                  } catch (e) {
-                    logger.e('Edit profile - Error updating profile: $e');
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                      // Error handled silently - user can try again if needed
-                    }
-                  }
-                } else {
-                  logger.d('Edit profile - No changes or empty name, closing dialog');
-                  Navigator.of(context).pop();
-                }
-              },
+                        // Update user profile
+                        final updatedUser = user.copyWith(
+                          name: newName,
+                          updatedAt: DateTime.now(),
+                        );
+
+                        logger.d(
+                            'Edit profile - Updating user profile with new name: "$newName"');
+
+                        try {
+                          // Update the AuthProvider which will handle both Firebase and local storage
+                          final success =
+                              await authProvider.updateUserProfile(updatedUser);
+
+                          logger.d('Edit profile - Update result: $success');
+
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                            // Profile update handled silently - the UI will reflect the changes automatically
+                          }
+                        } catch (e) {
+                          logger.e('Edit profile - Error updating profile: $e');
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                            // Error handled silently - user can try again if needed
+                          }
+                        }
+                      } else {
+                        logger.d(
+                            'Edit profile - No changes or empty name, closing dialog');
+                        Navigator.of(context).pop();
+                      }
+                    },
               child: isLoading
                   ? const SizedBox(
                       width: 20,
@@ -785,25 +794,6 @@ List<_MockQuickAccess> _getQuickAccessItems(BuildContext context) {
       icon: Icons.show_chart,
       onTap: () => context.go('/progress'),
     ),
-  ];
-}
-
-List<_MockCTA> _getCTAItems(BuildContext context, UserModel user) {
-  return [
-    _MockCTA(
-      label: 'Refer a Friend',
-      icon: Icons.group_add,
-      isProminent: true,
-      onTap: () {
-        // TODO: Implement refer a friend
-      },
-    ),
-    if (user.subscriptionStatus == SubscriptionStatus.free)
-      _MockCTA(
-        label: 'Upgrade Membership',
-        icon: Icons.workspace_premium,
-        onTap: () => context.go('/subscription'),
-      ),
   ];
 }
 

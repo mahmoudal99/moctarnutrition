@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
@@ -105,7 +106,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.bug_report,
+                const Icon(Icons.bug_report,
                     color: AppConstants.primaryColor, size: 24),
                 const SizedBox(width: 8),
                 Text(
@@ -156,12 +157,12 @@ class _BugReportScreenState extends State<BugReportScreen> {
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
-                      items: _categories.map((String category) {
-              return DropdownMenuItem<String>(
-                value: category,
-                child: Text(category),
-              );
-            }).toList(),
+          items: _categories.map((String category) {
+            return DropdownMenuItem<String>(
+              value: category,
+              child: Text(category),
+            );
+          }).toList(),
           onChanged: (String? newValue) {
             setState(() {
               _selectedCategory = newValue!;
@@ -189,28 +190,28 @@ class _BugReportScreenState extends State<BugReportScreen> {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedPriority,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
-                      items: _priorities.map((String priority) {
-              return DropdownMenuItem<String>(
-                value: priority,
-                child: Text(priority),
-              );
-            }).toList(),
+          items: _priorities.map((String priority) {
+            return DropdownMenuItem<String>(
+              value: priority,
+              child: Text(priority),
+            );
+          }).toList(),
           onChanged: (String? newValue) {
             setState(() {
               _selectedPriority = newValue!;
@@ -238,22 +239,22 @@ class _BugReportScreenState extends State<BugReportScreen> {
         const SizedBox(height: 8),
         TextFormField(
           controller: _titleController,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Brief description of the issue',
-            border: const OutlineInputBorder(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -278,22 +279,22 @@ class _BugReportScreenState extends State<BugReportScreen> {
         TextFormField(
           controller: _descriptionController,
           maxLines: 4,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Detailed description of the bug',
-            border: const OutlineInputBorder(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -318,22 +319,22 @@ class _BugReportScreenState extends State<BugReportScreen> {
         TextFormField(
           controller: _stepsController,
           maxLines: 3,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: '1. Go to...\n2. Click on...\n3. See error...',
-            border: const OutlineInputBorder(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
@@ -352,22 +353,22 @@ class _BugReportScreenState extends State<BugReportScreen> {
         TextFormField(
           controller: _expectedBehaviorController,
           maxLines: 2,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'What should happen?',
-            border: const OutlineInputBorder(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
@@ -386,22 +387,22 @@ class _BugReportScreenState extends State<BugReportScreen> {
         TextFormField(
           controller: _actualBehaviorController,
           maxLines: 2,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'What actually happens?',
-            border: const OutlineInputBorder(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
@@ -464,7 +465,8 @@ class _BugReportScreenState extends State<BugReportScreen> {
         expectedBehavior: _expectedBehaviorController.text.trim(),
         actualBehavior: _actualBehaviorController.text.trim(),
       );
-      final emailSubject = EmailTemplates.buildBugReportSubject(_titleController.text.trim());
+      final emailSubject =
+          EmailTemplates.buildBugReportSubject(_titleController.text.trim());
 
       final emailUrl = Uri.parse(
           'mailto:${EmailTemplates.bugReportEmail}?subject=${Uri.encodeComponent(emailSubject)}&body=${Uri.encodeComponent(emailBody)}');
@@ -473,13 +475,6 @@ class _BugReportScreenState extends State<BugReportScreen> {
         await launchUrl(emailUrl);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Email client opened. Please send the email to submit your bug report.'),
-              backgroundColor: AppConstants.successColor,
-            ),
-          );
           Navigator.of(context).pop();
         }
       } else {
@@ -487,12 +482,9 @@ class _BugReportScreenState extends State<BugReportScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to open email client: $e'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
+        if (kDebugMode) {
+          print("Exception: $e");
+        }
       }
     } finally {
       if (mounted) {
@@ -502,8 +494,6 @@ class _BugReportScreenState extends State<BugReportScreen> {
       }
     }
   }
-
-
 
   Future<String> _getDeviceInfo() async {
     try {
