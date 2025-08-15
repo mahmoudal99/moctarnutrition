@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'whats_new_modal.dart';
 
 class VersionText extends StatefulWidget {
   const VersionText({super.key});
@@ -25,16 +27,30 @@ class _VersionTextState extends State<VersionText> {
     });
   }
 
+  void _showWhatsNewModal(BuildContext context) {
+    HapticFeedback.lightImpact();
+    showDialog(
+      context: context,
+      builder: (context) => WhatsNewModal(
+        currentVersion: packageInfo?.version ?? "1.0.0",
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    return Center(
-      child: Text(
-        "Moctar Nutrition v${packageInfo != null ? packageInfo!.version : ""} [${packageInfo != null ? packageInfo!.buildNumber : ""}]",
-        style: TextStyle(
+    return GestureDetector(
+      onTap: () => _showWhatsNewModal(context),
+      child: Center(
+        child: Text(
+          "Moctar Nutrition v${packageInfo != null ? packageInfo!.version : ""} [${packageInfo != null ? packageInfo!.buildNumber : ""}]",
+          style: TextStyle(
             color: theme.brightness == Brightness.dark
                 ? Colors.grey[300]
-                : Colors.grey),
+                : Colors.grey,
+          ),
+        ),
       ),
     );
   }

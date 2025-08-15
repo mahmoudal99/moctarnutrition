@@ -12,11 +12,19 @@ class WaitingForMealPlan extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Image.asset(
+                "assets/images/meal_loading.png",
+                height: 125,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
               Text(
                 'You will receive an email when your plan is ready.',
                 style: AppTextStyles.bodyMedium.copyWith(

@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/user_model.dart';
+import 'whats_new_wrapper.dart';
 
 class FloatingMainNavigation extends StatefulWidget {
   final Widget child;
@@ -88,31 +89,33 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
         final idx = items.indexWhere((item) => location == item.route);
         final currentIndex = idx != -1 ? idx : _currentIndex;
 
-        return BottomBar(
-          body: (context, controller) => widget.child,
-          borderRadius: BorderRadius.circular(25),
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          width: MediaQuery.of(context).size.width * 0.9,
-          barColor: Colors.white,
-          start: 2,
-          end: 0,
-          offset: 16,
-          barAlignment: Alignment.bottomCenter,
-          hideOnScroll: true,
-          showIcon: false,
-          barDecoration: BoxDecoration(
-            color: Colors.white,
+        return WhatsNewWrapper(
+          child: BottomBar(
+            body: (context, controller) => widget.child,
             borderRadius: BorderRadius.circular(25),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            width: MediaQuery.of(context).size.width * 0.9,
+            barColor: Colors.white,
+            start: 2,
+            end: 0,
+            offset: 16,
+            barAlignment: Alignment.bottomCenter,
+            hideOnScroll: true,
+            showIcon: false,
+            barDecoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(25),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: _buildFloatingBottomBar(items, currentIndex, context),
           ),
-          child: _buildFloatingBottomBar(items, currentIndex, context),
         );
       },
     );
