@@ -811,7 +811,6 @@ class AuthService {
         throw Exception('User not authenticated');
       }
 
-      // Re-authenticate user before changing password
       final AuthCredential credential = EmailAuthProvider.credential(
         email: currentUser.email!,
         password: currentPassword,

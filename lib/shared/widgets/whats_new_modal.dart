@@ -59,28 +59,6 @@ class WhatsNewModal extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildVersionSection(
-                      currentVersion,
-                      "Current Version",
-                      [
-                        "🎯 Enhanced meal planning with AI-powered recommendations",
-                        "📊 Improved progress tracking and analytics",
-                        "🔔 Better notification system for reminders",
-                        "🐛 Bug fixes and performance improvements",
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildVersionSection(
-                      _getPreviousVersion(currentVersion),
-                      "Previous Update",
-                      [
-                        "💪 New workout plan customization features",
-                        "📱 Improved user interface and navigation",
-                        "🍎 Enhanced nutrition tracking capabilities",
-                        "⚡ Faster app performance",
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildVersionSection(
                       _getInitialVersion(currentVersion),
                       "Initial Release",
                       [
@@ -88,7 +66,6 @@ class WhatsNewModal extends StatelessWidget {
                         "📋 Personalized meal planning",
                         "🏋️ Custom workout plans",
                         "📈 Progress tracking and analytics",
-                        "🔐 Secure user authentication",
                       ],
                     ),
                   ],
