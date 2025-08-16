@@ -15,7 +15,6 @@ import '../widgets/workout_plan_header.dart';
 import '../widgets/view_toggle.dart';
 import '../widgets/day_view.dart';
 import '../utils/workout_message_generator.dart';
-import 'add_workout_screen.dart';
 
 class WorkoutsScreen extends StatefulWidget {
   const WorkoutsScreen({super.key});

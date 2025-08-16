@@ -51,12 +51,17 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
           dailyWorkout: widget.dailyWorkout,
           workout: WorkoutModel(
             id: 'temp_workout',
-            title: _titleController.text.trim().isEmpty ? 'Custom Workout' : _titleController.text.trim(),
-            description: _descriptionController.text.trim().isEmpty ? 'Your personalized workout' : _descriptionController.text.trim(),
+            title: _titleController.text.trim().isEmpty
+                ? 'Custom Workout'
+                : _titleController.text.trim(),
+            description: _descriptionController.text.trim().isEmpty
+                ? 'Your personalized workout'
+                : _descriptionController.text.trim(),
             trainerId: 'temp',
             trainerName: 'You',
             difficulty: _selectedDifficulty,
-            category: WorkoutCategory.strength, // Will be overridden
+            category: WorkoutCategory.strength,
+            // Will be overridden
             estimatedDuration: 0,
             exercises: _exercises,
             tags: [],
@@ -114,7 +119,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
       }
       final exercise = _exercises.removeAt(oldIndex);
       _exercises.insert(newIndex, exercise);
-      
+
       // Reorder exercises
       for (int i = 0; i < _exercises.length; i++) {
         _exercises[i] = Exercise(
@@ -158,12 +163,14 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
 
       // Get user's preferred workout category from onboarding
       final userPreferences = authProvider.userModel?.preferences;
-      final preferredWorkoutStyles = userPreferences?.preferredWorkoutStyles ?? ['strength'];
-      
+      final preferredWorkoutStyles =
+          userPreferences?.preferredWorkoutStyles ?? ['strength'];
+
       // Map workout styles to category (default to strength if no clear mapping)
       WorkoutCategory workoutCategory = WorkoutCategory.strength;
       if (preferredWorkoutStyles.contains('cardio')) {
@@ -177,7 +184,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
       } else if (preferredWorkoutStyles.contains('flexibility')) {
         workoutCategory = WorkoutCategory.flexibility;
       }
-      
+
       // Create custom workout
       final workout = WorkoutModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -187,19 +194,22 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
         trainerName: authProvider.userModel?.name ?? 'You',
         difficulty: _selectedDifficulty,
         category: workoutCategory,
-        estimatedDuration: _exercises.length * 3, // Rough estimate: 3 minutes per exercise
+        estimatedDuration: _exercises.length * 3,
+        // Rough estimate: 3 minutes per exercise
         exercises: _exercises,
         tags: [workoutCategory.toString().split('.').last],
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      await workoutProvider.addWorkoutToDay(widget.dailyWorkout.dayName, workout);
+      await workoutProvider.addWorkoutToDay(
+          widget.dailyWorkout.dayName, workout);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Created "${workout.title}" for ${widget.dailyWorkout.dayName}'),
+            content: Text(
+                'Created "${workout.title}" for ${widget.dailyWorkout.dayName}'),
             backgroundColor: AppConstants.primaryColor,
           ),
         );
@@ -262,7 +272,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                     },
                   ),
                   const SizedBox(height: AppConstants.spacingM),
-                  
+
                   // Workout description
                   TextFormField(
                     controller: _descriptionController,
@@ -273,7 +283,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                     maxLines: 2,
                   ),
                   const SizedBox(height: AppConstants.spacingM),
-                  
+
                   // Difficulty selection
                   Text(
                     'Difficulty',
@@ -302,7 +312,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                     },
                   ),
                   const SizedBox(height: AppConstants.spacingL),
-                  
+
                   // Exercises section
                   Row(
                     children: [
@@ -325,26 +335,21 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                     ],
                   ),
                   const SizedBox(height: AppConstants.spacingM),
-                  
+
                   // Exercises list
                   if (_exercises.isEmpty)
                     Container(
                       padding: const EdgeInsets.all(AppConstants.spacingL),
                       decoration: BoxDecoration(
                         color: AppConstants.surfaceColor,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusM),
                         border: Border.all(
                           color: AppConstants.textTertiary.withOpacity(0.3),
                         ),
                       ),
                       child: Column(
                         children: [
-                          Icon(
-                            Icons.fitness_center,
-                            size: 48,
-                            color: AppConstants.textTertiary,
-                          ),
-                          const SizedBox(height: AppConstants.spacingM),
                           Text(
                             'No exercises yet',
                             style: AppTextStyles.bodyMedium.copyWith(
@@ -380,27 +385,33 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                 ],
               ),
             ),
-            
+
             // Create workout button
             Padding(
               padding: const EdgeInsets.all(AppConstants.spacingM),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _createWorkout,
+                  onPressed: (_isLoading || _exercises.isEmpty) ? null : _createWorkout,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.primaryColor,
+                    backgroundColor: _exercises.isEmpty 
+                        ? AppConstants.textTertiary.withOpacity(0.3)
+                        : AppConstants.primaryColor,
                     foregroundColor: AppConstants.surfaceColor,
                     padding: const EdgeInsets.symmetric(
                       vertical: AppConstants.spacingM,
                     ),
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(color: AppConstants.surfaceColor)
-                      : const Text('Create Workout'),
+                      ? const CircularProgressIndicator(
+                          color: AppConstants.surfaceColor)
+                      : Text(_exercises.isEmpty ? 'Add at least one exercise' : 'Create Workout'),
                 ),
               ),
             ),
+            const SizedBox(
+              height: 24,
+            )
           ],
         ),
       ),
@@ -439,7 +450,7 @@ class _ExerciseCard extends StatelessWidget {
             size: 20,
           ),
           const SizedBox(width: AppConstants.spacingS),
-          
+
           // Exercise number
           Container(
             width: 32,
@@ -459,7 +470,7 @@ class _ExerciseCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppConstants.spacingS),
-          
+
           // Exercise details
           Expanded(
             child: Column(
@@ -481,7 +492,7 @@ class _ExerciseCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Remove button
           IconButton(
             onPressed: onRemove,
