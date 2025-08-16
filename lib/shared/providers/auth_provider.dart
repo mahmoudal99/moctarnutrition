@@ -6,6 +6,7 @@ import '../services/auth_service.dart';
 import '../services/user_local_storage_service.dart';
 import '../services/onboarding_service.dart';
 import '../services/workout_plan_local_storage_service.dart';
+import 'profile_photo_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   static final _logger = Logger();
@@ -14,6 +15,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   final UserLocalStorageService _storageService = UserLocalStorageService();
+  ProfilePhotoProvider? _profilePhotoProvider;
 
   // Getters
   User? get firebaseUser => _firebaseUser;
@@ -22,6 +24,11 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _firebaseUser != null && _userModel != null;
   bool get isGuest => _firebaseUser?.isAnonymous ?? false;
+
+  /// Set the profile photo provider reference
+  void setProfilePhotoProvider(ProfilePhotoProvider provider) {
+    _profilePhotoProvider = provider;
+  }
 
   AuthProvider() {
     _initializeAuthState();
@@ -44,6 +51,12 @@ class AuthProvider extends ChangeNotifier {
         _userModel = null;
         await _storageService.clearUser();
         await WorkoutPlanLocalStorageService.clearWorkoutPlan();
+        
+        // Clear profile photo provider
+        if (_profilePhotoProvider != null) {
+          _logger.i('AuthProvider - Clearing profile photo provider');
+          _profilePhotoProvider!.clear();
+        }
       }
       
       _error = null;
@@ -107,6 +120,12 @@ class AuthProvider extends ChangeNotifier {
         
         _userModel = userModel;
         await _storageService.saveUser(userModel);
+        
+        // Initialize profile photo provider if available
+        if (_profilePhotoProvider != null) {
+          _logger.i('AuthProvider - Initializing profile photo provider for user: ${userModel.id}');
+          await _profilePhotoProvider!.initialize(userModel.id);
+        }
       } else {
         _logger.w('AuthProvider - No user model found');
       }

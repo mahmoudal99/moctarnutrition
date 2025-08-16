@@ -1,6 +1,7 @@
 import 'package:champions_gym_app/features/profile/presentation/screens/nutrition_preferences_screen.dart';
 import 'package:champions_gym_app/features/profile/presentation/screens/workout_preferences_screen.dart';
 import 'package:champions_gym_app/features/profile/presentation/screens/help_center_screen.dart';
+import 'package:champions_gym_app/features/profile/presentation/screens/account_settings_screen.dart';
 import 'package:champions_gym_app/shared/widgets/version_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
+import '../../../../shared/providers/profile_photo_provider.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/utils/avatar_utils.dart';
 import '../../../onboarding/presentation/screens/get_started_screen.dart';
@@ -108,39 +110,46 @@ class _UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Stack(
+    return Consumer<ProfilePhotoProvider>(
+      builder: (context, profilePhotoProvider, child) {
+        return Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
               children: [
-                AvatarUtils.buildAvatar(
-                  photoUrl: user.photoUrl,
-                  name: user.name,
-                  email: user.email,
-                  radius: 38,
-                  fontSize: 18,
-                ),
-                if (authUser.emailVerified)
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppConstants.successColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                Stack(
+                  children: [
+                    profilePhotoProvider.hasProfilePhoto
+                        ? CircleAvatar(
+                            radius: 38,
+                            backgroundImage: profilePhotoProvider.getProfilePhotoImage(),
+                          )
+                        : AvatarUtils.buildAvatar(
+                            photoUrl: user.photoUrl,
+                            name: user.name,
+                            email: user.email,
+                            radius: 38,
+                            fontSize: 18,
+                          ),
+                    if (authUser.emailVerified)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppConstants.successColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: const Icon(Icons.check,
+                              size: 16, color: Colors.white),
+                        ),
                       ),
-                      padding: const EdgeInsets.all(4),
-                      child: const Icon(Icons.check,
-                          size: 16, color: Colors.white),
-                    ),
-                  ),
-              ],
-            ),
+                  ],
+                ),
             const SizedBox(width: 18),
             Expanded(
               child: Column(
@@ -212,6 +221,8 @@ class _UserCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+      },
     );
   }
 }
@@ -830,7 +841,11 @@ List<_MockSettingsItem> _getSettingsItems(BuildContext context) {
       label: 'Account Settings',
       icon: Icons.settings,
       onTap: () {
-        // TODO: Navigate to account settings
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const AccountSettingsScreen(),
+          ),
+        );
       },
     ),
   ];

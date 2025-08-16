@@ -57,7 +57,6 @@ class NotificationService {
       );
 
       _isInitialized = true;
-      _logger.i('NotificationService initialized successfully');
     } catch (e) {
       _logger.e('Failed to initialize NotificationService: $e');
     }
@@ -90,7 +89,6 @@ class NotificationService {
             badge: true,
             sound: true,
           );
-          _logger.d('iOS notification permission check result: $result');
           return result ?? false;
         } catch (e) {
           _logger.e('Error checking iOS notification permissions: $e');

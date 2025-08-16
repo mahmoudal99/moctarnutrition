@@ -149,7 +149,7 @@ class WorkoutPlanHeader extends StatelessWidget {
       case WorkoutPlanType.running:
         return 'Running';
       case WorkoutPlanType.ai_generated:
-        return 'AI Generated';
+        return 'Generated';
     }
   }
 

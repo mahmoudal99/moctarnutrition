@@ -7,6 +7,8 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/workout_provider.dart';
 import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/user_provider.dart';
+import '../../../../shared/providers/profile_photo_provider.dart';
+import '../../../../shared/utils/avatar_utils.dart';
 import '../widgets/daily_workout_card.dart';
 import '../widgets/workout_plan_header.dart';
 
@@ -324,25 +326,31 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _getUserProfileIcon() {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final photoUrl = authProvider.userModel?.photoUrl;
+    return Consumer<ProfilePhotoProvider>(
+      builder: (context, profilePhotoProvider, child) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final user = authProvider.userModel;
 
-    if (photoUrl != null && photoUrl.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Image.network(
-          photoUrl,
-          width: 48,
-          height: 48,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildDefaultAvatar();
-          },
-        ),
-      );
-    }
+        if (profilePhotoProvider.hasProfilePhoto) {
+          return CircleAvatar(
+            radius: 24,
+            backgroundImage: profilePhotoProvider.getProfilePhotoImage(),
+          );
+        }
 
-    return _buildDefaultAvatar();
+        if (user != null) {
+          return AvatarUtils.buildAvatar(
+            photoUrl: user.photoUrl,
+            name: user.name,
+            email: user.email,
+            radius: 24,
+            fontSize: 12,
+          );
+        }
+
+        return _buildDefaultAvatar();
+      },
+    );
   }
 
   Widget _buildDefaultAvatar() {

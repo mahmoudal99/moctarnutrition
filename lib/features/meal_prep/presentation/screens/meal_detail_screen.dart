@@ -96,7 +96,6 @@ class _MealDetailScreenState extends State<MealDetailScreen>
   }
 
   Future<void> _loadVerificationResult() async {
-    // USDA verification temporarily disabled
     return;
   }
 

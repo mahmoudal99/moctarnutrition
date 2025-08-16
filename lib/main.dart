@@ -25,6 +25,7 @@ import 'features/admin/presentation/screens/admin_home_screen.dart';
 import 'features/workouts/presentation/screens/workouts_screen.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'shared/services/background_upload_service.dart';
+import 'shared/providers/profile_photo_provider.dart';
 
 // import 'features/trainers/presentation/screens/trainers_screen.dart';
 // import 'features/workouts/presentation/screens/workouts_screen.dart';
@@ -262,6 +263,11 @@ void main() async {
   }
 
   final authProvider = AuthProvider();
+  final profilePhotoProvider = ProfilePhotoProvider();
+  
+  // Connect auth provider with profile photo provider
+  authProvider.setProfilePhotoProvider(profilePhotoProvider);
+  
   _router = createRouter(authProvider);
 
   runApp(
@@ -272,6 +278,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MealPlanProvider()),
         ChangeNotifierProvider(create: (_) => CheckinProvider()),
         ChangeNotifierProvider(create: (_) => WorkoutProvider()),
+        ChangeNotifierProvider(create: (_) => profilePhotoProvider),
       ],
       child: const ChampionsGymApp(),
     ),
