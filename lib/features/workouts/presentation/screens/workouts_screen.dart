@@ -28,8 +28,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     });
   }
 
-
-
   Future<void> _loadWorkoutPlanIfNeeded() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     Provider.of<UserProvider>(context, listen: false);
@@ -38,7 +36,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
     // Check if user is authenticated
     if (!authProvider.isAuthenticated || authProvider.userModel == null) {
-      _logger.w('Cannot load workout plan: user not authenticated or userModel is null');
+      _logger.w(
+          'Cannot load workout plan: user not authenticated or userModel is null');
       return;
     }
 
@@ -46,10 +45,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     final currentWorkoutPlan = workoutProvider.currentWorkoutPlan;
     if (currentWorkoutPlan != null) {
       if (currentWorkoutPlan.userId == authProvider.userModel!.id) {
-        _logger.d('Workout plan already loaded for current user, skipping API call');
+        _logger.d(
+            'Workout plan already loaded for current user, skipping API call');
         return;
       } else {
-        _logger.d('Workout plan belongs to different user, clearing and reloading');
+        _logger.d(
+            'Workout plan belongs to different user, clearing and reloading');
         await workoutProvider.clearWorkoutPlanForUserChange();
       }
     }
@@ -90,11 +91,11 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     if (authProvider.isAuthenticated && authProvider.userModel != null) {
       // Clear local cache to force refresh from server
       await workoutProvider.clearLocalCache();
-      
+
       final workoutStyles =
           authProvider.userModel!.preferences.preferredWorkoutStyles;
-      _logger.d(
-          'Refreshing workout plan for user ${authProvider.userModel!.id}');
+      _logger
+          .d('Refreshing workout plan for user ${authProvider.userModel!.id}');
       await workoutProvider.loadWorkoutPlan(
           authProvider.userModel!.id, workoutStyles, authProvider.userModel);
     }
@@ -154,7 +155,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               padding: const EdgeInsets.all(AppConstants.spacingL),
               child: Column(
                 children: [
-                  // Loading animation
                   Container(
                     width: 120,
                     height: 120,
@@ -163,24 +163,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                       borderRadius: BorderRadius.circular(AppConstants.radiusL),
                       boxShadow: AppConstants.shadowM,
                     ),
-                    child: Column(
+                    child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppConstants.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                          ),
-                          child: const Icon(
-                            Icons.fitness_center,
-                            color: AppConstants.primaryColor,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(height: AppConstants.spacingM),
-                        const CircularProgressIndicator(
+                        CircularProgressIndicator(
                           color: AppConstants.primaryColor,
                           strokeWidth: 3,
                         ),
@@ -238,7 +224,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         color: AppConstants.surfaceColor,
         borderRadius: BorderRadius.circular(AppConstants.radiusM),
         border: Border.all(
-          color: isCompleted 
+          color: isCompleted
               ? AppConstants.primaryColor.withOpacity(0.3)
               : AppConstants.textTertiary.withOpacity(0.2),
         ),
@@ -307,11 +293,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     // Check if it's a specific type of workout day
     final workoutCount = todayWorkout.workouts.length;
     final estimatedDuration = todayWorkout.estimatedDuration;
-    
+
     if (workoutCount == 1) {
       final workout = todayWorkout.workouts.first;
-      final category = workout.category.toString().split('.').last.toLowerCase();
-      
+      final category =
+          workout.category.toString().split('.').last.toLowerCase();
+
       // Provide more specific messages based on workout category
       switch (workout.category) {
         case WorkoutCategory.strength:
@@ -375,10 +362,11 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       body: Consumer2<AuthProvider, WorkoutProvider>(
         builder: (context, authProvider, workoutProvider, child) {
           // Check if user changed and workout plan needs to be reloaded
-          if (authProvider.isAuthenticated && 
-              authProvider.userModel != null && 
+          if (authProvider.isAuthenticated &&
+              authProvider.userModel != null &&
               workoutProvider.currentWorkoutPlan != null &&
-              workoutProvider.currentWorkoutPlan!.userId != authProvider.userModel!.id) {
+              workoutProvider.currentWorkoutPlan!.userId !=
+                  authProvider.userModel!.id) {
             _logger.d('User changed, reloading workout plan');
             // Use Future.microtask to avoid build-time side effects
             Future.microtask(() => _loadWorkoutPlanIfNeeded());
@@ -492,103 +480,103 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     return RefreshIndicator(
       onRefresh: _refreshWorkoutPlan,
       child: CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          expandedHeight: 140,
-          floating: false,
-          pinned: true,
-          backgroundColor: AppConstants.surfaceColor,
-          elevation: 0,
-          leading: Container(
-            margin: const EdgeInsets.all(8),
-            child: _getUserProfileIcon(),
-          ),
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              color: AppConstants.surfaceColor,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppConstants.spacingM,
-                  AppConstants.spacingXL,
-                  AppConstants.spacingM,
-                  AppConstants.spacingM,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Hi ${_getUserName()}!',
-                      style: AppTextStyles.heading3.copyWith(
-                        color: AppConstants.textPrimary,
-                        fontWeight: FontWeight.w600,
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 140,
+            floating: false,
+            pinned: true,
+            backgroundColor: AppConstants.surfaceColor,
+            elevation: 0,
+            leading: Container(
+              margin: const EdgeInsets.all(8),
+              child: _getUserProfileIcon(),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                color: AppConstants.surfaceColor,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppConstants.spacingM,
+                    AppConstants.spacingXL,
+                    AppConstants.spacingM,
+                    AppConstants.spacingM,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Hi ${_getUserName()}!',
+                        style: AppTextStyles.heading3.copyWith(
+                          color: AppConstants.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingXS),
-                    Text(
-                      _getWorkoutMessage(todayWorkout),
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppConstants.textSecondary,
+                      const SizedBox(height: AppConstants.spacingXS),
+                      Text(
+                        _getWorkoutMessage(todayWorkout),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppConstants.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                WorkoutPlanHeader(workoutPlan: workoutPlan),
-                const SizedBox(height: AppConstants.spacingL),
-                if (todayWorkout != null) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.spacingM),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  WorkoutPlanHeader(workoutPlan: workoutPlan),
+                  const SizedBox(height: AppConstants.spacingL),
+                  if (todayWorkout != null) ...[
+                    Text(
+                      "Today's Workout",
+                      style: AppTextStyles.heading4,
+                    ),
+                    const SizedBox(height: AppConstants.spacingM),
+                    DailyWorkoutCard(
+                      dailyWorkout: todayWorkout,
+                      isToday: true,
+                    ),
+                    const SizedBox(height: AppConstants.spacingL),
+                  ],
                   Text(
-                    "Today's Workout",
+                    'Weekly Plan',
                     style: AppTextStyles.heading4,
                   ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  DailyWorkoutCard(
-                    dailyWorkout: todayWorkout,
-                    isToday: true,
-                  ),
-                  const SizedBox(height: AppConstants.spacingL),
                 ],
-                Text(
-                  'Weekly Plan',
-                  style: AppTextStyles.heading4,
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              final dailyWorkout = workoutPlan.dailyWorkouts[index];
-              final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final dailyWorkout = workoutPlan.dailyWorkouts[index];
+                final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.spacingM,
-                  vertical: AppConstants.spacingS,
-                ),
-                child: DailyWorkoutCard(
-                  dailyWorkout: dailyWorkout,
-                  isToday: isToday,
-                ),
-              );
-            },
-            childCount: workoutPlan.dailyWorkouts.length,
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.spacingM,
+                    vertical: AppConstants.spacingS,
+                  ),
+                  child: DailyWorkoutCard(
+                    dailyWorkout: dailyWorkout,
+                    isToday: isToday,
+                  ),
+                );
+              },
+              childCount: workoutPlan.dailyWorkouts.length,
+            ),
           ),
-        ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 128),
-        ),
-      ],
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 128),
+          ),
+        ],
       ),
     );
   }

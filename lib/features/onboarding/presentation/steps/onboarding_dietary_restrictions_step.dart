@@ -38,9 +38,9 @@ class OnboardingDietaryRestrictionsStep extends StatelessWidget {
       case 'Vegan':
         return 'No animal products';
       case 'Gluten-Free':
-        return 'No gluten-containing foods';
+        return 'No gluten-containing foods (e.g., wheat, barley, rye)';
       case 'Dairy-Free':
-        return 'No dairy products';
+        return 'No dairy products (milk, cheese, yogurt, etc.)';
       case 'Keto':
         return 'Low-carb, high-fat diet';
       case 'Paleo':

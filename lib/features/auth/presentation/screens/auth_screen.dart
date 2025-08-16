@@ -7,6 +7,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/user_provider.dart';
+import '../../../profile/presentation/screens/privacy_policy_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   final bool isSignUp;
@@ -25,6 +26,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _obscurePassword = true;
+  bool _acceptedTerms = false; // New field for terms acceptance
 
   @override
   void initState() {
@@ -190,6 +192,10 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
           ],
+          if (_isSignUp) ...[
+            const SizedBox(height: AppConstants.spacingS),
+            _buildTermsCheckbox(),
+          ],
           const SizedBox(height: AppConstants.spacingM),
           _buildAuthButton(),
           const SizedBox(height: AppConstants.spacingS),
@@ -263,6 +269,81 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  Widget _buildTermsCheckbox() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppConstants.surfaceColor,
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        border: Border.all(
+          color: AppConstants.textTertiary.withOpacity(0.2),
+        ),
+        boxShadow: AppConstants.shadowS,
+      ),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: Checkbox(
+              value: _acceptedTerms,
+              onChanged: (value) {
+                setState(() {
+                  _acceptedTerms = value ?? false;
+                });
+              },
+              activeColor: AppConstants.primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.radiusS),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppConstants.spacingS),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+                children: [
+                  const TextSpan(text: 'I agree to the '),
+                  WidgetSpan(
+                    child: GestureDetector(
+                      onTap: _showTermsAndConditions,
+                      child: Text(
+                        'Terms and Conditions',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppConstants.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const TextSpan(text: ' and '),
+                  WidgetSpan(
+                    child: GestureDetector(
+                      onTap: _showPrivacyPolicy,
+                      child: Text(
+                        'Privacy Policy',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppConstants.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildToggleAuth() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -279,6 +360,7 @@ class _AuthScreenState extends State<AuthScreen> {
           onTap: () {
             setState(() {
               _isSignUp = !_isSignUp;
+              _acceptedTerms = false; // Reset terms acceptance when switching modes
             });
           },
           child: Text(
@@ -425,6 +507,15 @@ class _AuthScreenState extends State<AuthScreen> {
     bool success = false;
 
     if (_isSignUp) {
+      if (!_acceptedTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please accept terms and conditions to create an account.'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+        return;
+      }
       success = await authProvider.signUpWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -464,6 +555,16 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _handleGoogleSignIn() async {
+    if (_isSignUp && !_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please accept terms and conditions to create an account.'),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
+      return;
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.signInWithGoogle();
 
@@ -492,6 +593,16 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _handleAppleSignIn() async {
+    if (_isSignUp && !_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please accept terms and conditions to create an account.'),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
+      return;
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.signInWithApple();
 
@@ -563,5 +674,50 @@ class _AuthScreenState extends State<AuthScreen> {
       // Navigate to get started screen directly
       context.go('/get-started');
     }
+  }
+
+  void _showTermsAndConditions() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Terms and Conditions',
+          style: AppTextStyles.heading4,
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            'By using Moctar Nutrition, you agree to:\n\n'
+            '• Use the app responsibly and in accordance with applicable laws\n'
+            '• Provide accurate and truthful information\n'
+            '• Not share your account credentials with others\n'
+            '• Respect the privacy and rights of other users\n'
+            '• Follow our community guidelines\n\n'
+            'We reserve the right to modify these terms at any time. '
+            'Continued use of the app constitutes acceptance of any changes.',
+            style: AppTextStyles.bodyMedium,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Close',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppConstants.primaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrivacyPolicy() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PrivacyPolicyScreen(),
+      ),
+    );
   }
 } 

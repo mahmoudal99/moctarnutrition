@@ -42,7 +42,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ActivityLevel _selectedActivityLevel = ActivityLevel.moderatelyActive;
   final List<String> _selectedDietaryRestrictions = [];
   final List<String> _selectedWorkoutStyles = [];
-  int _targetCalories = 2000;
 
   // Food preferences
   final List<String> _preferredCuisines = [];
@@ -57,7 +56,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // Meal Timing Preferences
   MealTimingPreferences? _mealTimingPreferences;
-  
+
   // Batch Cooking Preferences
   BatchCookingPreferences? _batchCookingPreferences;
 
@@ -69,7 +68,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingStep> _steps = [
     OnboardingStep(
-      title: 'YOUR FITNESS JOURNEY IS ABOUT TO BEGIN',
+      title: 'KICKSTART YOUR FITNESS JOURNEY',
       subtitle: 'Your journey to a healthier lifestyle starts here',
       description:
           'Let\'s personalize your experience by understanding your fitness goals and preferences.',
@@ -133,7 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle: 'Tell us what you like and don\'t like',
       description:
           'This helps us create personalized meal plans that match your taste preferences.',
-      icon: "diet.json",
+      icon: "prefs.json",
       color: AppConstants.successColor,
     ),
     OnboardingStep(
@@ -141,17 +140,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle: 'Keep you safe and healthy',
       description:
           'Tell us about any allergies or intolerances so we can ensure your meal plans are safe.',
-      icon: "heartbeat.json",
+      icon: "failed.json",
       color: AppConstants.errorColor,
     ),
     OnboardingStep(
-      title: 'Meal Count & Timing',
-      subtitle: 'Your eating schedule',
-      description:
-          'Tell us about your meal frequency and preferred eating times.',
-      icon: "calendar.json",
-      color: AppConstants.accentColor,
-    ),
+        title: 'Meal Count & Timing',
+        subtitle: 'Your eating schedule',
+        description:
+            'Tell us about your meal frequency and preferred eating times.',
+        icon: "recipes.json",
+        color: AppConstants.accentColor,
+        showIconColor: false),
     OnboardingStep(
       title: 'Batch Cooking Preferences',
       subtitle: 'Your meal preparation habits',
@@ -321,12 +320,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 value: step.color,
                               ),
                             ]
-                          : [
-                              // ValueDelegate.color(
-                              //   const ['**', 'Fill 1'], // Change this based on your animation
-                              //   value: step.color,
-                              // ),
-                            ],
+                          : [],
                     ),
                   ),
                 ),
@@ -577,7 +571,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           setState(() => _preferredCuisines.add(cuisine));
         }
       },
-      onRemoveCuisine: (cuisine) => setState(() => _preferredCuisines.remove(cuisine)),
+      onRemoveCuisine: (cuisine) =>
+          setState(() => _preferredCuisines.remove(cuisine)),
       foodsToAvoid: _foodsToAvoid,
       onAddAvoid: (food) {
         if (food.isNotEmpty && !_foodsToAvoid.contains(food)) {
@@ -637,7 +632,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isWorkoutStep = _currentPage == 6;
     final isFoodPreferencesStep = _currentPage == 7;
     final isAllergiesStep = _currentPage == 8;
-    final isNextEnabled = !isDietaryStep && !isWorkoutStep && !isFoodPreferencesStep && !isAllergiesStep
+    final isNextEnabled = !isDietaryStep &&
+            !isWorkoutStep &&
+            !isFoodPreferencesStep &&
+            !isAllergiesStep
         ? true
         : isDietaryStep
             ? _selectedDietaryRestrictions.isNotEmpty
@@ -845,37 +843,107 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       builder: (context, setModalState) {
         return Container(
           padding: const EdgeInsets.all(AppConstants.spacingL),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Handle indicator
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingL),
               Text('Select Age', style: AppTextStyles.heading4),
               const SizedBox(height: AppConstants.spacingL),
-              SizedBox(
+              Container(
                 height: 200,
-                child: ListWheelScrollView(
-                  itemExtent: 50,
-                  diameterRatio: 1.5,
-                  onSelectedItemChanged: (index) {
-                    setModalState(() {
-                      tempAge = 16 + index;
-                    });
-                  },
-                  children: List.generate(84, (index) {
-                    final age = 16 + index;
-                    return Center(
-                      child: Text(
-                        '$age years',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          fontWeight: tempAge == age
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: tempAge == age
-                              ? AppConstants.primaryColor
-                              : AppConstants.textPrimary,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.grey[50]!,
+                      Colors.white,
+                      Colors.grey[50]!,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    // Background pattern - subtle dots
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: DotPatternPainter(),
+                      ),
+                    ),
+                    // Selection indicator lines
+                    Positioned(
+                      top: 75,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                                color:
+                                    AppConstants.primaryColor.withOpacity(0.3),
+                                width: 1),
+                            bottom: BorderSide(
+                                color:
+                                    AppConstants.primaryColor.withOpacity(0.3),
+                                width: 1),
+                          ),
                         ),
                       ),
-                    );
-                  }),
+                    ),
+                    // Main scroll view
+                    ListWheelScrollView(
+                      itemExtent: 50,
+                      diameterRatio: 1.5,
+                      onSelectedItemChanged: (index) {
+                        setModalState(() {
+                          tempAge = 16 + index;
+                        });
+                      },
+                      children: List.generate(84, (index) {
+                        final age = 16 + index;
+                        return Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Text(
+                              '$age years',
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                fontWeight: tempAge == age
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: tempAge == age
+                                    ? AppConstants.primaryColor
+                                    : AppConstants.textPrimary,
+                                fontSize: tempAge == age ? 18 : 16,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppConstants.spacingL),
@@ -967,9 +1035,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         2,
         OnboardingStep(
           title: 'Your BMI',
-          subtitle: 'Body Mass Index',
-          description:
-              'Your BMI is calculated from your height and weight. This helps us personalize your experience.',
+          subtitle:
+              'Calculated from your height and weight to tailor your experience.',
+          description: '',
           icon: "heartbeat.json",
           color: AppConstants.warningColor,
         ));
@@ -989,14 +1057,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _logger.i('  Dietary Restrictions: ${_selectedDietaryRestrictions}');
     _logger.i('  Workout Styles: ${_selectedWorkoutStyles}');
     // Convert allergies to JSON format for storage
-    final allergiesJson = _selectedAllergies.map((allergy) => allergy.toJson()).toList();
-    
+    final allergiesJson =
+        _selectedAllergies.map((allergy) => allergy.toJson()).toList();
+
     // Convert meal timing preferences to JSON format for storage
     final mealTimingJson = _mealTimingPreferences?.toJson();
-    
+
     // Convert batch cooking preferences to JSON format for storage
     final batchCookingJson = _batchCookingPreferences?.toJson();
-    
+
     // Create user preferences
     final preferences = UserPreferences(
       fitnessGoal: _selectedFitnessGoal,
@@ -1104,29 +1173,126 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       builder: (context, setModalState) {
         return Container(
           padding: const EdgeInsets.all(AppConstants.spacingL),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Handle indicator
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingL),
               Text('Select Weight', style: AppTextStyles.heading4),
               const SizedBox(height: AppConstants.spacingL),
-              Slider(
-                value: tempWeight,
-                min: 30.0,
-                max: 200.0,
-                divisions: 170,
-                label: '${tempWeight.toStringAsFixed(1)} kg',
-                onChanged: (value) {
-                  setModalState(() {
-                    tempWeight = value;
-                  });
-                  HapticFeedback.selectionClick();
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-              Text(
-                '${tempWeight.toStringAsFixed(1)} kg',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w600,
+              Container(
+                constraints: const BoxConstraints(minHeight: 120),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.grey[50]!,
+                      Colors.white,
+                      Colors.grey[50]!,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    // Background measurement lines
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: MeasurementLinePainter(),
+                      ),
+                    ),
+                    // Weight scale icon
+                    Positioned(
+                      top: 10,
+                      right: 20,
+                      child: Icon(
+                        Icons.monitor_weight_outlined,
+                        color: AppConstants.primaryColor.withOpacity(0.3),
+                        size: 24,
+                      ),
+                    ),
+                    // Slider container
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                activeTrackColor: AppConstants.primaryColor,
+                                inactiveTrackColor: Colors.grey[300],
+                                thumbColor: AppConstants.primaryColor,
+                                thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 8),
+                                overlayShape: const RoundSliderOverlayShape(
+                                    overlayRadius: 16),
+                                trackHeight: 4,
+                              ),
+                              child: Slider(
+                                value: tempWeight,
+                                min: 30.0,
+                                max: 200.0,
+                                divisions: 170,
+                                label: '${tempWeight.toStringAsFixed(1)} kg',
+                                onChanged: (value) {
+                                  setModalState(() {
+                                    tempWeight = value;
+                                  });
+                                  HapticFeedback.selectionClick();
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: AppConstants.spacingM),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppConstants.primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AppConstants.primaryColor
+                                      .withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                '${tempWeight.toStringAsFixed(1)} kg',
+                                style: AppTextStyles.bodyLarge.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppConstants.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppConstants.spacingL),
@@ -1152,29 +1318,126 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       builder: (context, setModalState) {
         return Container(
           padding: const EdgeInsets.all(AppConstants.spacingL),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Handle indicator
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingL),
               Text('Select Height', style: AppTextStyles.heading4),
               const SizedBox(height: AppConstants.spacingL),
-              Slider(
-                value: tempHeight,
-                min: 120.0,
-                max: 220.0,
-                divisions: 100,
-                label: '${tempHeight.toStringAsFixed(0)} cm',
-                onChanged: (value) {
-                  setModalState(() {
-                    tempHeight = value;
-                  });
-                  HapticFeedback.selectionClick();
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-              Text(
-                '${tempHeight.toStringAsFixed(0)} cm',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w600,
+              Container(
+                constraints: const BoxConstraints(minHeight: 120),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.grey[50]!,
+                      Colors.white,
+                      Colors.grey[50]!,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    // Background measurement lines
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: MeasurementLinePainter(),
+                      ),
+                    ),
+                    // Height ruler icon
+                    Positioned(
+                      top: 10,
+                      right: 20,
+                      child: Icon(
+                        Icons.height_outlined,
+                        color: AppConstants.primaryColor.withOpacity(0.3),
+                        size: 24,
+                      ),
+                    ),
+                    // Slider container
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                activeTrackColor: AppConstants.primaryColor,
+                                inactiveTrackColor: Colors.grey[300],
+                                thumbColor: AppConstants.primaryColor,
+                                thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 8),
+                                overlayShape: const RoundSliderOverlayShape(
+                                    overlayRadius: 16),
+                                trackHeight: 4,
+                              ),
+                              child: Slider(
+                                value: tempHeight,
+                                min: 120.0,
+                                max: 220.0,
+                                divisions: 100,
+                                label: '${tempHeight.toStringAsFixed(0)} cm',
+                                onChanged: (value) {
+                                  setModalState(() {
+                                    tempHeight = value;
+                                  });
+                                  HapticFeedback.selectionClick();
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: AppConstants.spacingM),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppConstants.primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AppConstants.primaryColor
+                                      .withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                '${tempHeight.toStringAsFixed(0)} cm',
+                                style: AppTextStyles.bodyLarge.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppConstants.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppConstants.spacingL),
@@ -1210,4 +1473,64 @@ class OnboardingStep {
       required this.icon,
       required this.color,
       this.showIconColor = true});
+}
+
+// Custom painter for subtle background patterns
+class DotPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey[200]!
+      ..strokeWidth = 1
+      ..style = PaintingStyle.fill;
+
+    const spacing = 20.0;
+    const dotSize = 2.0;
+
+    for (double x = spacing; x < size.width; x += spacing) {
+      for (double y = spacing; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), dotSize, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for measurement-style lines
+class MeasurementLinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey[300]!
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    // Draw vertical measurement lines
+    for (double x = 0; x < size.width; x += 30) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        paint,
+      );
+    }
+
+    // Draw horizontal tick marks
+    for (double y = 0; y < size.height; y += 20) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(10, y),
+        paint,
+      );
+      canvas.drawLine(
+        Offset(size.width - 10, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

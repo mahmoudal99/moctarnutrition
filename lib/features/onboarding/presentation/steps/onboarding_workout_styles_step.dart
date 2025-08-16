@@ -55,7 +55,7 @@ class OnboardingWorkoutStylesStep extends StatelessWidget {
       case 'Body Building':
         return 'Focus on muscle hypertrophy and definition';
       case 'Cardio':
-        return 'Improve cardiovascular health';
+        return 'Boost heart health and overall fitness';
       case 'HIIT':
         return 'High-intensity interval training';
       case 'Running':

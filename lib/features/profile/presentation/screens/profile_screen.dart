@@ -744,13 +744,6 @@ void _handleDeleteAccount(BuildContext context) async {
     if (success && context.mounted) {
       // Navigate to get started screen after successful deletion
       context.go('/get-started');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account deleted successfully'),
-          backgroundColor: AppConstants.successColor,
-        ),
-      );
     } else if (context.mounted) {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -772,7 +765,6 @@ void _handleDeleteAccount(BuildContext context) async {
   }
 }
 
-// --- DATA GENERATION FUNCTIONS ---
 List<_MockStat> _getUserStats(UserModel user) {
   // TODO: Replace with real stats from user data
   return [

@@ -136,13 +136,6 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
       await authProvider.updateUserProfile(updatedUser);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Workout preferences updated successfully'),
-            backgroundColor: AppConstants.successColor,
-          ),
-        );
-
         setState(() {
           _hasChanges = false;
         });
@@ -516,25 +509,11 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
       case 'Body Building':
         return 'Focus on muscle hypertrophy and definition';
       case 'Cardio':
-        return 'Improve cardiovascular health';
+        return 'Boost heart health and overall fitness';
       case 'HIIT':
         return 'High-intensity interval training';
       case 'Running':
         return 'Endurance and cardiovascular';
-      case 'Yoga':
-        return 'Flexibility and mindfulness';
-      case 'Pilates':
-        return 'Core strength and stability';
-      case 'CrossFit':
-        return 'Functional fitness and conditioning';
-      case 'Swimming':
-        return 'Low-impact full-body workout';
-      case 'Cycling':
-        return 'Cardiovascular and leg strength';
-      case 'Boxing':
-        return 'Cardio and upper body strength';
-      case 'Martial Arts':
-        return 'Self-defense and discipline';
       default:
         return 'Custom workout style';
     }
