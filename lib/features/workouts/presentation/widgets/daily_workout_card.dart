@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/workout_plan_model.dart';
 import '../../../../shared/models/workout_model.dart';
+import '../../../../shared/providers/workout_provider.dart';
+import '../screens/add_workout_screen.dart';
+import '../screens/add_exercise_screen.dart';
 
 class DailyWorkoutCard extends StatelessWidget {
   final DailyWorkout dailyWorkout;
@@ -276,6 +280,29 @@ class _WorkoutDetailsSheet extends StatelessWidget {
                 ? _buildRestDayContent(context)
                 : _buildWorkoutContent(context),
           ),
+          // Add workout button (only for workout days)
+          if (!dailyWorkout.isRestDay)
+            Padding(
+              padding: const EdgeInsets.all(AppConstants.spacingM),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _navigateToAddWorkout(context),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Workout'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppConstants.primaryColor,
+                        foregroundColor: AppConstants.surfaceColor,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppConstants.spacingM,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -337,12 +364,14 @@ class _WorkoutDetailsSheet extends StatelessWidget {
 
   IconData _getRestDayIcon() {
     final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
-    
+
     if (restDayMessage.contains('active') || restDayMessage.contains('light')) {
       return Icons.directions_walk;
-    } else if (restDayMessage.contains('stretch') || restDayMessage.contains('flexibility')) {
+    } else if (restDayMessage.contains('stretch') ||
+        restDayMessage.contains('flexibility')) {
       return Icons.accessibility;
-    } else if (restDayMessage.contains('yoga') || restDayMessage.contains('meditation')) {
+    } else if (restDayMessage.contains('yoga') ||
+        restDayMessage.contains('meditation')) {
       return Icons.self_improvement;
     } else {
       return Icons.bedtime;
@@ -351,7 +380,7 @@ class _WorkoutDetailsSheet extends StatelessWidget {
 
   String _getRestDayTitle() {
     final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
-    
+
     if (restDayMessage.contains('active')) {
       return 'Active Recovery';
     } else if (restDayMessage.contains('stretch')) {
@@ -366,7 +395,7 @@ class _WorkoutDetailsSheet extends StatelessWidget {
   List<Widget> _getRestDayBenefits() {
     final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
     final benefits = <Widget>[];
-    
+
     if (restDayMessage.contains('active') || restDayMessage.contains('light')) {
       benefits.addAll([
         _buildRestBenefit(
@@ -387,7 +416,8 @@ class _WorkoutDetailsSheet extends StatelessWidget {
           'Light exercise reduces stress and improves mood',
         ),
       ]);
-    } else if (restDayMessage.contains('stretch') || restDayMessage.contains('flexibility')) {
+    } else if (restDayMessage.contains('stretch') ||
+        restDayMessage.contains('flexibility')) {
       benefits.addAll([
         _buildRestBenefit(
           Icons.accessibility,
@@ -407,7 +437,8 @@ class _WorkoutDetailsSheet extends StatelessWidget {
           'Better flexibility reduces injury risk',
         ),
       ]);
-    } else if (restDayMessage.contains('yoga') || restDayMessage.contains('meditation')) {
+    } else if (restDayMessage.contains('yoga') ||
+        restDayMessage.contains('meditation')) {
       benefits.addAll([
         _buildRestBenefit(
           Icons.self_improvement,
@@ -448,7 +479,7 @@ class _WorkoutDetailsSheet extends StatelessWidget {
         ),
       ]);
     }
-    
+
     return benefits;
   }
 
@@ -491,17 +522,106 @@ class _WorkoutDetailsSheet extends StatelessWidget {
       itemCount: dailyWorkout.workouts.length,
       itemBuilder: (context, index) {
         final workout = dailyWorkout.workouts[index];
-        return _WorkoutCard(workout: workout);
+        return _WorkoutCard(
+          workout: workout,
+          dayName: dailyWorkout.dayName,
+          dailyWorkout: dailyWorkout,
+          onRemove: () => _removeWorkout(context, workout.id),
+        );
       },
     );
+  }
+
+  void _navigateToAddWorkout(BuildContext context) {
+    Navigator.pop(context); // Close the current modal
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddWorkoutScreen(dailyWorkout: dailyWorkout),
+      ),
+    );
+  }
+
+  void _navigateToAddExercise(BuildContext context, WorkoutModel workout) {
+    Navigator.pop(context); // Close the current modal
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddExerciseScreen(
+          dailyWorkout: dailyWorkout,
+          workout: workout,
+        ),
+      ),
+    );
+  }
+
+  void _removeWorkout(BuildContext context, String workoutId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Workout'),
+        content: const Text(
+            'Are you sure you want to remove this workout from your plan?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmRemoveWorkout(context, workoutId);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppConstants.errorColor,
+            ),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmRemoveWorkout(BuildContext context, String workoutId) async {
+    try {
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
+      await workoutProvider.removeWorkoutFromDay(
+          dailyWorkout.dayName, workoutId);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Workout removed from plan'),
+            backgroundColor: AppConstants.primaryColor,
+          ),
+        );
+        Navigator.pop(context); // Close the modal
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to remove workout. Please try again.'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+      }
+    }
   }
 }
 
 class _WorkoutCard extends StatelessWidget {
   final WorkoutModel workout;
+  final String dayName;
+  final VoidCallback? onRemove;
+  final DailyWorkout dailyWorkout;
 
   const _WorkoutCard({
     required this.workout,
+    required this.dayName,
+    required this.dailyWorkout,
+    this.onRemove,
   });
 
   @override
@@ -519,11 +639,24 @@ class _WorkoutCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            workout.title,
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  workout.title,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (onRemove != null)
+                IconButton(
+                  onPressed: onRemove,
+                  icon: const Icon(Icons.remove_circle_outline),
+                  color: AppConstants.errorColor,
+                  tooltip: 'Remove workout',
+                ),
+            ],
           ),
           const SizedBox(height: AppConstants.spacingXS),
           Text(
@@ -540,9 +673,99 @@ class _WorkoutCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppConstants.spacingS),
-          ...workout.exercises
-              .map((exercise) => _ExerciseItem(exercise: exercise)),
+          ...workout.exercises.map((exercise) => _ExerciseItem(
+                exercise: exercise,
+                dayName: dayName,
+                workoutId: workout.id,
+                onRemove: () => _removeExercise(context, exercise.id),
+              )),
+          const SizedBox(height: AppConstants.spacingM),
+          // Add exercise button
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _navigateToAddExercise(context, workout),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Exercise'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppConstants.primaryColor,
+                side: const BorderSide(color: AppConstants.primaryColor),
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppConstants.spacingS,
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void _removeExercise(BuildContext context, String exerciseId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Exercise'),
+        content: const Text('Are you sure you want to remove this exercise from your workout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmRemoveExercise(context, exerciseId);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppConstants.errorColor,
+            ),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmRemoveExercise(BuildContext context, String exerciseId) async {
+    try {
+      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      await workoutProvider.removeExerciseFromWorkout(
+        dayName, 
+        workout.id, 
+        exerciseId,
+      );
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Exercise removed from workout'),
+            backgroundColor: AppConstants.primaryColor,
+          ),
+        );
+        Navigator.pop(context); // Close the modal
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to remove exercise. Please try again.'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateToAddExercise(BuildContext context, WorkoutModel workout) {
+    Navigator.pop(context); // Close the current modal
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddExerciseScreen(
+          dailyWorkout: dailyWorkout,
+          workout: workout,
+        ),
       ),
     );
   }
@@ -550,9 +773,15 @@ class _WorkoutCard extends StatelessWidget {
 
 class _ExerciseItem extends StatelessWidget {
   final Exercise exercise;
+  final String dayName;
+  final String workoutId;
+  final VoidCallback? onRemove;
 
   const _ExerciseItem({
     required this.exercise,
+    required this.dayName,
+    required this.workoutId,
+    this.onRemove,
   });
 
   @override
@@ -626,6 +855,16 @@ class _ExerciseItem extends StatelessWidget {
               ),
             ],
           ),
+          if (onRemove != null) ...[
+            const SizedBox(width: AppConstants.spacingS),
+            IconButton(
+              onPressed: onRemove,
+              icon: const Icon(Icons.remove_circle_outline),
+              color: AppConstants.errorColor,
+              tooltip: 'Remove exercise',
+              iconSize: 20,
+            ),
+          ],
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import '../models/workout_plan_model.dart';
+import '../models/workout_model.dart';
 import '../models/user_model.dart';
 import '../../features/workouts/data/workout_service.dart';
 import '../services/workout_plan_storage_service.dart';
@@ -192,5 +193,306 @@ class WorkoutProvider extends ChangeNotifier {
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
+  }
+
+  // Add workout to a specific day
+  Future<void> addWorkoutToDay(String dayName, WorkoutModel workout) async {
+    if (_currentWorkoutPlan == null) {
+      _logger.w('Cannot add workout: no current workout plan');
+      return;
+    }
+
+    try {
+      _logger.d('Adding workout "${workout.title}" to $dayName');
+      
+      // Find the day to update
+      final dayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
+        (day) => day.dayName == dayName,
+      );
+
+      if (dayIndex == -1) {
+        _logger.w('Day $dayName not found in workout plan');
+        return;
+      }
+
+      // Create updated daily workout with new workout added
+      final currentDay = _currentWorkoutPlan!.dailyWorkouts[dayIndex];
+      final updatedWorkouts = List<WorkoutModel>.from(currentDay.workouts)..add(workout);
+      
+      // Recalculate estimated duration
+      final newDuration = updatedWorkouts.fold<int>(
+        0, 
+        (total, w) => total + w.estimatedDuration,
+      );
+
+      final updatedDay = DailyWorkout(
+        id: currentDay.id,
+        dayName: currentDay.dayName,
+        title: currentDay.title,
+        description: currentDay.description,
+        workouts: updatedWorkouts,
+        estimatedDuration: newDuration,
+        restDay: currentDay.restDay,
+      );
+
+      // Create updated workout plan
+      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      updatedDailyWorkouts[dayIndex] = updatedDay;
+
+      final updatedWorkoutPlan = _currentWorkoutPlan!.copyWith(
+        dailyWorkouts: updatedDailyWorkouts,
+        updatedAt: DateTime.now(),
+      );
+
+      // Update the current workout plan
+      _currentWorkoutPlan = updatedWorkoutPlan;
+
+      // Save to storage
+      await _saveUpdatedWorkoutPlan(updatedWorkoutPlan);
+      
+      _logger.d('Successfully added workout to $dayName');
+      notifyListeners();
+    } catch (e) {
+      _logger.e('Failed to add workout to day: $e');
+      _error = 'Failed to add workout. Please try again.';
+      notifyListeners();
+    }
+  }
+
+  // Remove workout from a specific day
+  Future<void> removeWorkoutFromDay(String dayName, String workoutId) async {
+    if (_currentWorkoutPlan == null) {
+      _logger.w('Cannot remove workout: no current workout plan');
+      return;
+    }
+
+    try {
+      _logger.d('Removing workout $workoutId from $dayName');
+      
+      // Find the day to update
+      final dayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
+        (day) => day.dayName == dayName,
+      );
+
+      if (dayIndex == -1) {
+        _logger.w('Day $dayName not found in workout plan');
+        return;
+      }
+
+      // Create updated daily workout with workout removed
+      final currentDay = _currentWorkoutPlan!.dailyWorkouts[dayIndex];
+      final updatedWorkouts = currentDay.workouts.where((w) => w.id != workoutId).toList();
+      
+      // Recalculate estimated duration
+      final newDuration = updatedWorkouts.fold<int>(
+        0, 
+        (total, w) => total + w.estimatedDuration,
+      );
+
+      final updatedDay = DailyWorkout(
+        id: currentDay.id,
+        dayName: currentDay.dayName,
+        title: currentDay.title,
+        description: currentDay.description,
+        workouts: updatedWorkouts,
+        estimatedDuration: newDuration,
+        restDay: currentDay.restDay,
+      );
+
+      // Create updated workout plan
+      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      updatedDailyWorkouts[dayIndex] = updatedDay;
+
+      final updatedWorkoutPlan = _currentWorkoutPlan!.copyWith(
+        dailyWorkouts: updatedDailyWorkouts,
+        updatedAt: DateTime.now(),
+      );
+
+      // Update the current workout plan
+      _currentWorkoutPlan = updatedWorkoutPlan;
+
+      // Save to storage
+      await _saveUpdatedWorkoutPlan(updatedWorkoutPlan);
+      
+      _logger.d('Successfully removed workout from $dayName');
+      notifyListeners();
+    } catch (e) {
+      _logger.e('Failed to remove workout from day: $e');
+      _error = 'Failed to remove workout. Please try again.';
+      notifyListeners();
+    }
+  }
+
+  // Save updated workout plan to storage
+  Future<void> _saveUpdatedWorkoutPlan(WorkoutPlanModel updatedPlan) async {
+    try {
+      // Save to both Firestore and local storage
+      await WorkoutPlanStorageService.saveWorkoutPlan(updatedPlan);
+      await WorkoutPlanLocalStorageService.saveWorkoutPlan(updatedPlan);
+      _logger.d('Updated workout plan saved to storage');
+    } catch (e) {
+      _logger.e('Failed to save updated workout plan: $e');
+      throw e;
+    }
+  }
+
+  // Add exercise to a specific workout in a specific day
+  Future<void> addExerciseToWorkout(String dayName, String workoutId, Exercise exercise) async {
+    if (_currentWorkoutPlan == null) {
+      _logger.w('Cannot add exercise: no current workout plan');
+      return;
+    }
+
+    try {
+      _logger.d('Adding exercise "${exercise.name}" to workout $workoutId on $dayName');
+      
+      // Find the day to update
+      final dayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
+        (day) => day.dayName == dayName,
+      );
+
+      if (dayIndex == -1) {
+        _logger.w('Day $dayName not found in workout plan');
+        return;
+      }
+
+      // Find the workout to update
+      final day = _currentWorkoutPlan!.dailyWorkouts[dayIndex];
+      final workoutIndex = day.workouts.indexWhere((w) => w.id == workoutId);
+
+      if (workoutIndex == -1) {
+        _logger.w('Workout $workoutId not found in day $dayName');
+        return;
+      }
+
+      // Create updated workout with new exercise added
+      final currentWorkout = day.workouts[workoutIndex];
+      final updatedExercises = List<Exercise>.from(currentWorkout.exercises)..add(exercise);
+      
+      // Recalculate estimated duration (rough estimate: 2 minutes per exercise)
+      final newDuration = currentWorkout.estimatedDuration + 2;
+
+      final updatedWorkout = currentWorkout.copyWith(
+        exercises: updatedExercises,
+        estimatedDuration: newDuration,
+        updatedAt: DateTime.now(),
+      );
+
+      // Create updated daily workout
+      final updatedWorkouts = List<WorkoutModel>.from(day.workouts);
+      updatedWorkouts[workoutIndex] = updatedWorkout;
+
+      final updatedDay = DailyWorkout(
+        id: day.id,
+        dayName: day.dayName,
+        title: day.title,
+        description: day.description,
+        workouts: updatedWorkouts,
+        estimatedDuration: updatedWorkouts.fold<int>(0, (total, w) => total + w.estimatedDuration),
+        restDay: day.restDay,
+      );
+
+      // Create updated workout plan
+      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      updatedDailyWorkouts[dayIndex] = updatedDay;
+
+      final updatedWorkoutPlan = _currentWorkoutPlan!.copyWith(
+        dailyWorkouts: updatedDailyWorkouts,
+        updatedAt: DateTime.now(),
+      );
+
+      // Update the current workout plan
+      _currentWorkoutPlan = updatedWorkoutPlan;
+
+      // Save to storage
+      await _saveUpdatedWorkoutPlan(updatedWorkoutPlan);
+      
+      _logger.d('Successfully added exercise to workout on $dayName');
+      notifyListeners();
+    } catch (e) {
+      _logger.e('Failed to add exercise to workout: $e');
+      _error = 'Failed to add exercise. Please try again.';
+      notifyListeners();
+    }
+  }
+
+  // Remove exercise from a specific workout in a specific day
+  Future<void> removeExerciseFromWorkout(String dayName, String workoutId, String exerciseId) async {
+    if (_currentWorkoutPlan == null) {
+      _logger.w('Cannot remove exercise: no current workout plan');
+      return;
+    }
+
+    try {
+      _logger.d('Removing exercise $exerciseId from workout $workoutId on $dayName');
+      
+      // Find the day to update
+      final dayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
+        (day) => day.dayName == dayName,
+      );
+
+      if (dayIndex == -1) {
+        _logger.w('Day $dayName not found in workout plan');
+        return;
+      }
+
+      // Find the workout to update
+      final day = _currentWorkoutPlan!.dailyWorkouts[dayIndex];
+      final workoutIndex = day.workouts.indexWhere((w) => w.id == workoutId);
+
+      if (workoutIndex == -1) {
+        _logger.w('Workout $workoutId not found in day $dayName');
+        return;
+      }
+
+      // Create updated workout with exercise removed
+      final currentWorkout = day.workouts[workoutIndex];
+      final updatedExercises = currentWorkout.exercises.where((e) => e.id != exerciseId).toList();
+      
+      // Recalculate estimated duration
+      final newDuration = currentWorkout.estimatedDuration - 2; // Rough estimate
+
+      final updatedWorkout = currentWorkout.copyWith(
+        exercises: updatedExercises,
+        estimatedDuration: newDuration > 0 ? newDuration : 1,
+        updatedAt: DateTime.now(),
+      );
+
+      // Create updated daily workout
+      final updatedWorkouts = List<WorkoutModel>.from(day.workouts);
+      updatedWorkouts[workoutIndex] = updatedWorkout;
+
+      final updatedDay = DailyWorkout(
+        id: day.id,
+        dayName: day.dayName,
+        title: day.title,
+        description: day.description,
+        workouts: updatedWorkouts,
+        estimatedDuration: updatedWorkouts.fold<int>(0, (total, w) => total + w.estimatedDuration),
+        restDay: day.restDay,
+      );
+
+      // Create updated workout plan
+      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      updatedDailyWorkouts[dayIndex] = updatedDay;
+
+      final updatedWorkoutPlan = _currentWorkoutPlan!.copyWith(
+        dailyWorkouts: updatedDailyWorkouts,
+        updatedAt: DateTime.now(),
+      );
+
+      // Update the current workout plan
+      _currentWorkoutPlan = updatedWorkoutPlan;
+
+      // Save to storage
+      await _saveUpdatedWorkoutPlan(updatedWorkoutPlan);
+      
+      _logger.d('Successfully removed exercise from workout on $dayName');
+      notifyListeners();
+    } catch (e) {
+      _logger.e('Failed to remove exercise from workout: $e');
+      _error = 'Failed to remove exercise. Please try again.';
+      notifyListeners();
+    }
   }
 } 

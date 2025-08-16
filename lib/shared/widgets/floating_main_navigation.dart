@@ -48,8 +48,7 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
         ),
       ];
     }
-    // Non-admins: original tabs
-    _logger.d('FloatingMainNavigation - Building USER navigation items');
+
     return [
       const _NavItem(
         icon: Icons.fitness_center,
