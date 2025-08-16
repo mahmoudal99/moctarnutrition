@@ -21,6 +21,7 @@ import '../steps/onboarding_allergies_step.dart';
 import '../steps/onboarding_meal_timing_step.dart';
 import '../steps/onboarding_batch_cooking_step.dart';
 import '../steps/onboarding_workout_notifications_step.dart';
+import '../steps/onboarding_weekly_workout_goal_step.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/services/auth_service.dart';
@@ -65,6 +66,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Workout Notification Preferences
   TimeOfDay _workoutNotificationTime = const TimeOfDay(hour: 9, minute: 0);
   bool _workoutNotificationsEnabled = false;
+
+  // Weekly Workout Goal
+  int _weeklyWorkoutDays = 3;
+  List<int> _specificWorkoutDays = [1, 3, 5]; // Mon, Wed, Fri
 
   // User metrics
   int _age = 25;
@@ -132,6 +137,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           'We\'ll prioritize these types of workouts in your recommendations.',
       icon: "run.json",
       color: AppConstants.primaryColor,
+    ),
+    OnboardingStep(
+      title: 'Weekly Workout Goal',
+      subtitle: 'How often do you want to train?',
+      description:
+          'This helps us create a realistic workout schedule that fits your lifestyle.',
+      icon: "calendar.json",
+      color: AppConstants.secondaryColor,
     ),
     OnboardingStep(
       title: 'Food preferences',
@@ -390,14 +403,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       case 6:
         return _buildWorkoutStylesStep();
       case 7:
-        return _buildFoodPreferencesStep();
+        return _buildWeeklyWorkoutGoalStep();
       case 8:
-        return _buildAllergiesStep();
+        return _buildFoodPreferencesStep();
       case 9:
-        return _buildMealTimingStep();
+        return _buildAllergiesStep();
       case 10:
-        return _buildBatchCookingStep();
+        return _buildMealTimingStep();
       case 11:
+        return _buildBatchCookingStep();
+      case 12:
         return _buildWorkoutNotificationsStep();
       default:
         return const SizedBox.shrink();
@@ -579,6 +594,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Widget _buildWeeklyWorkoutGoalStep() {
+    return OnboardingWeeklyWorkoutGoalStep(
+      selectedDaysPerWeek: _weeklyWorkoutDays,
+      selectedSpecificDays: _specificWorkoutDays,
+      onDaysPerWeekChanged: (days) {
+        setState(() {
+          _weeklyWorkoutDays = days;
+        });
+      },
+      onSpecificDaysChanged: (days) {
+        setState(() {
+          _specificWorkoutDays = days;
+        });
+      },
+    );
+  }
+
   Widget _buildFoodPreferencesStep() {
     return OnboardingFoodPreferencesStep(
       preferredCuisines: _preferredCuisines,
@@ -678,11 +710,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildNavigationButtons() {
     final isDietaryStep = _currentPage == 5;
     final isWorkoutStep = _currentPage == 6;
-    final isFoodPreferencesStep = _currentPage == 7;
-    final isAllergiesStep = _currentPage == 8;
-    final isWorkoutNotificationsStep = _currentPage == 11;
+    final isWeeklyWorkoutGoalStep = _currentPage == 7;
+    final isFoodPreferencesStep = _currentPage == 8;
+    final isAllergiesStep = _currentPage == 9;
+    final isWorkoutNotificationsStep = _currentPage == 12;
     final isNextEnabled = !isDietaryStep &&
             !isWorkoutStep &&
+            !isWeeklyWorkoutGoalStep &&
             !isFoodPreferencesStep &&
             !isAllergiesStep &&
             !isWorkoutNotificationsStep
@@ -691,9 +725,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ? _selectedDietaryRestrictions.isNotEmpty
             : isWorkoutStep
                 ? _selectedWorkoutStyles.isNotEmpty
-                : true; // Food preferences and allergies steps are optional
+                : isWeeklyWorkoutGoalStep
+                    ? _weeklyWorkoutDays > 0
+                    : true; // Food preferences and allergies steps are optional
     // Hide navigation buttons for workout notifications step since it has its own
-    if (_currentPage == 11 || _currentPage == _steps.length - 1) {
+    if (_currentPage == 12 || _currentPage == _steps.length - 1) {
       return const SizedBox.shrink();
     }
 
@@ -1131,6 +1167,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       workoutNotificationsEnabled: _workoutNotificationsEnabled,
       workoutNotificationTime:
           '${_workoutNotificationTime.hour.toString().padLeft(2, '0')}:${_workoutNotificationTime.minute.toString().padLeft(2, '0')}',
+      weeklyWorkoutDays: _weeklyWorkoutDays,
+      specificWorkoutDays: _specificWorkoutDays,
       age: _age,
       weight: _weight,
       height: _height,

@@ -133,6 +133,8 @@ class UserPreferences {
   final bool notificationsEnabled;
   final bool workoutNotificationsEnabled;
   final String? workoutNotificationTime; // Format: "HH:mm"
+  final int weeklyWorkoutDays;
+  final List<int>? specificWorkoutDays; // 1 = Monday, 7 = Sunday
   final String? timezone;
   
   // Personal metrics
@@ -170,6 +172,8 @@ class UserPreferences {
     this.notificationsEnabled = true,
     this.workoutNotificationsEnabled = false,
     this.workoutNotificationTime,
+    this.weeklyWorkoutDays = 3,
+    this.specificWorkoutDays,
     this.timezone,
     this.age = 25,
     this.weight = 70.0,
@@ -201,6 +205,10 @@ class UserPreferences {
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
       workoutNotificationsEnabled: json['workoutNotificationsEnabled'] as bool? ?? false,
       workoutNotificationTime: json['workoutNotificationTime'] as String?,
+      weeklyWorkoutDays: json['weeklyWorkoutDays'] as int? ?? 3,
+      specificWorkoutDays: json['specificWorkoutDays'] != null
+          ? List<int>.from(json['specificWorkoutDays'])
+          : null,
       timezone: json['timezone'] as String?,
       age: json['age'] as int? ?? 25,
       weight: (json['weight'] as num?)?.toDouble() ?? 70.0,
@@ -227,6 +235,8 @@ class UserPreferences {
       'notificationsEnabled': notificationsEnabled,
       'workoutNotificationsEnabled': workoutNotificationsEnabled,
       'workoutNotificationTime': workoutNotificationTime,
+      'weeklyWorkoutDays': weeklyWorkoutDays,
+      'specificWorkoutDays': specificWorkoutDays,
       'timezone': timezone,
       'age': age,
       'weight': weight,
@@ -252,6 +262,8 @@ class UserPreferences {
     bool? notificationsEnabled,
     bool? workoutNotificationsEnabled,
     String? workoutNotificationTime,
+    int? weeklyWorkoutDays,
+    List<int>? specificWorkoutDays,
     String? timezone,
     int? age,
     double? weight,
@@ -275,6 +287,8 @@ class UserPreferences {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       workoutNotificationsEnabled: workoutNotificationsEnabled ?? this.workoutNotificationsEnabled,
       workoutNotificationTime: workoutNotificationTime ?? this.workoutNotificationTime,
+      weeklyWorkoutDays: weeklyWorkoutDays ?? this.weeklyWorkoutDays,
+      specificWorkoutDays: specificWorkoutDays ?? this.specificWorkoutDays,
       timezone: timezone ?? this.timezone,
       age: age ?? this.age,
       weight: weight ?? this.weight,
@@ -301,6 +315,7 @@ class UserPreferences {
       targetCalories: 2000,
       notificationsEnabled: true,
       workoutNotificationsEnabled: false,
+      weeklyWorkoutDays: 3,
       age: 25,
       weight: 70.0,
       height: 170.0,
