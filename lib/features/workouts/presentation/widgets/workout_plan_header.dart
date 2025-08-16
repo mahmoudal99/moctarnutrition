@@ -24,20 +24,6 @@ class WorkoutPlanHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppConstants.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                ),
-                child: Icon(
-                  _getWorkoutTypeIcon(workoutPlan.type),
-                  color: AppConstants.primaryColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,6 +140,7 @@ class WorkoutPlanHeader extends StatelessWidget {
   }
 
   int _calculateTotalDuration() {
-    return workoutPlan.dailyWorkouts.fold(0, (sum, day) => sum + day.estimatedDuration);
+    return workoutPlan.dailyWorkouts
+        .fold(0, (sum, day) => sum + day.estimatedDuration);
   }
-} 
+}

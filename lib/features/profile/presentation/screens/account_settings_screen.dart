@@ -628,7 +628,7 @@ class _DangerZoneSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SettingsSection(
-      title: 'Danger Zone',
+      title: 'Account Deletion',
       icon: Icons.warning,
       children: [
         _InfoCard(
