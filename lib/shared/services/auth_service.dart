@@ -798,6 +798,40 @@ class AuthService {
     throw Exception('Firestore operation failed after $maxRetries attempts');
   }
 
+  /// Change user password
+  static Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      _logger.i('Attempting to change password');
+      
+      final User? currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Re-authenticate user before changing password
+      final AuthCredential credential = EmailAuthProvider.credential(
+        email: currentUser.email!,
+        password: currentPassword,
+      );
+
+      await currentUser.reauthenticateWithCredential(credential);
+      _logger.i('User re-authenticated successfully');
+
+      // Update password
+      await currentUser.updatePassword(newPassword);
+      _logger.i('Password updated successfully');
+    } catch (e) {
+      _logger.e('Error changing password: $e');
+      if (e is FirebaseAuthException) {
+        throw _handleFirebaseAuthException(e);
+      }
+      throw Exception('Failed to change password: $e');
+    }
+  }
+
   // Error handling
   static Exception _handleFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
