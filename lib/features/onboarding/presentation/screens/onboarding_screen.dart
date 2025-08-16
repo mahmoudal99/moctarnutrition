@@ -20,10 +20,12 @@ import '../steps/onboarding_food_preferences_step.dart';
 import '../steps/onboarding_allergies_step.dart';
 import '../steps/onboarding_meal_timing_step.dart';
 import '../steps/onboarding_batch_cooking_step.dart';
+import '../steps/onboarding_workout_notifications_step.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/services/auth_service.dart';
 import '../../../../shared/services/user_local_storage_service.dart';
+import '../../../../shared/services/notification_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -59,6 +61,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // Batch Cooking Preferences
   BatchCookingPreferences? _batchCookingPreferences;
+
+  // Workout Notification Preferences
+  TimeOfDay _workoutNotificationTime = const TimeOfDay(hour: 9, minute: 0);
+  bool _workoutNotificationsEnabled = false;
 
   // User metrics
   int _age = 25;
@@ -158,6 +164,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           'Tell us about your cooking frequency and batch size preferences.',
       icon: "diet.json",
       color: AppConstants.warningColor,
+    ),
+    OnboardingStep(
+      title: 'Workout Previews',
+      subtitle: 'Get workout previews on training days',
+      description:
+          'When it\'s almost time to train, we\'ll remind you so you can get ready.',
+      icon: "run.json",
+      color: AppConstants.primaryColor,
     ),
   ];
 
@@ -383,6 +397,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return _buildMealTimingStep();
       case 10:
         return _buildBatchCookingStep();
+      case 11:
+        return _buildWorkoutNotificationsStep();
       default:
         return const SizedBox.shrink();
     }
@@ -627,21 +643,60 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Widget _buildWorkoutNotificationsStep() {
+    return OnboardingWorkoutNotificationsStepWithActions(
+      selectedTime: _workoutNotificationTime,
+      notificationsEnabled: _workoutNotificationsEnabled,
+      onTimeChanged: (time) {
+        setState(() {
+          _workoutNotificationTime =
+              time ?? const TimeOfDay(hour: 9, minute: 0);
+        });
+      },
+      onNotificationsChanged: (enabled) {
+        setState(() {
+          _workoutNotificationsEnabled = enabled;
+        });
+      },
+      onSkip: () {
+        _completeOnboarding();
+      },
+      onEnable: () async {
+        final permissionResult =
+            await NotificationService.requestNotificationPermission();
+        if (permissionResult.isGranted) {
+          setState(() {
+            _workoutNotificationsEnabled = true;
+          });
+          await NotificationService.showTestNotification();
+        }
+        _completeOnboarding();
+      },
+    );
+  }
+
   Widget _buildNavigationButtons() {
     final isDietaryStep = _currentPage == 5;
     final isWorkoutStep = _currentPage == 6;
     final isFoodPreferencesStep = _currentPage == 7;
     final isAllergiesStep = _currentPage == 8;
+    final isWorkoutNotificationsStep = _currentPage == 11;
     final isNextEnabled = !isDietaryStep &&
             !isWorkoutStep &&
             !isFoodPreferencesStep &&
-            !isAllergiesStep
+            !isAllergiesStep &&
+            !isWorkoutNotificationsStep
         ? true
         : isDietaryStep
             ? _selectedDietaryRestrictions.isNotEmpty
             : isWorkoutStep
                 ? _selectedWorkoutStyles.isNotEmpty
                 : true; // Food preferences and allergies steps are optional
+    // Hide navigation buttons for workout notifications step since it has its own
+    if (_currentPage == 11 || _currentPage == _steps.length - 1) {
+      return const SizedBox.shrink();
+    }
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(
@@ -1073,6 +1128,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       dietaryRestrictions: List<String>.from(_selectedDietaryRestrictions),
       preferredWorkoutStyles: List<String>.from(_selectedWorkoutStyles),
       targetCalories: _calculateTargetCalories(),
+      workoutNotificationsEnabled: _workoutNotificationsEnabled,
+      workoutNotificationTime:
+          '${_workoutNotificationTime.hour.toString().padLeft(2, '0')}:${_workoutNotificationTime.minute.toString().padLeft(2, '0')}',
       age: _age,
       weight: _weight,
       height: _height,

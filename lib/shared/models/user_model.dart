@@ -131,6 +131,8 @@ class UserPreferences {
   final List<String> preferredWorkoutStyles;
   final int targetCalories;
   final bool notificationsEnabled;
+  final bool workoutNotificationsEnabled;
+  final String? workoutNotificationTime; // Format: "HH:mm"
   final String? timezone;
   
   // Personal metrics
@@ -166,6 +168,8 @@ class UserPreferences {
     required this.preferredWorkoutStyles,
     required this.targetCalories,
     this.notificationsEnabled = true,
+    this.workoutNotificationsEnabled = false,
+    this.workoutNotificationTime,
     this.timezone,
     this.age = 25,
     this.weight = 70.0,
@@ -195,6 +199,8 @@ class UserPreferences {
       preferredWorkoutStyles: List<String>.from(json['preferredWorkoutStyles'] ?? []),
       targetCalories: json['targetCalories'] as int? ?? 2000,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+      workoutNotificationsEnabled: json['workoutNotificationsEnabled'] as bool? ?? false,
+      workoutNotificationTime: json['workoutNotificationTime'] as String?,
       timezone: json['timezone'] as String?,
       age: json['age'] as int? ?? 25,
       weight: (json['weight'] as num?)?.toDouble() ?? 70.0,
@@ -219,6 +225,8 @@ class UserPreferences {
       'preferredWorkoutStyles': preferredWorkoutStyles,
       'targetCalories': targetCalories,
       'notificationsEnabled': notificationsEnabled,
+      'workoutNotificationsEnabled': workoutNotificationsEnabled,
+      'workoutNotificationTime': workoutNotificationTime,
       'timezone': timezone,
       'age': age,
       'weight': weight,
@@ -242,6 +250,8 @@ class UserPreferences {
     List<String>? preferredWorkoutStyles,
     int? targetCalories,
     bool? notificationsEnabled,
+    bool? workoutNotificationsEnabled,
+    String? workoutNotificationTime,
     String? timezone,
     int? age,
     double? weight,
@@ -263,6 +273,8 @@ class UserPreferences {
       preferredWorkoutStyles: preferredWorkoutStyles ?? this.preferredWorkoutStyles,
       targetCalories: targetCalories ?? this.targetCalories,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      workoutNotificationsEnabled: workoutNotificationsEnabled ?? this.workoutNotificationsEnabled,
+      workoutNotificationTime: workoutNotificationTime ?? this.workoutNotificationTime,
       timezone: timezone ?? this.timezone,
       age: age ?? this.age,
       weight: weight ?? this.weight,
@@ -288,6 +300,7 @@ class UserPreferences {
       preferredWorkoutStyles: [],
       targetCalories: 2000,
       notificationsEnabled: true,
+      workoutNotificationsEnabled: false,
       age: 25,
       weight: 70.0,
       height: 170.0,
