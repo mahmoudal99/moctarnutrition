@@ -165,7 +165,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   Widget _buildWorkoutPlanView(WorkoutProvider workoutProvider) {
     final workoutPlan = workoutProvider.currentWorkoutPlan!;
     final todayWorkout = workoutProvider.getTodayWorkout();
-    final workoutMessage = WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout);
+    final workoutMessage =
+        WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout);
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
@@ -220,7 +221,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
     return CustomScrollView(
       slivers: [
-        WorkoutAppHeader(message: WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
+        WorkoutAppHeader(
+            message:
+                WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
         SliverToBoxAdapter(
           child: Column(
             children: [
@@ -240,10 +243,13 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     );
   }
 
-  Widget _buildWeekView(WorkoutPlanModel workoutPlan, DailyWorkout? todayWorkout) {
+  Widget _buildWeekView(
+      WorkoutPlanModel workoutPlan, DailyWorkout? todayWorkout) {
     return CustomScrollView(
       slivers: [
-        WorkoutAppHeader(message: WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
+        WorkoutAppHeader(
+            message:
+                WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
         SliverToBoxAdapter(
           child: Column(
             children: [
@@ -260,8 +266,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    WorkoutPlanHeader(workoutPlan: workoutPlan),
-                    const SizedBox(height: AppConstants.spacingL),
                     if (todayWorkout != null) ...[
                       Text(
                         "Today's Workout",
