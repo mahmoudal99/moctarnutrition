@@ -5,6 +5,7 @@ import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/services/ai_meal_service.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
+import '../../../../shared/services/email_service.dart';
 
 import 'package:lottie/lottie.dart';
 import 'setup_steps/goal_selection_step.dart' show GoalSelectionStep;
@@ -16,12 +17,14 @@ import 'setup_steps/final_review_step.dart';
 class AdminMealSetupFlow extends StatefulWidget {
   final UserPreferences targetUserPreferences;
   final String? userName;
+  final String? userEmail;
   final VoidCallback? onMealPlanGenerated;
 
   const AdminMealSetupFlow({
     super.key,
     required this.targetUserPreferences,
     this.userName,
+    this.userEmail,
     this.onMealPlanGenerated,
   });
 
@@ -211,6 +214,29 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
       await MealPlanStorageService.saveMealPlan(mealPlan);
       // Note: We don't save diet preferences here since we don't have the user ID
       // The diet preferences are already saved when the meal plan is generated
+
+      // Send email notification if user email is available
+      if (widget.userEmail != null) {
+        try {
+          final emailSent = await EmailService.sendMealPlanReadyEmail(
+            userEmail: widget.userEmail!,
+            userName: widget.userName ?? widget.userEmail!.split('@').first,
+            mealPlanId: mealPlan.id ?? 'demo_plan_${DateTime.now().millisecondsSinceEpoch}',
+            planDuration: _selectedDays,
+            fitnessGoal: _getFitnessGoalLabel(_selectedFitnessGoal ?? _userPreferences.fitnessGoal),
+            targetCalories: _targetCalories,
+          );
+          
+          if (emailSent) {
+            _logger.i('Meal plan ready email sent successfully to: ${widget.userEmail}');
+          } else {
+            _logger.w('Failed to send meal plan ready email to: ${widget.userEmail}');
+          }
+        } catch (e) {
+          _logger.e('Error sending meal plan ready email: $e');
+          // Don't fail the entire operation if email fails
+        }
+      }
 
       setState(() {
         _isLoading = false;

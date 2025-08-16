@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/services/ai_meal_service.dart';
+import 'package:champions_gym_app/shared/services/email_service.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
@@ -308,6 +309,27 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         'mealPlanId': mealPlanRef.id,
       });
       _logger.i('Updated user document with mealPlanId: ${mealPlanRef.id}');
+      
+      // Send email notification to user
+      try {
+        final emailSent = await EmailService.sendMealPlanReadyEmail(
+          userEmail: widget.user.email,
+          userName: widget.user.name ?? widget.user.email.split('@').first,
+          mealPlanId: mealPlanRef.id,
+          planDuration: _selectedDays,
+          fitnessGoal: _getFitnessGoalLabel(_selectedFitnessGoal ?? widget.user.preferences.fitnessGoal),
+          targetCalories: _targetCalories,
+        );
+        
+        if (emailSent) {
+          _logger.i('Meal plan ready email sent successfully to: ${widget.user.email}');
+        } else {
+          _logger.w('Failed to send meal plan ready email to: ${widget.user.email}');
+        }
+      } catch (e) {
+        _logger.e('Error sending meal plan ready email: $e');
+        // Don't fail the entire operation if email fails
+      }
       
       if (mounted) {
         // Show appropriate message based on whether it was a fallback plan
