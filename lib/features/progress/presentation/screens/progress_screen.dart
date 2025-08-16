@@ -142,15 +142,9 @@ class _ProgressSummaryCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            const Icon(
-              Icons.trending_up,
-              size: 48,
-              color: AppConstants.textSecondary,
-            ),
-            const SizedBox(height: 12),
             Text(
               'No Progress Data Yet',
-              style: AppTextStyles.heading4.copyWith(
+              style: AppTextStyles.heading5.copyWith(
                 color: AppConstants.textSecondary,
               ),
             ),
