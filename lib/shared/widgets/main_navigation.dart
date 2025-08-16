@@ -104,27 +104,33 @@ class _MainNavigationState extends State<MainNavigation> {
             GoRouter.of(context).routeInformationProvider.value.uri.toString();
         final idx = items.indexWhere((item) => location == item.route);
         final currentIndex = idx != -1 ? idx : _currentIndex;
+        
+        // Only show bottom navigation bar for main tab routes
+        final shouldShowBottomNav = idx != -1;
+        
         return Scaffold(
           body: widget.child,
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            currentIndex: currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-              context.go(items[index].route);
-            },
-            selectedItemColor: AppConstants.primaryColor,
-            unselectedItemColor: AppConstants.textTertiary,
-            showUnselectedLabels: true,
-            items: items
-                .map((item) => BottomNavigationBarItem(
-                      icon: Icon(item.icon),
-                      label: item.label,
-                    ))
-                .toList(),
-          ),
+          bottomNavigationBar: shouldShowBottomNav
+              ? BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  currentIndex: currentIndex,
+                  onTap: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                    context.go(items[index].route);
+                  },
+                  selectedItemColor: AppConstants.primaryColor,
+                  unselectedItemColor: AppConstants.textTertiary,
+                  showUnselectedLabels: true,
+                  items: items
+                      .map((item) => BottomNavigationBarItem(
+                            icon: Icon(item.icon),
+                            label: item.label,
+                          ))
+                      .toList(),
+                )
+              : null,
         );
       },
     );

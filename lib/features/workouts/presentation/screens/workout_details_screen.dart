@@ -52,6 +52,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
                   foregroundColor: AppConstants.surfaceColor,
                 )
               : null,
+      extendBody: true, // This might help with the bottom bar issue
     );
   }
 

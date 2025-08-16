@@ -23,7 +23,12 @@ import 'features/admin/presentation/screens/admin_user_list_screen.dart';
 import 'features/admin/presentation/screens/admin_user_detail_screen.dart';
 import 'features/admin/presentation/screens/admin_home_screen.dart';
 import 'features/workouts/presentation/screens/workouts_screen.dart';
+import 'features/workouts/presentation/screens/workout_details_screen.dart';
+import 'features/profile/presentation/screens/workout_preferences_screen.dart';
+import 'features/profile/presentation/screens/nutrition_preferences_screen.dart';
+import 'features/profile/presentation/screens/privacy_policy_screen.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
+import 'shared/models/workout_plan_model.dart';
 import 'shared/services/background_upload_service.dart';
 import 'shared/providers/profile_photo_provider.dart';
 
@@ -147,29 +152,8 @@ GoRouter createRouter(AuthProvider authProvider) {
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
           ),
-          GoRoute(
-            path: '/checkin',
-            builder: (context, state) => const CheckinScreen(),
-          ),
-          GoRoute(
-            path: '/checkin/form',
-            builder: (context, state) => const CheckinFormScreen(),
-          ),
-          GoRoute(
-            path: '/checkin/details',
-            builder: (context, state) {
-              final checkin = state.extra as CheckinModel;
-              return CheckinDetailsScreen(checkin: checkin);
-            },
-          ),
-          GoRoute(
-            path: '/checkin/history',
-            builder: (context, state) => const CheckinHistoryScreen(),
-          ),
-          GoRoute(
-            path: '/progress',
-            builder: (context, state) => const ProgressScreen(),
-          ),
+
+
         ],
       ),
 
@@ -180,6 +164,56 @@ GoRouter createRouter(AuthProvider authProvider) {
           final user = state.extra as UserModel;
           return AdminUserDetailScreen(user: user);
         },
+      ),
+
+      // Workout Details Route (outside shell route - no bottom navigation)
+      GoRoute(
+        path: '/workout-details',
+        builder: (context, state) {
+          final dailyWorkout = state.extra as DailyWorkout;
+          return WorkoutDetailsScreen(dailyWorkout: dailyWorkout);
+        },
+      ),
+
+      // Checkin Routes (outside shell route - no bottom navigation)
+      GoRoute(
+        path: '/checkin',
+        builder: (context, state) => const CheckinScreen(),
+      ),
+      GoRoute(
+        path: '/checkin/form',
+        builder: (context, state) => const CheckinFormScreen(),
+      ),
+      GoRoute(
+        path: '/checkin/details',
+        builder: (context, state) {
+          final checkin = state.extra as CheckinModel;
+          return CheckinDetailsScreen(checkin: checkin);
+        },
+      ),
+      GoRoute(
+        path: '/checkin/history',
+        builder: (context, state) => const CheckinHistoryScreen(),
+      ),
+
+      // Progress Route (outside shell route - no bottom navigation)
+      GoRoute(
+        path: '/progress',
+        builder: (context, state) => const ProgressScreen(),
+      ),
+
+      // Profile Detail Routes (outside shell route - no bottom navigation)
+      GoRoute(
+        path: '/workout-preferences',
+        builder: (context, state) => const WorkoutPreferencesScreen(),
+      ),
+      GoRoute(
+        path: '/nutrition-preferences',
+        builder: (context, state) => const NutritionPreferencesScreen(),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
       ),
     ],
     redirect: (context, state) {

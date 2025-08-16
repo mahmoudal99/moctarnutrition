@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/workout_plan_model.dart';
 import '../screens/workout_details_screen.dart';
@@ -200,11 +201,6 @@ class DailyWorkoutCard extends StatelessWidget {
   }
 
   void _showWorkoutDetails(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => WorkoutDetailsScreen(dailyWorkout: dailyWorkout),
-      ),
-    );
+    context.push('/workout-details', extra: dailyWorkout);
   }
 }
