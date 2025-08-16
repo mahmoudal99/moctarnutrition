@@ -39,48 +39,31 @@ class WorkoutDetailsScreen extends StatelessWidget {
           const SizedBox(width: AppConstants.spacingM),
         ],
       ),
-      body: dailyWorkout.isRestDay
+      body: (dailyWorkout.isRestDay || dailyWorkout.workouts.isEmpty)
           ? _buildRestDayContent(context)
           : _buildWorkoutContent(context),
-      floatingActionButton: !dailyWorkout.isRestDay
-          ? FloatingActionButton.extended(
-              onPressed: () => _navigateToAddWorkout(context),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Workout'),
-              backgroundColor: AppConstants.primaryColor,
-              foregroundColor: AppConstants.surfaceColor,
-            )
-          : null,
+      floatingActionButton:
+          (!dailyWorkout.isRestDay && dailyWorkout.workouts.isNotEmpty)
+              ? FloatingActionButton.extended(
+                  onPressed: () => _navigateToAddWorkout(context),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Workout'),
+                  backgroundColor: AppConstants.primaryColor,
+                  foregroundColor: AppConstants.surfaceColor,
+                )
+              : null,
     );
   }
 
   Widget _buildRestDayContent(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.spacingL),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Rest day title
-          Text(
-            _getRestDayTitle(),
-            style: AppTextStyles.heading4.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppConstants.textPrimary,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          // Rest day message
-          Text(
-            dailyWorkout.restDay ?? 'Time to rest and recover!',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppConstants.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppConstants.spacingXL),
           // Benefits of rest
           Container(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
+            padding: const EdgeInsets.all(AppConstants.spacingL),
             decoration: BoxDecoration(
               color: AppConstants.backgroundColor,
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -91,15 +74,71 @@ class WorkoutDetailsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.psychology,
+                      color: AppConstants.primaryColor,
+                      size: 24,
+                    ),
+                    const SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Why Rest Days Matter',
+                      style: AppTextStyles.heading5.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppConstants.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                ..._getRestDayBenefits(),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingXL),
+
+          // Motivational message
+          Container(
+            padding: const EdgeInsets.all(AppConstants.spacingL),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppConstants.primaryColor.withOpacity(0.1),
+                  AppConstants.primaryColor.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              border: Border.all(
+                color: AppConstants.primaryColor.withOpacity(0.2),
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.emoji_events,
+                  size: 32,
+                  color: AppConstants.primaryColor,
+                ),
+                const SizedBox(height: AppConstants.spacingM),
                 Text(
-                  'Why Rest Days Matter:',
+                  'You\'re doing great!',
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppConstants.textPrimary,
+                    color: AppConstants.primaryColor,
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingS),
-                ..._getRestDayBenefits(),
+                Text(
+                  'Rest is just as important as training. Your body needs time to recover and grow stronger.',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppConstants.textSecondary,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),
@@ -450,7 +489,8 @@ class _WorkoutCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remove Exercise'),
-        content: const Text('Are you sure you want to remove this exercise from your workout?'),
+        content: const Text(
+            'Are you sure you want to remove this exercise from your workout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -473,13 +513,14 @@ class _WorkoutCard extends StatelessWidget {
 
   void _confirmRemoveExercise(BuildContext context, String exerciseId) async {
     try {
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
       await workoutProvider.removeExerciseFromWorkout(
-        dayName, 
-        workout.id, 
+        dayName,
+        workout.id,
         exerciseId,
       );
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -606,4 +647,4 @@ class _ExerciseItem extends StatelessWidget {
       ),
     );
   }
-} 
+}
