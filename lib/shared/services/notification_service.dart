@@ -500,7 +500,6 @@ class NotificationService {
 
       // Schedule notifications for the next 2 weeks (14 days)
       _logger.d('Starting to schedule notifications for ${dailyWorkouts.length} workout days');
-      _logger.d('Available workout days: ${dailyWorkouts.map((w) => w.dayName).toList()}');
       for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
         if (scheduledCount >= maxNotifications) {
           _logger.w('Reached iOS notification limit (64), stopping scheduling');
@@ -509,9 +508,6 @@ class NotificationService {
 
         final targetDate = DateTime.now().add(Duration(days: dayOffset));
         final dayName = _getDayName(targetDate.weekday);
-        
-        _logger.d('Checking day $dayOffset: $dayName');
-        
         // Find the workout for this day
         DailyWorkout? dailyWorkout;
         try {
@@ -572,9 +568,6 @@ class NotificationService {
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
         );
-
-        _logger.i('Scheduled workout notification for $dayName at ${scheduledTime.toString()}: $workoutTitle');
-        
         notificationId++;
         scheduledCount++;
       }

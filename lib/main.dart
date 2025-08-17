@@ -158,8 +158,6 @@ GoRouter createRouter(AuthProvider authProvider) {
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
           ),
-
-
         ],
       ),
 
@@ -265,12 +263,12 @@ GoRouter createRouter(AuthProvider authProvider) {
       ];
       final currentRoute = state.uri.toString();
 
-            // If admin and authenticated, redirect to /admin-home only if not on an admin route
+      // If admin and authenticated, redirect to /admin-home only if not on an admin route
       if (isAuthenticated && isAdmin && !adminRoutes.contains(currentRoute)) {
         _logger.d('Router redirect - Redirecting admin to /admin-home');
         return '/admin-home';
       }
-      
+
       _logger.d('Router redirect - No redirect needed');
       // Otherwise, no redirect
       return null;
@@ -293,7 +291,6 @@ void main() async {
   // Load environment variables
   try {
     await dotenv.load();
-    _logger.i('Environment file loaded successfully');
   } catch (e) {
     _logger.w('Warning: Could not load .env file: $e');
     _logger.w(
@@ -309,8 +306,6 @@ void main() async {
   } catch (e) {
     _logger.e('Environment configuration error: $e');
     _logger.e('Please check your .env file and ensure OPENAI_API_KEY is set');
-    // In production, you might want to show a user-friendly error
-    // or fall back to a safe default configuration
   }
 
   // Initialize background upload service
@@ -333,10 +328,10 @@ void main() async {
 
   final authProvider = AuthProvider();
   final profilePhotoProvider = ProfilePhotoProvider();
-  
+
   // Connect auth provider with profile photo provider
   authProvider.setProfilePhotoProvider(profilePhotoProvider);
-  
+
   _router = createRouter(authProvider);
 
   runApp(
@@ -381,8 +376,6 @@ class TrainersScreen extends StatelessWidget {
     );
   }
 }
-
-
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});

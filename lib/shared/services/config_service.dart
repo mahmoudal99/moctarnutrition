@@ -91,7 +91,6 @@ class ConfigService {
   static void validateEnvironment() {
     final requiredVars = ['OPENAI_API_KEY'];
     final missingVars = <String>[];
-    _logger.d(dotenv.env);
     for (final varName in requiredVars) {
       final value = dotenv.env[varName];
       if (value == null || value.isEmpty || value == 'your_openai_api_key_here') {

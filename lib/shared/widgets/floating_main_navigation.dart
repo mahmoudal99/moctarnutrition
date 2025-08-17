@@ -70,14 +70,6 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         final user = authProvider.userModel;
-
-        // Debug logging
-        _logger.d('FloatingMainNavigation - AuthProvider state:');
-        _logger.d('  isLoading: ${authProvider.isLoading}');
-        _logger.d('  isAuthenticated: ${authProvider.isAuthenticated}');
-        _logger.d('  user: ${user?.name ?? 'null'}');
-        _logger.d('  user role: ${user?.role ?? 'null'}');
-
         final items = _buildNavItems(user);
         // Find the current index based on the current route
         final location =
