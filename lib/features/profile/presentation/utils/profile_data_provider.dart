@@ -11,6 +11,7 @@ import '../screens/account_settings_screen.dart';
 import '../screens/bug_report_screen.dart';
 import '../screens/feedback_screen.dart';
 import '../screens/privacy_policy_screen.dart';
+import '../screens/workout_notification_settings_screen.dart';
 
 class ProfileDataProvider {
   static List<QuickAccessItem> getQuickAccessItems(BuildContext context) {
@@ -38,35 +39,22 @@ class ProfileDataProvider {
       SettingsItem(
         label: 'Workout Preferences',
         icon: Icons.fitness_center,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const WorkoutPreferencesScreen(),
-            ),
-          );
-        },
+        onTap: () => context.push('/workout-preferences'),
+      ),
+      SettingsItem(
+        label: 'Workout Notifications',
+        icon: Icons.notifications_active,
+        onTap: () => context.push('/workout-notifications'),
       ),
       SettingsItem(
         label: 'Nutrition Preferences',
         icon: Icons.restaurant,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const NutritionPreferencesScreen(),
-            ),
-          );
-        },
+        onTap: () => context.push('/nutrition-preferences'),
       ),
       SettingsItem(
         label: 'Account Settings',
         icon: Icons.settings,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const AccountSettingsScreen(),
-            ),
-          );
-        },
+        onTap: () => context.push('/account-settings'),
       ),
     ];
   }
@@ -76,13 +64,7 @@ class ProfileDataProvider {
       SettingsItem(
         label: 'Privacy Policy',
         icon: Icons.privacy_tip,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const PrivacyPolicyScreen(),
-            ),
-          );
-        },
+        onTap: () => context.push('/privacy-policy'),
       ),
       SettingsItem(
         label: 'Delete Account',
@@ -99,35 +81,17 @@ class ProfileDataProvider {
       SettingsItem(
         label: 'Help Center',
         icon: Icons.help_outline,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const HelpCenterScreen(),
-            ),
-          );
-        },
+        onTap: () => context.push('/help-center'),
       ),
       SettingsItem(
         label: 'Report a Bug',
         icon: Icons.bug_report,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const BugReportScreen(),
-            ),
-          );
-        },
+        onTap: () => context.push('/bug-report'),
       ),
       SettingsItem(
         label: 'Feedback',
         icon: Icons.feedback,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const FeedbackScreen(),
-            ),
-          );
-        },
+        onTap: () => context.push('/feedback'),
       ),
     ];
   }

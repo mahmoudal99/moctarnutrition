@@ -5,6 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
 import 'core/theme/app_theme.dart';
+import 'features/profile/presentation/screens/account_settings_screen.dart';
+import 'features/profile/presentation/screens/bug_report_screen.dart';
+import 'features/profile/presentation/screens/feedback_screen.dart';
+import 'features/profile/presentation/screens/help_center_screen.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 import 'features/auth/presentation/screens/auth_screen.dart';
 import 'features/auth/presentation/screens/password_reset_screen.dart';
@@ -27,9 +31,11 @@ import 'features/workouts/presentation/screens/workout_details_screen.dart';
 import 'features/profile/presentation/screens/workout_preferences_screen.dart';
 import 'features/profile/presentation/screens/nutrition_preferences_screen.dart';
 import 'features/profile/presentation/screens/privacy_policy_screen.dart';
+import 'features/profile/presentation/screens/workout_notification_settings_screen.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'shared/models/workout_plan_model.dart';
 import 'shared/services/background_upload_service.dart';
+import 'shared/services/notification_service.dart';
 import 'shared/providers/profile_photo_provider.dart';
 
 // import 'features/trainers/presentation/screens/trainers_screen.dart';
@@ -208,12 +214,32 @@ GoRouter createRouter(AuthProvider authProvider) {
         builder: (context, state) => const WorkoutPreferencesScreen(),
       ),
       GoRoute(
+        path: '/workout-notifications',
+        builder: (context, state) => const WorkoutNotificationSettingsScreen(),
+      ),
+      GoRoute(
         path: '/nutrition-preferences',
         builder: (context, state) => const NutritionPreferencesScreen(),
       ),
       GoRoute(
+        path: '/account-settings',
+        builder: (context, state) => const AccountSettingsScreen(),
+      ),
+      GoRoute(
         path: '/privacy-policy',
         builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: '/help-center',
+        builder: (context, state) => const HelpCenterScreen(),
+      ),
+      GoRoute(
+        path: '/bug-report',
+        builder: (context, state) => const BugReportScreen(),
+      ),
+      GoRoute(
+        path: '/feedback',
+        builder: (context, state) => const FeedbackScreen(),
       ),
     ],
     redirect: (context, state) {
@@ -294,6 +320,15 @@ void main() async {
   } catch (e) {
     _logger.w('Warning: Could not initialize background upload service: $e');
     // Continue without background upload service
+  }
+
+  // Initialize notification service
+  try {
+    await NotificationService.initialize();
+    _logger.i('Notification service initialized successfully');
+  } catch (e) {
+    _logger.w('Warning: Could not initialize notification service: $e');
+    // Continue without notification service
   }
 
   final authProvider = AuthProvider();

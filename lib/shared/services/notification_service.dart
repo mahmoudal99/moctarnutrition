@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:logger/logger.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import '../models/workout_plan_model.dart';
 
 /// Service to handle notification permissions and local notifications
 class NotificationService {
@@ -434,6 +435,175 @@ class NotificationService {
       _logger.i('All notifications cancelled');
     } catch (e) {
       _logger.e('Error cancelling notifications: $e');
+    }
+  }
+
+  /// Cancel all workout notifications
+  static Future<void> cancelWorkoutNotifications() async {
+    try {
+      // Cancel all notifications with IDs in the workout range
+      // We'll use a range to identify workout notifications
+      for (int i = 1000; i < 2000; i++) {
+        await _flutterLocalNotificationsPlugin.cancel(i);
+      }
+      _logger.i('All workout notifications cancelled');
+    } catch (e) {
+      _logger.e('Error cancelling workout notifications: $e');
+    }
+  }
+
+  /// Schedule workout notifications for the entire week
+  /// iOS has a limitation of 64 notifications, so we'll prioritize the next 2 weeks
+  static Future<void> scheduleWorkoutNotifications({
+    required List<DailyWorkout> dailyWorkouts,
+    required String notificationTime, // Format: "HH:mm"
+    required String userId,
+  }) async {
+    try {
+      if (!await areNotificationsEnabled()) {
+        _logger.w('Cannot schedule workout notifications: permission not granted');
+        return;
+      }
+
+      // Cancel existing workout notifications first
+      await cancelWorkoutNotifications();
+
+      // Parse notification time
+      final timeParts = notificationTime.split(':');
+      final hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
+
+      const AndroidNotificationDetails androidNotificationDetails =
+          AndroidNotificationDetails(
+        'workout_reminders',
+        'Workout Reminders',
+        channelDescription: 'Daily workout reminders',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+
+      const DarwinNotificationDetails iosNotificationDetails =
+          DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: androidNotificationDetails,
+        iOS: iosNotificationDetails,
+      );
+
+      int notificationId = 1000; // Start from 1000 for workout notifications
+      int scheduledCount = 0;
+      const int maxNotifications = 64; // iOS limitation
+
+      // Schedule notifications for the next 2 weeks (14 days)
+      _logger.d('Starting to schedule notifications for ${dailyWorkouts.length} workout days');
+      _logger.d('Available workout days: ${dailyWorkouts.map((w) => w.dayName).toList()}');
+      for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
+        if (scheduledCount >= maxNotifications) {
+          _logger.w('Reached iOS notification limit (64), stopping scheduling');
+          break;
+        }
+
+        final targetDate = DateTime.now().add(Duration(days: dayOffset));
+        final dayName = _getDayName(targetDate.weekday);
+        
+        _logger.d('Checking day $dayOffset: $dayName');
+        
+        // Find the workout for this day
+        DailyWorkout? dailyWorkout;
+        try {
+          dailyWorkout = dailyWorkouts.firstWhere(
+            (workout) => workout.dayName == dayName,
+          );
+        } catch (e) {
+          dailyWorkout = null;
+        }
+
+        // Skip if no workout for this day or it's a rest day
+        if (dailyWorkout == null) {
+          _logger.d('No workout found for $dayName, skipping');
+          continue;
+        }
+        
+        if (dailyWorkout.restDay != null) {
+          _logger.d('Rest day for $dayName, skipping');
+          continue;
+        }
+
+        // Create notification time for this specific day
+        final scheduledTime = DateTime(
+          targetDate.year,
+          targetDate.month,
+          targetDate.day,
+          hour,
+          minute,
+        );
+
+        // Skip if the time has already passed today
+        if (dayOffset == 0 && scheduledTime.isBefore(DateTime.now())) {
+          _logger.d('Notification time for today has already passed, skipping');
+          continue;
+        }
+
+        final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
+        final workoutTitle = dailyWorkout.title;
+        final workoutDescription = dailyWorkout.description;
+
+        // Create notification body
+        String body = 'Time for your workout! 💪';
+        if (workoutDescription.isNotEmpty) {
+          // Truncate description if too long
+          final truncatedDescription = workoutDescription.length > 50 
+              ? '${workoutDescription.substring(0, 47)}...'
+              : workoutDescription;
+          body = '$workoutTitle: $truncatedDescription';
+        }
+
+        await _flutterLocalNotificationsPlugin.zonedSchedule(
+          notificationId,
+          'TODAY\'S WORKOUT IS READY',
+          body,
+          tzScheduledTime,
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+
+        _logger.i('Scheduled workout notification for $dayName at ${scheduledTime.toString()}: $workoutTitle');
+        
+        notificationId++;
+        scheduledCount++;
+      }
+
+      _logger.i('Scheduled $scheduledCount workout notifications');
+    } catch (e) {
+      _logger.e('Error scheduling workout notifications: $e');
+    }
+  }
+
+  /// Get day name from weekday number
+  static String _getDayName(int weekday) {
+    switch (weekday) {
+      case DateTime.monday:
+        return 'Monday';
+      case DateTime.tuesday:
+        return 'Tuesday';
+      case DateTime.wednesday:
+        return 'Wednesday';
+      case DateTime.thursday:
+        return 'Thursday';
+      case DateTime.friday:
+        return 'Friday';
+      case DateTime.saturday:
+        return 'Saturday';
+      case DateTime.sunday:
+        return 'Sunday';
+      default:
+        return 'Monday';
     }
   }
 }

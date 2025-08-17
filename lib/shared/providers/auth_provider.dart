@@ -6,6 +6,7 @@ import '../services/auth_service.dart';
 import '../services/user_local_storage_service.dart';
 import '../services/onboarding_service.dart';
 import '../services/workout_plan_local_storage_service.dart';
+import '../services/notification_service.dart';
 import 'profile_photo_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -51,6 +52,9 @@ class AuthProvider extends ChangeNotifier {
         _userModel = null;
         await _storageService.clearUser();
         await WorkoutPlanLocalStorageService.clearWorkoutPlan();
+        
+        // Cancel workout notifications when user is signed out
+        await NotificationService.cancelWorkoutNotifications();
         
         // Clear profile photo provider
         if (_profilePhotoProvider != null) {
@@ -272,6 +276,9 @@ class AuthProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
+      // Cancel workout notifications before signing out
+      await NotificationService.cancelWorkoutNotifications();
+      
       await AuthService.signOut();
       
       _firebaseUser = null;
@@ -370,6 +377,9 @@ class AuthProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
+      // Cancel workout notifications before deleting account
+      await NotificationService.cancelWorkoutNotifications();
+      
       await AuthService.deleteAccount();
       
       // Clear local state

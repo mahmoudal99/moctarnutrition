@@ -25,11 +25,8 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
   int _currentIndex = 0;
 
   List<_NavItem> _buildNavItems(UserModel? user) {
-    _logger.d(
-        'FloatingMainNavigation - Building nav items for user: ${user?.name ?? 'null'} with role: ${user?.role ?? 'null'}');
 
     if (user != null && user.role == UserRole.admin) {
-      _logger.d('FloatingMainNavigation - Building ADMIN navigation items');
       return [
         const _NavItem(
           icon: Icons.home,

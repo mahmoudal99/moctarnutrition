@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/workout_provider.dart';
 import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/user_provider.dart';
+import '../../../../shared/services/notification_service.dart';
 import '../widgets/workout_loading_state.dart';
 import '../widgets/workout_error_state.dart';
 import '../widgets/workout_empty_state.dart';
@@ -54,6 +55,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       if (currentWorkoutPlan.userId == authProvider.userModel!.id) {
         _logger.d(
             'Workout plan already loaded for current user, skipping API call');
+        // Still schedule notifications in case they were missed
+        await _scheduleWorkoutNotifications();
         return;
       } else {
         _logger.d(
@@ -69,6 +72,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         'Loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
     await workoutProvider.loadWorkoutPlan(
         authProvider.userModel!.id, workoutStyles, authProvider.userModel);
+    
+    // Schedule notifications after workout plan is loaded
+    await _scheduleWorkoutNotifications();
   }
 
   Future<void> _loadWorkoutPlan() async {
@@ -105,6 +111,49 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           .d('Refreshing workout plan for user ${authProvider.userModel!.id}');
       await workoutProvider.loadWorkoutPlan(
           authProvider.userModel!.id, workoutStyles, authProvider.userModel);
+      
+      // Schedule notifications after workout plan is refreshed
+      await _scheduleWorkoutNotifications();
+    }
+  }
+
+  /// Schedule workout notifications if user has enabled them
+  Future<void> _scheduleWorkoutNotifications() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+
+      // Check if user is authenticated and has workout notifications enabled
+      if (!authProvider.isAuthenticated || 
+          authProvider.userModel == null ||
+          !authProvider.userModel!.preferences.workoutNotificationsEnabled ||
+          authProvider.userModel!.preferences.workoutNotificationTime == null) {
+        _logger.d('Workout notifications not enabled or missing time preference');
+        return;
+      }
+
+      // Check if workout plan is loaded
+      if (workoutProvider.currentWorkoutPlan == null) {
+        _logger.d('No workout plan loaded, skipping notification scheduling');
+        return;
+      }
+
+      final user = authProvider.userModel!;
+      final workoutPlan = workoutProvider.currentWorkoutPlan!;
+      final notificationTime = user.preferences.workoutNotificationTime!;
+
+      _logger.d('Scheduling workout notifications for user ${user.id} at $notificationTime');
+
+      // Schedule notifications
+      await NotificationService.scheduleWorkoutNotifications(
+        dailyWorkouts: workoutPlan.dailyWorkouts,
+        notificationTime: notificationTime,
+        userId: user.id,
+      );
+
+      _logger.i('Workout notifications scheduled successfully');
+    } catch (e) {
+      _logger.e('Error scheduling workout notifications: $e');
     }
   }
 
