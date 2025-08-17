@@ -290,8 +290,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   Widget _buildWorkoutPlanView(WorkoutProvider workoutProvider) {
     final workoutPlan = workoutProvider.currentWorkoutPlan!;
     final todayWorkout = workoutProvider.getTodayWorkout();
-    final workoutMessage =
-        WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout);
+    WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout);
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
@@ -357,8 +356,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           slivers: [
             if (!workoutProvider.isEditMode)
               WorkoutAppHeader(
-                  message:
-                      WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
+                  message: WorkoutMessageGenerator.generateWorkoutMessage(
+                      todayWorkout)),
             SliverToBoxAdapter(
               child: Column(
                 children: [
@@ -390,32 +389,19 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           slivers: [
             if (!workoutProvider.isEditMode)
               WorkoutAppHeader(
-                  message:
-                      WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
+                  message: WorkoutMessageGenerator.generateWorkoutMessage(
+                      todayWorkout)),
             SliverToBoxAdapter(
               child: Column(
                 children: [
                   if (!workoutProvider.isEditMode) ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ViewToggle(
-                            selectedView: _selectedView,
-                            onViewChanged: (viewType) {
-                              setState(() {
-                                _selectedView = viewType;
-                              });
-                            },
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            workoutProvider.enterEditMode();
-                          },
-                          icon: const Icon(Icons.edit),
-                          tooltip: 'Edit Schedule',
-                        ),
-                      ],
+                    ViewToggle(
+                      selectedView: _selectedView,
+                      onViewChanged: (viewType) {
+                        setState(() {
+                          _selectedView = viewType;
+                        });
+                      },
                     ),
                   ],
                   Padding(
@@ -423,7 +409,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (todayWorkout != null && !workoutProvider.isEditMode) ...[
+                        if (todayWorkout != null &&
+                            !workoutProvider.isEditMode) ...[
                           Text(
                             "Today's Workout",
                             style: AppTextStyles.heading4,
@@ -455,7 +442,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final dailyWorkout = workoutPlan.dailyWorkouts[index];
-                    final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
+                    final isToday =
+                        dailyWorkout.dayName == todayWorkout?.dayName;
 
                     return DroppableDayArea(
                       dayName: dailyWorkout.dayName,
@@ -467,13 +455,13 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   childCount: workoutPlan.dailyWorkouts.length,
                 ),
               ),
-            ]
-            else
+            ] else
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final dailyWorkout = workoutPlan.dailyWorkouts[index];
-                    final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
+                    final isToday =
+                        dailyWorkout.dayName == todayWorkout?.dayName;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(

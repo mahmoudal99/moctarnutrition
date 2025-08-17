@@ -20,16 +20,9 @@ class ViewToggle extends StatelessWidget {
         horizontal: AppConstants.spacingM,
         vertical: AppConstants.spacingS,
       ),
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        boxShadow: AppConstants.shadowS,
-        border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.1),
-        ),
-      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildToggleOption(
             WorkoutViewType.day,
