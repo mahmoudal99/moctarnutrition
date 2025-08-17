@@ -6,6 +6,7 @@ import '../models/user_model.dart';
 import '../../features/workouts/data/workout_service.dart';
 import '../services/workout_plan_storage_service.dart';
 import '../services/workout_plan_local_storage_service.dart';
+import '../services/notification_service.dart';
 
 class WorkoutProvider extends ChangeNotifier {
   static final _logger = Logger();
@@ -39,6 +40,10 @@ class WorkoutProvider extends ChangeNotifier {
         final isFresh = await WorkoutPlanLocalStorageService.isWorkoutPlanFresh();
         if (isFresh) {
           _logger.d('Local workout plan is fresh, using cached data');
+          // Schedule notifications for fresh local plan
+          if (user != null) {
+            await _scheduleWorkoutNotifications(user);
+          }
           return;
         } else {
           _logger.d('Local workout plan is stale, refreshing from server');
@@ -59,6 +64,11 @@ class WorkoutProvider extends ChangeNotifier {
         } catch (e) {
           _logger.w('Failed to save workout plan to local storage: $e');
         }
+        
+        // Schedule notifications for stored workout plan
+        if (user != null) {
+          await _scheduleWorkoutNotifications(user);
+        }
         return;
       }
 
@@ -77,6 +87,11 @@ class WorkoutProvider extends ChangeNotifier {
         } catch (e) {
           _logger.w('Failed to save predefined workout plan: $e');
           // Don't fail the operation if saving fails
+        }
+        
+        // Schedule notifications for predefined workout plan
+        if (user != null) {
+          await _scheduleWorkoutNotifications(user);
         }
       } else {
         _logger.i('No predefined workout plan found for styles: $workoutStyles. Generating AI plan...');
@@ -97,6 +112,11 @@ class WorkoutProvider extends ChangeNotifier {
             }
             
             _currentWorkoutPlan = aiWorkoutPlan;
+            
+            // Schedule notifications for AI-generated workout plan
+            if (user != null) {
+              await _scheduleWorkoutNotifications(user);
+            }
           } catch (e) {
             _logger.e('Failed to generate AI workout plan: $e');
             _error = 'Failed to generate personalized workout plan. Please try again later.';
@@ -183,6 +203,11 @@ class WorkoutProvider extends ChangeNotifier {
       // Load new plan (this will generate new AI plan or use predefined)
       await loadWorkoutPlan(userId, workoutStyles, user);
       
+      // Schedule notifications for regenerated workout plan
+      if (_currentWorkoutPlan != null && user != null) {
+        await _scheduleWorkoutNotifications(user);
+      }
+      
       _logger.i('Workout plan regenerated successfully');
     } catch (e) {
       _logger.e('Failed to regenerate workout plan: $e');
@@ -193,6 +218,39 @@ class WorkoutProvider extends ChangeNotifier {
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
+  }
+
+  /// Schedule workout notifications if user has enabled them
+  Future<void> _scheduleWorkoutNotifications(UserModel user) async {
+    try {
+      // Check if user has workout notifications enabled
+      if (!user.preferences.workoutNotificationsEnabled ||
+          user.preferences.workoutNotificationTime == null) {
+        _logger.d('Workout notifications not enabled or missing time preference');
+        return;
+      }
+
+      // Check if workout plan is loaded
+      if (_currentWorkoutPlan == null) {
+        _logger.d('No workout plan loaded, skipping notification scheduling');
+        return;
+      }
+
+      final notificationTime = user.preferences.workoutNotificationTime!;
+
+      _logger.d('Scheduling workout notifications for user ${user.id} at $notificationTime');
+
+      // Schedule notifications
+      await NotificationService.scheduleWorkoutNotifications(
+        dailyWorkouts: _currentWorkoutPlan!.dailyWorkouts,
+        notificationTime: notificationTime,
+        userId: user.id,
+      );
+
+      _logger.i('Workout notifications scheduled successfully');
+    } catch (e) {
+      _logger.e('Error scheduling workout notifications: $e');
+    }
   }
 
   // Add workout to a specific day
