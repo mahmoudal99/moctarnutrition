@@ -363,26 +363,27 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
               ],
             ),
           ),
-          // Floating toggle
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: AnimatedBuilder(
-                animation: _toggleAnimationController,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _toggleScaleAnimation.value,
-                    child: Opacity(
-                      opacity: _toggleOpacityAnimation.value,
-                      child: _buildFloatingToggle(),
-                    ),
-                  );
-                },
+          // Floating toggle (only show when not in edit mode)
+          if (!workoutProvider.isEditMode)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 20,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: AnimatedBuilder(
+                  animation: _toggleAnimationController,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _toggleScaleAnimation.value,
+                      child: Opacity(
+                        opacity: _toggleOpacityAnimation.value,
+                        child: _buildFloatingToggle(),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
