@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import '../models/meal_model.dart';
@@ -12,12 +13,20 @@ class MealPlanFirestoreService {
     try {
       _logger.d('Fetching meal plan for user: $userId');
       
+      // Add timeout to prevent hanging
       final querySnapshot = await _firestore
           .collection(_collectionName)
           .where('userId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .limit(1)
-          .get();
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              _logger.w('Firestore query timed out for user: $userId');
+              throw TimeoutException('Firestore query timed out', const Duration(seconds: 10));
+            },
+          );
 
       if (querySnapshot.docs.isNotEmpty) {
         final doc = querySnapshot.docs.first;
@@ -28,6 +37,16 @@ class MealPlanFirestoreService {
         _logger.i('No meal plan found for user: $userId');
         return null;
       }
+    } on FirebaseException catch (e) {
+      _logger.e('Firebase error fetching meal plan: ${e.code} - ${e.message}');
+      if (e.code == 'failed-precondition') {
+        _logger.e('Firestore index error - missing composite index for userId + createdAt');
+        throw Exception('Database index error. Please contact support.');
+      }
+      rethrow;
+    } on TimeoutException catch (e) {
+      _logger.e('Timeout error fetching meal plan: $e');
+      rethrow;
     } catch (e) {
       _logger.e('Failed to fetch meal plan: $e');
       rethrow;
@@ -39,10 +58,18 @@ class MealPlanFirestoreService {
     try {
       _logger.d('Fetching meal plan by ID: $mealPlanId');
       
+      // Add timeout to prevent hanging
       final doc = await _firestore
           .collection(_collectionName)
           .doc(mealPlanId)
-          .get();
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              _logger.w('Firestore query timed out for meal plan ID: $mealPlanId');
+              throw TimeoutException('Firestore query timed out', const Duration(seconds: 10));
+            },
+          );
 
       if (doc.exists) {
         final mealPlan = MealPlanModel.fromJson(doc.data()!);
@@ -144,6 +171,40 @@ class MealPlanFirestoreService {
       return mealPlans;
     } catch (e) {
       _logger.e('Failed to fetch meal plan history: $e');
+      rethrow;
+    }
+  }
+
+  /// Get meal plan for user from Firestore (fallback method without ordering)
+  static Future<MealPlanModel?> getMealPlanFallback(String userId) async {
+    try {
+      _logger.d('Fetching meal plan for user (fallback): $userId');
+      
+      // Simple query without ordering to avoid index requirements
+      final querySnapshot = await _firestore
+          .collection(_collectionName)
+          .where('userId', isEqualTo: userId)
+          .limit(1)
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              _logger.w('Firestore fallback query timed out for user: $userId');
+              throw TimeoutException('Firestore query timed out', const Duration(seconds: 10));
+            },
+          );
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final doc = querySnapshot.docs.first;
+        final mealPlan = MealPlanModel.fromJson(doc.data());
+        _logger.i('Meal plan found (fallback): ${mealPlan.id}');
+        return mealPlan;
+      } else {
+        _logger.i('No meal plan found for user (fallback): $userId');
+        return null;
+      }
+    } catch (e) {
+      _logger.e('Failed to fetch meal plan (fallback): $e');
       rethrow;
     }
   }

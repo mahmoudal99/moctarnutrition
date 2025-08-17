@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../models/meal_model.dart';
@@ -31,6 +32,7 @@ class MealPlanProvider with ChangeNotifier {
   void clearMealPlan() {
     _mealPlan = null;
     _error = null;
+    _isLoading = false; // Ensure loading state is reset
     notifyListeners();
   }
 
@@ -61,22 +63,69 @@ class MealPlanProvider with ChangeNotifier {
       }
 
       // Try to load from Firestore (server-side storage)
-      final firestoreMealPlan = await MealPlanFirestoreService.getMealPlan(userId);
-      
-      if (firestoreMealPlan != null) {
-        _logger.d('Found meal plan in Firestore: ${firestoreMealPlan.title}');
-        _mealPlan = firestoreMealPlan;
+      try {
+        final firestoreMealPlan = await MealPlanFirestoreService.getMealPlan(userId);
         
-        // Save to local storage for future use
-        try {
-          await MealPlanLocalStorageService.saveMealPlan(firestoreMealPlan);
-          _logger.d('Meal plan saved to local storage');
-        } catch (e) {
-          _logger.w('Failed to save meal plan to local storage: $e');
+        if (firestoreMealPlan != null) {
+          _logger.d('Found meal plan in Firestore: ${firestoreMealPlan.title}');
+          _mealPlan = firestoreMealPlan;
+          
+          // Save to local storage for future use
+          try {
+            await MealPlanLocalStorageService.saveMealPlan(firestoreMealPlan);
+            _logger.d('Meal plan saved to local storage');
+          } catch (e) {
+            _logger.w('Failed to save meal plan to local storage: $e');
+          }
+          
+          _setLoading(false);
+          return;
         }
-        
-        _setLoading(false);
-        return;
+      } on FirebaseException catch (e) {
+        _logger.w('Firebase error loading from Firestore: ${e.code} - ${e.message}');
+        if (e.code == 'failed-precondition') {
+          _logger.i('Trying fallback query without ordering');
+          try {
+            final fallbackMealPlan = await MealPlanFirestoreService.getMealPlanFallback(userId);
+            if (fallbackMealPlan != null) {
+              _logger.d('Found meal plan using fallback query: ${fallbackMealPlan.title}');
+              _mealPlan = fallbackMealPlan;
+              
+              // Save to local storage for future use
+              try {
+                await MealPlanLocalStorageService.saveMealPlan(fallbackMealPlan);
+                _logger.d('Meal plan saved to local storage');
+              } catch (e) {
+                _logger.w('Failed to save meal plan to local storage: $e');
+              }
+              
+              _setLoading(false);
+              return;
+            }
+          } catch (fallbackError) {
+            _logger.w('Fallback query also failed: $fallbackError');
+          }
+        }
+        // If we have local data, use it as fallback
+        if (localMealPlan != null) {
+          _logger.i('Using local meal plan as fallback due to Firestore error');
+          _mealPlan = localMealPlan;
+          _setLoading(false);
+          return;
+        }
+        // Re-throw if no local fallback available
+        rethrow;
+      } catch (e) {
+        _logger.w('Failed to load from Firestore: $e');
+        // If we have local data, use it as fallback
+        if (localMealPlan != null) {
+          _logger.i('Using local meal plan as fallback due to Firestore error');
+          _mealPlan = localMealPlan;
+          _setLoading(false);
+          return;
+        }
+        // Re-throw if no local fallback available
+        rethrow;
       }
 
       // No meal plan found
