@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../models/meal_model.dart';
-import '../models/user_model.dart';
 import '../services/nutrition_calculation_service.dart';
 import '../services/meal_plan_local_storage_service.dart';
 import '../services/meal_plan_firestore_service.dart';
