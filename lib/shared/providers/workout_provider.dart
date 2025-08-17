@@ -11,15 +11,17 @@ import '../services/notification_service.dart';
 class WorkoutProvider extends ChangeNotifier {
   static final _logger = Logger();
   
+  final WorkoutService _workoutService = WorkoutService();
+  
   WorkoutPlanModel? _currentWorkoutPlan;
   bool _isLoading = false;
+  bool _isGenerating = false; // New flag to track generation vs loading
   String? _error;
 
   WorkoutPlanModel? get currentWorkoutPlan => _currentWorkoutPlan;
   bool get isLoading => _isLoading;
+  bool get isGenerating => _isGenerating; // New getter
   String? get error => _error;
-
-  final WorkoutService _workoutService = WorkoutService();
 
   // Load workout plan based on user's selected workout styles
   Future<void> loadWorkoutPlan(String userId, List<String> workoutStyles, UserModel? user) async {
@@ -98,6 +100,9 @@ class WorkoutProvider extends ChangeNotifier {
         
         if (user != null) {
           try {
+            _isGenerating = true; // Set generating flag
+            notifyListeners();
+            
             final aiWorkoutPlan = await _workoutService.generateAIWorkoutPlan(user, userId);
             _logger.d('AI workout plan generated successfully: ${aiWorkoutPlan.title}');
             
@@ -120,6 +125,9 @@ class WorkoutProvider extends ChangeNotifier {
           } catch (e) {
             _logger.e('Failed to generate AI workout plan: $e');
             _error = 'Failed to generate personalized workout plan. Please try again later.';
+          } finally {
+            _isGenerating = false; // Clear generating flag
+            notifyListeners();
           }
         } else {
           _error = 'Unable to generate personalized workout plan. Please update your profile preferences.';
@@ -200,6 +208,10 @@ class WorkoutProvider extends ChangeNotifier {
       _currentWorkoutPlan = null;
       notifyListeners();
       
+      // Set generating flag for regeneration
+      _isGenerating = true;
+      notifyListeners();
+      
       // Load new plan (this will generate new AI plan or use predefined)
       await loadWorkoutPlan(userId, workoutStyles, user);
       
@@ -212,6 +224,9 @@ class WorkoutProvider extends ChangeNotifier {
     } catch (e) {
       _logger.e('Failed to regenerate workout plan: $e');
       _error = 'Failed to regenerate workout plan. Please try again.';
+    } finally {
+      _isGenerating = false; // Clear generating flag
+      notifyListeners();
     }
   }
 

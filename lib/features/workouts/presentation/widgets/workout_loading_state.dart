@@ -47,7 +47,7 @@ class WorkoutLoadingState extends StatelessWidget {
                       ),
                       const SizedBox(height: AppConstants.spacingXS),
                       Text(
-                        'Preparing your workout plan...',
+                        'Loading your workout plan...',
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: AppConstants.textSecondary,
                         ),
@@ -63,13 +63,10 @@ class WorkoutLoadingState extends StatelessWidget {
               padding: const EdgeInsets.all(AppConstants.spacingL),
               child: Column(
                 children: [
+                  const SizedBox(height: AppConstants.spacingXL),
                   _buildLoadingSpinner(),
                   const SizedBox(height: AppConstants.spacingXL),
-                  _buildLoadingTitle(),
-                  const SizedBox(height: AppConstants.spacingM),
-                  _buildLoadingDescription(),
-                  const SizedBox(height: AppConstants.spacingXL),
-                  _buildLoadingSteps(),
+                  _buildLoadingMessage(),
                 ],
               ),
             ),
@@ -81,120 +78,44 @@ class WorkoutLoadingState extends StatelessWidget {
 
   Widget _buildLoadingSpinner() {
     return Container(
-      width: 120,
-      height: 120,
+      width: 80,
+      height: 80,
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
         borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        boxShadow: AppConstants.shadowM,
+        boxShadow: AppConstants.shadowS,
       ),
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
             color: AppConstants.primaryColor,
-            strokeWidth: 3,
+            strokeWidth: 2,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLoadingTitle() {
-    return Text(
-      'Creating Your Perfect Workout',
-      style: AppTextStyles.heading4.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _buildLoadingDescription() {
-    return Text(
-      'We\'re analyzing your preferences and fitness goals to create a personalized workout plan just for you.',
-      style: AppTextStyles.bodyMedium.copyWith(
-        color: AppConstants.textSecondary,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _buildLoadingSteps() {
+  Widget _buildLoadingMessage() {
     return Column(
       children: [
-        _buildLoadingStep(
-          'Analyzing your fitness goals',
-          Icons.track_changes,
-          true,
+        Text(
+          'Loading Workout Plan',
+          style: AppTextStyles.heading4.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppConstants.spacingM),
-        _buildLoadingStep(
-          'Designing workout routines',
-          Icons.fitness_center,
-          true,
-        ),
-        const SizedBox(height: AppConstants.spacingM),
-        _buildLoadingStep(
-          'Optimizing for your schedule',
-          Icons.schedule,
-          false,
+        Text(
+          'Please wait while we load your personalized workout plan.',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppConstants.textSecondary,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
-    );
-  }
-
-  Widget _buildLoadingStep(String text, IconData icon, bool isCompleted) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(
-          color: isCompleted
-              ? AppConstants.primaryColor.withOpacity(0.3)
-              : AppConstants.textTertiary.withOpacity(0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: isCompleted
-                  ? AppConstants.primaryColor
-                  : AppConstants.textTertiary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppConstants.radiusS),
-            ),
-            child: Icon(
-              icon,
-              color: isCompleted
-                  ? AppConstants.surfaceColor
-                  : AppConstants.textTertiary,
-              size: 16,
-            ),
-          ),
-          const SizedBox(width: AppConstants.spacingM),
-          Expanded(
-            child: Text(
-              text,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: isCompleted
-                    ? AppConstants.textPrimary
-                    : AppConstants.textSecondary,
-                fontWeight: isCompleted ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-          ),
-          if (isCompleted)
-            const Icon(
-              Icons.check_circle,
-              color: AppConstants.primaryColor,
-              size: 20,
-            ),
-        ],
-      ),
     );
   }
 

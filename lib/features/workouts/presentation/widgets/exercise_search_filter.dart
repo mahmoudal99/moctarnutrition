@@ -21,7 +21,9 @@ class ExerciseSearchFilter extends StatelessWidget {
                 boxShadow: AppConstants.shadowS,
               ),
               child: TextField(
-                onChanged: exerciseProvider.setSearchQuery,
+                onChanged: (value) {
+                  exerciseProvider.setSearchQuery(value);
+                },
                 decoration: InputDecoration(
                   hintText: 'Search exercises...',
                   prefixIcon: const Icon(Icons.search),
@@ -123,7 +125,9 @@ class ExerciseSearchFilter extends StatelessWidget {
                     ),
                     const Spacer(),
                     TextButton(
-                      onPressed: exerciseProvider.clearFilters,
+                      onPressed: () {
+                        exerciseProvider.clearFilters();
+                      },
                       child: const Text('Clear filters'),
                     ),
                   ],

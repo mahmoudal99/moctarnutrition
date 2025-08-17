@@ -8,6 +8,7 @@ import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/user_provider.dart';
 import '../../../../shared/services/notification_service.dart';
 import '../widgets/workout_loading_state.dart';
+import '../widgets/workout_generation_loading_state.dart';
 import '../widgets/workout_error_state.dart';
 import '../widgets/workout_empty_state.dart';
 import '../widgets/workout_app_header.dart';
@@ -158,7 +159,16 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const WorkoutLoadingState();
+    return Consumer<WorkoutProvider>(
+      builder: (context, workoutProvider, child) {
+        // Use generation loading state if we're generating a new workout plan
+        if (workoutProvider.isGenerating) {
+          return const WorkoutGenerationLoadingState();
+        }
+        // Use regular loading state for loading existing workouts
+        return const WorkoutLoadingState();
+      },
+    );
   }
 
   @override

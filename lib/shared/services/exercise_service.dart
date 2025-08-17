@@ -1,238 +1,213 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import '../models/workout_model.dart';
 
-class ExerciseService {
-  static final ExerciseService _instance = ExerciseService._internal();
-  factory ExerciseService() => _instance;
-  ExerciseService._internal();
+class FreeExerciseService {
+  static final _logger = Logger();
+  
+  static const String _baseUrl = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main';
+  static const String _exercisesUrl = '$_baseUrl/dist/exercises.json';
 
-  // Exercise library data
-  static const Map<String, Map<String, dynamic>> _exerciseLibrary = {
-    // Chest exercises
-    'chest_press': {
-      'name': 'Chest Press',
-      'description': 'Classic chest exercise using dumbbells or barbell',
-      'sets': 3,
-      'reps': 12,
-      'muscleGroups': ['chest', 'triceps', 'shoulders'],
-      'equipment': 'Dumbbells/Barbell',
-    },
-    'push_ups': {
-      'name': 'Push-ups',
-      'description': 'Bodyweight chest exercise',
-      'sets': 3,
-      'reps': 15,
-      'muscleGroups': ['chest', 'triceps', 'shoulders'],
-      'equipment': 'Bodyweight',
-    },
-    'incline_press': {
-      'name': 'Incline Press',
-      'description': 'Upper chest focus exercise',
-      'sets': 3,
-      'reps': 10,
-      'muscleGroups': ['chest', 'triceps', 'shoulders'],
-      'equipment': 'Dumbbells/Barbell',
-    },
-    'dumbbell_flyes': {
-      'name': 'Dumbbell Flyes',
-      'description': 'Isolation exercise for chest',
-      'sets': 3,
-      'reps': 12,
-      'muscleGroups': ['chest'],
-      'equipment': 'Dumbbells',
-    },
-    
-    // Back exercises
-    'pull_ups': {
-      'name': 'Pull-ups',
-      'description': 'Upper body pulling exercise',
-      'sets': 3,
-      'reps': 8,
-      'muscleGroups': ['back', 'biceps'],
-      'equipment': 'Pull-up bar',
-    },
-    'barbell_rows': {
-      'name': 'Barbell Rows',
-      'description': 'Compound back exercise',
-      'sets': 3,
-      'reps': 12,
-      'muscleGroups': ['back', 'biceps'],
-      'equipment': 'Barbell',
-    },
-    'lat_pulldowns': {
-      'name': 'Lat Pulldowns',
-      'description': 'Machine-based back exercise',
-      'sets': 3,
-      'reps': 12,
-      'muscleGroups': ['back', 'biceps'],
-      'equipment': 'Cable machine',
-    },
-    
-    // Leg exercises
-    'squats': {
-      'name': 'Squats',
-      'description': 'Compound leg exercise',
-      'sets': 3,
-      'reps': 15,
-      'muscleGroups': ['legs', 'glutes'],
-      'equipment': 'Bodyweight/Barbell',
-    },
-    'deadlifts': {
-      'name': 'Deadlifts',
-      'description': 'Posterior chain exercise',
-      'sets': 3,
-      'reps': 8,
-      'muscleGroups': ['legs', 'back', 'glutes'],
-      'equipment': 'Barbell',
-    },
-    'lunges': {
-      'name': 'Lunges',
-      'description': 'Unilateral leg exercise',
-      'sets': 3,
-      'reps': 12,
-      'muscleGroups': ['legs', 'glutes'],
-      'equipment': 'Bodyweight/Dumbbells',
-    },
-    
-    // Shoulder exercises
-    'shoulder_press': {
-      'name': 'Shoulder Press',
-      'description': 'Overhead pressing movement',
-      'sets': 3,
-      'reps': 10,
-      'muscleGroups': ['shoulders', 'triceps'],
-      'equipment': 'Dumbbells/Barbell',
-    },
-    'lateral_raises': {
-      'name': 'Lateral Raises',
-      'description': 'Isolation exercise for lateral deltoids',
-      'sets': 3,
-      'reps': 15,
-      'muscleGroups': ['shoulders'],
-      'equipment': 'Dumbbells',
-    },
-    
-    // Arm exercises
-    'bicep_curls': {
-      'name': 'Bicep Curls',
-      'description': 'Isolation exercise for biceps',
-      'sets': 3,
-      'reps': 12,
-      'muscleGroups': ['biceps'],
-      'equipment': 'Dumbbells/Barbell',
-    },
-    'tricep_dips': {
-      'name': 'Tricep Dips',
-      'description': 'Bodyweight tricep exercise',
-      'sets': 3,
-      'reps': 12,
-      'muscleGroups': ['triceps'],
-      'equipment': 'Dip bars',
-    },
-    
-    // Core exercises
-    'plank': {
-      'name': 'Plank',
-      'description': 'Core stability exercise',
-      'sets': 3,
-      'reps': 0,
-      'duration': 60,
-      'muscleGroups': ['core'],
-      'equipment': 'Bodyweight',
-    },
-    'crunches': {
-      'name': 'Crunches',
-      'description': 'Abdominal exercise',
-      'sets': 3,
-      'reps': 20,
-      'muscleGroups': ['core'],
-      'equipment': 'Bodyweight',
-    },
-  };
-
-  /// Get all available exercises
-  List<Exercise> getAllExercises() {
-    return _exerciseLibrary.entries.map((entry) {
-      final data = entry.value;
-      return Exercise(
-        id: entry.key,
-        name: data['name'] as String,
-        description: data['description'] as String,
-        sets: data['sets'] as int,
-        reps: data['reps'] as int,
-        duration: data['duration'] as int?,
-        equipment: data['equipment'] as String?,
-        muscleGroups: List<String>.from(data['muscleGroups'] as List),
-        order: 1,
-      );
-    }).toList();
+  /// Get all exercises from the free exercise database
+  Future<List<Exercise>> getAllExercises() async {
+    try {
+      _logger.d('Fetching all exercises from free-exercise-db');
+      
+      final response = await http.get(Uri.parse(_exercisesUrl));
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final exercises = data.map((json) => _mapApiExerciseToExercise(json)).toList();
+        
+        _logger.d('Successfully fetched ${exercises.length} exercises from free-exercise-db');
+        return exercises;
+      } else {
+        _logger.e('Failed to fetch exercises: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to fetch exercises: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logger.e('Error fetching exercises: $e');
+      throw Exception('Error fetching exercises: $e');
+    }
   }
 
-  /// Get exercises filtered by muscle group
-  List<Exercise> getExercisesByMuscleGroup(String muscleGroup) {
-    return getAllExercises().where((exercise) {
-      return exercise.muscleGroups.contains(muscleGroup);
-    }).toList();
+  /// Get exercises by target muscle
+  Future<List<Exercise>> getExercisesByTarget(String target) async {
+    try {
+      _logger.d('Fetching exercises for target muscle: $target');
+      
+      final allExercises = await getAllExercises();
+      final targetExercises = allExercises.where((exercise) {
+        return exercise.muscleGroups.any((muscle) => 
+          muscle.toLowerCase().contains(target.toLowerCase())
+        );
+      }).toList();
+      
+      _logger.d('Found ${targetExercises.length} exercises for target $target');
+      return targetExercises;
+    } catch (e) {
+      _logger.e('Error fetching exercises for target $target: $e');
+      throw Exception('Error fetching exercises for target $target: $e');
+    }
+  }
+
+  /// Get exercises by equipment
+  Future<List<Exercise>> getExercisesByEquipment(String equipment) async {
+    try {
+      _logger.d('Fetching exercises for equipment: $equipment');
+      
+      final allExercises = await getAllExercises();
+      final equipmentExercises = allExercises.where((exercise) {
+        return exercise.equipment?.toLowerCase().contains(equipment.toLowerCase()) ?? false;
+      }).toList();
+      
+      _logger.d('Found ${equipmentExercises.length} exercises for equipment $equipment');
+      return equipmentExercises;
+    } catch (e) {
+      _logger.e('Error fetching exercises for equipment $equipment: $e');
+      throw Exception('Error fetching exercises for equipment $equipment: $e');
+    }
+  }
+
+  /// Get all available target muscles
+  Future<List<String>> getTargetMuscles() async {
+    try {
+      _logger.d('Fetching available target muscles');
+      
+      final allExercises = await getAllExercises();
+      final Set<String> muscles = {};
+      
+      for (final exercise in allExercises) {
+        muscles.addAll(exercise.muscleGroups);
+      }
+      
+      final muscleList = muscles.toList()..sort();
+      _logger.d('Found ${muscleList.length} target muscles');
+      return muscleList;
+    } catch (e) {
+      _logger.e('Error fetching target muscles: $e');
+      throw Exception('Error fetching target muscles: $e');
+    }
+  }
+
+  /// Get all available equipment
+  Future<List<String>> getEquipment() async {
+    try {
+      _logger.d('Fetching available equipment');
+      
+      final allExercises = await getAllExercises();
+      final Set<String> equipment = {};
+      
+      for (final exercise in allExercises) {
+        if (exercise.equipment != null && exercise.equipment!.isNotEmpty) {
+          equipment.add(exercise.equipment!);
+        }
+      }
+      
+      final equipmentList = equipment.toList()..sort();
+      _logger.d('Found ${equipmentList.length} equipment types');
+      return equipmentList;
+    } catch (e) {
+      _logger.e('Error fetching equipment: $e');
+      throw Exception('Error fetching equipment: $e');
+    }
   }
 
   /// Search exercises by name or description
-  List<Exercise> searchExercises(String query) {
-    final lowercaseQuery = query.toLowerCase();
-    return getAllExercises().where((exercise) {
-      return exercise.name.toLowerCase().contains(lowercaseQuery) ||
-             exercise.description.toLowerCase().contains(lowercaseQuery);
-    }).toList();
-  }
-
-  /// Get all available muscle groups
-  List<String> getAvailableMuscleGroups() {
-    final allGroups = <String>{};
-    for (final exercise in getAllExercises()) {
-      allGroups.addAll(exercise.muscleGroups);
-    }
-    return allGroups.toList()..sort();
-  }
-
-  /// Get exercise by ID
-  Exercise? getExerciseById(String id) {
-    final data = _exerciseLibrary[id];
-    if (data == null) return null;
-    
-    return Exercise(
-      id: id,
-      name: data['name'] as String,
-      description: data['description'] as String,
-      sets: data['sets'] as int,
-      reps: data['reps'] as int,
-      duration: data['duration'] as int?,
-      equipment: data['equipment'] as String?,
-      muscleGroups: List<String>.from(data['muscleGroups'] as List),
-      order: 1,
-    );
-  }
-
-  /// Filter exercises by multiple criteria
-  List<Exercise> filterExercises({
-    String? searchQuery,
-    String? muscleGroup,
-  }) {
-    List<Exercise> exercises = getAllExercises();
-
-    // Filter by search query
-    if (searchQuery != null && searchQuery.isNotEmpty) {
-      exercises = exercises.where((exercise) {
-        final lowercaseQuery = searchQuery.toLowerCase();
+  Future<List<Exercise>> searchExercises(String query) async {
+    try {
+      _logger.d('Searching exercises with query: $query');
+      
+      final allExercises = await getAllExercises();
+      final lowercaseQuery = query.toLowerCase();
+      
+      final filteredExercises = allExercises.where((exercise) {
         return exercise.name.toLowerCase().contains(lowercaseQuery) ||
                exercise.description.toLowerCase().contains(lowercaseQuery);
       }).toList();
+      
+      _logger.d('Found ${filteredExercises.length} exercises matching "$query"');
+      return filteredExercises;
+    } catch (e) {
+      _logger.e('Error searching exercises: $e');
+      throw Exception('Error searching exercises: $e');
     }
+  }
 
-    // Filter by muscle group
-    if (muscleGroup != null && muscleGroup.isNotEmpty) {
-      exercises = exercises.where((exercise) {
-        return exercise.muscleGroups.contains(muscleGroup);
-      }).toList();
+  /// Get exercise by ID
+  Future<Exercise?> getExerciseById(String id) async {
+    try {
+      _logger.d('Fetching exercise by ID: $id');
+      
+      final allExercises = await getAllExercises();
+      final exercise = allExercises.where((e) => e.id == id).firstOrNull;
+      
+      if (exercise != null) {
+        _logger.d('Found exercise: ${exercise.name}');
+      } else {
+        _logger.w('Exercise with ID $id not found');
+      }
+      
+      return exercise;
+    } catch (e) {
+      _logger.e('Error fetching exercise $id: $e');
+      throw Exception('Error fetching exercise $id: $e');
     }
+  }
 
-    return exercises;
+  /// Get all available primary target muscles (for cleaner filtering)
+  Future<List<String>> getPrimaryMuscles() async {
+    try {
+      _logger.d('Fetching available primary target muscles');
+      
+      final allExercises = await getAllExercises();
+      final Set<String> muscles = {};
+      
+      for (final exercise in allExercises) {
+        // Only include primary muscles for cleaner filtering
+        if (exercise.muscleGroups.isNotEmpty) {
+          muscles.add(exercise.muscleGroups.first);
+        }
+      }
+      
+      final muscleList = muscles.toList()..sort();
+      _logger.d('Found ${muscleList.length} primary target muscles');
+      return muscleList;
+    } catch (e) {
+      _logger.e('Error fetching primary target muscles: $e');
+      throw Exception('Error fetching primary target muscles: $e');
+    }
+  }
+
+  /// Map API exercise data to our Exercise model
+  Exercise _mapApiExerciseToExercise(Map<String, dynamic> apiData) {
+    return Exercise(
+      id: apiData['id']?.toString() ?? '',
+      name: apiData['name'] ?? '',
+      description: apiData['instructions']?.join('\n') ?? '',
+      videoUrl: null, // Free exercise DB doesn't provide videos
+      imageUrl: _getImageUrl(apiData['id']?.toString(), apiData['images']),
+      sets: 3, // Default values since API doesn't provide these
+      reps: 12,
+      equipment: apiData['equipment'] ?? '',
+      muscleGroups: [
+        ...(apiData['primaryMuscles'] as List<dynamic>? ?? []).cast<String>(),
+        ...(apiData['secondaryMuscles'] as List<dynamic>? ?? []).cast<String>(),
+      ],
+      order: 0, // Default order
+      formCues: apiData['instructions']?.join('\n') ?? '',
+    );
+  }
+
+  /// Get image URL for exercise
+  String? _getImageUrl(String? exerciseId, List<dynamic>? images) {
+    if (exerciseId == null || images == null || images.isEmpty) {
+      return null;
+    }
+    
+    // Return the first image URL
+    final imagePath = images.first.toString();
+    return '$_baseUrl/exercises/$imagePath';
   }
 } 
