@@ -37,10 +37,6 @@ import 'shared/models/workout_plan_model.dart';
 import 'shared/services/background_upload_service.dart';
 import 'shared/services/notification_service.dart';
 import 'shared/providers/profile_photo_provider.dart';
-
-// import 'features/trainers/presentation/screens/trainers_screen.dart';
-// import 'features/workouts/presentation/screens/workouts_screen.dart';
-// import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'shared/widgets/floating_main_navigation.dart';
 import 'shared/providers/user_provider.dart';
 import 'shared/providers/meal_plan_provider.dart';

@@ -3,13 +3,36 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/exercise_provider.dart';
 
-class ExerciseSearchFilter extends StatelessWidget {
+class ExerciseSearchFilter extends StatefulWidget {
   const ExerciseSearchFilter({super.key});
+
+  @override
+  State<ExerciseSearchFilter> createState() => _ExerciseSearchFilterState();
+}
+
+class _ExerciseSearchFilterState extends State<ExerciseSearchFilter> {
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ExerciseProvider>(
       builder: (context, exerciseProvider, child) {
+        // Update the controller text when the provider's search query changes
+        if (_searchController.text != exerciseProvider.searchQuery) {
+          _searchController.text = exerciseProvider.searchQuery;
+        }
         return Column(
           children: [
             // Search bar
@@ -21,6 +44,7 @@ class ExerciseSearchFilter extends StatelessWidget {
                 boxShadow: AppConstants.shadowS,
               ),
               child: TextField(
+                controller: _searchController,
                 onChanged: (value) {
                   exerciseProvider.setSearchQuery(value);
                 },

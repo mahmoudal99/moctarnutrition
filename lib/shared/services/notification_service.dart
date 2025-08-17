@@ -229,9 +229,6 @@ class NotificationService {
       // Cancel any existing weekly reminders first
       await cancelWeeklyCheckinReminder();
 
-      // Get next Sunday at 9 AM
-      final nextSunday = _getNextSunday9AM();
-      
       const AndroidNotificationDetails androidNotificationDetails =
           AndroidNotificationDetails(
         'weekly_checkin',
@@ -253,19 +250,45 @@ class NotificationService {
         iOS: iosNotificationDetails,
       );
 
-      await _flutterLocalNotificationsPlugin.zonedSchedule(
-        WEEKLY_CHECKIN_REMINDER_ID,
-        'Weekly Check-in Reminder 📊',
-        'Don\'t forget to complete your weekly check-in! Track your progress and stay motivated 💪',
-        nextSunday,
-        notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      );
+      // Schedule weekly reminders for the next 8 weeks (to balance with workout notifications)
+      int weeklyReminderId = WEEKLY_CHECKIN_REMINDER_ID;
+      int scheduledCount = 0;
+      
+      _logger.d('Starting to schedule weekly reminders for 8 weeks');
+      
+      for (int weekOffset = 0; weekOffset < 8; weekOffset++) {
+        final targetDate = DateTime.now().add(Duration(days: weekOffset * 7));
+        final nextSunday = _getNextSunday9AMFromDate(targetDate);
+        
+        _logger.d('Week $weekOffset: targetDate=$targetDate, nextSunday=$nextSunday');
+        
+        // Skip if the time has already passed
+        if (nextSunday.isBefore(DateTime.now())) {
+          _logger.d('Week $weekOffset: Sunday time has passed, skipping');
+          continue;
+        }
+        
+        try {
+          await _flutterLocalNotificationsPlugin.zonedSchedule(
+            weeklyReminderId,
+            'Weekly Check-in Reminder 📊',
+            'Don\'t forget to complete your weekly check-in! Track your progress and stay motivated 💪',
+            nextSunday,
+            notificationDetails,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
+          
+          _logger.d('Successfully scheduled weekly check-in reminder for week $weekOffset (ID: $weeklyReminderId): $nextSunday');
+          weeklyReminderId++;
+          scheduledCount++;
+        } catch (e) {
+          _logger.e('Failed to schedule weekly reminder for week $weekOffset: $e');
+        }
+      }
 
-      _logger.i('Weekly check-in reminder scheduled for: $nextSunday');
+      _logger.i('Weekly check-in reminders scheduled: $scheduledCount reminders');
     } catch (e) {
       _logger.e('Error scheduling weekly reminder: $e');
     }
@@ -274,10 +297,13 @@ class NotificationService {
   /// Cancel weekly check-in reminder
   static Future<void> cancelWeeklyCheckinReminder() async {
     try {
-      await _flutterLocalNotificationsPlugin.cancel(WEEKLY_CHECKIN_REMINDER_ID);
-      _logger.i('Weekly check-in reminder cancelled');
+      // Cancel all weekly reminders (IDs 2-9 for 8 weeks)
+      for (int i = WEEKLY_CHECKIN_REMINDER_ID; i < WEEKLY_CHECKIN_REMINDER_ID + 8; i++) {
+        await _flutterLocalNotificationsPlugin.cancel(i);
+      }
+      _logger.i('All weekly check-in reminders cancelled');
     } catch (e) {
-      _logger.e('Error cancelling weekly reminder: $e');
+      _logger.e('Error cancelling weekly reminders: $e');
     }
   }
 
@@ -408,20 +434,24 @@ class NotificationService {
 
   /// Get next Sunday at 9 AM in local timezone
   static tz.TZDateTime _getNextSunday9AM() {
-    final now = tz.TZDateTime.now(tz.local);
-    final daysUntilSunday = (DateTime.sunday - now.weekday) % 7;
+    return _getNextSunday9AMFromDate(DateTime.now());
+  }
+
+  /// Get next Sunday at 9 AM from a specific date
+  static tz.TZDateTime _getNextSunday9AMFromDate(DateTime fromDate) {
+    final daysUntilSunday = (DateTime.sunday - fromDate.weekday) % 7;
     
     var nextSunday = tz.TZDateTime(
       tz.local,
-      now.year,
-      now.month,
-      now.day + daysUntilSunday,
+      fromDate.year,
+      fromDate.month,
+      fromDate.day + daysUntilSunday,
       9, // 9 AM
       0, // 0 minutes
     );
 
     // If it's already past 9 AM on Sunday, schedule for next week
-    if (nextSunday.isBefore(now)) {
+    if (nextSunday.isBefore(fromDate)) {
       nextSunday = nextSunday.add(const Duration(days: 7));
     }
 
@@ -449,6 +479,20 @@ class NotificationService {
       _logger.i('All workout notifications cancelled');
     } catch (e) {
       _logger.e('Error cancelling workout notifications: $e');
+    }
+  }
+
+  /// Check if workout notifications are already scheduled
+  static Future<bool> areWorkoutNotificationsScheduled() async {
+    try {
+      final pendingNotifications = await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+      // Check if we have workout notifications (IDs 1000+)
+      final workoutNotifications = pendingNotifications.where((n) => n.id >= 1000).length;
+      _logger.d('Found $workoutNotifications existing workout notifications');
+      return workoutNotifications > 0;
+    } catch (e) {
+      _logger.e('Error checking workout notifications: $e');
+      return false;
     }
   }
 
@@ -498,9 +542,11 @@ class NotificationService {
       int scheduledCount = 0;
       const int maxNotifications = 64; // iOS limitation
 
-      // Schedule notifications for the next 2 weeks (14 days)
+      // Schedule notifications for the next 6 weeks (42 days) to balance with weekly reminders
       _logger.d('Starting to schedule notifications for ${dailyWorkouts.length} workout days');
-      for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
+      _logger.d('Will schedule up to $maxNotifications notifications across 42 days');
+      _logger.d('Notification time: $hour:$minute');
+      for (int dayOffset = 0; dayOffset < 42; dayOffset++) {
         if (scheduledCount >= maxNotifications) {
           _logger.w('Reached iOS notification limit (64), stopping scheduling');
           break;
@@ -508,26 +554,33 @@ class NotificationService {
 
         final targetDate = DateTime.now().add(Duration(days: dayOffset));
         final dayName = _getDayName(targetDate.weekday);
+        _logger.d('Checking day $dayOffset: $dayName (${targetDate.toString().split(' ')[0]})');
+        
         // Find the workout for this day
         DailyWorkout? dailyWorkout;
         try {
           dailyWorkout = dailyWorkouts.firstWhere(
             (workout) => workout.dayName == dayName,
           );
+          _logger.d('Found workout for $dayName: ${dailyWorkout.title} (restDay: ${dailyWorkout.restDay})');
         } catch (e) {
           dailyWorkout = null;
+          _logger.d('No workout found for $dayName');
         }
 
-        // Skip if no workout for this day or it's a rest day
+        // Skip if no workout for this day
         if (dailyWorkout == null) {
           _logger.d('No workout found for $dayName, skipping');
           continue;
         }
         
-        if (dailyWorkout.restDay != null) {
+        // Skip if it's a rest day
+        if (dailyWorkout.restDay == true) {
           _logger.d('Rest day for $dayName, skipping');
           continue;
         }
+        
+        _logger.d('Processing workout day: $dayName');
 
         // Create notification time for this specific day
         final scheduledTime = DateTime(
@@ -568,9 +621,13 @@ class NotificationService {
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
         );
+        
+        _logger.d('Scheduled workout notification for $dayName (${notificationId}): $body');
         notificationId++;
         scheduledCount++;
       }
+      
+      _logger.i('Workout notification scheduling complete: $scheduledCount notifications scheduled');
     } catch (e) {
       _logger.e('Error scheduling workout notifications: $e');
     }

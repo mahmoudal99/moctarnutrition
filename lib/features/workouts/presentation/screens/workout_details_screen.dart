@@ -17,42 +17,51 @@ class WorkoutDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        title: Text(dailyWorkout.title),
-        backgroundColor: AppConstants.surfaceColor,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppConstants.textPrimary),
-        titleTextStyle: AppTextStyles.heading5.copyWith(
-          color: AppConstants.textPrimary,
-          fontWeight: FontWeight.w600,
-        ),
-        actions: [
-          Text(
-            dailyWorkout.dayName,
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.primaryColor,
+    return Consumer<WorkoutProvider>(
+      builder: (context, workoutProvider, child) {
+        // Get the current daily workout from the provider to ensure real-time updates
+        final currentDailyWorkout = workoutProvider.getWorkoutForDay(dailyWorkout.dayName);
+        
+        return Scaffold(
+          backgroundColor: AppConstants.backgroundColor,
+          appBar: AppBar(
+            title: Text(currentDailyWorkout?.title ?? dailyWorkout.title),
+            backgroundColor: AppConstants.surfaceColor,
+            elevation: 0,
+            iconTheme: const IconThemeData(color: AppConstants.textPrimary),
+            titleTextStyle: AppTextStyles.heading5.copyWith(
+              color: AppConstants.textPrimary,
               fontWeight: FontWeight.w600,
             ),
+            actions: [
+              Text(
+                dailyWorkout.dayName,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.primaryColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacingM),
+            ],
           ),
-          const SizedBox(width: AppConstants.spacingM),
-        ],
-      ),
-      body: (dailyWorkout.isRestDay || dailyWorkout.workouts.isEmpty)
-          ? _buildRestDayContent(context)
-          : _buildWorkoutContent(context),
-      floatingActionButton:
-          (!dailyWorkout.isRestDay && dailyWorkout.workouts.isNotEmpty)
-              ? FloatingActionButton.extended(
-                  onPressed: () => _navigateToAddWorkout(context),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Workout'),
-                  backgroundColor: AppConstants.primaryColor,
-                  foregroundColor: AppConstants.surfaceColor,
-                )
-              : null,
-      extendBody: true, // This might help with the bottom bar issue
+          body: (currentDailyWorkout?.isRestDay ?? dailyWorkout.isRestDay) || 
+                (currentDailyWorkout?.workouts.isEmpty ?? dailyWorkout.workouts.isEmpty)
+              ? _buildRestDayContent(context)
+              : _buildWorkoutContent(context, currentDailyWorkout ?? dailyWorkout),
+          floatingActionButton:
+              (!(currentDailyWorkout?.isRestDay ?? dailyWorkout.isRestDay) && 
+               !(currentDailyWorkout?.workouts.isEmpty ?? dailyWorkout.workouts.isEmpty))
+                  ? FloatingActionButton.extended(
+                      onPressed: () => _navigateToAddWorkout(context),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Workout'),
+                      backgroundColor: AppConstants.primaryColor,
+                      foregroundColor: AppConstants.surfaceColor,
+                    )
+                  : null,
+          extendBody: true, // This might help with the bottom bar issue
+        );
+      },
     );
   }
 
@@ -302,17 +311,17 @@ class WorkoutDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkoutContent(BuildContext context) {
+  Widget _buildWorkoutContent(BuildContext context, DailyWorkout currentDailyWorkout) {
     return ListView.builder(
       padding: const EdgeInsets.all(AppConstants.spacingM),
-      itemCount: dailyWorkout.workouts.length,
+      itemCount: currentDailyWorkout.workouts.length,
       itemBuilder: (context, index) {
-        final workout = dailyWorkout.workouts[index];
+        final workout = currentDailyWorkout.workouts[index];
         return _WorkoutCard(
           workout: workout,
-          dayName: dailyWorkout.dayName,
-          dailyWorkout: dailyWorkout,
-          onRemove: () => _removeWorkout(context, workout.id),
+          dayName: currentDailyWorkout.dayName,
+          dailyWorkout: currentDailyWorkout,
+          onRemove: () => _removeWorkout(context, workout.id, currentDailyWorkout),
         );
       },
     );
@@ -324,22 +333,19 @@ class WorkoutDetailsScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => AddWorkoutScreen(dailyWorkout: dailyWorkout),
       ),
-    );
+    ).then((result) {
+      // If a workout was successfully added, the UI will automatically update
+      // because the WorkoutProvider notifies listeners when the workout plan changes
+      if (result == true) {
+        // The workout was added successfully, no need to do anything
+        // as the provider will trigger a rebuild
+      }
+    });
   }
 
-  void _navigateToAddExercise(BuildContext context, WorkoutModel workout) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddExerciseScreen(
-          dailyWorkout: dailyWorkout,
-          workout: workout,
-        ),
-      ),
-    );
-  }
 
-  void _removeWorkout(BuildContext context, String workoutId) {
+
+  void _removeWorkout(BuildContext context, String workoutId, DailyWorkout currentDailyWorkout) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -354,7 +360,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _confirmRemoveWorkout(context, workoutId);
+              _confirmRemoveWorkout(context, workoutId, currentDailyWorkout);
             },
             style: TextButton.styleFrom(
               foregroundColor: AppConstants.errorColor,
@@ -366,12 +372,12 @@ class WorkoutDetailsScreen extends StatelessWidget {
     );
   }
 
-  void _confirmRemoveWorkout(BuildContext context, String workoutId) async {
+  void _confirmRemoveWorkout(BuildContext context, String workoutId, DailyWorkout currentDailyWorkout) async {
     try {
       final workoutProvider =
           Provider.of<WorkoutProvider>(context, listen: false);
       await workoutProvider.removeWorkoutFromDay(
-          dailyWorkout.dayName, workoutId);
+          currentDailyWorkout.dayName, workoutId);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -461,14 +467,14 @@ class _WorkoutCard extends StatelessWidget {
                 exercise: exercise,
                 dayName: dayName,
                 workoutId: workout.id,
-                onRemove: () => _removeExercise(context, exercise.id),
+                onRemove: () => _removeExercise(context, exercise.id, dailyWorkout, workout.id),
               )),
           const SizedBox(height: AppConstants.spacingM),
           // Add exercise button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _navigateToAddExercise(context, workout),
+              onPressed: () => _navigateToAddExercise(context, workout, dailyWorkout),
               icon: const Icon(Icons.add),
               label: const Text('Add Exercise'),
               style: OutlinedButton.styleFrom(
@@ -485,7 +491,7 @@ class _WorkoutCard extends StatelessWidget {
     );
   }
 
-  void _removeExercise(BuildContext context, String exerciseId) {
+  void _removeExercise(BuildContext context, String exerciseId, DailyWorkout currentDailyWorkout, String workoutId) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -500,7 +506,7 @@ class _WorkoutCard extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _confirmRemoveExercise(context, exerciseId);
+              _confirmRemoveExercise(context, exerciseId, currentDailyWorkout, workoutId);
             },
             style: TextButton.styleFrom(
               foregroundColor: AppConstants.errorColor,
@@ -512,13 +518,13 @@ class _WorkoutCard extends StatelessWidget {
     );
   }
 
-  void _confirmRemoveExercise(BuildContext context, String exerciseId) async {
+  void _confirmRemoveExercise(BuildContext context, String exerciseId, DailyWorkout currentDailyWorkout, String workoutId) async {
     try {
       final workoutProvider =
           Provider.of<WorkoutProvider>(context, listen: false);
       await workoutProvider.removeExerciseFromWorkout(
-        dayName,
-        workout.id,
+        currentDailyWorkout.dayName,
+        workoutId,
         exerciseId,
       );
 
@@ -543,16 +549,23 @@ class _WorkoutCard extends StatelessWidget {
     }
   }
 
-  void _navigateToAddExercise(BuildContext context, WorkoutModel workout) {
+  void _navigateToAddExercise(BuildContext context, WorkoutModel workout, DailyWorkout currentDailyWorkout) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddExerciseScreen(
-          dailyWorkout: dailyWorkout,
+          dailyWorkout: currentDailyWorkout,
           workout: workout,
         ),
       ),
-    );
+    ).then((result) {
+      // If an exercise was successfully added, the UI will automatically update
+      // because the WorkoutProvider notifies listeners when the workout plan changes
+      if (result == true) {
+        // The exercise was added successfully, no need to do anything
+        // as the provider will trigger a rebuild
+      }
+    });
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -55,12 +56,9 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         );
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Added "${exercise.name}" to workout'),
-              backgroundColor: AppConstants.primaryColor,
-            ),
-          );
+          // Provide haptic feedback for successful addition
+          HapticFeedback.lightImpact();
+          
           Navigator.pop(context, exerciseWithOrder); // Return the exercise
         }
       } else {
@@ -93,12 +91,9 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         );
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Added "${exercise.name}" to ${widget.workout.title}'),
-              backgroundColor: AppConstants.primaryColor,
-            ),
-          );
+          // Provide haptic feedback for successful addition
+          HapticFeedback.lightImpact();
+          
           Navigator.pop(context, true); // Return true to indicate success
         }
       }

@@ -22,8 +22,6 @@ class AccountSettingsScreen extends StatefulWidget {
 }
 
 class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
-  static final _logger = Logger();
-  bool _isLoading = false;
 
   @override
   void initState() {

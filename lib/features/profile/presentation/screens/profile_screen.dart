@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -16,6 +17,7 @@ import '../widgets/profile_section_header.dart';
 import '../widgets/profile_settings_tile.dart';
 import '../widgets/profile_logout_button.dart';
 import '../utils/profile_data_provider.dart';
+import 'debug_settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   static final _logger = Logger();
@@ -81,6 +83,33 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 const ProfileSectionHeader(title: 'Support'),
                 ...support.map((item) => ProfileSettingsTile(item: item)),
+                
+                // Debug Settings (only visible in debug mode)
+                if (kDebugMode) ...[
+                  const SizedBox(height: 24),
+                  const ProfileSectionHeader(title: 'Debug'),
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: AppConstants.errorColor.withOpacity(0.1),
+                      child: Icon(
+                        Icons.bug_report,
+                        color: AppConstants.errorColor,
+                      ),
+                    ),
+                    title: const Text('Debug Settings'),
+                    subtitle: const Text('View pending notifications and debug info'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DebugSettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+                
                 const SizedBox(height: 32),
                 const ProfileLogoutButton(),
                 const SizedBox(height: 32),

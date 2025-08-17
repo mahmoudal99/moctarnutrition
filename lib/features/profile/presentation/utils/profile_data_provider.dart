@@ -31,6 +31,11 @@ class ProfileDataProvider {
 
   static List<SettingsItem> getSettingsItems(BuildContext context) {
     return [
+      SettingsItem(
+        label: 'Account Settings',
+        icon: Icons.settings,
+        onTap: () => context.push('/account-settings'),
+      ),
       const SettingsItem(
         label: 'Reminders',
         icon: Icons.alarm,
@@ -50,11 +55,6 @@ class ProfileDataProvider {
         label: 'Nutrition Preferences',
         icon: Icons.restaurant,
         onTap: () => context.push('/nutrition-preferences'),
-      ),
-      SettingsItem(
-        label: 'Account Settings',
-        icon: Icons.settings,
-        onTap: () => context.push('/account-settings'),
       ),
     ];
   }
