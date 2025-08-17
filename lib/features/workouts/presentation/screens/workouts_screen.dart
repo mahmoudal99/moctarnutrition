@@ -29,9 +29,19 @@ class WorkoutsScreen extends StatefulWidget {
   State<WorkoutsScreen> createState() => _WorkoutsScreenState();
 }
 
-class _WorkoutsScreenState extends State<WorkoutsScreen> {
+class _WorkoutsScreenState extends State<WorkoutsScreen>
+    with TickerProviderStateMixin {
   static final _logger = Logger();
   WorkoutViewType _selectedView = WorkoutViewType.week; // Default to week view
+  
+  // Scroll and animation controllers for floating toggle
+  late ScrollController _scrollController;
+  late AnimationController _toggleAnimationController;
+  late Animation<double> _toggleOpacityAnimation;
+  late Animation<double> _toggleScaleAnimation;
+  
+  double _scrollOffset = 0.0;
+  static const double _scrollThreshold = 100.0;
 
   @override
   void initState() {
@@ -39,6 +49,50 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadWorkoutPlanIfNeeded();
     });
+    
+    // Initialize scroll controller and animations
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    
+    _toggleAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _toggleOpacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _toggleAnimationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _toggleScaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _toggleAnimationController,
+      curve: Curves.elasticOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _toggleAnimationController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    setState(() {
+      _scrollOffset = _scrollController.offset;
+    });
+    
+    if (_scrollOffset > _scrollThreshold && _toggleAnimationController.value == 0) {
+      _toggleAnimationController.forward();
+    } else if (_scrollOffset <= _scrollThreshold && _toggleAnimationController.value == 1) {
+      _toggleAnimationController.reverse();
+    }
   }
 
   Future<void> _loadWorkoutPlanIfNeeded() async {
@@ -294,65 +348,109 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      body: RefreshIndicator(
-        onRefresh: _refreshWorkoutPlan,
-        child: Column(
-          children: [
-            const EditModeHeader(),
-            Expanded(
-              child: _selectedView == WorkoutViewType.day
-                  ? _buildDayView(todayWorkout)
-                  : _buildWeekView(workoutPlan, todayWorkout),
+      body: Stack(
+        children: [
+          RefreshIndicator(
+            onRefresh: _refreshWorkoutPlan,
+            child: Column(
+              children: [
+                const EditModeHeader(),
+                Expanded(
+                  child: _selectedView == WorkoutViewType.day
+                      ? _buildDayView(todayWorkout)
+                      : _buildWeekView(workoutPlan, todayWorkout),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Floating toggle
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 20,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _toggleAnimationController,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _toggleScaleAnimation.value,
+                    child: Opacity(
+                      opacity: _toggleOpacityAnimation.value,
+                      child: _buildFloatingToggle(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDayView(DailyWorkout? todayWorkout) {
     if (todayWorkout == null) {
-      return CustomScrollView(
-        slivers: [
-          const WorkoutAppHeader(message: 'No workout scheduled for today'),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.spacingL),
-              child: Center(
+      return Consumer<WorkoutProvider>(
+        builder: (context, workoutProvider, child) {
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              const WorkoutAppHeader(message: 'No workout scheduled for today'),
+              SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    const Icon(
-                      Icons.fitness_center,
-                      size: 64,
-                      color: AppConstants.textTertiary,
-                    ),
-                    const SizedBox(height: AppConstants.spacingM),
-                    Text(
-                      'No Workout Today',
-                      style: AppTextStyles.heading4.copyWith(
-                        color: AppConstants.textSecondary,
+                    if (!workoutProvider.isEditMode) ...[
+                      ViewToggle(
+                        selectedView: _selectedView,
+                        onViewChanged: (viewType) {
+                          setState(() {
+                            _selectedView = viewType;
+                          });
+                        },
                       ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingS),
-                    Text(
-                      'Switch to week view to see your full workout plan.',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppConstants.textTertiary,
+                    ],
+                    Padding(
+                      padding: const EdgeInsets.all(AppConstants.spacingL),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.fitness_center,
+                              size: 64,
+                              color: AppConstants.textTertiary,
+                            ),
+                            const SizedBox(height: AppConstants.spacingM),
+                            Text(
+                              'No Workout Today',
+                              style: AppTextStyles.heading4.copyWith(
+                                color: AppConstants.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: AppConstants.spacingS),
+                            Text(
+                              'Switch to week view to see your full workout plan.',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppConstants.textTertiary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       );
     }
 
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, child) {
         return CustomScrollView(
+          controller: _scrollController,
           slivers: [
             if (!workoutProvider.isEditMode)
               WorkoutAppHeader(
@@ -386,6 +484,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, child) {
         return CustomScrollView(
+          controller: _scrollController,
           slivers: [
             if (!workoutProvider.isEditMode)
               WorkoutAppHeader(
@@ -483,6 +582,38 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildFloatingToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingS,
+        vertical: AppConstants.spacingXS,
+      ),
+      decoration: BoxDecoration(
+        color: AppConstants.surfaceColor,
+        borderRadius: BorderRadius.circular(50),
+        border: Border.all(
+          color: AppConstants.textTertiary.withOpacity(0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ViewToggle(
+        selectedView: _selectedView,
+        onViewChanged: (viewType) {
+          setState(() {
+            _selectedView = viewType;
+          });
+        },
+        isFloating: true,
+      ),
     );
   }
 }

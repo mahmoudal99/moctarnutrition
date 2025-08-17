@@ -6,20 +6,24 @@ enum WorkoutViewType { day, week }
 class ViewToggle extends StatelessWidget {
   final WorkoutViewType selectedView;
   final ValueChanged<WorkoutViewType> onViewChanged;
+  final bool isFloating;
 
   const ViewToggle({
     super.key,
     required this.selectedView,
     required this.onViewChanged,
+    this.isFloating = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppConstants.spacingM,
-        vertical: AppConstants.spacingS,
-      ),
+      margin: isFloating 
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingM,
+              vertical: AppConstants.spacingS,
+            ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -51,9 +55,9 @@ class ViewToggle extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.spacingM,
-          vertical: AppConstants.spacingS,
+        padding: EdgeInsets.symmetric(
+          horizontal: isFloating ? AppConstants.spacingS : AppConstants.spacingM,
+          vertical: isFloating ? AppConstants.spacingXS : AppConstants.spacingS,
         ),
         decoration: BoxDecoration(
           color: isSelected
@@ -66,15 +70,15 @@ class ViewToggle extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 16,
+              size: isFloating ? 14 : 16,
               color: isSelected
                   ? AppConstants.surfaceColor
                   : AppConstants.textSecondary,
             ),
-            const SizedBox(width: AppConstants.spacingXS),
+            SizedBox(width: isFloating ? AppConstants.spacingXS : AppConstants.spacingXS),
             Text(
               label,
-              style: AppTextStyles.bodySmall.copyWith(
+              style: (isFloating ? AppTextStyles.caption : AppTextStyles.bodySmall).copyWith(
                 color: isSelected
                     ? AppConstants.surfaceColor
                     : AppConstants.textSecondary,
