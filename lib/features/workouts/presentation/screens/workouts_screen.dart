@@ -17,6 +17,9 @@ import '../widgets/daily_workout_card.dart';
 import '../widgets/workout_plan_header.dart';
 import '../widgets/view_toggle.dart';
 import '../widgets/day_view.dart';
+import '../widgets/edit_mode_header.dart';
+import '../widgets/droppable_day_area.dart';
+import '../widgets/edit_mode_instructions.dart';
 import '../utils/workout_message_generator.dart';
 
 class WorkoutsScreen extends StatefulWidget {
@@ -294,9 +297,16 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       backgroundColor: AppConstants.backgroundColor,
       body: RefreshIndicator(
         onRefresh: _refreshWorkoutPlan,
-        child: _selectedView == WorkoutViewType.day
-            ? _buildDayView(todayWorkout)
-            : _buildWeekView(workoutPlan, todayWorkout),
+        child: Column(
+          children: [
+            const EditModeHeader(),
+            Expanded(
+              child: _selectedView == WorkoutViewType.day
+                  ? _buildDayView(todayWorkout)
+                  : _buildWeekView(workoutPlan, todayWorkout),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -341,99 +351,150 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       );
     }
 
-    return CustomScrollView(
-      slivers: [
-        WorkoutAppHeader(
-            message:
-                WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
-        SliverToBoxAdapter(
-          child: Column(
-            children: [
-              ViewToggle(
-                selectedView: _selectedView,
-                onViewChanged: (viewType) {
-                  setState(() {
-                    _selectedView = viewType;
-                  });
-                },
+    return Consumer<WorkoutProvider>(
+      builder: (context, workoutProvider, child) {
+        return CustomScrollView(
+          slivers: [
+            if (!workoutProvider.isEditMode)
+              WorkoutAppHeader(
+                  message:
+                      WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  if (!workoutProvider.isEditMode) ...[
+                    ViewToggle(
+                      selectedView: _selectedView,
+                      onViewChanged: (viewType) {
+                        setState(() {
+                          _selectedView = viewType;
+                        });
+                      },
+                    ),
+                    DayView(dailyWorkout: todayWorkout),
+                  ],
+                ],
               ),
-              DayView(dailyWorkout: todayWorkout),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildWeekView(
       WorkoutPlanModel workoutPlan, DailyWorkout? todayWorkout) {
-    return CustomScrollView(
-      slivers: [
-        WorkoutAppHeader(
-            message:
-                WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
-        SliverToBoxAdapter(
-          child: Column(
-            children: [
-              ViewToggle(
-                selectedView: _selectedView,
-                onViewChanged: (viewType) {
-                  setState(() {
-                    _selectedView = viewType;
-                  });
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingM),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (todayWorkout != null) ...[
-                      Text(
-                        "Today's Workout",
-                        style: AppTextStyles.heading4,
-                      ),
-                      const SizedBox(height: AppConstants.spacingM),
-                      DailyWorkoutCard(
-                        dailyWorkout: todayWorkout,
-                        isToday: true,
-                      ),
-                      const SizedBox(height: AppConstants.spacingL),
-                    ],
-                    Text(
-                      'Weekly Plan',
-                      style: AppTextStyles.heading4,
+    return Consumer<WorkoutProvider>(
+      builder: (context, workoutProvider, child) {
+        return CustomScrollView(
+          slivers: [
+            if (!workoutProvider.isEditMode)
+              WorkoutAppHeader(
+                  message:
+                      WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  if (!workoutProvider.isEditMode) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ViewToggle(
+                            selectedView: _selectedView,
+                            onViewChanged: (viewType) {
+                              setState(() {
+                                _selectedView = viewType;
+                              });
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            workoutProvider.enterEditMode();
+                          },
+                          icon: const Icon(Icons.edit),
+                          tooltip: 'Edit Schedule',
+                        ),
+                      ],
                     ),
                   ],
+                  Padding(
+                    padding: const EdgeInsets.all(AppConstants.spacingM),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (todayWorkout != null && !workoutProvider.isEditMode) ...[
+                          Text(
+                            "Today's Workout",
+                            style: AppTextStyles.heading4,
+                          ),
+                          const SizedBox(height: AppConstants.spacingM),
+                          DailyWorkoutCard(
+                            dailyWorkout: todayWorkout,
+                            isToday: true,
+                          ),
+                          const SizedBox(height: AppConstants.spacingL),
+                        ],
+                        if (!workoutProvider.isEditMode) ...[
+                          Text(
+                            'Weekly Plan',
+                            style: AppTextStyles.heading4,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (workoutProvider.isEditMode) ...[
+              const SliverToBoxAdapter(
+                child: EditModeInstructions(),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final dailyWorkout = workoutPlan.dailyWorkouts[index];
+                    final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
+
+                    return DroppableDayArea(
+                      dayName: dailyWorkout.dayName,
+                      dailyWorkout: dailyWorkout,
+                      isToday: isToday,
+                      isEditMode: workoutProvider.isEditMode,
+                    );
+                  },
+                  childCount: workoutPlan.dailyWorkouts.length,
                 ),
               ),
-            ],
-          ),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              final dailyWorkout = workoutPlan.dailyWorkouts[index];
-              final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
+            ]
+            else
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final dailyWorkout = workoutPlan.dailyWorkouts[index];
+                    final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.spacingM,
-                  vertical: AppConstants.spacingS,
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppConstants.spacingM,
+                        vertical: AppConstants.spacingS,
+                      ),
+                      child: DailyWorkoutCard(
+                        dailyWorkout: dailyWorkout,
+                        isToday: isToday,
+                      ),
+                    );
+                  },
+                  childCount: workoutPlan.dailyWorkouts.length,
                 ),
-                child: DailyWorkoutCard(
-                  dailyWorkout: dailyWorkout,
-                  isToday: isToday,
-                ),
-              );
-            },
-            childCount: workoutPlan.dailyWorkouts.length,
-          ),
-        ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 128),
-        ),
-      ],
+              ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 128),
+            ),
+          ],
+        );
+      },
     );
   }
 }

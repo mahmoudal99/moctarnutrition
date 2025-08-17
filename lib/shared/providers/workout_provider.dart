@@ -14,13 +14,17 @@ class WorkoutProvider extends ChangeNotifier {
   final WorkoutService _workoutService = WorkoutService();
   
   WorkoutPlanModel? _currentWorkoutPlan;
+  WorkoutPlanModel? _originalWorkoutPlan; // Store original plan for canceling edits
   bool _isLoading = false;
   bool _isGenerating = false; // New flag to track generation vs loading
+  bool _isEditMode = false; // New flag for edit mode
   String? _error;
 
   WorkoutPlanModel? get currentWorkoutPlan => _currentWorkoutPlan;
+  WorkoutPlanModel? get originalWorkoutPlan => _originalWorkoutPlan;
   bool get isLoading => _isLoading;
   bool get isGenerating => _isGenerating; // New getter
+  bool get isEditMode => _isEditMode; // New getter
   String? get error => _error;
 
   // Load workout plan based on user's selected workout styles
@@ -604,6 +608,127 @@ class WorkoutProvider extends ChangeNotifier {
     } catch (e) {
       _logger.e('Failed to remove exercise from workout: $e');
       _error = 'Failed to remove exercise. Please try again.';
+      notifyListeners();
+    }
+  }
+
+  // Edit mode methods
+  void enterEditMode() {
+    if (_currentWorkoutPlan != null) {
+      _originalWorkoutPlan = _currentWorkoutPlan!.copyWith();
+      _isEditMode = true;
+      _logger.d('Entered edit mode for workout plan');
+      notifyListeners();
+    }
+  }
+
+  void exitEditMode() {
+    _isEditMode = false;
+    _originalWorkoutPlan = null;
+    _logger.d('Exited edit mode for workout plan');
+    notifyListeners();
+  }
+
+  void cancelEditMode() {
+    if (_originalWorkoutPlan != null) {
+      _currentWorkoutPlan = _originalWorkoutPlan!.copyWith();
+      _isEditMode = false;
+      _originalWorkoutPlan = null;
+      _logger.d('Canceled edit mode, restored original workout plan');
+      notifyListeners();
+    }
+  }
+
+  // Swap daily workouts between two days
+  void swapDailyWorkouts(String fromDayName, String toDayName) {
+    if (!_isEditMode || _currentWorkoutPlan == null) {
+      _logger.w('Cannot swap workouts: not in edit mode or no workout plan');
+      return;
+    }
+
+    try {
+      _logger.d('Swapping workouts between $fromDayName and $toDayName');
+      
+      // Find source day
+      final fromDayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
+        (day) => day.dayName == fromDayName,
+      );
+
+      // Find target day
+      final toDayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
+        (day) => day.dayName == toDayName,
+      );
+
+      if (fromDayIndex == -1 || toDayIndex == -1) {
+        _logger.w('Source day $fromDayName or target day $toDayName not found');
+        return;
+      }
+
+      final fromDay = _currentWorkoutPlan!.dailyWorkouts[fromDayIndex];
+      final toDay = _currentWorkoutPlan!.dailyWorkouts[toDayIndex];
+
+      // Create new daily workouts with swapped content but keeping day names
+      final swappedFromDay = DailyWorkout(
+        id: fromDay.id,
+        dayName: fromDay.dayName,
+        title: toDay.title,
+        description: toDay.description,
+        workouts: toDay.workouts,
+        estimatedDuration: toDay.estimatedDuration,
+        restDay: toDay.restDay,
+      );
+
+      final swappedToDay = DailyWorkout(
+        id: toDay.id,
+        dayName: toDay.dayName,
+        title: fromDay.title,
+        description: fromDay.description,
+        workouts: fromDay.workouts,
+        estimatedDuration: fromDay.estimatedDuration,
+        restDay: fromDay.restDay,
+      );
+
+      // Update workout plan
+      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      updatedDailyWorkouts[fromDayIndex] = swappedFromDay;
+      updatedDailyWorkouts[toDayIndex] = swappedToDay;
+
+      _currentWorkoutPlan = _currentWorkoutPlan!.copyWith(
+        dailyWorkouts: updatedDailyWorkouts,
+        updatedAt: DateTime.now(),
+      );
+
+      _logger.d('Successfully swapped workouts between $fromDayName and $toDayName');
+      notifyListeners();
+    } catch (e) {
+      _logger.e('Failed to swap workouts: $e');
+      _error = 'Failed to swap workouts. Please try again.';
+      notifyListeners();
+    }
+  }
+
+  // Save changes made in edit mode
+  Future<void> saveEditModeChanges() async {
+    if (!_isEditMode || _currentWorkoutPlan == null) {
+      _logger.w('Cannot save changes: not in edit mode or no workout plan');
+      return;
+    }
+
+    try {
+      _logger.d('Saving edit mode changes');
+      
+      // Save to both Firestore and local storage
+      await WorkoutPlanStorageService.saveWorkoutPlan(_currentWorkoutPlan!);
+      await WorkoutPlanLocalStorageService.saveWorkoutPlan(_currentWorkoutPlan!);
+      
+      _isEditMode = false;
+      _originalWorkoutPlan = null;
+      
+      _logger.d('Successfully saved edit mode changes');
+      notifyListeners();
+    } catch (e) {
+      _logger.e('Failed to save edit mode changes: $e');
+      _error = 'Failed to save changes. Please try again.';
       notifyListeners();
     }
   }
