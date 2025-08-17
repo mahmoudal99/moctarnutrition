@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/profile_photo_provider.dart';
+import '../../../../shared/providers/workout_provider.dart';
 import '../../../../shared/utils/avatar_utils.dart';
 
 class WorkoutAppHeader extends StatelessWidget {
@@ -25,6 +26,22 @@ class WorkoutAppHeader extends StatelessWidget {
         margin: const EdgeInsets.all(8),
         child: _buildUserProfileIcon(context),
       ),
+      actions: [
+        Consumer<WorkoutProvider>(
+          builder: (context, workoutProvider, child) {
+            if (workoutProvider.isEditMode) {
+              return const SizedBox.shrink();
+            }
+            return IconButton(
+              onPressed: () {
+                workoutProvider.enterEditMode();
+              },
+              icon: const Icon(Icons.edit),
+              tooltip: 'Edit Schedule',
+            );
+          },
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           color: AppConstants.surfaceColor,
