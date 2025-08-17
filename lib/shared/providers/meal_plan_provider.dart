@@ -1,19 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import '../models/meal_model.dart';
+import '../models/user_model.dart';
 import '../services/nutrition_calculation_service.dart';
+import '../services/meal_plan_local_storage_service.dart';
+import '../services/meal_plan_firestore_service.dart';
 
 class MealPlanProvider with ChangeNotifier {
+  static final _logger = Logger();
+  
   MealPlanModel? _mealPlan;
-
-  MealPlanProvider();
+  bool _isLoading = false;
+  String? _error;
 
   MealPlanModel? get mealPlan => _mealPlan;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
-
+  void _setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
 
   void setMealPlan(MealPlanModel mealPlan) {
     _mealPlan = mealPlan;
+    _error = null;
     notifyListeners();
+  }
+
+  void clearMealPlan() {
+    _mealPlan = null;
+    _error = null;
+    notifyListeners();
+  }
+
+  /// Load meal plan with caching strategy
+  Future<void> loadMealPlan(String userId) async {
+    _setLoading(true);
+    _error = null;
+
+    _logger.d('Loading meal plan for user: $userId');
+
+    try {
+      // First, try to load from local storage
+      final localMealPlan = await MealPlanLocalStorageService.loadMealPlan(userId);
+      
+      if (localMealPlan != null) {
+        _logger.d('Found meal plan in local storage: ${localMealPlan.title}');
+        _mealPlan = localMealPlan;
+        
+        // Check if the local plan is fresh (less than 24 hours old)
+        final isFresh = await MealPlanLocalStorageService.isMealPlanFresh();
+        if (isFresh) {
+          _logger.d('Local meal plan is fresh, using cached data');
+          _setLoading(false);
+          return;
+        } else {
+          _logger.d('Local meal plan is stale, refreshing from server');
+        }
+      }
+
+      // Try to load from Firestore (server-side storage)
+      final firestoreMealPlan = await MealPlanFirestoreService.getMealPlan(userId);
+      
+      if (firestoreMealPlan != null) {
+        _logger.d('Found meal plan in Firestore: ${firestoreMealPlan.title}');
+        _mealPlan = firestoreMealPlan;
+        
+        // Save to local storage for future use
+        try {
+          await MealPlanLocalStorageService.saveMealPlan(firestoreMealPlan);
+          _logger.d('Meal plan saved to local storage');
+        } catch (e) {
+          _logger.w('Failed to save meal plan to local storage: $e');
+        }
+        
+        _setLoading(false);
+        return;
+      }
+
+      // No meal plan found
+      _logger.i('No meal plan found for user: $userId');
+      _mealPlan = null;
+      _setLoading(false);
+    } catch (e) {
+      _logger.e('Error loading meal plan: $e');
+      _error = 'Failed to load meal plan: $e';
+      _setLoading(false);
+    }
+  }
+
+  /// Load meal plan by ID (for admin or specific access)
+  Future<void> loadMealPlanById(String mealPlanId) async {
+    _setLoading(true);
+    _error = null;
+
+    _logger.d('Loading meal plan by ID: $mealPlanId');
+
+    try {
+      final mealPlan = await MealPlanFirestoreService.getMealPlanById(mealPlanId);
+      
+      if (mealPlan != null) {
+        _logger.d('Found meal plan: ${mealPlan.title}');
+        _mealPlan = mealPlan;
+      } else {
+        _logger.i('No meal plan found with ID: $mealPlanId');
+        _mealPlan = null;
+      }
+      
+      _setLoading(false);
+    } catch (e) {
+      _logger.e('Error loading meal plan by ID: $e');
+      _error = 'Failed to load meal plan: $e';
+      _setLoading(false);
+    }
+  }
+
+  /// Refresh meal plan from server (force refresh)
+  Future<void> refreshMealPlan(String userId) async {
+    _logger.d('Force refreshing meal plan for user: $userId');
+    
+    // Clear local cache to force refresh
+    await MealPlanLocalStorageService.clearMealPlan();
+    
+    // Reload from server
+    await loadMealPlan(userId);
+  }
+
+  /// Clear local cache
+  Future<void> clearLocalCache() async {
+    _logger.d('Clearing local meal plan cache');
+    await MealPlanLocalStorageService.clearMealPlan();
   }
 
 

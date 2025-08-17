@@ -6,8 +6,10 @@ import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/meal_plan_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../widgets/meal_plan_view.dart';
 import '../widgets/waiting_for_meal_plan.dart';
+import '../widgets/meal_plan_loading_state.dart';
 
 class MealPrepScreen extends StatefulWidget {
   const MealPrepScreen({super.key});
@@ -18,74 +20,58 @@ class MealPrepScreen extends StatefulWidget {
 
 class _MealPrepScreenState extends State<MealPrepScreen> {
   static final _logger = Logger();
-  MealPlanModel? _currentMealPlan;
   String? _cheatDay;
 
   @override
   void initState() {
     super.initState();
-    _loadSavedData();
+    _loadMealPlanIfNeeded();
   }
 
-  /// Load saved meal plan from storage
-  Future<void> _loadSavedData() async {
-    try {
-      // Fetch the current user from Firestore to get the latest mealPlanId
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final user = authProvider.userModel;
-      String? mealPlanId = user?.mealPlanId;
-      MealPlanModel? firestoreMealPlan;
+  /// Load meal plan if needed
+  Future<void> _loadMealPlanIfNeeded() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+    
+    // Check if user is authenticated
+    if (!authProvider.isAuthenticated || authProvider.userModel == null) {
+      _logger.w('Cannot load meal plan: user not authenticated or userModel is null');
+      return;
+    }
 
-      if (mealPlanId != null) {
-        // Try to fetch the meal plan from Firestore
-        final doc = await FirebaseFirestore.instance
-            .collection('meal_plans')
-            .doc(mealPlanId)
-            .get();
-        if (doc.exists) {
-          firestoreMealPlan = MealPlanModel.fromJson(doc.data()!);
-        }
-      }
-
-      if (firestoreMealPlan != null) {
-        setState(() {
-          _currentMealPlan = firestoreMealPlan;
-        });
-        // Optionally cache to local storage
-        await MealPlanStorageService.saveMealPlan(firestoreMealPlan);
-        final mealPlanProvider =
-            Provider.of<MealPlanProvider>(context, listen: false);
-        mealPlanProvider.setMealPlan(firestoreMealPlan);
-        _logger.i('Loaded meal plan from Firestore: ${firestoreMealPlan.title}');
-        
+    // Check if the current meal plan belongs to the current user
+    final currentMealPlan = mealPlanProvider.mealPlan;
+    if (currentMealPlan != null) {
+      if (currentMealPlan.userId == authProvider.userModel!.id) {
+        _logger.d('Meal plan already loaded for current user, skipping API call');
         // Load cheat day from diet preferences
-        await _loadCheatDay(user!.id);
+        await _loadCheatDay(authProvider.userModel!.id);
         return;
+      } else {
+        _logger.d('Meal plan belongs to different user, clearing and reloading');
+        mealPlanProvider.clearMealPlan();
       }
+    }
 
-      // Fallback: Load saved meal plan from local storage
-      if (user?.id != null) {
-        final savedMealPlan =
-            await MealPlanStorageService.loadMealPlan(user!.id);
-        if (savedMealPlan != null) {
-          setState(() {
-            _currentMealPlan = savedMealPlan;
-          });
-          final mealPlanProvider =
-              Provider.of<MealPlanProvider>(context, listen: false);
-          mealPlanProvider.setMealPlan(savedMealPlan);
-          _logger.i(
-              'Loaded saved meal plan from local storage for user ${user.id}: ${savedMealPlan.title}');
-          
-          // Load cheat day from diet preferences
-          await _loadCheatDay(user.id);
-        }
-      }
+    // Load meal plan for current user
+    _logger.d('Loading meal plan for user ${authProvider.userModel!.id}');
+    await mealPlanProvider.loadMealPlan(authProvider.userModel!.id);
+    
+    // Load cheat day from diet preferences
+    await _loadCheatDay(authProvider.userModel!.id);
+  }
 
-      // No meal plan exists - will show waiting state
-    } catch (e) {
-      _logger.e('Error loading saved data: $e');
-      // Will show waiting state
+  /// Refresh meal plan (force refresh from server)
+  Future<void> _refreshMealPlan() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+    
+    if (authProvider.isAuthenticated && authProvider.userModel != null) {
+      _logger.d('Force refreshing meal plan for user ${authProvider.userModel!.id}');
+      await mealPlanProvider.refreshMealPlan(authProvider.userModel!.id);
+      
+      // Load cheat day from diet preferences
+      await _loadCheatDay(authProvider.userModel!.id);
     }
   }
 
@@ -106,21 +92,93 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // If a meal plan exists, show it
-    if (_currentMealPlan != null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Meal Plan'),
-        ),
-        body: MealPlanView(
-          mealPlan: _currentMealPlan!,
-          user: Provider.of<AuthProvider>(context, listen: false).userModel,
-          cheatDay: _cheatDay,
-        ),
-      );
-    }
+    return Consumer2<AuthProvider, MealPlanProvider>(
+      builder: (context, authProvider, mealPlanProvider, child) {
+        // Check if user changed and meal plan needs to be reloaded
+        if (authProvider.isAuthenticated &&
+            authProvider.userModel != null &&
+            mealPlanProvider.mealPlan != null &&
+            mealPlanProvider.mealPlan!.userId != authProvider.userModel!.id) {
+          _logger.d('User changed, reloading meal plan');
+          // Use Future.microtask to avoid build-time side effects
+          Future.microtask(() => _loadMealPlanIfNeeded());
+        }
 
-    // If no meal plan exists, show waiting state
-    return const WaitingForMealPlan();
+        if (mealPlanProvider.isLoading) {
+          return const MealPlanLoadingState();
+        }
+
+        if (mealPlanProvider.error != null) {
+          return _buildErrorState(mealPlanProvider.error!);
+        }
+
+        if (mealPlanProvider.mealPlan == null) {
+          return const WaitingForMealPlan();
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Meal Plan'),
+          ),
+          body: RefreshIndicator(
+            onRefresh: _refreshMealPlan,
+            child: MealPlanView(
+              mealPlan: mealPlanProvider.mealPlan!,
+              user: authProvider.userModel,
+              cheatDay: _cheatDay,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Meal Plan'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+                color: AppConstants.errorColor,
+              ),
+              const SizedBox(height: AppConstants.spacingM),
+              Text(
+                'Error Loading Meal Plan',
+                style: AppTextStyles.heading4.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppConstants.spacingS),
+              Text(
+                error,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppConstants.spacingL),
+              ElevatedButton(
+                onPressed: () {
+                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                  if (authProvider.userModel != null) {
+                    _loadMealPlanIfNeeded();
+                  }
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
