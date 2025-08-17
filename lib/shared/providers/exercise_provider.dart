@@ -47,9 +47,6 @@ class ExerciseProvider extends ChangeNotifier {
         _availableExercises = cachedExercises;
         _availableMuscleGroups = cachedMuscleGroups;
         _filteredExercises = _availableExercises;
-        
-        _logger.d('Loaded ${_availableExercises.length} exercises from cache');
-        
         // Check if cache is stale and update in background
         final isStale = await _localStorage.isCacheStale();
         if (isStale) {
