@@ -25,31 +25,34 @@ class WorkoutProvider extends ChangeNotifier {
 
   // Load workout plan based on user's selected workout styles
   Future<void> loadWorkoutPlan(String userId, List<String> workoutStyles, UserModel? user) async {
-    _setLoading(true);
     _error = null;
 
     _logger.d('Loading workout plan for user $userId with styles: $workoutStyles');
 
     try {
-      // First, try to load from local storage
+      // First, try to load from local storage (this should be instant)
       final localWorkoutPlan = await WorkoutPlanLocalStorageService.loadWorkoutPlan(userId);
       
       if (localWorkoutPlan != null) {
         _logger.d('Found workout plan in local storage: ${localWorkoutPlan.title}');
         _currentWorkoutPlan = localWorkoutPlan;
+        notifyListeners(); // Update UI immediately with local data
         
         // Check if the local plan is fresh (less than 24 hours old)
         final isFresh = await WorkoutPlanLocalStorageService.isWorkoutPlanFresh();
         if (isFresh) {
           _logger.d('Local workout plan is fresh, using cached data');
-          // Schedule notifications for fresh local plan
+          // Schedule notifications for fresh local plan (non-blocking)
           if (user != null) {
-            await _scheduleWorkoutNotifications(user);
+            _scheduleWorkoutNotificationsInBackground(user);
           }
           return;
         } else {
           _logger.d('Local workout plan is stale, refreshing from server');
+          _setLoading(true); // Only show loading for network operations
         }
+      } else {
+        _setLoading(true); // Show loading for network operations
       }
 
       // Try to load from Firestore (server-side storage)
@@ -69,7 +72,7 @@ class WorkoutProvider extends ChangeNotifier {
         
         // Schedule notifications for stored workout plan
         if (user != null) {
-          await _scheduleWorkoutNotifications(user);
+          _scheduleWorkoutNotificationsInBackground(user);
         }
         return;
       }
@@ -93,7 +96,7 @@ class WorkoutProvider extends ChangeNotifier {
         
         // Schedule notifications for predefined workout plan
         if (user != null) {
-          await _scheduleWorkoutNotifications(user);
+          _scheduleWorkoutNotificationsInBackground(user);
         }
       } else {
         _logger.i('No predefined workout plan found for styles: $workoutStyles. Generating AI plan...');
@@ -120,7 +123,7 @@ class WorkoutProvider extends ChangeNotifier {
             
             // Schedule notifications for AI-generated workout plan
             if (user != null) {
-              await _scheduleWorkoutNotifications(user);
+              _scheduleWorkoutNotificationsInBackground(user);
             }
           } catch (e) {
             _logger.e('Failed to generate AI workout plan: $e');
@@ -235,7 +238,43 @@ class WorkoutProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Schedule workout notifications if user has enabled them
+  /// Schedule workout notifications in background (non-blocking)
+  void _scheduleWorkoutNotificationsInBackground(UserModel user) {
+    // Schedule notifications in background to avoid blocking UI
+    Future.microtask(() async {
+      try {
+        // Check if user has workout notifications enabled
+        if (!user.preferences.workoutNotificationsEnabled ||
+            user.preferences.workoutNotificationTime == null) {
+          _logger.d('Workout notifications not enabled or missing time preference');
+          return;
+        }
+
+        // Check if workout plan is loaded
+        if (_currentWorkoutPlan == null) {
+          _logger.d('No workout plan loaded, skipping notification scheduling');
+          return;
+        }
+
+        final notificationTime = user.preferences.workoutNotificationTime!;
+
+        _logger.d('Scheduling workout notifications in background for user ${user.id} at $notificationTime');
+
+        // Schedule notifications
+        await NotificationService.scheduleWorkoutNotifications(
+          dailyWorkouts: _currentWorkoutPlan!.dailyWorkouts,
+          notificationTime: notificationTime,
+          userId: user.id,
+        );
+
+        _logger.i('Workout notifications scheduled successfully in background');
+      } catch (e) {
+        _logger.e('Error scheduling workout notifications in background: $e');
+      }
+    });
+  }
+
+  /// Schedule workout notifications if user has enabled them (blocking version for manual calls)
   Future<void> _scheduleWorkoutNotifications(UserModel user) async {
     try {
       // Check if user has workout notifications enabled
