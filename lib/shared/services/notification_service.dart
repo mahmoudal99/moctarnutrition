@@ -624,8 +624,6 @@ class NotificationService {
         notificationId++;
         scheduledCount++;
       }
-      
-      _logger.i('Workout notification scheduling complete: $scheduledCount notifications scheduled');
     } catch (e) {
       _logger.e('Error scheduling workout notifications: $e');
     }

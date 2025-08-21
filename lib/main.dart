@@ -239,14 +239,6 @@ GoRouter createRouter(AuthProvider authProvider) {
     redirect: (context, state) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-      // Debug logging
-      _logger.d('Router redirect - AuthProvider state:');
-      _logger.d('  isLoading: ${authProvider.isLoading}');
-      _logger.d('  isAuthenticated: ${authProvider.isAuthenticated}');
-      _logger.d('  userModel: ${authProvider.userModel?.name ?? 'null'}');
-      _logger.d('  user role: ${authProvider.userModel?.role ?? 'null'}');
-      _logger.d('  current route: ${state.uri.toString()}');
-
       if (authProvider.isLoading) return null;
       final isAdmin = authProvider.userModel?.role == UserRole.admin;
       final isAuthenticated = authProvider.isAuthenticated;

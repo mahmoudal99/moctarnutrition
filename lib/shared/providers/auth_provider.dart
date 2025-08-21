@@ -64,7 +64,6 @@ class AuthProvider extends ChangeNotifier {
       }
       
       _error = null;
-      _logger.d('AuthProvider - Notifying listeners');
       notifyListeners();
     });
   }
@@ -137,7 +136,6 @@ class AuthProvider extends ChangeNotifier {
       _logger.e('AuthProvider - Error loading user model: $e');
       _error = 'Failed to load user profile: $e';
     } finally {
-      _logger.d('AuthProvider - Finished loading user model, setting isLoading to false');
       _isLoading = false;
       notifyListeners();
     }
