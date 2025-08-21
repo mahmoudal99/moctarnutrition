@@ -270,8 +270,6 @@ class WorkoutProvider extends ChangeNotifier {
           notificationTime: notificationTime,
           userId: user.id,
         );
-
-        _logger.i('Workout notifications scheduled successfully in background');
       } catch (e) {
         _logger.e('Error scheduling workout notifications in background: $e');
       }

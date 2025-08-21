@@ -1,66 +1,77 @@
-# Workouts Feature
+# Workouts Feature - Refactored Structure
 
-This feature provides workout management functionality including workout plans, daily workouts, and exercise tracking.
+This directory contains the refactored workouts feature with improved separation of concerns and better maintainability.
 
-## Features
+## Structure
 
-### Workout Plan Management
-- View weekly workout plans
-- Daily workout details
-- Exercise tracking and progress
+### Controllers
+- **`controllers/workout_controller.dart`** - Handles business logic for workout plan loading and management
+- **`controllers/workout_scroll_controller.dart`** - Manages scroll behavior and floating toggle animations
 
-### Edit Mode with Drag & Drop
-- **Edit Mode**: Toggle edit mode to rearrange workout schedules
-- **Drag & Drop**: Drag workout cards between days to swap schedules
-- **Visual Feedback**: Clear visual indicators during drag operations
-- **Save/Cancel**: Save changes to cloud and local storage or cancel to revert
-
-## Components
-
-### Screens
-- `workouts_screen.dart` - Main workouts screen with edit mode
-- `workout_details_screen.dart` - Detailed workout view
-- `add_workout_screen.dart` - Add new workout
-- `add_exercise_screen.dart` - Add exercises to workouts
+### Services
+- **`services/workout_notification_service.dart`** - Handles workout notification scheduling
 
 ### Widgets
-- `daily_workout_card.dart` - Standard workout card display
-- `draggable_workout_card.dart` - Draggable version for edit mode
-- `droppable_day_area.dart` - Drop target for workout cards
-- `edit_mode_header.dart` - Edit mode controls (save/cancel)
-- `workout_app_header.dart` - App header with workout messages
-- `view_toggle.dart` - Toggle between day/week views
+- **`widgets/workout_view_builder.dart`** - Builds different workout view states (loading, error, empty)
+- **`widgets/floating_toggle_widget.dart`** - Floating toggle component for view switching
+- **`widgets/day_view_widget.dart`** - Day view component showing today's workout or no workout state
+- **`widgets/week_view_widget.dart`** - Week view component showing the weekly workout plan
 
-### Edit Mode Workflow
-1. User taps edit button to enter edit mode
-2. Workout cards become draggable with visual indicators
-3. User can drag cards between days to swap schedules
-4. Visual feedback shows valid drop zones
-5. User can save changes or cancel to revert
+### Screens
+- **`screens/workouts_screen.dart`** - Main screen that orchestrates all components
 
-### Data Flow
-- Changes are made locally in edit mode
-- Only saved to cloud/local storage when user confirms
-- Original data is preserved until save/cancel
-- Real-time UI updates during drag operations
+## Benefits of Refactoring
+
+1. **Separation of Concerns**: Business logic, UI components, and services are now properly separated
+2. **Reusability**: Individual widgets can be reused in other parts of the app
+3. **Testability**: Each component can be tested independently
+4. **Maintainability**: Easier to modify and extend individual components
+5. **Readability**: Smaller, focused files are easier to understand
+
+## Component Responsibilities
+
+### WorkoutController
+- Load workout plans for users
+- Handle user authentication checks
+- Manage workout plan refresh logic
+- Determine when to reload workout plans
+
+### WorkoutScrollController
+- Manage scroll behavior
+- Handle floating toggle animations
+- Control scroll threshold detection
+
+### WorkoutNotificationService
+- Schedule workout notifications
+- Handle notification permission checks
+- Manage notification state
+
+### WorkoutViewBuilder
+- Build loading states
+- Build error states
+- Build empty states
+
+### FloatingToggleWidget
+- Display floating toggle for view switching
+- Handle toggle animations
+- Manage toggle positioning
+
+### DayViewWidget
+- Display today's workout
+- Show no workout state
+- Handle day view interactions
+
+### WeekViewWidget
+- Display weekly workout plan
+- Handle edit mode vs normal mode
+- Manage workout card rendering
 
 ## Usage
 
-```dart
-// Enter edit mode
-workoutProvider.enterEditMode();
+The main `WorkoutsScreen` now acts as a coordinator that:
+1. Uses `WorkoutController` for business logic
+2. Uses `WorkoutScrollController` for scroll management
+3. Uses `WorkoutViewBuilder` for state management
+4. Uses individual widgets for UI rendering
 
-// Save changes
-await workoutProvider.saveEditModeChanges();
-
-// Cancel changes
-workoutProvider.cancelEditMode();
-```
-
-## State Management
-
-The workout functionality uses Provider pattern with `WorkoutProvider` managing:
-- Current workout plan
-- Edit mode state
-- Original data for cancellation
-- Loading and error states 
+This creates a clean, maintainable architecture that follows Flutter best practices. 

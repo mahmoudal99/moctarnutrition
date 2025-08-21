@@ -562,7 +562,6 @@ class NotificationService {
           dailyWorkout = dailyWorkouts.firstWhere(
             (workout) => workout.dayName == dayName,
           );
-          _logger.d('Found workout for $dayName: ${dailyWorkout.title} (restDay: ${dailyWorkout.restDay})');
         } catch (e) {
           dailyWorkout = null;
           _logger.d('No workout found for $dayName');
@@ -619,8 +618,6 @@ class NotificationService {
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
         );
-        
-        _logger.d('Scheduled workout notification for $dayName (${notificationId}): $body');
         notificationId++;
         scheduledCount++;
       }
