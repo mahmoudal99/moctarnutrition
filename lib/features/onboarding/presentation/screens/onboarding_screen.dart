@@ -314,6 +314,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   int _calculateTargetCalories() {
+    // Use the same calculation as the CalorieCalculationService for consistency
     double bmr;
     if (_data.gender == 'Male') {
       bmr = 10 * _data.weight + 6.25 * _data.height - 5 * _data.age + 5;
@@ -321,13 +322,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       bmr = 10 * _data.weight + 6.25 * _data.height - 5 * _data.age - 161;
     }
 
+    // Activity level multipliers matching CalorieCalculationService
     double activityMultiplier;
     switch (_data.selectedActivityLevel) {
       case ActivityLevel.sedentary:
         activityMultiplier = 1.2;
         break;
       case ActivityLevel.lightlyActive:
-        activityMultiplier = 1.375;
+        activityMultiplier = 1.35; // Updated to match service
         break;
       case ActivityLevel.moderatelyActive:
         activityMultiplier = 1.55;
@@ -342,23 +344,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     double tdee = bmr * activityMultiplier;
 
+    // Goal adjustments matching CalorieCalculationService
     switch (_data.selectedFitnessGoal) {
       case FitnessGoal.weightLoss:
-        tdee -= 500;
+        tdee -= 500; // 500 kcal deficit for 0.5 kg/week loss
         break;
       case FitnessGoal.muscleGain:
-        tdee += 300;
+        tdee += 300; // 300 kcal surplus for moderate gain
         break;
       case FitnessGoal.maintenance:
+        // No adjustment
         break;
       case FitnessGoal.endurance:
-        tdee += 200;
+        tdee += 200; // 200 kcal surplus for performance
         break;
       case FitnessGoal.strength:
-        tdee += 250;
+        tdee += 400; // 400 kcal surplus for strength training
         break;
     }
 
-    return tdee.round();
+    // Apply safety rails
+    final minSafe = _calculateMinSafeCalories(bmr, _data.gender);
+    return tdee.clamp(minSafe, tdee * 1.5).round();
+  }
+
+  /// Calculate minimum safe calories (85% of BMR or gender-specific minimum)
+  double _calculateMinSafeCalories(double bmr, String gender) {
+    final rmrFloor = bmr * 0.85;
+    final genderFloor = gender.toLowerCase() == 'male' ? 1500.0 : 1200.0;
+    return rmrFloor.clamp(genderFloor, double.infinity);
   }
 }

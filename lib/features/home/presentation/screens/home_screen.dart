@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -129,6 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onDateSelected(DateTime date) {
+    // Light haptic feedback
+    HapticFeedback.lightImpact();
+    
     setState(() {
       _selectedDate = date;
     });

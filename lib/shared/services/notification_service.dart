@@ -579,8 +579,6 @@ class NotificationService {
           _logger.d('Rest day for $dayName, skipping');
           continue;
         }
-        
-        _logger.d('Processing workout day: $dayName');
 
         // Create notification time for this specific day
         final scheduledTime = DateTime(

@@ -8,8 +8,8 @@ class CalorieCalculationService {
   static const Map<ActivityLevel, double> _activityMultipliers = {
     ActivityLevel.sedentary: 1.2,
     ActivityLevel.lightlyActive: 1.35,
-    ActivityLevel.moderatelyActive: 1.5,
-    ActivityLevel.veryActive: 1.7,
+    ActivityLevel.moderatelyActive: 1.55, // Updated to match standard 1.55 for moderate activity
+    ActivityLevel.veryActive: 1.725, // Updated to match standard 1.725 for very active
     ActivityLevel.extremelyActive: 1.9,
   };
 
@@ -22,40 +22,203 @@ class CalorieCalculationService {
     final fitnessGoal = preferences.fitnessGoal;
     final activityLevel = preferences.activityLevel;
     
-    // Calculate body fat percentage (rough estimate using BMI)
-    final bmi = weight / ((height / 100) * (height / 100));
-    final bodyFatPercentage = _estimateBodyFatPercentage(bmi, age, gender);
-    
-    // Calculate lean body mass (FFM - Fat Free Mass)
-    final fatFreeMass = weight * (1 - bodyFatPercentage / 100);
-    
-    // Choose RMR equation based on body composition
-    final rmr = _calculateRMR(weight, height, age, gender, fatFreeMass, bodyFatPercentage);
+    // Calculate BMR using Mifflin-St Jeor equation
+    final bmr = _calculateBMR(weight, height, age, gender);
     
     // Calculate TDEE (Total Daily Energy Expenditure)
-    final tdee = _calculateTDEE(rmr, activityLevel);
+    final tdee = _calculateTDEE(bmr, activityLevel);
     
     // Apply goal adjustments
-    final dailyTarget = _applyGoalAdjustments(tdee, rmr, fitnessGoal, weight, gender);
+    final dailyTarget = _applyGoalAdjustments(tdee, bmr, fitnessGoal, weight, gender);
     
-    // Calculate macronutrient breakdown
+    // Calculate macronutrient breakdown using standard ratios
     final macros = _calculateMacros(dailyTarget, preferences);
     
     return CalorieTargets(
-      rmr: rmr.round(),
+      rmr: bmr.round(),
       tdee: tdee.round(),
       dailyTarget: dailyTarget.round(),
       fitnessGoal: _getFitnessGoalName(fitnessGoal),
       activityLevel: _getActivityLevelName(activityLevel),
-      bodyFatPercentage: bodyFatPercentage,
-      fatFreeMass: fatFreeMass,
+      bodyFatPercentage: _estimateBodyFatPercentage(weight, height, age, gender),
+      fatFreeMass: weight * (1 - _estimateBodyFatPercentage(weight, height, age, gender) / 100),
       macros: macros,
       recommendations: _getRecommendations(fitnessGoal, preferences),
     );
   }
 
-  static double _estimateBodyFatPercentage(double bmi, int age, String gender) {
-    // Rough estimation based on BMI, age, and gender
+  /// Calculate BMR using the Mifflin-St Jeor equation
+  /// For men: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(y) + 5
+  /// For women: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(y) - 161
+  static double _calculateBMR(double weight, double height, int age, String gender) {
+    final base = 10 * weight + 6.25 * height - 5 * age;
+    return gender.toLowerCase() == 'male' ? base + 5 : base - 161;
+  }
+
+  /// Calculate TDEE by multiplying BMR by activity factor
+  static double _calculateTDEE(double bmr, ActivityLevel activityLevel) {
+    return bmr * _activityMultipliers[activityLevel]!;
+  }
+
+  /// Apply goal adjustments to TDEE
+  static double _applyGoalAdjustments(double tdee, double bmr, FitnessGoal fitnessGoal, double weight, String gender) {
+    double targetCalories = tdee;
+    
+    switch (fitnessGoal) {
+      case FitnessGoal.weightLoss:
+        // Weight loss: subtract 500 kcal/day for 0.5 kg/week loss
+        // This creates a 3500 kcal weekly deficit (500 * 7 = 3500 kcal)
+        // 7700 kcal ≈ 1 kg fat, so 3500 kcal ≈ 0.5 kg fat loss per week
+        targetCalories = tdee - 500;
+        break;
+        
+      case FitnessGoal.muscleGain:
+        // Muscle gain: add 300-500 kcal surplus
+        // Start with 300 kcal surplus for moderate gain
+        targetCalories = tdee + 300;
+        break;
+        
+      case FitnessGoal.maintenance:
+        // Maintenance: no adjustment
+        targetCalories = tdee;
+        break;
+        
+      case FitnessGoal.endurance:
+        // Endurance: slight surplus for performance
+        targetCalories = tdee + 200; // 200 kcal surplus
+        break;
+        
+      case FitnessGoal.strength:
+        // Strength: moderate surplus for muscle building
+        targetCalories = tdee + 400; // 400 kcal surplus
+        break;
+    }
+    
+    // Safety rails - ensure minimum safe calories
+    final minSafe = _calculateMinSafeCalories(bmr, gender);
+    return targetCalories.clamp(minSafe, tdee * 1.5); // Cap at 50% surplus
+  }
+
+  /// Calculate minimum safe calories (85% of BMR or gender-specific minimum)
+  static double _calculateMinSafeCalories(double bmr, String gender) {
+    final rmrFloor = bmr * 0.85;
+    final genderFloor = gender.toLowerCase() == 'male' ? 1500.0 : 1200.0;
+    return rmrFloor.clamp(genderFloor, double.infinity);
+  }
+
+  /// Calculate macronutrient breakdown using standard ratios
+  /// Default: 40% protein, 40% carbs, 20% fat
+  /// Protein: 4 kcal/g, Carbs: 4 kcal/g, Fat: 9 kcal/g
+  static MacroBreakdown _calculateMacros(double dailyCalories, UserPreferences preferences) {
+    final weight = preferences.weight;
+    final fitnessGoal = preferences.fitnessGoal;
+    final dietaryRestrictions = preferences.dietaryRestrictions;
+    final isVegan = dietaryRestrictions.contains('Vegan');
+    
+    // Calculate protein first (priority macro)
+    final proteinGrams = _calculateProteinGrams(weight, fitnessGoal, isVegan);
+    final proteinCalories = proteinGrams * 4; // 4 kcal per gram
+    
+    // Calculate fat (minimum 20% of calories, maximum 35%)
+    final minFatPercentage = 0.20;
+    final maxFatPercentage = 0.35;
+    final targetFatPercentage = 0.25; // Default to 25% (middle of range)
+    
+    final minFatCalories = dailyCalories * minFatPercentage;
+    final maxFatCalories = dailyCalories * maxFatPercentage;
+    final targetFatCalories = dailyCalories * targetFatPercentage;
+    
+    // Ensure minimum fat grams (0.6 g/kg body weight)
+    final minFatGrams = weight * 0.6;
+    final minFatCaloriesFromWeight = minFatGrams * 9;
+    
+    final fatCalories = targetFatCalories.clamp(
+      minFatCalories.clamp(minFatCaloriesFromWeight, maxFatCalories),
+      maxFatCalories
+    );
+    final fatGrams = fatCalories / 9; // 9 kcal per gram
+    
+    // Calculate carbs from remaining calories
+    final remainingCalories = dailyCalories - proteinCalories - fatCalories;
+    final carbGrams = remainingCalories / 4; // 4 kcal per gram
+    final carbCalories = carbGrams * 4;
+    
+    // Ensure minimum carb intake (130g for brain function)
+    final minCarbGrams = 130.0;
+    if (carbGrams < minCarbGrams) {
+      // Adjust fat down to accommodate minimum carbs
+      final adjustedCarbGrams = minCarbGrams;
+      final adjustedCarbCalories = adjustedCarbGrams * 4;
+      final adjustedFatCalories = dailyCalories - proteinCalories - adjustedCarbCalories;
+      final adjustedFatGrams = adjustedFatCalories / 9;
+      
+      return MacroBreakdown(
+        protein: MacroNutrient(
+          grams: proteinGrams.round(),
+          calories: proteinCalories.round(),
+          percentage: ((proteinCalories / dailyCalories) * 100).round(),
+        ),
+        fat: MacroNutrient(
+          grams: adjustedFatGrams.round(),
+          calories: adjustedFatCalories.round(),
+          percentage: ((adjustedFatCalories / dailyCalories) * 100).round(),
+        ),
+        carbs: MacroNutrient(
+          grams: adjustedCarbGrams.round(),
+          calories: adjustedCarbCalories.round(),
+          percentage: ((adjustedCarbCalories / dailyCalories) * 100).round(),
+        ),
+      );
+    }
+    
+    return MacroBreakdown(
+      protein: MacroNutrient(
+        grams: proteinGrams.round(),
+        calories: proteinCalories.round(),
+        percentage: ((proteinCalories / dailyCalories) * 100).round(),
+      ),
+      fat: MacroNutrient(
+        grams: fatGrams.round(),
+        calories: fatCalories.round(),
+        percentage: ((fatCalories / dailyCalories) * 100).round(),
+      ),
+      carbs: MacroNutrient(
+        grams: carbGrams.round(),
+        calories: carbCalories.round(),
+        percentage: ((carbCalories / dailyCalories) * 100).round(),
+      ),
+    );
+  }
+
+  /// Calculate protein grams based on body weight and fitness goal
+  /// Using evidence-based recommendations
+  static double _calculateProteinGrams(double weight, FitnessGoal fitnessGoal, bool isVegan) {
+    double proteinPerKg;
+    
+    switch (fitnessGoal) {
+      case FitnessGoal.muscleGain:
+        proteinPerKg = isVegan ? 2.0 : 1.6; // Higher for vegans due to lower bioavailability
+        break;
+      case FitnessGoal.weightLoss:
+        proteinPerKg = isVegan ? 2.4 : 2.2; // Higher to preserve muscle mass
+        break;
+      case FitnessGoal.maintenance:
+        proteinPerKg = isVegan ? 1.8 : 1.4; // Standard recommendations
+        break;
+      case FitnessGoal.endurance:
+        proteinPerKg = isVegan ? 1.6 : 1.3; // Moderate protein for endurance
+        break;
+      case FitnessGoal.strength:
+        proteinPerKg = isVegan ? 2.0 : 1.7; // Higher for strength training
+        break;
+    }
+    
+    return weight * proteinPerKg;
+  }
+
+  /// Estimate body fat percentage based on BMI, age, and gender
+  static double _estimateBodyFatPercentage(double weight, double height, int age, String gender) {
+    final bmi = weight / ((height / 100) * (height / 100));
     double baseBodyFat;
     
     if (gender.toLowerCase() == 'male') {
@@ -88,178 +251,6 @@ class CalorieCalculationService {
     }
     
     return baseBodyFat;
-  }
-
-  static double _calculateRMR(double weight, double height, int age, String gender, double fatFreeMass, double bodyFatPercentage) {
-    // Choose equation based on body composition
-    // Use Katch-McArdle for high body fat or when we have FFM
-    // Use Cunningham for athletes (could be enhanced with activity level detection)
-    // Default to Mifflin-St Jeor for general population
-    
-    if (bodyFatPercentage > 25) {
-      // High body fat - prefer Katch-McArdle
-      return _rmrKatchMcArdle(fatFreeMass);
-    } else if (_isAthlete(gender, age, weight, height)) {
-      // Athlete - use Cunningham
-      return _rmrCunningham(fatFreeMass);
-    } else {
-      // General population - use Mifflin-St Jeor
-      return _rmrMifflinStJeor(weight, height, age, gender);
-    }
-  }
-
-  static double _rmrMifflinStJeor(double weight, double height, int age, String gender) {
-    // Mifflin-St Jeor Equation
-    // Male: RMR = 10*kg + 6.25*cm - 5*age + 5
-    // Female: RMR = 10*kg + 6.25*cm - 5*age - 161
-    
-    final base = 10 * weight + 6.25 * height - 5 * age;
-    return gender.toLowerCase() == 'male' ? base + 5 : base - 161;
-  }
-
-  static double _rmrKatchMcArdle(double fatFreeMass) {
-    // Katch-McArdle Equation
-    // RMR = 370 + 21.6 * FFM_kg
-    return 370 + 21.6 * fatFreeMass;
-  }
-
-  static double _rmrCunningham(double fatFreeMass) {
-    // Cunningham Equation (for athletes)
-    // RMR = 500 + 22 * FFM_kg
-    return 500 + 22 * fatFreeMass;
-  }
-
-  static bool _isAthlete(String gender, int age, double weight, double height) {
-    // Simple heuristic to identify potential athletes
-    // This could be enhanced with actual activity data
-    final bmi = weight / ((height / 100) * (height / 100));
-    
-    // Athletes typically have lower body fat and higher muscle mass
-    return bmi >= 20 && bmi <= 28 && age >= 18 && age <= 45;
-  }
-
-  static double _calculateTDEE(double rmr, ActivityLevel activityLevel) {
-    // TDEE = RMR * PAL (Physical Activity Level)
-    return rmr * _activityMultipliers[activityLevel]!;
-  }
-
-  static double _applyGoalAdjustments(double tdee, double rmr, FitnessGoal fitnessGoal, double weight, String gender) {
-    double targetCalories = tdee;
-    
-    switch (fitnessGoal) {
-      case FitnessGoal.weightLoss:
-        // Fat loss: subtract 10-25% of TDEE
-        // 7,700 kcal ≈ 1 kg fat
-        // Calculate deficit based on desired rate (default 0.5 kg/week)
-        final weeklyRateKg = 0.5; // Could be made configurable
-        final deficitByRate = 7700 * weeklyRateKg / 7; // kcal/day
-        final deficitPercentage = (deficitByRate / tdee).clamp(0.10, 0.25);
-        targetCalories = tdee * (1 - deficitPercentage);
-        break;
-        
-      case FitnessGoal.muscleGain:
-        // Muscle gain: add 5-15% (new lifters toward high end; advanced toward low)
-        final surplusPercentage = 0.10; // Default 10%, could be configurable
-        targetCalories = tdee * (1 + surplusPercentage);
-        break;
-        
-      case FitnessGoal.maintenance:
-        // Maintenance: no adjustment
-        targetCalories = tdee;
-        break;
-        
-      case FitnessGoal.endurance:
-        // Endurance: slight surplus for performance
-        targetCalories = tdee * 1.05; // 5% surplus
-        break;
-        
-      case FitnessGoal.strength:
-        // Strength: moderate surplus for muscle building
-        targetCalories = tdee * 1.08; // 8% surplus
-        break;
-    }
-    
-    // Safety rails
-    final minSafe = _calculateMinSafeCalories(rmr, gender);
-    return targetCalories.clamp(minSafe, tdee * 1.5); // Cap at 50% surplus
-  }
-
-  static double _calculateMinSafeCalories(double rmr, String gender) {
-    // Don't set below ~85-90% of RMR without medical oversight
-    // Consider soft floors of ≥1,200 kcal (F) / ≥1,500 kcal (M) for general UX
-    final rmrFloor = rmr * 0.85;
-    final genderFloor = gender.toLowerCase() == 'male' ? 1500.0 : 1200.0;
-    return rmrFloor.clamp(genderFloor, double.infinity);
-  }
-
-  static MacroBreakdown _calculateMacros(double dailyCalories, UserPreferences preferences) {
-    final weight = preferences.weight;
-    final dietaryRestrictions = preferences.dietaryRestrictions;
-    final isVegan = dietaryRestrictions.contains('Vegan');
-    
-    // Protein calculation (from protein service)
-    final proteinGrams = _calculateProteinGrams(weight, preferences.fitnessGoal, isVegan);
-    final proteinCalories = proteinGrams * 4; // 4 kcal per gram
-    
-    // Fat calculation: ≥0.6 g/kg (health floor), then 20-35% of calories
-    final minFatGrams = weight * 0.6;
-    final maxFatPercentage = 0.35;
-    final maxFatCalories = dailyCalories * maxFatPercentage;
-    final maxFatGrams = maxFatCalories / 9; // 9 kcal per gram
-    
-    // Use 25% of calories for fat (middle of 20-35% range)
-    final targetFatPercentage = 0.25;
-    final targetFatCalories = dailyCalories * targetFatPercentage;
-    final fatGrams = (targetFatCalories / 9).clamp(minFatGrams, maxFatGrams);
-    final fatCalories = fatGrams * 9;
-    
-    // Carbs: rest of calories after protein + fat
-    final remainingCalories = dailyCalories - proteinCalories - fatCalories;
-    final carbGrams = remainingCalories / 4; // 4 kcal per gram
-    final carbCalories = carbGrams * 4;
-    
-    return MacroBreakdown(
-      protein: MacroNutrient(
-        grams: proteinGrams.round(),
-        calories: proteinCalories.round(),
-        percentage: ((proteinCalories / dailyCalories) * 100).round(),
-      ),
-      fat: MacroNutrient(
-        grams: fatGrams.round(),
-        calories: fatCalories.round(),
-        percentage: ((fatCalories / dailyCalories) * 100).round(),
-      ),
-      carbs: MacroNutrient(
-        grams: carbGrams.round(),
-        calories: carbCalories.round(),
-        percentage: ((carbCalories / dailyCalories) * 100).round(),
-      ),
-    );
-  }
-
-  static double _calculateProteinGrams(double weight, FitnessGoal fitnessGoal, bool isVegan) {
-    // Simplified protein calculation (could use the full protein service)
-    double proteinPerKg;
-    
-    switch (fitnessGoal) {
-      case FitnessGoal.muscleGain:
-        proteinPerKg = isVegan ? 2.0 : 1.6;
-        break;
-      case FitnessGoal.weightLoss:
-        proteinPerKg = isVegan ? 2.4 : 2.2;
-        break;
-      case FitnessGoal.maintenance:
-        proteinPerKg = isVegan ? 1.8 : 1.4;
-        break;
-      case FitnessGoal.endurance:
-        proteinPerKg = isVegan ? 1.6 : 1.3;
-        break;
-      case FitnessGoal.strength:
-        proteinPerKg = isVegan ? 2.0 : 1.7;
-        break;
-    }
-    
-    return weight * proteinPerKg;
   }
 
   static String _getFitnessGoalName(FitnessGoal goal) {

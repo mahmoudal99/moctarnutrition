@@ -264,9 +264,6 @@ GoRouter createRouter(AuthProvider authProvider) {
         _logger.d('Router redirect - Redirecting admin to /admin-home');
         return '/admin-home';
       }
-
-      _logger.d('Router redirect - No redirect needed');
-      // Otherwise, no redirect
       return null;
     },
   );

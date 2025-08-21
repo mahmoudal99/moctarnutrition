@@ -557,17 +557,13 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
   }
 
   int _calculateCarbs() {
-    // Calculate carbs as 40% of total calories
-    final totalCalories = _calorieTargets!.dailyTarget;
-    final carbCalories = totalCalories * 0.4;
-    return (carbCalories / 4).round(); // 4 calories per gram of carbs
+    // Use the calculated macros from CalorieCalculationService
+    return _calorieTargets!.macros.carbs.grams;
   }
 
   int _calculateFats() {
-    // Calculate fats as 25% of total calories
-    final totalCalories = _calorieTargets!.dailyTarget;
-    final fatCalories = totalCalories * 0.25;
-    return (fatCalories / 9).round(); // 9 calories per gram of fat
+    // Use the calculated macros from CalorieCalculationService
+    return _calorieTargets!.macros.fat.grams;
   }
 
   double _calculateWeightLoss() {

@@ -24,16 +24,11 @@ class CalorieSummaryCard extends StatelessWidget {
     if (currentDayMeals != null) {
       consumedCalories = currentDayMeals!.totalCalories;
     }
-    
-    final caloriesLeft = (calorieTargets.dailyTarget - consumedCalories).round();
+
+    final caloriesLeft =
+        (calorieTargets.dailyTarget - consumedCalories).round();
     final activityBonus = 37; // TODO: Get from activity tracking
-    
-    // Debug logging
-    print('DEBUG - Calorie Summary Card:');
-    print('  Target Calories: ${calorieTargets.dailyTarget}');
-    print('  Consumed Calories: ${consumedCalories}');
-    print('  Calories Left: $caloriesLeft');
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -66,41 +61,41 @@ class CalorieSummaryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Row(
+                const Row(
                   children: [
-                    const Text(
+                    Text(
                       'Calories left',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    // Activity bonus
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.person_add,
-                          size: 16,
-                          color: Colors.black,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '+$activityBonus',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                    SizedBox(width: 8),
+                    // Activity bonus - Add Later
+                    // Row(
+                    //   children: [
+                    //     const Icon(
+                    //       Icons.person_add,
+                    //       size: 16,
+                    //       color: Colors.black,
+                    //     ),
+                    //     const SizedBox(width: 4),
+                    //     Text(
+                    //       '+$activityBonus',
+                    //       style: const TextStyle(
+                    //         fontSize: 14,
+                    //         color: Colors.black,
+                    //         fontWeight: FontWeight.w600,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
               ],
             ),
           ),
-          
+
           // Right side - Activity ring
           Expanded(
             flex: 1,

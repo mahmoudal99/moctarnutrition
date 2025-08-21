@@ -63,8 +63,8 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
         route: '/meal-prep',
       ),
       const _NavItem(
-        icon: Icons.account_circle,
-        label: 'Profile',
+        icon: Icons.settings,
+        label: 'Settings',
         route: '/profile',
       ),
     ];
