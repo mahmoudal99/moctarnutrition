@@ -57,14 +57,6 @@ class WorkoutAppHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  'Hi ${_getUserName(context)}!',
-                  style: AppTextStyles.heading3.copyWith(
-                    color: AppConstants.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingXS),
-                Text(
                   message,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppConstants.textSecondary,
