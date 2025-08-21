@@ -141,6 +141,7 @@ class UserPreferences {
   final int age;
   final double weight; // in kg
   final double height; // in cm
+  final double desiredWeight; // in kg
   final String gender;
   
   // Food preferences
@@ -178,6 +179,7 @@ class UserPreferences {
     this.age = 25,
     this.weight = 70.0,
     this.height = 170.0,
+    this.desiredWeight = 65.0,
     this.gender = 'Male',
     this.preferredCuisines = const [],
     this.foodsToAvoid = const [],
@@ -213,6 +215,7 @@ class UserPreferences {
       age: json['age'] as int? ?? 25,
       weight: (json['weight'] as num?)?.toDouble() ?? 70.0,
       height: (json['height'] as num?)?.toDouble() ?? 170.0,
+      desiredWeight: (json['desiredWeight'] as num?)?.toDouble() ?? 65.0,
       gender: json['gender'] as String? ?? 'Male',
       preferredCuisines: List<String>.from(json['preferredCuisines'] ?? []),
       foodsToAvoid: List<String>.from(json['foodsToAvoid'] ?? []),
@@ -241,6 +244,7 @@ class UserPreferences {
       'age': age,
       'weight': weight,
       'height': height,
+      'desiredWeight': desiredWeight,
       'gender': gender,
       'preferredCuisines': preferredCuisines,
       'foodsToAvoid': foodsToAvoid,
@@ -268,6 +272,7 @@ class UserPreferences {
     int? age,
     double? weight,
     double? height,
+    double? desiredWeight,
     String? gender,
     List<String>? preferredCuisines,
     List<String>? foodsToAvoid,
@@ -293,6 +298,7 @@ class UserPreferences {
       age: age ?? this.age,
       weight: weight ?? this.weight,
       height: height ?? this.height,
+      desiredWeight: desiredWeight ?? this.desiredWeight,
       gender: gender ?? this.gender,
       preferredCuisines: preferredCuisines ?? this.preferredCuisines,
       foodsToAvoid: foodsToAvoid ?? this.foodsToAvoid,
@@ -319,6 +325,7 @@ class UserPreferences {
       age: 25,
       weight: 70.0,
       height: 170.0,
+      desiredWeight: 65.0,
       gender: 'Male',
       preferredCuisines: [],
       foodsToAvoid: [],

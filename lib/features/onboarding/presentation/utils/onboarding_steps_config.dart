@@ -34,6 +34,13 @@ class OnboardingStepsConfig {
         showIconColor: false,
       ),
       OnboardingStep(
+        title: 'Desired Weight',
+        subtitle: 'What is your target weight?',
+        icon: "target.json",
+        color: AppConstants.primaryColor,
+        showIconColor: false,
+      ),
+      OnboardingStep(
         title: 'What is your primary objective?',
         subtitle: 'Choose your fitness goal',
         icon: "target.json",
@@ -94,6 +101,13 @@ class OnboardingStepsConfig {
         subtitle: 'Get workout previews on training days',
         icon: "run.json",
         color: AppConstants.primaryColor,
+      ),
+      OnboardingStep(
+        title: 'Give us a rating',
+        subtitle: 'Help us improve with your feedback',
+        icon: "target.json",
+        color: AppConstants.successColor,
+        showIconColor: false,
       ),
     ];
   }

@@ -5,6 +5,7 @@ import '../steps/onboarding_welcome_step.dart';
 import '../steps/onboarding_gender_step.dart';
 import '../steps/onboarding_height_weight_step.dart';
 import '../steps/onboarding_age_step.dart';
+import '../steps/onboarding_desired_weight_step.dart';
 import '../steps/onboarding_bmi_step.dart';
 import '../steps/onboarding_fitness_goal_step.dart';
 import '../steps/onboarding_activity_level_step.dart';
@@ -16,6 +17,7 @@ import '../steps/onboarding_allergies_step.dart';
 import '../steps/onboarding_meal_timing_step.dart';
 import '../steps/onboarding_batch_cooking_step.dart';
 import '../steps/onboarding_workout_notifications_step.dart';
+import '../steps/onboarding_rating_step.dart';
 
 class OnboardingStepBuilder {
   static Widget buildStepContent({
@@ -66,6 +68,11 @@ class OnboardingStepBuilder {
           onAgeChanged: (age) => data.age = age,
         );
       case 4:
+        return OnboardingDesiredWeightStep(
+          desiredWeight: data.desiredWeight,
+          onDesiredWeightChanged: (weight) => data.desiredWeight = weight,
+        );
+      case 5:
         return OnboardingBMIStep(
           bmi: _calculateBMI(data.height, data.weight),
           bmiCategory: _getBMICategory(_calculateBMI(data.height, data.weight)),
@@ -73,17 +80,17 @@ class OnboardingStepBuilder {
           height: data.height,
           weight: data.weight,
         );
-      case 5:
+      case 6:
         return OnboardingFitnessGoalStep(
           selectedFitnessGoal: data.selectedFitnessGoal,
           onSelect: onFitnessGoalChanged,
         );
-      case 6:
+      case 7:
         return OnboardingActivityLevelStep(
           selectedActivityLevel: data.selectedActivityLevel,
           onSelect: onActivityLevelChanged,
         );
-      case 7:
+      case 8:
         return OnboardingDietaryRestrictionsStep(
           selectedDietaryRestrictions: data.selectedDietaryRestrictions,
           restrictions: [
@@ -98,7 +105,7 @@ class OnboardingStepBuilder {
           ],
           onSelect: onDietaryRestrictionChanged,
         );
-      case 8:
+      case 9:
         return OnboardingWorkoutStylesStep(
           selectedWorkoutStyles: data.selectedWorkoutStyles,
           styles: [
@@ -109,14 +116,14 @@ class OnboardingStepBuilder {
           ],
           onSelect: onWorkoutStyleChanged,
         );
-      case 9:
+      case 10:
         return OnboardingWeeklyWorkoutGoalStep(
           selectedDaysPerWeek: data.weeklyWorkoutDays,
           selectedSpecificDays: data.specificWorkoutDays,
           onDaysPerWeekChanged: onWeeklyWorkoutDaysChanged,
           onSpecificDaysChanged: onSpecificWorkoutDaysChanged,
         );
-      case 10:
+      case 11:
         return OnboardingFoodPreferencesStep(
           preferredCuisines: data.preferredCuisines,
           onAddCuisine: onAddCuisine,
@@ -131,22 +138,22 @@ class OnboardingStepBuilder {
           avoidController: data.avoidController,
           favoriteController: data.favoriteController,
         );
-      case 11:
+      case 12:
         return OnboardingAllergiesStep(
           selectedAllergies: data.selectedAllergies,
           onAllergiesChanged: onAllergiesChanged,
         );
-      case 12:
+      case 13:
         return OnboardingMealTimingStep(
           selectedPreferences: data.mealTimingPreferences,
           onPreferencesChanged: onMealTimingChanged,
         );
-      case 13:
+      case 14:
         return OnboardingBatchCookingStep(
           selectedPreferences: data.batchCookingPreferences,
           onPreferencesChanged: onBatchCookingChanged,
         );
-      case 14:
+      case 15:
         return OnboardingWorkoutNotificationsStepWithActions(
           selectedTime: data.workoutNotificationTime,
           notificationsEnabled: data.workoutNotificationsEnabled,
@@ -154,6 +161,10 @@ class OnboardingStepBuilder {
           onNotificationsChanged: onNotificationsChanged,
           onSkip: onSkip,
           onEnable: onEnable,
+        );
+      case 16:
+        return OnboardingRatingStep(
+          onContinue: onComplete,
         );
       default:
         return const SizedBox.shrink();
@@ -206,6 +217,7 @@ class OnboardingData {
   int age = 25;
   double weight = 70.0;
   double height = 170.0;
+  double desiredWeight = 65.0;
   String gender = 'Male';
   TextEditingController cuisineController = TextEditingController();
   TextEditingController avoidController = TextEditingController();

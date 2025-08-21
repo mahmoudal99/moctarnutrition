@@ -33,8 +33,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void initState() {
     super.initState();
     _steps = OnboardingStepsConfig.getSteps();
-    // Insert BMI step after age (index 4)
-    _steps.insert(4, OnboardingStepsConfig.getBMIStep());
+    // Insert BMI step after desired weight (index 5)
+    _steps.insert(5, OnboardingStepsConfig.getBMIStep());
   }
 
   @override
@@ -72,50 +72,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       stepIndex: index,
                       data: _data,
                       onFitnessGoalChanged: (goal) {
-                        setState(() {
+        setState(() {
                           _data.selectedFitnessGoal = goal;
-                        });
-                      },
+        });
+      },
                       onActivityLevelChanged: (level) {
-                        setState(() {
+        setState(() {
                           _data.selectedActivityLevel = level;
-                        });
-                      },
+        });
+      },
                       onDietaryRestrictionChanged: (restriction) {
-                        setState(() {
-                          if (restriction == 'None') {
+        setState(() {
+          if (restriction == 'None') {
                             _data.selectedDietaryRestrictions.clear();
                             _data.selectedDietaryRestrictions.add('None');
-                          } else {
+          } else {
                             _data.selectedDietaryRestrictions.remove('None');
                             if (_data.selectedDietaryRestrictions.contains(restriction)) {
                               _data.selectedDietaryRestrictions.remove(restriction);
-                            } else {
+            } else {
                               _data.selectedDietaryRestrictions.add(restriction);
-                            }
-                          }
-                        });
-                      },
+            }
+          }
+        });
+      },
                       onWorkoutStyleChanged: (style) {
-                        setState(() {
+        setState(() {
                           if (_data.selectedWorkoutStyles.contains(style)) {
                             _data.selectedWorkoutStyles.remove(style);
-                          } else {
+          } else {
                             _data.selectedWorkoutStyles.add(style);
-                          }
-                        });
-                      },
+          }
+        });
+      },
                       onWeeklyWorkoutDaysChanged: (days) {
-                        setState(() {
+        setState(() {
                           _data.weeklyWorkoutDays = days;
-                        });
-                      },
+        });
+      },
                       onSpecificWorkoutDaysChanged: (days) {
-                        setState(() {
+        setState(() {
                           _data.specificWorkoutDays = days;
-                        });
-                      },
-                      onAddCuisine: (cuisine) {
+        });
+      },
+      onAddCuisine: (cuisine) {
                         if (cuisine.isNotEmpty && !_data.preferredCuisines.contains(cuisine)) {
                           setState(() => _data.preferredCuisines.add(cuisine));
                         }
@@ -123,15 +123,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onRemoveCuisine: (cuisine) {
                         setState(() => _data.preferredCuisines.remove(cuisine));
                       },
-                      onAddAvoid: (food) {
+      onAddAvoid: (food) {
                         if (food.isNotEmpty && !_data.foodsToAvoid.contains(food)) {
                           setState(() => _data.foodsToAvoid.add(food));
-                        }
-                      },
+        }
+      },
                       onRemoveAvoid: (food) {
                         setState(() => _data.foodsToAvoid.remove(food));
                       },
-                      onAddFavorite: (food) {
+      onAddFavorite: (food) {
                         if (food.isNotEmpty && !_data.favoriteFoods.contains(food)) {
                           setState(() => _data.favoriteFoods.add(food));
                         }
@@ -139,45 +139,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onRemoveFavorite: (food) {
                         setState(() => _data.favoriteFoods.remove(food));
                       },
-                      onAllergiesChanged: (allergies) {
-                        setState(() {
+      onAllergiesChanged: (allergies) {
+        setState(() {
                           _data.selectedAllergies.clear();
                           _data.selectedAllergies.addAll(allergies);
-                        });
-                      },
+        });
+      },
                       onMealTimingChanged: (preferences) {
-                        setState(() {
+        setState(() {
                           _data.mealTimingPreferences = preferences;
-                        });
-                      },
+        });
+      },
                       onBatchCookingChanged: (preferences) {
-                        setState(() {
+        setState(() {
                           _data.batchCookingPreferences = preferences;
-                        });
-                      },
-                      onTimeChanged: (time) {
-                        setState(() {
+        });
+      },
+      onTimeChanged: (time) {
+        setState(() {
                           _data.workoutNotificationTime = time ?? const TimeOfDay(hour: 9, minute: 0);
-                        });
-                      },
-                      onNotificationsChanged: (enabled) {
-                        setState(() {
+        });
+      },
+      onNotificationsChanged: (enabled) {
+        setState(() {
                           _data.workoutNotificationsEnabled = enabled;
-                        });
-                      },
-                      onSkip: () {
-                        _completeOnboarding();
-                      },
-                      onEnable: () async {
+        });
+      },
+      onSkip: () {
+        _completeOnboarding();
+      },
+      onEnable: () async {
                         final permissionResult = await NotificationService.requestNotificationPermission();
-                        if (permissionResult.isGranted) {
-                          setState(() {
+        if (permissionResult.isGranted) {
+          setState(() {
                             _data.workoutNotificationsEnabled = true;
-                          });
-                          await NotificationService.showTestNotification();
-                        }
-                        _completeOnboarding();
-                      },
+          });
+          await NotificationService.showTestNotification();
+        }
+        _completeOnboarding();
+      },
                       onComplete: _completeOnboarding,
                     ),
                   );
@@ -190,18 +190,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               totalSteps: _steps.length,
               isNextEnabled: _isNextEnabled(),
               onBack: () {
-                HapticFeedback.mediumImpact();
-                _pageController.previousPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              },
+                      HapticFeedback.mediumImpact();
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
               onNext: () {
-                HapticFeedback.mediumImpact();
-                _pageController.nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
+                          HapticFeedback.mediumImpact();
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
               },
               onComplete: _completeOnboarding,
             ),
@@ -212,25 +212,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   ScrollPhysics _getPageViewPhysics() {
-    if (_currentPage == 5 && _data.selectedDietaryRestrictions.isEmpty) {
+    // Disable page swiping for the desired weight step to allow weight selector interaction
+    if (_currentPage == 4) {
       return const NeverScrollableScrollPhysics();
     }
-    if (_currentPage == 8 && _data.selectedWorkoutStyles.isEmpty) {
+    if (_currentPage == 8 && _data.selectedDietaryRestrictions.isEmpty) {
+      return const NeverScrollableScrollPhysics();
+    }
+    if (_currentPage == 10 && _data.selectedWorkoutStyles.isEmpty) {
       return const NeverScrollableScrollPhysics();
     }
     return const BouncingScrollPhysics();
   }
 
   bool _isNextEnabled() {
-    final isDietaryStep = _currentPage == 7;
-    final isWorkoutStep = _currentPage == 8;
-    final isWeeklyWorkoutGoalStep = _currentPage == 9;
-    final isFoodPreferencesStep = _currentPage == 10;
-    final isAllergiesStep = _currentPage == 11;
-    final isWorkoutNotificationsStep = _currentPage == 14;
+    final isDietaryStep = _currentPage == 8;
+    final isWorkoutStep = _currentPage == 10;
+    final isWeeklyWorkoutGoalStep = _currentPage == 11;
+    final isFoodPreferencesStep = _currentPage == 12;
+    final isAllergiesStep = _currentPage == 13;
+    final isWorkoutNotificationsStep = _currentPage == 16;
+    final isRatingStep = _currentPage == 17;
 
     if (!isDietaryStep && !isWorkoutStep && !isWeeklyWorkoutGoalStep && 
-        !isFoodPreferencesStep && !isAllergiesStep && !isWorkoutNotificationsStep) {
+        !isFoodPreferencesStep && !isAllergiesStep && !isWorkoutNotificationsStep && !isRatingStep) {
       return true;
     }
 
@@ -269,6 +274,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       age: _data.age,
       weight: _data.weight,
       height: _data.height,
+      desiredWeight: _data.desiredWeight,
       gender: _data.gender,
       preferredCuisines: List<String>.from(_data.preferredCuisines),
       foodsToAvoid: List<String>.from(_data.foodsToAvoid),

@@ -2,12 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
-import '../../../../shared/providers/user_provider.dart';
 import '../../../../shared/services/protein_calculation_service.dart';
 import '../../../../shared/services/calorie_calculation_service.dart';
 import '../../../../shared/services/user_local_storage_service.dart';
@@ -308,84 +305,166 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
   }
 
   Widget _buildResultsSection() {
-    if (_proteinTargets == null) return const SizedBox.shrink();
+    if (_proteinTargets == null || _calorieTargets == null)
+      return const SizedBox.shrink();
 
     return Expanded(
       child: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Congratulations Section
             Center(
               child: Column(
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 75,
+                    height: 75,
                     decoration: BoxDecoration(
-                      gradient: AppConstants.primaryGradient,
+                      color: AppConstants.textPrimary,
                       borderRadius: BorderRadius.circular(40),
                       boxShadow: AppConstants.shadowM,
                     ),
                     child: const Icon(
-                      Icons.fitness_center,
-                      size: 40,
+                      Icons.check,
+                      size: 35,
                       color: AppConstants.surfaceColor,
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingL),
                   Text(
-                    'Your Nutrition Targets',
-                    style: AppTextStyles.heading3,
+                    'Congratulations',
+                    style: AppTextStyles.heading3.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppConstants.textPrimary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppConstants.spacingS),
                   Text(
-                    'Personalized for ${_proteinTargets!.fitnessGoal}',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppConstants.textSecondary,
-                    ),
+                    'your custom plan is ready!',
+                    style: AppTextStyles.bodySmall,
                     textAlign: TextAlign.center,
                   ),
                 ],
               ),
             ),
 
+            const SizedBox(height: AppConstants.spacingL),
+
+            // Nutrition Targets Grid
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: AppConstants.spacingM,
+              mainAxisSpacing: AppConstants.spacingM,
+              childAspectRatio: 1.1,
+              children: [
+                _buildNutritionCard(
+                  'Calories',
+                  '${_calorieTargets!.dailyTarget}',
+                  Icons.local_fire_department,
+                  AppConstants.textPrimary,
+                  0.75, // Progress percentage
+                ),
+                _buildNutritionCard(
+                  'Carbs',
+                  '${_calculateCarbs()}g',
+                  Icons.grain,
+                  const Color(0xFFD4A574), // Light brown
+                  0.65, // Progress percentage
+                ),
+                _buildNutritionCard(
+                  'Protein',
+                  '${_proteinTargets!.dailyTarget}g',
+                  Icons.restaurant,
+                  const Color(0xFFE57373), // Red
+                  0.85, // Progress percentage
+                ),
+                _buildNutritionCard(
+                  'Fats',
+                  '${_calculateFats()}g',
+                  Icons.water_drop,
+                  const Color(0xFF81C784), // Light blue
+                  0.45, // Progress percentage
+                ),
+              ],
+            ),
+
             const SizedBox(height: AppConstants.spacingXL),
 
-            // Daily target cards
-            _buildProteinTargetCard(),
+            // How to reach your goals section
+            Text(
+              'How to reach your goals:',
+              style: AppTextStyles.heading4.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppConstants.textPrimary,
+              ),
+            ),
 
             const SizedBox(height: AppConstants.spacingL),
 
-            _buildCalorieTargetCard(),
+            // Goal cards
+            Column(
+              children: [
+                _buildGoalCard(
+                  Icons.flash_on,
+                  const Color(0xFFE91E63), // Pink
+                  'Use health scores to improve your routine',
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildGoalCard(
+                  Icons.eco, // Avocado-like icon
+                  const Color(0xFF8BC34A), // Green
+                  'Track your food',
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildGoalCard(
+                  Icons.local_fire_department,
+                  const Color(0xFFFF9800), // Orange
+                  'Follow your daily calorie recommendation',
+                ),
+                const SizedBox(height: AppConstants.spacingM),
+                _buildMacroBalanceCard(),
+              ],
+            ),
 
-            const SizedBox(height: AppConstants.spacingL),
+            const SizedBox(height: AppConstants.spacingXL),
 
-            // Meal distribution
-            _buildMealDistributionSection(),
-
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Macro breakdown
-            _buildMacroBreakdownSection(),
-
-            const SizedBox(height: AppConstants.spacingL),
-
-            // Recommendations
-            _buildRecommendationsSection(),
+            // Plan sources text
+            Text(
+              'Plan based on the following sources,',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppConstants.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
 
             const SizedBox(height: AppConstants.spacingXL),
 
             // Continue button
             SizedBox(
               width: double.infinity,
-              child: CustomButton(
-                text: 'Continue to Subscription',
+              height: 55,
+              child: ElevatedButton(
                 onPressed: () {
                   context.go('/subscription');
                 },
-                type: ButtonType.primary,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppConstants.textPrimary,
+                  foregroundColor: AppConstants.surfaceColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Let\'s get started!',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppConstants.surfaceColor,
+                  ),
+                ),
               ),
             ),
           ],
@@ -394,245 +473,132 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
     );
   }
 
-  Widget _buildProteinTargetCard() {
+  Widget _buildNutritionCard(
+      String title, String value, IconData icon, Color color, double progress) {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      decoration: BoxDecoration(
-        gradient: AppConstants.primaryGradient,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        boxShadow: AppConstants.shadowM,
-      ),
-      child: Column(
-        children: [
-          Text(
-            '${_proteinTargets!.dailyTarget}g',
-            style: AppTextStyles.heading1.copyWith(
-              color: AppConstants.surfaceColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            'Daily Protein Target',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppConstants.surfaceColor.withOpacity(0.9),
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildTargetDetail(
-                '${_proteinTargets!.proteinPerKg.toStringAsFixed(1)}g/kg',
-                'Per kg',
-              ),
-              _buildTargetDetail(
-                '${_proteinTargets!.proteinPerLb.toStringAsFixed(1)}g/lb',
-                'Per lb',
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            'Based on ${_proteinTargets!.weightBase} (${_proteinTargets!.baseWeight.toStringAsFixed(1)}kg)',
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.surfaceColor.withOpacity(0.8),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalorieTargetCard() {
-    if (_calorieTargets == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      decoration: BoxDecoration(
-        gradient: AppConstants.secondaryGradient,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        boxShadow: AppConstants.shadowM,
-      ),
-      child: Column(
-        children: [
-          Text(
-            '${_calorieTargets!.dailyTarget}',
-            style: AppTextStyles.heading1.copyWith(
-              color: AppConstants.surfaceColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            'Daily Calorie Target',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppConstants.surfaceColor.withOpacity(0.9),
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildTargetDetail(
-                '${_calorieTargets!.rmr}',
-                'RMR',
-              ),
-              _buildTargetDetail(
-                '${_calorieTargets!.tdee}',
-                'TDEE',
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            '${_calorieTargets!.activityLevel} • ${_calorieTargets!.bodyFatPercentage.toStringAsFixed(1)}% body fat',
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.surfaceColor.withOpacity(0.8),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTargetDetail(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: AppTextStyles.bodyLarge.copyWith(
-            color: AppConstants.surfaceColor,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: AppConstants.surfaceColor.withOpacity(0.8),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMealDistributionSection() {
-    if (_proteinTargets!.mealDistribution == null)
-      return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Meal Distribution',
-          style: AppTextStyles.heading4,
-        ),
-        const SizedBox(height: AppConstants.spacingM),
-        ..._proteinTargets!.mealDistribution!
-            .map((meal) => _buildMealCard(meal)),
-      ],
-    );
-  }
-
-  Widget _buildMealCard(MealProteinDistribution meal) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderRadius: BorderRadius.circular(AppConstants.radiusL),
         border: Border.all(
           color: AppConstants.textTertiary.withOpacity(0.2),
           width: 1,
         ),
+        boxShadow: AppConstants.shadowS,
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: Text(
-                '${meal.mealNumber}',
+          // Header with icon and title
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 20,
+              ),
+              const SizedBox(width: AppConstants.spacingXS),
+              Text(
+                title,
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppConstants.primaryColor,
                   fontWeight: FontWeight.w600,
+                  color: AppConstants.textPrimary,
                 ),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: AppConstants.spacingM),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+
+          const SizedBox(height: AppConstants.spacingM),
+
+          // Circular progress indicator
+          SizedBox(
+            width: 75,
+            height: 75,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                Text(
-                  meal.mealName,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
+                // Background circle
+                SizedBox(
+                  width: 75,
+                  height: 75,
+                  child: CircularProgressIndicator(
+                    value: 1.0,
+                    strokeWidth: 8,
+                    backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
                   ),
                 ),
+                // Progress circle
+                SizedBox(
+                  width: 75,
+                  height: 75,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 8,
+                    backgroundColor: Colors.transparent,
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ),
+                ),
+                // Value text
                 Text(
-                  '${meal.proteinTarget}g protein',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppConstants.textSecondary,
+                  value,
+                  style: AppTextStyles.heading5.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppConstants.textPrimary,
                   ),
                 ),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.spacingS,
-              vertical: 4,
-            ),
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor,
-              borderRadius: BorderRadius.circular(AppConstants.radiusS),
-            ),
-            child: Text(
-              '${meal.proteinTarget}g',
-              style: AppTextStyles.caption.copyWith(
-                color: AppConstants.surfaceColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
+
+          const Spacer(),
         ],
       ),
     );
   }
 
-  Widget _buildMacroBreakdownSection() {
-    if (_calorieTargets == null) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Macronutrient Breakdown',
-          style: AppTextStyles.heading4,
-        ),
-        const SizedBox(height: AppConstants.spacingM),
-        _buildMacroCard('Protein', _calorieTargets!.macros.protein,
-            AppConstants.primaryColor),
-        const SizedBox(height: AppConstants.spacingS),
-        _buildMacroCard(
-            'Fat', _calorieTargets!.macros.fat, AppConstants.warningColor),
-        const SizedBox(height: AppConstants.spacingS),
-        _buildMacroCard('Carbohydrates', _calorieTargets!.macros.carbs,
-            AppConstants.successColor),
-      ],
-    );
+  int _calculateCarbs() {
+    // Calculate carbs as 40% of total calories
+    final totalCalories = _calorieTargets!.dailyTarget;
+    final carbCalories = totalCalories * 0.4;
+    return (carbCalories / 4).round(); // 4 calories per gram of carbs
   }
 
-  Widget _buildMacroCard(String name, MacroNutrient macro, Color color) {
+  int _calculateFats() {
+    // Calculate fats as 25% of total calories
+    final totalCalories = _calorieTargets!.dailyTarget;
+    final fatCalories = totalCalories * 0.25;
+    return (fatCalories / 9).round(); // 9 calories per gram of fat
+  }
+
+  double _calculateWeightLoss() {
+    // Calculate weight loss based on calorie deficit
+    // Assuming a 500 calorie daily deficit leads to ~0.5kg per week
+    // For 3 months (12 weeks), that's about 6kg
+    return 5.0; // Default to 5kg for now
+  }
+
+  String _getTargetDate() {
+    // Calculate target date (3 months from now)
+    final now = DateTime.now();
+    final targetDate = DateTime(now.year, now.month + 3, now.day);
+    final months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return '${months[targetDate.month - 1]} ${targetDate.day}';
+  }
+
+  Widget _buildGoalCard(IconData icon, Color color, String text) {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
@@ -642,51 +608,29 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
           color: AppConstants.textTertiary.withOpacity(0.2),
           width: 1,
         ),
+        boxShadow: AppConstants.shadowS,
       ),
       child: Row(
         children: [
           Container(
-            width: 12,
-            height: 12,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               color: color,
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: AppConstants.surfaceColor,
+              size: 18,
             ),
           ),
           const SizedBox(width: AppConstants.spacingM),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  '${macro.grams}g • ${macro.calories} cal',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppConstants.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.spacingS,
-              vertical: 4,
-            ),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppConstants.radiusS),
-            ),
             child: Text(
-              '${macro.percentage}%',
-              style: AppTextStyles.caption.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
+              text,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppConstants.textPrimary,
               ),
             ),
           ),
@@ -695,34 +639,8 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
     );
   }
 
-  Widget _buildRecommendationsSection() {
-    final allRecommendations = <String>[];
-
-    // Add protein recommendations
-    allRecommendations.addAll(_proteinTargets!.recommendations);
-
-    // Add calorie recommendations
-    if (_calorieTargets != null) {
-      allRecommendations.addAll(_calorieTargets!.recommendations);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Recommendations',
-          style: AppTextStyles.heading4,
-        ),
-        const SizedBox(height: AppConstants.spacingM),
-        ...allRecommendations
-            .map((recommendation) => _buildRecommendationItem(recommendation)),
-      ],
-    );
-  }
-
-  Widget _buildRecommendationItem(String recommendation) {
+  Widget _buildMacroBalanceCard() {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
@@ -731,26 +649,88 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
           color: AppConstants.textTertiary.withOpacity(0.2),
           width: 1,
         ),
+        boxShadow: AppConstants.shadowS,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 6,
-            height: 6,
-            margin: const EdgeInsets.only(top: 6),
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor,
-              shape: BoxShape.circle,
+          // Three overlapping circular icons
+          SizedBox(
+            width: 40,
+            height: 32,
+            child: Stack(
+              children: [
+                // Brown circle with wheat symbol
+                Positioned(
+                  left: 0,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4A574), // Brown
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppConstants.surfaceColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.grain,
+                      color: AppConstants.surfaceColor,
+                      size: 12,
+                    ),
+                  ),
+                ),
+                // Red circle with lightning bolt
+                Positioned(
+                  left: 8,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE57373), // Red
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppConstants.surfaceColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.flash_on,
+                      color: AppConstants.surfaceColor,
+                      size: 12,
+                    ),
+                  ),
+                ),
+                // Blue circle with water drop
+                Positioned(
+                  left: 16,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF81C784), // Blue
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppConstants.surfaceColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.water_drop,
+                      color: AppConstants.surfaceColor,
+                      size: 12,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: AppConstants.spacingM),
           Expanded(
             child: Text(
-              recommendation,
-              style: AppTextStyles.bodySmall.copyWith(
+              'Balance your carbs, proteins, and fat',
+              style: AppTextStyles.bodyMedium.copyWith(
                 color: AppConstants.textPrimary,
-                height: 1.4,
               ),
             ),
           ),
