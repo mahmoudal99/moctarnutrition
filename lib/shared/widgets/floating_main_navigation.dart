@@ -48,6 +48,11 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
 
     return [
       const _NavItem(
+        icon: Icons.home,
+        label: 'Home',
+        route: '/home',
+      ),
+      const _NavItem(
         icon: Icons.fitness_center,
         label: 'Workouts',
         route: '/workouts',

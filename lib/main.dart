@@ -28,6 +28,7 @@ import 'features/admin/presentation/screens/admin_user_detail_screen.dart';
 import 'features/admin/presentation/screens/admin_home_screen.dart';
 import 'features/workouts/presentation/screens/workouts_screen.dart';
 import 'features/workouts/presentation/screens/workout_details_screen.dart';
+import 'features/home/presentation/screens/home_screen.dart';
 import 'features/profile/presentation/screens/workout_preferences_screen.dart';
 import 'features/profile/presentation/screens/nutrition_preferences_screen.dart';
 import 'features/profile/presentation/screens/privacy_policy_screen.dart';
@@ -70,7 +71,7 @@ GoRouter createRouter(AuthProvider authProvider) {
             // The redirect will handle navigation, just show a placeholder
             return const SizedBox.shrink();
           }
-          return const FloatingMainNavigation(child: WorkoutsScreen());
+          return const FloatingMainNavigation(child: HomeScreen());
         },
       ),
 
@@ -123,7 +124,7 @@ GoRouter createRouter(AuthProvider authProvider) {
         routes: [
           GoRoute(
             path: '/home',
-            builder: (context, state) => const WorkoutsScreen(),
+            builder: (context, state) => const HomeScreen(),
           ),
           GoRoute(
             path: '/workouts',
