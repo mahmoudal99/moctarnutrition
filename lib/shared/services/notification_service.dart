@@ -554,8 +554,7 @@ class NotificationService {
 
         final targetDate = DateTime.now().add(Duration(days: dayOffset));
         final dayName = _getDayName(targetDate.weekday);
-        _logger.d('Checking day $dayOffset: $dayName (${targetDate.toString().split(' ')[0]})');
-        
+
         // Find the workout for this day
         DailyWorkout? dailyWorkout;
         try {
