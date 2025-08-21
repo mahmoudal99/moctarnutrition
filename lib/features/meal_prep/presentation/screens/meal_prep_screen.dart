@@ -21,14 +21,13 @@ class MealPrepScreen extends StatefulWidget {
 class _MealPrepScreenState extends State<MealPrepScreen> {
   static final _logger = Logger();
   String? _cheatDay;
-  bool _isLoadingMealPlan = false; // Add flag to prevent multiple simultaneous calls
+  bool _isLoadingMealPlan = false;
+  bool _hasAttemptedLoad = false; // Track if we've attempted to load
 
   @override
   void initState() {
     super.initState();
     _logger.d('MealPrepScreen - initState called');
-    // Remove the call to _loadMealPlanIfNeeded from initState
-    // Let the build method handle loading when conditions are right
   }
 
   /// Load meal plan if needed
@@ -49,6 +48,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
     // Set loading flag
     setState(() {
       _isLoadingMealPlan = true;
+      _hasAttemptedLoad = true;
     });
     
     try {
@@ -140,52 +140,55 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           return const MealPlanLoadingState();
         }
 
+        // Check if user is authenticated
+        if (!authProvider.isAuthenticated || authProvider.userModel == null) {
+          return const WaitingForMealPlan();
+        }
+
         // Check if user changed and meal plan needs to be reloaded
-        if (authProvider.isAuthenticated &&
-            authProvider.userModel != null &&
-            mealPlanProvider.mealPlan != null &&
+        if (mealPlanProvider.mealPlan != null &&
             mealPlanProvider.mealPlan!.userId != authProvider.userModel!.id) {
           _logger.d('User changed, reloading meal plan');
           // Use Future.microtask to avoid build-time side effects
           Future.microtask(() => _loadMealPlanIfNeeded());
         }
 
-        // Trigger meal plan loading if user is authenticated but no meal plan is loaded
-        if (authProvider.isAuthenticated &&
-            authProvider.userModel != null &&
-            mealPlanProvider.mealPlan == null &&
-            !mealPlanProvider.isLoading &&
-            !_isLoadingMealPlan) {
-          _logger.d('User authenticated but no meal plan loaded, triggering load');
-          // Use Future.microtask to avoid build-time side effects
-          Future.microtask(() => _loadMealPlanIfNeeded());
-        }
-
+        // Show loading state if we're currently loading
         if (mealPlanProvider.isLoading || _isLoadingMealPlan) {
           return const MealPlanLoadingState();
         }
 
+        // Show error state if there's an error
         if (mealPlanProvider.error != null) {
           return _buildErrorState(mealPlanProvider.error!);
         }
 
-        if (mealPlanProvider.mealPlan == null) {
-          return const WaitingForMealPlan();
+        // If we have a meal plan, show it
+        if (mealPlanProvider.mealPlan != null) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Meal Plan'),
+            ),
+            body: RefreshIndicator(
+              onRefresh: _refreshMealPlan,
+              child: MealPlanView(
+                mealPlan: mealPlanProvider.mealPlan!,
+                user: authProvider.userModel,
+                cheatDay: _cheatDay,
+              ),
+            ),
+          );
         }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Meal Plan'),
-          ),
-          body: RefreshIndicator(
-            onRefresh: _refreshMealPlan,
-            child: MealPlanView(
-              mealPlan: mealPlanProvider.mealPlan!,
-              user: authProvider.userModel,
-              cheatDay: _cheatDay,
-            ),
-          ),
-        );
+        // If we haven't attempted to load yet, trigger the load
+        if (!_hasAttemptedLoad) {
+          _logger.d('First time loading meal plan, triggering load');
+          Future.microtask(() => _loadMealPlanIfNeeded());
+          return const MealPlanLoadingState();
+        }
+
+        // If we've attempted to load but have no meal plan, show waiting state
+        return const WaitingForMealPlan();
       },
     );
   }

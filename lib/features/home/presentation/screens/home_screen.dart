@@ -48,41 +48,14 @@ class _HomeScreenState extends State<HomeScreen> {
       final user = authProvider.userModel;
 
       if (user != null) {
-        _logger.d('Calculating calorie targets for user: ${user.name}');
-        _logger.d('User preferences:');
-        _logger.d('  Age: ${user.preferences.age}');
-        _logger.d('  Weight: ${user.preferences.weight}kg');
-        _logger.d('  Height: ${user.preferences.height}cm');
-        _logger.d('  Gender: ${user.preferences.gender}');
-        _logger.d('  Activity Level: ${user.preferences.activityLevel}');
-        _logger.d('  Fitness Goal: ${user.preferences.fitnessGoal}');
-        _logger.d('  Target Calories: ${user.preferences.targetCalories}');
-
         _calorieTargets =
             CalorieCalculationService.calculateCalorieTargets(user);
-
-        _logger.d('Calorie targets calculated:');
-        _logger.d('  RMR: ${_calorieTargets?.rmr}');
-        _logger.d('  TDEE: ${_calorieTargets?.tdee}');
-        _logger.d('  Daily Target: ${_calorieTargets?.dailyTarget}');
-        _logger.d('  Protein: ${_calorieTargets?.macros.protein.grams}g');
-        _logger.d('  Carbs: ${_calorieTargets?.macros.carbs.grams}g');
-        _logger.d('  Fat: ${_calorieTargets?.macros.fat.grams}g');
 
         // Load meal plan if needed
         await _loadMealPlanIfNeeded(authProvider, mealPlanProvider);
 
         // Load current day's meals
         _loadCurrentDayMeals(mealPlanProvider);
-
-        _logger.d('User data loaded successfully');
-        _logger.d('User: ${user.name}');
-        _logger.d('Target calories: ${_calorieTargets?.dailyTarget}');
-        _logger.d('Meal plan loaded: ${mealPlanProvider.mealPlan != null}');
-        if (mealPlanProvider.mealPlan != null) {
-          _logger.d(
-              'Meal plan has ${mealPlanProvider.mealPlan!.mealDays.length} days');
-        }
       }
     } catch (e) {
       _logger.e('Error loading user data: $e');
@@ -96,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadMealPlanIfNeeded(
       AuthProvider authProvider, MealPlanProvider mealPlanProvider) async {
     if (_isLoadingMealPlan) {
-      _logger.d('Already loading meal plan, skipping duplicate call');
       return;
     }
 
@@ -107,7 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       // Check if user is authenticated
       if (!authProvider.isAuthenticated || authProvider.userModel == null) {
-        _logger.w('Cannot load meal plan: user not authenticated');
         return;
       }
 
@@ -115,17 +86,13 @@ class _HomeScreenState extends State<HomeScreen> {
       final currentMealPlan = mealPlanProvider.mealPlan;
       if (currentMealPlan != null) {
         if (currentMealPlan.userId == authProvider.userModel!.id) {
-          _logger.d('Meal plan already loaded for current user');
           return;
         } else {
-          _logger
-              .d('Meal plan belongs to different user, clearing and reloading');
           mealPlanProvider.clearMealPlan();
         }
       }
 
       // Load meal plan for current user
-      _logger.d('Loading meal plan for user ${authProvider.userModel!.id}');
       await mealPlanProvider.loadMealPlan(authProvider.userModel!.id);
     } finally {
       setState(() {
@@ -141,60 +108,23 @@ class _HomeScreenState extends State<HomeScreen> {
       final selectedDateOnly =
           DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
 
-      _logger.d(
-          'Looking for meal day on: ${selectedDateOnly.toString().split(' ')[0]}');
-      _logger.d('Available meal days:');
-      for (final day in mealPlan.mealDays) {
-        final dayDateOnly =
-            DateTime(day.date.year, day.date.month, day.date.day);
-        _logger.d(
-            '  ${dayDateOnly.toString().split(' ')[0]} - ${day.meals.length} meals');
-      }
-
       MealDay? mealDay;
       try {
         mealDay = mealPlan.mealDays.firstWhere(
           (day) {
             final dayDateOnly =
                 DateTime(day.date.year, day.date.month, day.date.day);
-            final isMatch = dayDateOnly.isAtSameMomentAs(selectedDateOnly);
-            _logger.d(
-                'Comparing ${dayDateOnly.toString().split(' ')[0]} with ${selectedDateOnly.toString().split(' ')[0]}: $isMatch');
-            return isMatch;
+            return dayDateOnly.isAtSameMomentAs(selectedDateOnly);
           },
         );
       } catch (e) {
         // No meal day found for this date
         mealDay = null;
-        _logger.d('No meal day found for selected date: ${e.toString()}');
       }
 
       setState(() {
         _currentDayMeals = mealDay;
       });
-
-      _logger.d(
-          'Loaded meals for ${_selectedDate.toString().split(' ')[0]}: ${mealDay?.meals.length ?? 0} meals');
-
-      // Debug logging for nutrition data
-      if (mealDay != null) {
-        _logger.d('Meal Day Nutrition Data:');
-        _logger.d('  Total Calories: ${mealDay.totalCalories}');
-        _logger.d('  Total Protein: ${mealDay.totalProtein}g');
-        _logger.d('  Total Carbs: ${mealDay.totalCarbs}g');
-        _logger.d('  Total Fat: ${mealDay.totalFat}g');
-
-        for (int i = 0; i < mealDay.meals.length; i++) {
-          final meal = mealDay.meals[i];
-          _logger.d('  Meal ${i + 1} (${meal.type}): ${meal.name}');
-          _logger.d('    Calories: ${meal.nutrition.calories}');
-          _logger.d('    Protein: ${meal.nutrition.protein}g');
-          _logger.d('    Carbs: ${meal.nutrition.carbs}g');
-          _logger.d('    Fat: ${meal.nutrition.fat}g');
-        }
-      } else {
-        _logger.d('No meal day found for selected date');
-      }
     }
   }
 
@@ -207,8 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final mealPlanProvider =
         Provider.of<MealPlanProvider>(context, listen: false);
     _loadCurrentDayMeals(mealPlanProvider);
-
-    _logger.d('Selected date: $date');
   }
 
   @override

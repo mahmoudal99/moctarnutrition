@@ -176,7 +176,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           });
           await NotificationService.showTestNotification();
         }
-        _completeOnboarding();
+        // Go to next step instead of completing onboarding
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
       },
                       onComplete: _completeOnboarding,
                     ),
