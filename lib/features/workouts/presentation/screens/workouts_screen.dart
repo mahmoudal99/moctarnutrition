@@ -1,5 +1,6 @@
 import 'package:champions_gym_app/shared/models/workout_plan_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -90,6 +91,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
     
     if (_scrollOffset > _scrollThreshold && _toggleAnimationController.value == 0) {
       _toggleAnimationController.forward();
+      // Add haptic feedback when toggle appears
+      HapticFeedback.selectionClick();
     } else if (_scrollOffset <= _scrollThreshold && _toggleAnimationController.value == 1) {
       _toggleAnimationController.reverse();
     }
