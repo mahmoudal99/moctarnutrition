@@ -467,15 +467,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     size: 16,
                   ),
                   const SizedBox(width: 4),
-                  // AnimatedCounter( // Removed as per edit hint
-                  //   value: _currentStreak.toDouble(),
-                  //   style: AppTextStyles.bodySmall.copyWith(
-                  //     fontWeight: FontWeight.w600,
-                  //     color: Colors.black,
-                  //   ),
-                  //   duration: const Duration(milliseconds: 600),
-                  //   curve: Curves.easeOutCubic,
-                  // ),
+                  Text(
+                    '$_currentStreak',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
                 ],
               ),
             ),
