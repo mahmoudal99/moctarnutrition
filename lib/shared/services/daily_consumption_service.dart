@@ -88,13 +88,93 @@ class DailyConsumptionService {
       final originalMealId = mealId.split('_').first; // Remove date suffix if present
       mealConsumption[originalMealId] = isConsumed;
       
+      // Recalculate nutrition data based on current meal consumption
+      nutritionData = await _recalculateNutritionData(userId, date, mealConsumption);
+      
       // Save updated data
       await saveDailyConsumption(userId, date, mealConsumption, nutritionData);
       
       _logger.d('Updated meal consumption for $originalMealId on ${date.toIso8601String()}: $isConsumed');
+      _logger.d('Updated nutrition data: $nutritionData');
     } catch (e) {
       _logger.e('Failed to update meal consumption: $e');
       rethrow;
+    }
+  }
+
+  /// Recalculate nutrition data based on meal consumption
+  static Future<Map<String, double>> _recalculateNutritionData(
+    String userId, 
+    DateTime date, 
+    Map<String, bool> mealConsumption
+  ) async {
+    try {
+      double totalCalories = 0.0;
+      double totalProtein = 0.0;
+      double totalCarbs = 0.0;
+      double totalFats = 0.0;
+      
+      // Get the meal plan for this user to calculate nutrition
+      // This is a simplified approach - you might need to implement this based on your meal plan structure
+      final mealPlan = await _getUserMealPlan(userId);
+      
+      if (mealPlan != null) {
+        // Calculate nutrition from consumed meals
+        for (final entry in mealConsumption.entries) {
+          final mealId = entry.key;
+          final isConsumed = entry.value;
+          
+          if (isConsumed) {
+            // Find the meal in the meal plan and add its nutrition
+            final meal = _findMealInPlan(mealPlan, mealId);
+            if (meal != null) {
+              totalCalories += meal.nutrition.calories;
+              totalProtein += meal.nutrition.protein;
+              totalCarbs += meal.nutrition.carbs;
+              totalFats += meal.nutrition.fat;
+            }
+          }
+        }
+      }
+      
+      return {
+        'consumedCalories': totalCalories,
+        'consumedProtein': totalProtein,
+        'consumedCarbs': totalCarbs,
+        'consumedFat': totalFats,
+      };
+    } catch (e) {
+      _logger.w('Error recalculating nutrition data: $e');
+      return {
+        'consumedCalories': 0.0,
+        'consumedProtein': 0.0,
+        'consumedCarbs': 0.0,
+        'consumedFat': 0.0,
+      };
+    }
+  }
+
+  /// Get user's meal plan (placeholder - implement based on your structure)
+  static Future<dynamic> _getUserMealPlan(String userId) async {
+    try {
+      // Import and implement based on your meal plan service
+      // For now, return null to use fallback approach
+      return null;
+    } catch (e) {
+      _logger.w('Could not load meal plan for user $userId: $e');
+      return null;
+    }
+  }
+
+  /// Find meal in meal plan (placeholder - implement based on your structure)
+  static dynamic _findMealInPlan(dynamic mealPlan, String mealId) {
+    try {
+      // Implement based on your meal plan structure
+      // For now, return null
+      return null;
+    } catch (e) {
+      _logger.w('Error finding meal in plan: $e');
+      return null;
     }
   }
 

@@ -136,6 +136,18 @@ class AppTextStyles {
     color: AppConstants.textSecondary,
   );
   
+  static TextStyle get body1 => GoogleFonts.nunitoSans(
+    fontSize: 16,
+    fontWeight: FontWeight.normal,
+    color: AppConstants.textPrimary,
+  );
+  
+  static TextStyle get body2 => GoogleFonts.nunitoSans(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+    color: AppConstants.textSecondary,
+  );
+  
   static TextStyle get caption => GoogleFonts.nunitoSans(
     fontSize: 12,
     fontWeight: FontWeight.normal,
