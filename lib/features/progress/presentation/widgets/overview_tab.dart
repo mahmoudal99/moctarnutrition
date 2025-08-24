@@ -161,16 +161,41 @@ class OverviewTab extends StatelessWidget {
   Widget _buildWeekProgressIndicator(DateTime? lastCompletedDate, int currentStreak) {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     
-    // Use streak count to determine how many days to mark as completed
+    // Calculate which days should be highlighted based on the streak
     return Row(
       children: days.asMap().entries.map((entry) {
         final index = entry.key;
         final day = entry.value;
         
-        // Mark as completed based on streak count (right to left)
-        // If streak is 1, only the last day (Sunday) is completed
-        // If streak is 3, the last 3 days are completed
-        bool isCompleted = index >= (7 - currentStreak);
+        // Calculate if this day should be completed
+        // Monday = 0, Tuesday = 1, ..., Sunday = 6
+        // For a 2-day streak ending on Monday (today), highlight Monday (index 0) and Sunday (index 6)
+        bool isCompleted = false;
+        
+        if (currentStreak > 0) {
+          // Get today's weekday (1 = Monday, 7 = Sunday)
+          final today = DateTime.now();
+          final todayWeekday = today.weekday; // 1 = Monday, 7 = Sunday
+          
+          // Convert to 0-based index for our array
+          final todayIndex = todayWeekday - 1; // Monday = 0, Sunday = 6
+          
+          // Calculate which days in the past should be highlighted
+          // For a 2-day streak, highlight today and yesterday
+          final daysToHighlight = currentStreak;
+          
+          // Check if this index represents a day that should be highlighted
+          // We need to go back from today by the streak count
+          for (int i = 0; i < daysToHighlight; i++) {
+            final targetWeekday = todayWeekday - i;
+            final targetIndex = (targetWeekday - 1 + 7) % 7; // Handle negative numbers
+            
+            if (index == targetIndex) {
+              isCompleted = true;
+              break;
+            }
+          }
+        }
         
         return Expanded(
           child: Container(
