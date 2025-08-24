@@ -8,6 +8,7 @@ import '../../../../shared/providers/meal_plan_provider.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/calorie_calculation_service.dart';
 import '../../../../shared/services/daily_consumption_service.dart';
+import '../../../../shared/services/streak_service.dart';
 import '../widgets/day_selector.dart';
 import '../widgets/calorie_summary_card.dart';
 import '../widgets/nutrition_goals_card.dart';
@@ -26,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   MealDay? _currentDayMeals;
   bool _isLoading = true;
   bool _isLoadingMealPlan = false;
+  int _currentStreak = 0; // Add streak tracking
 
   @override
   void initState() {
@@ -37,6 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserData();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh streak when dependencies change (e.g., returning from meal prep screen)
+    _loadCurrentStreak();
   }
 
   Future<void> _loadUserData() async {
@@ -73,6 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // Load current day's meals
         _loadCurrentDayMeals();
+
+        // Load current streak
+        _loadCurrentStreak();
       } else {
         _logger.w('HomeScreen - No user model available');
       }
@@ -226,6 +238,24 @@ class _HomeScreenState extends State<HomeScreen> {
       'Sunday'
     ];
     return days[date.weekday - 1];
+  }
+
+  /// Load the current streak for the user
+  Future<void> _loadCurrentStreak() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userId = authProvider.userModel?.id;
+      
+      if (userId != null) {
+        final streak = await StreakService.getCurrentStreak(userId);
+        setState(() {
+          _currentStreak = streak;
+        });
+        _logger.d('HomeScreen - Loaded current streak: $_currentStreak');
+      }
+    } catch (e) {
+      _logger.e('HomeScreen - Error loading streak: $e');
+    }
   }
 
   void _onDateSelected(DateTime date) {
@@ -425,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const Spacer(),
 
-            // Burned Calories Indicator
+            // Streak Widget
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -443,7 +473,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '0',
+                    '$_currentStreak',
                     style: AppTextStyles.bodySmall.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Colors.black,

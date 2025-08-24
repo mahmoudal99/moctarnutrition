@@ -6,6 +6,7 @@ import '../services/nutrition_calculation_service.dart';
 import '../services/meal_plan_local_storage_service.dart';
 import '../services/meal_plan_firestore_service.dart';
 import '../services/daily_consumption_service.dart';
+import '../services/streak_service.dart';
 
 class MealPlanProvider with ChangeNotifier {
   static final _logger = Logger();

@@ -7,6 +7,8 @@ import 'meal_card.dart';
 import 'nutrition_summary_card.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/providers/meal_plan_provider.dart';
+import '../../../../shared/services/streak_service.dart';
+import '../../../../shared/providers/auth_provider.dart';
 
 class MealPlanView extends StatefulWidget {
   final MealPlanModel mealPlan;
@@ -469,16 +471,33 @@ class _MealPlanViewState extends State<MealPlanView>
     final anyConsumed = meals.any((meal) => meal.isConsumed);
     
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         // Toggle consumption for all meals of this type
         final newStatus = !allConsumed;
         final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
         
-        // Use selected date if available, otherwise use current date
-        final targetDate = widget.selectedDate ?? DateTime.now();
-        
         for (final meal in meals) {
-          mealPlanProvider.updateMealConsumption(meal.id, newStatus, targetDate);
+          mealPlanProvider.updateMealConsumption(meal.id, newStatus, widget.selectedDate);
+        }
+        
+        // Increment streak when marking meals as done (only if not already done)
+        if (newStatus && !allConsumed) {
+          try {
+            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+            final userId = authProvider.userModel?.id;
+            
+            if (userId != null) {
+              // Use the selected date if available, otherwise use current date
+              final targetDate = widget.selectedDate ?? DateTime.now();
+              await StreakService.incrementStreak(userId);
+              
+              // Log the streak increment
+              final currentStreak = await StreakService.getCurrentStreak(userId);
+              print('MealPlanView - Streak incremented to $currentStreak for date: ${targetDate.toIso8601String()}');
+            }
+          } catch (e) {
+            print('MealPlanView - Error incrementing streak: $e');
+          }
         }
       },
       child: Container(
