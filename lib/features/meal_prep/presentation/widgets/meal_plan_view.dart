@@ -5,6 +5,8 @@ import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/models/user_model.dart';
 import 'meal_card.dart';
 import 'nutrition_summary_card.dart';
+import 'package:provider/provider.dart';
+import '../../../../shared/providers/meal_plan_provider.dart';
 
 class MealPlanView extends StatefulWidget {
   final MealPlanModel mealPlan;
@@ -385,7 +387,7 @@ class _MealPlanViewState extends State<MealPlanView>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Section title
-                _buildMealTypeSection(mealType),
+                _buildMealTypeSection(mealType, meals),
                 const SizedBox(height: AppConstants.spacingS),
 
                 // Meals for this type
@@ -393,6 +395,7 @@ class _MealPlanViewState extends State<MealPlanView>
                       meal: meal,
                       dayTitle: _getDayTitle(dayNumber - 1),
                       onTap: widget.onMealTap,
+                      mealDay: mealDay, // Pass the mealDay
                     )),
 
                 const SizedBox(height: AppConstants.spacingM),
@@ -429,7 +432,7 @@ class _MealPlanViewState extends State<MealPlanView>
     return dayLetters[dayIndex % 7];
   }
 
-  Widget _buildMealTypeSection(MealType mealType) {
+  Widget _buildMealTypeSection(MealType mealType, List<Meal> meals) {
     return Padding(
       padding: const EdgeInsets.only(
         left: AppConstants.spacingS,
@@ -450,7 +453,69 @@ class _MealPlanViewState extends State<MealPlanView>
               color: AppConstants.textPrimary,
             ),
           ),
+          const Spacer(),
+          // Mark Eaten button for the entire meal type section
+          _buildMealTypeConsumptionButton(mealType, meals),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMealTypeConsumptionButton(MealType mealType, List<Meal> meals) {
+    // Check if all meals of this type are consumed
+    final allConsumed = meals.every((meal) => meal.isConsumed);
+    final anyConsumed = meals.any((meal) => meal.isConsumed);
+    
+    return GestureDetector(
+      onTap: () {
+        // Toggle consumption for all meals of this type
+        final newStatus = !allConsumed;
+        final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+        
+        for (final meal in meals) {
+          mealPlanProvider.updateMealConsumption(meal.id, newStatus);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 4,
+        ),
+        decoration: BoxDecoration(
+          color: allConsumed 
+              ? AppConstants.successColor.withOpacity(0.1)
+              : AppConstants.warningColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: allConsumed 
+                ? AppConstants.successColor.withOpacity(0.3)
+                : AppConstants.warningColor.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              allConsumed ? Icons.check_circle : Icons.radio_button_unchecked,
+              size: 12,
+              color: allConsumed 
+                  ? AppConstants.successColor 
+                  : AppConstants.warningColor,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              allConsumed ? 'Done' : 'Mark as Done',
+              style: AppTextStyles.caption.copyWith(
+                color: allConsumed 
+                    ? AppConstants.successColor 
+                    : AppConstants.warningColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -512,8 +577,16 @@ class _MealPlanViewState extends State<MealPlanView>
   /// Check if a given day index is a cheat day
   bool _isCheatDay(int dayIndex) {
     if (widget.cheatDay == null) return false;
-    
-    final dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    final dayNames = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
     final currentDayName = dayNames[dayIndex % 7];
     return widget.cheatDay == currentDayName;
   }

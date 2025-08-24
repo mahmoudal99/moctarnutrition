@@ -128,10 +128,14 @@ class MealDay {
   final String id;
   final DateTime date;
   final List<Meal> meals;
-  double totalCalories; // Made mutable for corrections and changed to double
-  double totalProtein; // Made mutable for corrections
-  double totalCarbs; // Made mutable for corrections
-  double totalFat; // Made mutable for corrections
+  double totalCalories; // Made mutable for nutrition calculations
+  double totalProtein; // Made mutable for nutrition calculations
+  double totalCarbs; // Made mutable for nutrition calculations
+  double totalFat; // Made mutable for nutrition calculations
+  double consumedCalories; // Track consumed calories
+  double consumedProtein; // Track consumed protein
+  double consumedCarbs; // Track consumed carbs
+  double consumedFat; // Track consumed fat
 
   MealDay({
     required this.id,
@@ -141,7 +145,40 @@ class MealDay {
     required this.totalProtein,
     required this.totalCarbs,
     required this.totalFat,
+    this.consumedCalories = 0.0,
+    this.consumedProtein = 0.0,
+    this.consumedCarbs = 0.0,
+    this.consumedFat = 0.0,
   });
+
+  /// Calculate consumed nutrition from meals marked as consumed
+  void calculateConsumedNutrition() {
+    consumedCalories = 0.0;
+    consumedProtein = 0.0;
+    consumedCarbs = 0.0;
+    consumedFat = 0.0;
+
+    for (final meal in meals) {
+      if (meal.isConsumed) {
+        consumedCalories += meal.nutrition.calories;
+        consumedProtein += meal.nutrition.protein;
+        consumedCarbs += meal.nutrition.carbs;
+        consumedFat += meal.nutrition.fat;
+      }
+    }
+  }
+
+  /// Get remaining calories for the day
+  double get remainingCalories => totalCalories - consumedCalories;
+
+  /// Get remaining protein for the day
+  double get remainingProtein => totalProtein - consumedProtein;
+
+  /// Get remaining carbs for the day
+  double get remainingCarbs => totalCarbs - consumedCarbs;
+
+  /// Get remaining fat for the day
+  double get remainingFat => totalFat - consumedFat;
 
   factory MealDay.fromJson(Map<String, dynamic> json) {
     return MealDay(
@@ -154,6 +191,10 @@ class MealDay {
       totalProtein: (json['totalProtein'] as num?)?.toDouble() ?? 0.0,
       totalCarbs: (json['totalCarbs'] as num?)?.toDouble() ?? 0.0,
       totalFat: (json['totalFat'] as num?)?.toDouble() ?? 0.0,
+      consumedCalories: (json['consumedCalories'] as num?)?.toDouble() ?? 0.0,
+      consumedProtein: (json['consumedProtein'] as num?)?.toDouble() ?? 0.0,
+      consumedCarbs: (json['consumedCarbs'] as num?)?.toDouble() ?? 0.0,
+      consumedFat: (json['consumedFat'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -166,6 +207,10 @@ class MealDay {
       'totalProtein': totalProtein,
       'totalCarbs': totalCarbs,
       'totalFat': totalFat,
+      'consumedCalories': consumedCalories,
+      'consumedProtein': consumedProtein,
+      'consumedCarbs': consumedCarbs,
+      'consumedFat': consumedFat,
     };
   }
 }
@@ -183,7 +228,7 @@ class Meal {
   final int prepTime; // in minutes
   final int cookTime; // in minutes
   final int servings;
-  NutritionInfo nutrition; // Made mutable for corrections
+  NutritionInfo nutrition; // Made mutable for nutrition calculations
   final List<String> tags;
   final List<String> dietaryTags; // Added for dietary restriction checking
   final bool isVegetarian;
@@ -192,6 +237,7 @@ class Meal {
   final bool isDairyFree;
   final double rating;
   final int ratingCount;
+  bool isConsumed; // Track if meal has been consumed
 
   Meal({
     required this.id,
@@ -215,6 +261,7 @@ class Meal {
     this.isDairyFree = false,
     this.rating = 0.0,
     this.ratingCount = 0,
+    this.isConsumed = false,
   });
 
   factory Meal.fromJson(Map<String, dynamic> json) {
@@ -239,7 +286,7 @@ class Meal {
       prepTime: json['prepTime'] as int,
       cookTime: json['cookTime'] as int,
       servings: json['servings'] as int,
-      nutrition: json['nutrition'] != null 
+      nutrition: json['nutrition'] != null
           ? NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>)
           : NutritionInfo.empty(),
       tags: List<String>.from(json['tags'] ?? []),
@@ -250,6 +297,7 @@ class Meal {
       isDairyFree: json['isDairyFree'] as bool? ?? false,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       ratingCount: json['ratingCount'] as int? ?? 0,
+      isConsumed: json['isConsumed'] as bool? ?? false,
     );
   }
 
@@ -276,6 +324,7 @@ class Meal {
       'isDairyFree': isDairyFree,
       'rating': rating,
       'ratingCount': ratingCount,
+      'isConsumed': isConsumed,
     };
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/calorie_calculation_service.dart';
 import '../../../../shared/models/meal_model.dart';
-import '../../../../shared/services/nutrition_calculation_service.dart';
 
 class NutritionGoalsCard extends StatefulWidget {
   final MacroBreakdown macros;
@@ -21,22 +20,35 @@ class NutritionGoalsCard extends StatefulWidget {
 }
 
 class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
-  final PageController _pageController = PageController();
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Macronutrient cards - horizontal layout as shown in screenshot
-        SizedBox(
-          height: 160,
-          child: Row(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Nutrition Goals',
+            style: AppTextStyles.heading5.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+
+          // Macro cards in a row
+          Row(
             children: [
               Expanded(child: _buildMacroCard(0)), // Protein
               const SizedBox(width: 12),
@@ -45,26 +57,22 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
               Expanded(child: _buildMacroCard(2)), // Fat
             ],
           ),
-        ),
 
-        const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacingM),
 
-        // Pagination dots
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(3, (index) {
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: index == 0 ? Colors.black : Colors.grey.shade300,
-              ),
-            );
-          }),
-        ),
-      ],
+          // Pagination dots
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildPaginationDot(0, true),
+              const SizedBox(width: 8),
+              _buildPaginationDot(1, false),
+              const SizedBox(width: 8),
+              _buildPaginationDot(2, false),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -117,7 +125,7 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
             ),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 16),
 
           // Circular progress indicator with icon
           Center(
@@ -140,12 +148,12 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
                     ),
                   ),
 
-                  // Progress circle (empty for now)
+                  // Progress circle
                   SizedBox(
                     width: 50,
                     height: 50,
                     child: CircularProgressIndicator(
-                      value: 0.0, // Empty progress as shown in design
+                      value: _getMacroProgress(index),
                       strokeWidth: 2,
                       backgroundColor: Colors.transparent,
                       valueColor:
@@ -178,27 +186,30 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
     );
   }
 
+  Widget _buildPaginationDot(int index, bool isActive) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isActive ? AppConstants.primaryColor : Colors.grey.shade300,
+      ),
+    );
+  }
+
   MacroData _getMacroData(int index) {
     // Calculate consumed macros from current day meals
     double consumedProtein = 0.0;
     double consumedCarbs = 0.0;
     double consumedFat = 0.0;
-    
+
     if (widget.currentDayMeals != null) {
-      consumedProtein = widget.currentDayMeals!.totalProtein;
-      consumedCarbs = widget.currentDayMeals!.totalCarbs;
-      consumedFat = widget.currentDayMeals!.totalFat;
-      
-      // Debug logging
-      print('DEBUG - Nutrition Goals Card:');
-      print('  Consumed Protein: ${consumedProtein}g');
-      print('  Consumed Carbs: ${consumedCarbs}g');
-      print('  Consumed Fat: ${consumedFat}g');
-      print('  Target Protein: ${widget.macros.protein.grams}g');
-      print('  Target Carbs: ${widget.macros.carbs.grams}g');
-      print('  Target Fat: ${widget.macros.fat.grams}g');
+      // Always use consumed macros, even if they're 0
+      consumedProtein = widget.currentDayMeals!.consumedProtein;
+      consumedCarbs = widget.currentDayMeals!.consumedCarbs;
+      consumedFat = widget.currentDayMeals!.consumedFat;
     }
-    
+
     switch (index) {
       case 0:
         return MacroData(
@@ -229,6 +240,31 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
           color: Colors.black,
         );
     }
+  }
+
+  double _getMacroProgress(int index) {
+    if (widget.currentDayMeals == null) return 0.0;
+
+    double targetGrams = 0.0;
+    double consumedGrams = 0.0;
+
+    switch (index) {
+      case 0: // Protein
+        targetGrams = widget.macros.protein.grams.toDouble();
+        consumedGrams = widget.currentDayMeals!.consumedProtein;
+        break;
+      case 1: // Carbs
+        targetGrams = widget.macros.carbs.grams.toDouble();
+        consumedGrams = widget.currentDayMeals!.consumedCarbs;
+        break;
+      case 2: // Fat
+        targetGrams = widget.macros.fat.grams.toDouble();
+        consumedGrams = widget.currentDayMeals!.consumedFat;
+        break;
+    }
+
+    final progress = targetGrams > 0 ? consumedGrams / targetGrams : 0.0;
+    return progress.clamp(0.0, 1.0);
   }
 }
 

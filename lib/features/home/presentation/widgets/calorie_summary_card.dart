@@ -22,13 +22,12 @@ class CalorieSummaryCard extends StatelessWidget {
     // Calculate consumed calories from current day meals
     double consumedCalories = 0.0;
     if (currentDayMeals != null) {
-      consumedCalories = currentDayMeals!.totalCalories;
+      // Always use consumed calories, even if it's 0
+      consumedCalories = currentDayMeals!.consumedCalories;
     }
 
     final caloriesLeft =
         (calorieTargets.dailyTarget - consumedCalories).round();
-    final activityBonus = 37; // TODO: Get from activity tracking
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -101,8 +100,8 @@ class CalorieSummaryCard extends StatelessWidget {
             flex: 1,
             child: Center(
               child: ActivityRing(
-                caloriesBurned: 0,
-                targetCalories: 500,
+                consumedCalories: consumedCalories.round(),
+                targetCalories: calorieTargets.dailyTarget,
               ),
             ),
           ),

@@ -47,13 +47,11 @@ class MealPlanProvider with ChangeNotifier {
       final localMealPlan = await MealPlanLocalStorageService.loadMealPlan(userId);
       
       if (localMealPlan != null) {
-        _logger.d('Found meal plan in local storage: ${localMealPlan.title}');
         _mealPlan = localMealPlan;
         
         // Check if the local plan is fresh (less than 24 hours old)
         final isFresh = await MealPlanLocalStorageService.isMealPlanFresh();
         if (isFresh) {
-          _logger.d('Local meal plan is fresh, using cached data');
           _setLoading(false);
           return;
         } else {
@@ -179,6 +177,44 @@ class MealPlanProvider with ChangeNotifier {
   Future<void> clearLocalCache() async {
     _logger.d('Clearing local meal plan cache');
     await MealPlanLocalStorageService.clearMealPlan();
+  }
+
+  /// Notify listeners when meal consumption changes
+  void notifyMealConsumptionChanged() {
+    _logger.d('MealPlanProvider - Notifying listeners about meal consumption change');
+    _logger.d('MealPlanProvider - Current meal plan: ${_mealPlan?.title ?? 'null'}');
+    notifyListeners();
+    _logger.d('MealPlanProvider - Listeners notified');
+  }
+
+  /// Update meal consumption status and notify listeners
+  void updateMealConsumption(String mealId, bool isConsumed) {
+    if (_mealPlan == null) return;
+    
+    _logger.d('MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed');
+    print('MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed');
+    
+    // Find the meal and update its consumption status
+    for (final mealDay in _mealPlan!.mealDays) {
+      for (final meal in mealDay.meals) {
+        if (meal.id == mealId) {
+          meal.isConsumed = isConsumed;
+          mealDay.calculateConsumedNutrition();
+          _logger.d('MealPlanProvider - Updated meal consumption for: ${meal.name}');
+          _logger.d('MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
+          print('MealPlanProvider - Updated meal consumption for: ${meal.name}');
+          print('MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
+          break;
+        }
+      }
+    }
+    
+    // Notify listeners about the change
+    print('MealPlanProvider - About to call notifyListeners()');
+    _logger.d('MealPlanProvider - About to call notifyListeners()');
+    notifyListeners();
+    print('MealPlanProvider - notifyListeners() called');
+    _logger.d('MealPlanProvider - notifyListeners() called');
   }
 
 

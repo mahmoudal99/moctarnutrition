@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
+import '../../../../shared/services/meal_logging_service.dart';
+import '../../../../shared/providers/meal_plan_provider.dart';
 import '../screens/meal_detail_screen.dart';
+import 'package:logger/logger.dart';
 
-class MealCard extends StatelessWidget {
+class MealCard extends StatefulWidget {
   final Meal meal;
   final String dayTitle;
   final VoidCallback? onTap;
+  final MealDay? mealDay; // Add mealDay parameter
 
   const MealCard({
     super.key,
     required this.meal,
     required this.dayTitle,
     this.onTap,
+    this.mealDay, // Add mealDay parameter
   });
+
+  @override
+  State<MealCard> createState() => _MealCardState();
+}
+
+class _MealCardState extends State<MealCard> {
+  final Logger _logger = Logger();
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap ?? () {
+      onTap: widget.onTap ?? () {
         HapticFeedback.lightImpact();
         _navigateToMealDetail(context);
       },
@@ -28,10 +41,15 @@ class MealCard extends StatelessWidget {
         margin: const EdgeInsets.all(AppConstants.spacingS),
         padding: const EdgeInsets.all(AppConstants.spacingS),
         decoration: BoxDecoration(
-          color: AppConstants.backgroundColor,
+          color: widget.meal.isConsumed 
+              ? AppConstants.primaryColor.withOpacity(0.05)
+              : AppConstants.backgroundColor,
           borderRadius: BorderRadius.circular(AppConstants.radiusS),
           border: Border.all(
-            color: AppConstants.textTertiary.withOpacity(0.2),
+            color: widget.meal.isConsumed 
+                ? AppConstants.primaryColor.withOpacity(0.3)
+                : AppConstants.textTertiary.withOpacity(0.2),
+            width: widget.meal.isConsumed ? 2 : 1,
           ),
         ),
         child: Column(
@@ -45,13 +63,19 @@ class MealCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        meal.name,
+                        widget.meal.name,
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
+                          decoration: widget.meal.isConsumed 
+                              ? TextDecoration.lineThrough 
+                              : null,
+                          color: widget.meal.isConsumed 
+                              ? AppConstants.textSecondary 
+                              : AppConstants.textPrimary,
                         ),
                       ),
                       Text(
-                        meal.description,
+                        widget.meal.description,
                         style: AppTextStyles.caption.copyWith(
                           color: AppConstants.textSecondary,
                         ),
@@ -59,12 +83,28 @@ class MealCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Text(
-                  '${meal.nutrition.calories} cal',
-                  style: AppTextStyles.caption.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppConstants.accentColor,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${widget.meal.nutrition.calories} cal',
+                      style: AppTextStyles.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: widget.meal.isConsumed 
+                            ? AppConstants.primaryColor 
+                            : AppConstants.accentColor,
+                      ),
+                    ),
+                    if (widget.meal.isConsumed)
+                      Text(
+                        '✓ Consumed',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppConstants.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
@@ -72,14 +112,16 @@ class MealCard extends StatelessWidget {
             Row(
               children: [
                 _buildNutritionChip(
-                    'P', '${meal.nutrition.protein.toStringAsFixed(0)}g'),
+                    'P', '${widget.meal.nutrition.protein.toStringAsFixed(0)}g'),
                 const SizedBox(width: AppConstants.spacingS),
                 _buildNutritionChip(
-                    'C', '${meal.nutrition.carbs.toStringAsFixed(0)}g'),
+                    'C', '${widget.meal.nutrition.carbs.toStringAsFixed(0)}g'),
                 const SizedBox(width: AppConstants.spacingS),
                 _buildNutritionChip(
-                    'F', '${meal.nutrition.fat.toStringAsFixed(0)}g'),
+                    'F', '${widget.meal.nutrition.fat.toStringAsFixed(0)}g'),
                 const Spacer(),
+                // Mark as Consumed Button - Removed, now handled at section level
+                const SizedBox(width: AppConstants.spacingS),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -191,8 +233,8 @@ class MealCard extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => MealDetailScreen(
-          meal: meal,
-          dayTitle: dayTitle,
+          meal: widget.meal,
+          dayTitle: widget.dayTitle,
         ),
       ),
     );

@@ -14,12 +14,16 @@ class NutritionSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate consumed nutrition
+    mealDay.calculateConsumedNutrition();
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Nutrition cards
             Row(
               children: [
                 Expanded(
