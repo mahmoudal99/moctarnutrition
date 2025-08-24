@@ -227,12 +227,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               ),
               const SizedBox(height: AppConstants.spacingL),
               ElevatedButton(
-                onPressed: () {
-                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                  if (authProvider.userModel != null) {
-                    _loadMealPlanIfNeeded();
-                  }
-                },
+                onPressed: _retryLoading,
                 child: const Text('Retry'),
               ),
             ],
@@ -240,5 +235,12 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         ),
       ),
     );
+  }
+
+  void _retryLoading() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.userModel != null) {
+      _loadMealPlanIfNeeded();
+    }
   }
 }

@@ -8,15 +8,18 @@ import '../widgets/workout_empty_state.dart';
 import '../controllers/workout_controller.dart';
 
 class WorkoutViewBuilder {
+  static const Widget _generationLoadingState = WorkoutGenerationLoadingState();
+  static const Widget _loadingState = WorkoutLoadingState();
+
   static Widget buildLoadingState() {
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, child) {
         // Use generation loading state if we're generating a new workout plan
         if (workoutProvider.isGenerating) {
-          return const WorkoutGenerationLoadingState();
+          return _generationLoadingState;
         }
         // Use regular loading state for loading existing workouts
-        return const WorkoutLoadingState();
+        return _loadingState;
       },
     );
   }

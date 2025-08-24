@@ -94,22 +94,14 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
                       ? DayViewWidget(
                           todayWorkout: todayWorkout,
                           selectedView: _selectedView,
-                          onViewChanged: (viewType) {
-                            setState(() {
-                              _selectedView = viewType;
-                            });
-                          },
+                          onViewChanged: _onViewChanged,
                           scrollController: _scrollController.scrollController,
                         )
                       : WeekViewWidget(
                           workoutPlan: workoutPlan,
                           todayWorkout: todayWorkout,
                           selectedView: _selectedView,
-                          onViewChanged: (viewType) {
-                            setState(() {
-                              _selectedView = viewType;
-                            });
-                          },
+                          onViewChanged: _onViewChanged,
                           scrollController: _scrollController.scrollController,
                         ),
                 ),
@@ -120,16 +112,18 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
           if (!workoutProvider.isEditMode)
             FloatingToggleWidget(
               selectedView: _selectedView,
-              onViewChanged: (viewType) {
-                setState(() {
-                  _selectedView = viewType;
-                });
-              },
+              onViewChanged: _onViewChanged,
               opacityAnimation: _scrollController.toggleOpacityAnimation,
               scaleAnimation: _scrollController.toggleScaleAnimation,
             ),
         ],
       ),
     );
+  }
+
+  void _onViewChanged(WorkoutViewType viewType) {
+    setState(() {
+      _selectedView = viewType;
+    });
   }
 }
