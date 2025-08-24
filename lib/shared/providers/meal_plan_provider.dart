@@ -5,6 +5,7 @@ import '../models/meal_model.dart';
 import '../services/nutrition_calculation_service.dart';
 import '../services/meal_plan_local_storage_service.dart';
 import '../services/meal_plan_firestore_service.dart';
+import '../services/daily_consumption_service.dart';
 
 class MealPlanProvider with ChangeNotifier {
   static final _logger = Logger();
@@ -187,34 +188,69 @@ class MealPlanProvider with ChangeNotifier {
     _logger.d('MealPlanProvider - Listeners notified');
   }
 
+  /// Load consumption data for a specific date
+  Future<Map<String, dynamic>?> loadConsumptionForDate(DateTime date) async {
+    if (_mealPlan == null) return null;
+    
+    try {
+      final consumptionData = await DailyConsumptionService.getDailyConsumptionSummary(
+        _mealPlan!.userId,
+        date,
+      );
+      
+      _logger.d('MealPlanProvider - Loaded consumption data for ${date.toIso8601String()}: ${consumptionData?['consumedCalories'] ?? 0} calories');
+      return consumptionData;
+    } catch (e) {
+      _logger.e('MealPlanProvider - Error loading consumption data: $e');
+      return null;
+    }
+  }
+
   /// Update meal consumption status and notify listeners
-  void updateMealConsumption(String mealId, bool isConsumed) {
+  void updateMealConsumption(String mealId, bool isConsumed, DateTime? date) async {
     if (_mealPlan == null) return;
     
-    _logger.d('MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed');
-    print('MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed');
+    _logger.d('MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed for date: ${date?.toIso8601String() ?? 'current'}');
+    print('MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed for date: ${date?.toIso8601String() ?? 'current'}');
     
-    // Find the meal and update its consumption status
-    for (final mealDay in _mealPlan!.mealDays) {
-      for (final meal in mealDay.meals) {
-        if (meal.id == mealId) {
-          meal.isConsumed = isConsumed;
-          mealDay.calculateConsumedNutrition();
-          _logger.d('MealPlanProvider - Updated meal consumption for: ${meal.name}');
-          _logger.d('MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
-          print('MealPlanProvider - Updated meal consumption for: ${meal.name}');
-          print('MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
-          break;
+    // Use the current date if none provided
+    final targetDate = date ?? DateTime.now();
+    
+    try {
+      // Update consumption in the daily consumption service
+      await DailyConsumptionService.updateMealConsumption(
+        _mealPlan!.userId,
+        targetDate,
+        mealId,
+        isConsumed,
+      );
+      
+      // Also update the in-memory meal plan for immediate UI updates
+      // Find the meal and update its consumption status
+      for (final mealDay in _mealPlan!.mealDays) {
+        for (final meal in mealDay.meals) {
+          if (meal.id == mealId) {
+            meal.isConsumed = isConsumed;
+            mealDay.calculateConsumedNutrition();
+            _logger.d('MealPlanProvider - Updated meal consumption for: ${meal.name}');
+            _logger.d('MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
+            print('MealPlanProvider - Updated meal consumption for: ${meal.name}');
+            print('MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
+            break;
+          }
         }
       }
+      
+      // Notify listeners about the change
+      print('MealPlanProvider - About to call notifyListeners()');
+      _logger.d('MealPlanProvider - About to call notifyListeners()');
+      notifyListeners();
+      print('MealPlanProvider - notifyListeners() called');
+      _logger.d('MealPlanProvider - notifyListeners() called');
+    } catch (e) {
+      _logger.e('MealPlanProvider - Error updating meal consumption: $e');
+      print('MealPlanProvider - Error updating meal consumption: $e');
     }
-    
-    // Notify listeners about the change
-    print('MealPlanProvider - About to call notifyListeners()');
-    _logger.d('MealPlanProvider - About to call notifyListeners()');
-    notifyListeners();
-    print('MealPlanProvider - notifyListeners() called');
-    _logger.d('MealPlanProvider - notifyListeners() called');
   }
 
 

@@ -7,6 +7,7 @@ import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/meal_plan_provider.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/calorie_calculation_service.dart';
+import '../../../../shared/services/daily_consumption_service.dart';
 import '../widgets/day_selector.dart';
 import '../widgets/calorie_summary_card.dart';
 import '../widgets/nutrition_goals_card.dart';
@@ -31,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _selectedDate = DateTime.now();
     _logger.d('HomeScreen - initState called');
-    
+
     // Use addPostFrameCallback to delay data loading until after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserData();
@@ -71,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
         await _loadMealPlanIfNeeded(authProvider, mealPlanProvider);
 
         // Load current day's meals
-        _loadCurrentDayMeals(mealPlanProvider);
+        _loadCurrentDayMeals();
       } else {
         _logger.w('HomeScreen - No user model available');
       }
@@ -130,48 +131,100 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _loadCurrentDayMeals(MealPlanProvider mealPlanProvider) {
+  /// Load meals for the currently selected date
+  Future<void> _loadCurrentDayMeals() async {
+    final mealPlanProvider =
+        Provider.of<MealPlanProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final mealPlan = mealPlanProvider.mealPlan;
-    _logger.d(
-        'HomeScreen - Loading current day meals, meal plan: ${mealPlan?.title ?? 'null'}');
 
-    if (mealPlan != null) {
-      // Find the meal day for the selected date based on day of week
-      final dayOfWeek = _selectedDate.weekday; // 1 = Monday, 7 = Sunday
-      final mealDayIndex = dayOfWeek - 1; // Convert to 0-based index
-      _logger.d(
-          'HomeScreen - Day of week: $dayOfWeek, meal day index: $mealDayIndex');
-
-      if (mealDayIndex >= 0 && mealDayIndex < mealPlan.mealDays.length) {
-        final mealDay = mealPlan.mealDays[mealDayIndex];
-        _logger.d(
-            'HomeScreen - Found meal day: ${_getDayName(mealDay.date)}');
-
-        // Calculate consumed nutrition for the meal day
-        mealDay.calculateConsumedNutrition();
-
-        setState(() {
-          _currentDayMeals = mealDay;
-        });
-        _logger.d(
-            'HomeScreen - Current day meals set: ${_getDayName(_currentDayMeals?.date)}');
-      } else {
-        _logger.w('HomeScreen - No meal day found for index: $mealDayIndex');
-        setState(() {
-          _currentDayMeals = null;
-        });
-      }
-    } else {
+    if (mealPlan == null) {
       _logger.w('HomeScreen - No meal plan available');
-      setState(() {
-        _currentDayMeals = null;
-      });
+      return;
+    }
+
+    try {
+      // Get the weekday index (0 = Monday, 6 = Sunday)
+      final weekdayIndex = _selectedDate.weekday - 1;
+      _logger.d(
+          'HomeScreen - Loading meals for weekday index: $weekdayIndex (${_selectedDate.weekday})');
+
+      // Get the meal day from the weekly template
+      if (weekdayIndex >= 0 && weekdayIndex < mealPlan.mealDays.length) {
+        final templateMealDay = mealPlan.mealDays[weekdayIndex];
+        _logger
+            .d('HomeScreen - Found template meal day: ${templateMealDay.id}');
+
+        // Create a copy of the template meal day for the selected date
+        _currentDayMeals = MealDay(
+          id: '${templateMealDay.id}_${_selectedDate.toIso8601String()}',
+          date: _selectedDate,
+          meals: templateMealDay.meals.map((meal) => meal.copyWith()).toList(),
+          totalCalories: templateMealDay.totalCalories,
+          totalProtein: templateMealDay.totalProtein,
+          totalCarbs: templateMealDay.totalCarbs,
+          totalFat: templateMealDay.totalFat,
+        );
+
+        // Load consumption data for the selected date
+        final consumptionData = await DailyConsumptionService.getDailyConsumptionSummary(
+          authProvider.userModel?.id ?? '',
+          _selectedDate,
+        );
+
+        if (consumptionData != null) {
+          _logger.d(
+              'HomeScreen - Loaded consumption data for ${_selectedDate.toIso8601String()}: ${consumptionData['consumedCalories']} calories');
+
+          // Apply consumption data to meals
+          final mealConsumption =
+              Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
+          for (final meal in _currentDayMeals!.meals) {
+            if (mealConsumption.containsKey(meal.id)) {
+              meal.isConsumed = mealConsumption[meal.id]!;
+            }
+          }
+
+          // Update consumed nutrition
+          _currentDayMeals!.calculateConsumedNutrition();
+
+          _logger.d(
+              'HomeScreen - Applied consumption data: ${_currentDayMeals!.consumedCalories}/${_currentDayMeals!.totalCalories} calories');
+        } else {
+          _logger.d(
+              'HomeScreen - No consumption data found for ${_selectedDate.toIso8601String()}, using fresh template');
+          // Reset all meals to not consumed for new dates
+          for (final meal in _currentDayMeals!.meals) {
+            meal.isConsumed = false;
+          }
+          _currentDayMeals!.calculateConsumedNutrition();
+        }
+
+        _logger.d(
+            'HomeScreen - Updated current day meals: ${_getDayName(_currentDayMeals!.date)}');
+        _logger.d(
+            'HomeScreen - Total calories: ${_currentDayMeals!.totalCalories}, Consumed: ${_currentDayMeals!.consumedCalories}');
+
+        setState(() {});
+      } else {
+        _logger.w('HomeScreen - Invalid weekday index: $weekdayIndex');
+      }
+    } catch (e) {
+      _logger.e('HomeScreen - Error loading current day meals: $e');
     }
   }
 
   String _getDayName(DateTime? date) {
     if (date == null) return 'Unknown';
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
     return days[date.weekday - 1];
   }
 
@@ -184,9 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     // Reload meals for the selected date
-    final mealPlanProvider =
-        Provider.of<MealPlanProvider>(context, listen: false);
-    _loadCurrentDayMeals(mealPlanProvider);
+    _loadCurrentDayMeals();
   }
 
   @override
@@ -196,22 +247,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Consumer2<AuthProvider, MealPlanProvider>(
       builder: (context, authProvider, mealPlanProvider, child) {
-        _logger.d('HomeScreen - Consumer builder called');
-        _logger.d(
-            'HomeScreen - Auth provider state: isAuthenticated=${authProvider.isAuthenticated}, userModel=${authProvider.userModel?.name ?? 'null'}');
-        _logger.d(
-            'HomeScreen - Meal plan provider state: mealPlan=${mealPlanProvider.mealPlan?.title ?? 'null'}, isLoading=${mealPlanProvider.isLoading}');
-
-        // Log debug info to console instead of showing on screen
-        print('=== HOME SCREEN DEBUG INFO ===');
-        print('Auth: ${authProvider.isAuthenticated ? 'Yes' : 'No'}');
-        print('User: ${authProvider.userModel?.name ?? 'null'}');
-        print('Calorie Targets: ${_calorieTargets?.dailyTarget ?? 'null'}');
-        print('Meal Plan: ${mealPlanProvider.mealPlan?.title ?? 'null'}');
-        print('Current Day: ${_getDayName(_currentDayMeals?.date) ?? 'null'}');
-        print('Loading: $_isLoading, Meal Plan Loading: $_isLoadingMealPlan');
-        print('==============================');
-
         // Always get the latest meal day data from the provider
         if (mealPlanProvider.mealPlan != null) {
           try {
@@ -269,6 +304,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         DaySelector(
                           selectedDate: _selectedDate,
                           onDateSelected: _onDateSelected,
+                          currentDayMeals: _currentDayMeals,
+                          targetCalories: _calorieTargets?.dailyTarget,
                         ),
                         const SizedBox(height: 24),
                         // Calorie Summary Card
@@ -293,7 +330,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         else
                           _buildNoDataCard('No Nutrition Goals',
                               'Complete onboarding to set goals'),
-                        const SizedBox(height: 100), // Space for bottom navigation
+                        const SizedBox(
+                            height: 100), // Space for bottom navigation
                       ],
                     ),
                   ),

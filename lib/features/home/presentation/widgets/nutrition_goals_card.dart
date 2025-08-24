@@ -22,57 +22,42 @@ class NutritionGoalsCard extends StatefulWidget {
 class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Nutrition Goals',
+          style: AppTextStyles.heading5.copyWith(
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Nutrition Goals',
-            style: AppTextStyles.heading5.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
+        ),
+        const SizedBox(height: AppConstants.spacingM),
 
-          // Macro cards in a row
-          Row(
-            children: [
-              Expanded(child: _buildMacroCard(0)), // Protein
-              const SizedBox(width: 12),
-              Expanded(child: _buildMacroCard(1)), // Carbs
-              const SizedBox(width: 12),
-              Expanded(child: _buildMacroCard(2)), // Fat
-            ],
-          ),
+        // Macro cards in a row
+        Row(
+          children: [
+            Expanded(child: _buildMacroCard(0)), // Protein
+            const SizedBox(width: 12),
+            Expanded(child: _buildMacroCard(1)), // Carbs
+            const SizedBox(width: 12),
+            Expanded(child: _buildMacroCard(2)), // Fat
+          ],
+        ),
 
-          const SizedBox(height: AppConstants.spacingM),
+        const SizedBox(height: AppConstants.spacingM),
 
-          // Pagination dots
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildPaginationDot(0, true),
-              const SizedBox(width: 8),
-              _buildPaginationDot(1, false),
-              const SizedBox(width: 8),
-              _buildPaginationDot(2, false),
-            ],
-          ),
-        ],
-      ),
+        // Pagination dots
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildPaginationDot(0, true),
+            const SizedBox(width: 8),
+            _buildPaginationDot(1, false),
+            const SizedBox(width: 8),
+            _buildPaginationDot(2, false),
+          ],
+        ),
+      ],
     );
   }
 

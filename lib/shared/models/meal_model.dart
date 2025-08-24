@@ -327,6 +327,57 @@ class Meal {
       'isConsumed': isConsumed,
     };
   }
+
+  /// Create a copy of this meal with modified properties
+  Meal copyWith({
+    String? id,
+    String? name,
+    String? description,
+    MealType? type,
+    CuisineType? cuisineType,
+    String? imageUrl,
+    String? videoUrl,
+    List<RecipeIngredient>? ingredients,
+    List<String>? instructions,
+    int? prepTime,
+    int? cookTime,
+    int? servings,
+    NutritionInfo? nutrition,
+    List<String>? tags,
+    List<String>? dietaryTags,
+    bool? isVegetarian,
+    bool? isVegan,
+    bool? isGlutenFree,
+    bool? isDairyFree,
+    double? rating,
+    int? ratingCount,
+    bool? isConsumed,
+  }) {
+    return Meal(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      type: type ?? this.type,
+      cuisineType: cuisineType ?? this.cuisineType,
+      imageUrl: imageUrl ?? this.imageUrl,
+      videoUrl: videoUrl ?? this.videoUrl,
+      ingredients: ingredients ?? this.ingredients,
+      instructions: instructions ?? this.instructions,
+      prepTime: prepTime ?? this.prepTime,
+      cookTime: cookTime ?? this.cookTime,
+      servings: servings ?? this.servings,
+      nutrition: nutrition ?? this.nutrition,
+      tags: tags ?? this.tags,
+      dietaryTags: dietaryTags ?? this.dietaryTags,
+      isVegetarian: isVegetarian ?? this.isVegetarian,
+      isVegan: isVegan ?? this.isVegan,
+      isGlutenFree: isGlutenFree ?? this.isGlutenFree,
+      isDairyFree: isDairyFree ?? this.isDairyFree,
+      rating: rating ?? this.rating,
+      ratingCount: ratingCount ?? this.ratingCount,
+      isConsumed: isConsumed ?? this.isConsumed,
+    );
+  }
 }
 
 class RecipeIngredient {

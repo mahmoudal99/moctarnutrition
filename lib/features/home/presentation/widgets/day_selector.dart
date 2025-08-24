@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../shared/models/meal_model.dart';
 import 'dashed_circle_painter.dart';
 
 class DaySelector extends StatelessWidget {
   final DateTime selectedDate;
   final Function(DateTime) onDateSelected;
+  final MealDay? currentDayMeals;
+  final int? targetCalories;
 
   const DaySelector({
     super.key,
     required this.selectedDate,
     required this.onDateSelected,
+    this.currentDayMeals,
+    this.targetCalories,
   });
 
   @override
@@ -49,6 +54,22 @@ class DaySelector extends StatelessWidget {
                               gapLength: 2.0,
                             ),
                             size: const Size(32, 32),
+                          ),
+                        // Progress ring for today
+                        if (isToday && targetCalories != null && currentDayMeals != null)
+                          SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: CircularProgressIndicator(
+                              value: _calculateCalorieProgress(),
+                              strokeWidth: 2.0,
+                              backgroundColor: Colors.transparent,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                _calculateCalorieProgress() >= 1.0
+                                    ? AppConstants.successColor
+                                    : AppConstants.primaryColor,
+                              ),
+                            ),
                           ),
                         // Day text
                         Text(
@@ -118,5 +139,17 @@ class DaySelector extends StatelessWidget {
     return date1.year == date2.year &&
            date1.month == date2.month &&
            date1.day == date2.day;
+  }
+
+  double _calculateCalorieProgress() {
+    if (currentDayMeals == null || targetCalories == null) {
+      return 0.0;
+    }
+
+    // Calculate consumed calories from the meal day
+    currentDayMeals!.calculateConsumedNutrition();
+    final consumedCalories = currentDayMeals!.consumedCalories;
+    
+    return targetCalories! > 0 ? consumedCalories / targetCalories! : 0.0;
   }
 }

@@ -1,16 +1,20 @@
 import 'package:logger/logger.dart';
 import '../models/meal_model.dart';
+import 'daily_consumption_service.dart';
 
 /// Service responsible for managing meal logging and consumption tracking
 class MealLoggingService {
   static final _logger = Logger();
 
   /// Mark a meal as consumed and update the meal day's consumed nutrition
-  static void markMealAsConsumed(Meal meal, MealDay mealDay) {
-    _logger.i('Marking meal "${meal.name}" as consumed');
+  static Future<void> markMealAsConsumed(Meal meal, MealDay mealDay, String userId, DateTime date) async {
+    _logger.i('Marking meal "${meal.name}" as consumed for date: ${date.toIso8601String()}');
     
     meal.isConsumed = true;
     mealDay.calculateConsumedNutrition();
+    
+    // Update consumption in the daily consumption service
+    await DailyConsumptionService.updateMealConsumption(userId, date, meal.id, true);
     
     _logger.d('Updated consumed nutrition for ${mealDay.date}:');
     _logger.d('  Calories: ${mealDay.consumedCalories.toStringAsFixed(1)}/${mealDay.totalCalories.toStringAsFixed(1)}');
@@ -20,11 +24,14 @@ class MealLoggingService {
   }
 
   /// Mark a meal as not consumed and update the meal day's consumed nutrition
-  static void markMealAsNotConsumed(Meal meal, MealDay mealDay) {
-    _logger.i('Marking meal "${meal.name}" as not consumed');
+  static Future<void> markMealAsNotConsumed(Meal meal, MealDay mealDay, String userId, DateTime date) async {
+    _logger.i('Marking meal "${meal.name}" as not consumed for date: ${date.toIso8601String()}');
     
     meal.isConsumed = false;
     mealDay.calculateConsumedNutrition();
+    
+    // Update consumption in the daily consumption service
+    await DailyConsumptionService.updateMealConsumption(userId, date, meal.id, false);
     
     _logger.d('Updated consumed nutrition for ${mealDay.date}:');
     _logger.d('  Calories: ${mealDay.consumedCalories.toStringAsFixed(1)}/${mealDay.totalCalories.toStringAsFixed(1)}');
@@ -34,11 +41,11 @@ class MealLoggingService {
   }
 
   /// Toggle meal consumption status
-  static void toggleMealConsumption(Meal meal, MealDay mealDay) {
+  static Future<void> toggleMealConsumption(Meal meal, MealDay mealDay, String userId, DateTime date) async {
     if (meal.isConsumed) {
-      markMealAsNotConsumed(meal, mealDay);
+      await markMealAsNotConsumed(meal, mealDay, userId, date);
     } else {
-      markMealAsConsumed(meal, mealDay);
+      await markMealAsConsumed(meal, mealDay, userId, date);
     }
   }
 
@@ -92,11 +99,13 @@ class MealLoggingService {
   }
 
   /// Reset all meals in a meal day to not consumed
-  static void resetMealDayConsumption(MealDay mealDay) {
+  static Future<void> resetMealDayConsumption(MealDay mealDay, String userId, DateTime date) async {
     _logger.i('Resetting consumption for meal day ${mealDay.date}');
 
     for (final meal in mealDay.meals) {
       meal.isConsumed = false;
+      // Update consumption in the daily consumption service
+      await DailyConsumptionService.updateMealConsumption(userId, date, meal.id, false);
     }
 
     mealDay.calculateConsumedNutrition();
@@ -104,11 +113,13 @@ class MealLoggingService {
   }
 
   /// Mark all meals in a meal day as consumed
-  static void markAllMealsAsConsumed(MealDay mealDay) {
+  static Future<void> markAllMealsAsConsumed(MealDay mealDay, String userId, DateTime date) async {
     _logger.i('Marking all meals as consumed for meal day ${mealDay.date}');
 
     for (final meal in mealDay.meals) {
       meal.isConsumed = true;
+      // Update consumption in the daily consumption service
+      await DailyConsumptionService.updateMealConsumption(userId, date, meal.id, true);
     }
 
     mealDay.calculateConsumedNutrition();

@@ -13,6 +13,7 @@ class MealPlanView extends StatefulWidget {
   final VoidCallback? onMealTap;
   final UserModel? user; // Add user parameter for cheat day info
   final String? cheatDay; // Add cheat day parameter
+  final DateTime? selectedDate; // Add selected date parameter for consumption tracking
 
   const MealPlanView({
     super.key,
@@ -20,6 +21,7 @@ class MealPlanView extends StatefulWidget {
     this.onMealTap,
     this.user, // Add user parameter
     this.cheatDay, // Add cheat day parameter
+    this.selectedDate, // Add selected date parameter
   });
 
   @override
@@ -472,8 +474,11 @@ class _MealPlanViewState extends State<MealPlanView>
         final newStatus = !allConsumed;
         final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
         
+        // Use selected date if available, otherwise use current date
+        final targetDate = widget.selectedDate ?? DateTime.now();
+        
         for (final meal in meals) {
-          mealPlanProvider.updateMealConsumption(meal.id, newStatus);
+          mealPlanProvider.updateMealConsumption(meal.id, newStatus, targetDate);
         }
       },
       child: Container(
