@@ -21,7 +21,6 @@ class FloatingMainNavigation extends StatefulWidget {
 }
 
 class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
-  static final _logger = Logger();
   int _currentIndex = 0;
 
   List<_NavItem> _buildNavItems(UserModel? user) {

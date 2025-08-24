@@ -14,6 +14,7 @@ class NotificationService {
 
   static bool _isInitialized = false;
   static int _nextNotificationId = 1000; // Start from 1000 to avoid conflicts
+  static bool? _cachedNotificationPermission; // Cache the permission status
 
   /// Notification ID constants for different types
   static const int TEST_NOTIFICATION_ID = 1;
@@ -34,7 +35,7 @@ class NotificationService {
     try {
       // Initialize timezone data
       tz.initializeTimeZones();
-      
+
       // Initialize local notifications plugin
       const AndroidInitializationSettings initializationSettingsAndroid =
           AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -69,37 +70,26 @@ class NotificationService {
     // Handle notification tap logic here
   }
 
-  /// Check if notification permissions are granted
+    /// Check if notification permissions are granted
   static Future<bool> areNotificationsEnabled() async {
     try {
       if (defaultTargetPlatform == TargetPlatform.iOS) {
-        // For iOS, check through flutter_local_notifications directly
-        final iosImpl = _flutterLocalNotificationsPlugin
-            .resolvePlatformSpecificImplementation<
-                IOSFlutterLocalNotificationsPlugin>();
+        // For iOS, return cached permission status to avoid automatic permission requests
+        // The cache will be updated when user actually requests permission
+        if (_cachedNotificationPermission != null) {
+          _logger.d('iOS notification permission (cached): $_cachedNotificationPermission');
+          return _cachedNotificationPermission!;
+        }
         
-        if (iosImpl == null) {
-          _logger.d('iOS implementation not available');
-          return false;
-        }
-
-        // Use the same method as in the permission request to check permissions
-        try {
-          final bool? result = await iosImpl.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
-          return result ?? false;
-        } catch (e) {
-          _logger.e('Error checking iOS notification permissions: $e');
-          return false;
-        }
+        // If no cache, assume false to avoid permission prompts
+        _logger.d('iOS notification permission: no cache, assuming false');
+        return false;
       } else {
         // For Android, use permission_handler
         final status = await Permission.notification.status;
         final isGranted = status == PermissionStatus.granted;
-        _logger.d('Android notification permission: status=$status, isGranted=$isGranted');
+        _logger.d(
+            'Android notification permission: status=$status, isGranted=$isGranted');
         return isGranted;
       }
     } catch (e) {
@@ -127,9 +117,11 @@ class NotificationService {
 
         if (result == true) {
           _logger.i('iOS notification permission granted');
+          _cachedNotificationPermission = true;
           return NotificationPermissionResult.granted;
         } else {
           _logger.w('iOS notification permission denied');
+          _cachedNotificationPermission = false;
           return NotificationPermissionResult.denied;
         }
       } else if (defaultTargetPlatform == TargetPlatform.android) {
@@ -139,19 +131,24 @@ class NotificationService {
         switch (status) {
           case PermissionStatus.granted:
             _logger.i('Android notification permission granted');
+            _cachedNotificationPermission = true;
             return NotificationPermissionResult.granted;
           case PermissionStatus.denied:
             _logger.w('Android notification permission denied');
+            _cachedNotificationPermission = false;
             return NotificationPermissionResult.denied;
           case PermissionStatus.permanentlyDenied:
             _logger.w('Android notification permission permanently denied');
+            _cachedNotificationPermission = false;
             return NotificationPermissionResult.permanentlyDenied;
           case PermissionStatus.restricted:
             _logger.w('Android notification permission restricted');
+            _cachedNotificationPermission = false;
             return NotificationPermissionResult.restricted;
           default:
             _logger
                 .w('Android notification permission unknown status: $status');
+            _cachedNotificationPermission = false;
             return NotificationPermissionResult.denied;
         }
       } else {
@@ -174,6 +171,13 @@ class NotificationService {
       _logger.e('Error opening notification settings: $e');
       return false;
     }
+  }
+
+  /// Manually update the cached notification permission status
+  /// This is useful when the permission status changes outside the app
+  static void updateCachedPermissionStatus(bool isGranted) {
+    _cachedNotificationPermission = isGranted;
+    _logger.d('Updated cached notification permission: $isGranted');
   }
 
   /// Show a test notification (requires permission)
@@ -253,21 +257,22 @@ class NotificationService {
       // Schedule weekly reminders for the next 8 weeks (to balance with workout notifications)
       int weeklyReminderId = WEEKLY_CHECKIN_REMINDER_ID;
       int scheduledCount = 0;
-      
+
       _logger.d('Starting to schedule weekly reminders for 8 weeks');
-      
+
       for (int weekOffset = 0; weekOffset < 8; weekOffset++) {
         final targetDate = DateTime.now().add(Duration(days: weekOffset * 7));
         final nextSunday = _getNextSunday9AMFromDate(targetDate);
-        
-        _logger.d('Week $weekOffset: targetDate=$targetDate, nextSunday=$nextSunday');
-        
+
+        _logger.d(
+            'Week $weekOffset: targetDate=$targetDate, nextSunday=$nextSunday');
+
         // Skip if the time has already passed
         if (nextSunday.isBefore(DateTime.now())) {
           _logger.d('Week $weekOffset: Sunday time has passed, skipping');
           continue;
         }
-        
+
         try {
           await _flutterLocalNotificationsPlugin.zonedSchedule(
             weeklyReminderId,
@@ -279,16 +284,19 @@ class NotificationService {
             uiLocalNotificationDateInterpretation:
                 UILocalNotificationDateInterpretation.absoluteTime,
           );
-          
-          _logger.d('Successfully scheduled weekly check-in reminder for week $weekOffset (ID: $weeklyReminderId): $nextSunday');
+
+          _logger.d(
+              'Successfully scheduled weekly check-in reminder for week $weekOffset (ID: $weeklyReminderId): $nextSunday');
           weeklyReminderId++;
           scheduledCount++;
         } catch (e) {
-          _logger.e('Failed to schedule weekly reminder for week $weekOffset: $e');
+          _logger
+              .e('Failed to schedule weekly reminder for week $weekOffset: $e');
         }
       }
 
-      _logger.i('Weekly check-in reminders scheduled: $scheduledCount reminders');
+      _logger
+          .i('Weekly check-in reminders scheduled: $scheduledCount reminders');
     } catch (e) {
       _logger.e('Error scheduling weekly reminder: $e');
     }
@@ -298,7 +306,9 @@ class NotificationService {
   static Future<void> cancelWeeklyCheckinReminder() async {
     try {
       // Cancel all weekly reminders (IDs 2-9 for 8 weeks)
-      for (int i = WEEKLY_CHECKIN_REMINDER_ID; i < WEEKLY_CHECKIN_REMINDER_ID + 8; i++) {
+      for (int i = WEEKLY_CHECKIN_REMINDER_ID;
+          i < WEEKLY_CHECKIN_REMINDER_ID + 8;
+          i++) {
         await _flutterLocalNotificationsPlugin.cancel(i);
       }
       _logger.i('All weekly check-in reminders cancelled');
@@ -311,7 +321,8 @@ class NotificationService {
   static Future<void> scheduleWorkoutReminder({
     required DateTime scheduledTime,
     String title = 'Workout Reminder 💪',
-    String body = 'Time for your workout! Stay consistent and crush your goals!',
+    String body =
+        'Time for your workout! Stay consistent and crush your goals!',
   }) async {
     try {
       if (!await areNotificationsEnabled()) {
@@ -440,7 +451,7 @@ class NotificationService {
   /// Get next Sunday at 9 AM from a specific date
   static tz.TZDateTime _getNextSunday9AMFromDate(DateTime fromDate) {
     final daysUntilSunday = (DateTime.sunday - fromDate.weekday) % 7;
-    
+
     var nextSunday = tz.TZDateTime(
       tz.local,
       fromDate.year,
@@ -462,6 +473,8 @@ class NotificationService {
   static Future<void> cancelAllNotifications() async {
     try {
       await _flutterLocalNotificationsPlugin.cancelAll();
+      // Update cache to reflect that notifications are disabled
+      _cachedNotificationPermission = false;
       _logger.i('All notifications cancelled');
     } catch (e) {
       _logger.e('Error cancelling notifications: $e');
@@ -485,9 +498,11 @@ class NotificationService {
   /// Check if workout notifications are already scheduled
   static Future<bool> areWorkoutNotificationsScheduled() async {
     try {
-      final pendingNotifications = await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+      final pendingNotifications =
+          await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
       // Check if we have workout notifications (IDs 1000+)
-      final workoutNotifications = pendingNotifications.where((n) => n.id >= 1000).length;
+      final workoutNotifications =
+          pendingNotifications.where((n) => n.id >= 1000).length;
       _logger.d('Found $workoutNotifications existing workout notifications');
       return workoutNotifications > 0;
     } catch (e) {
@@ -505,7 +520,8 @@ class NotificationService {
   }) async {
     try {
       if (!await areNotificationsEnabled()) {
-        _logger.w('Cannot schedule workout notifications: permission not granted');
+        _logger
+            .w('Cannot schedule workout notifications: permission not granted');
         return;
       }
 
@@ -543,8 +559,10 @@ class NotificationService {
       const int maxNotifications = 64; // iOS limitation
 
       // Schedule notifications for the next 6 weeks (42 days) to balance with weekly reminders
-      _logger.d('Starting to schedule notifications for ${dailyWorkouts.length} workout days');
-      _logger.d('Will schedule up to $maxNotifications notifications across 42 days');
+      _logger.d(
+          'Starting to schedule notifications for ${dailyWorkouts.length} workout days');
+      _logger.d(
+          'Will schedule up to $maxNotifications notifications across 42 days');
       _logger.d('Notification time: $hour:$minute');
       for (int dayOffset = 0; dayOffset < 42; dayOffset++) {
         if (scheduledCount >= maxNotifications) {
@@ -571,7 +589,7 @@ class NotificationService {
           _logger.d('No workout found for $dayName, skipping');
           continue;
         }
-        
+
         // Skip if it's a rest day
         if (dailyWorkout.restDay == true) {
           _logger.d('Rest day for $dayName, skipping');
@@ -601,7 +619,7 @@ class NotificationService {
         String body = 'Time for your workout! 💪';
         if (workoutDescription.isNotEmpty) {
           // Truncate description if too long
-          final truncatedDescription = workoutDescription.length > 50 
+          final truncatedDescription = workoutDescription.length > 50
               ? '${workoutDescription.substring(0, 47)}...'
               : workoutDescription;
           body = '$workoutTitle: $truncatedDescription';
