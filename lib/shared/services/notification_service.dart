@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:logger/logger.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/workout_plan_model.dart';
 
 /// Service to handle notification permissions and local notifications
@@ -22,6 +23,9 @@ class NotificationService {
   static const int WORKOUT_REMINDER_ID = 3;
   static const int MEAL_REMINDER_ID = 4;
   static const int PROGRESS_REMINDER_ID = 5;
+
+  /// SharedPreferences keys
+  static const String _notificationPermissionKey = 'notification_permission_granted';
 
   /// Generate a unique notification ID
   static int _generateNotificationId() {
@@ -73,23 +77,33 @@ class NotificationService {
     /// Check if notification permissions are granted
   static Future<bool> areNotificationsEnabled() async {
     try {
+      // First, try to load from cache
+      if (_cachedNotificationPermission != null) {
+        _logger.d('Notification permission (cached): $_cachedNotificationPermission');
+        return _cachedNotificationPermission!;
+      }
+
+      // If no cache, try to load from storage
+      final storedPermission = await _loadPermissionStatusFromStorage();
+      _cachedNotificationPermission = storedPermission;
+      _logger.d('Notification permission (loaded from storage): $storedPermission');
+
       if (defaultTargetPlatform == TargetPlatform.iOS) {
-        // For iOS, return cached permission status to avoid automatic permission requests
-        // The cache will be updated when user actually requests permission
-        if (_cachedNotificationPermission != null) {
-          _logger.d('iOS notification permission (cached): $_cachedNotificationPermission');
-          return _cachedNotificationPermission!;
-        }
-        
-        // If no cache, assume false to avoid permission prompts
-        _logger.d('iOS notification permission: no cache, assuming false');
-        return false;
+        // For iOS, we'll trust the stored value since checking requires permission request
+        return storedPermission;
       } else {
-        // For Android, use permission_handler
+        // For Android, verify with permission_handler and update if different
         final status = await Permission.notification.status;
         final isGranted = status == PermissionStatus.granted;
-        _logger.d(
-            'Android notification permission: status=$status, isGranted=$isGranted');
+        
+        if (isGranted != storedPermission) {
+          // Update cache and storage if different
+          _cachedNotificationPermission = isGranted;
+          await _savePermissionStatusToStorage(isGranted);
+          _logger.d('Updated Android notification permission: $isGranted');
+        }
+        
+        _logger.d('Android notification permission: status=$status, isGranted=$isGranted');
         return isGranted;
       }
     } catch (e) {
@@ -118,10 +132,12 @@ class NotificationService {
         if (result == true) {
           _logger.i('iOS notification permission granted');
           _cachedNotificationPermission = true;
+          await _savePermissionStatusToStorage(true);
           return NotificationPermissionResult.granted;
         } else {
           _logger.w('iOS notification permission denied');
           _cachedNotificationPermission = false;
+          await _savePermissionStatusToStorage(false);
           return NotificationPermissionResult.denied;
         }
       } else if (defaultTargetPlatform == TargetPlatform.android) {
@@ -132,23 +148,28 @@ class NotificationService {
           case PermissionStatus.granted:
             _logger.i('Android notification permission granted');
             _cachedNotificationPermission = true;
+            await _savePermissionStatusToStorage(true);
             return NotificationPermissionResult.granted;
           case PermissionStatus.denied:
             _logger.w('Android notification permission denied');
             _cachedNotificationPermission = false;
+            await _savePermissionStatusToStorage(false);
             return NotificationPermissionResult.denied;
           case PermissionStatus.permanentlyDenied:
             _logger.w('Android notification permission permanently denied');
             _cachedNotificationPermission = false;
+            await _savePermissionStatusToStorage(false);
             return NotificationPermissionResult.permanentlyDenied;
           case PermissionStatus.restricted:
             _logger.w('Android notification permission restricted');
             _cachedNotificationPermission = false;
+            await _savePermissionStatusToStorage(false);
             return NotificationPermissionResult.restricted;
           default:
             _logger
                 .w('Android notification permission unknown status: $status');
             _cachedNotificationPermission = false;
+            await _savePermissionStatusToStorage(false);
             return NotificationPermissionResult.denied;
         }
       } else {
@@ -177,7 +198,30 @@ class NotificationService {
   /// This is useful when the permission status changes outside the app
   static void updateCachedPermissionStatus(bool isGranted) {
     _cachedNotificationPermission = isGranted;
+    _savePermissionStatusToStorage(isGranted);
     _logger.d('Updated cached notification permission: $isGranted');
+  }
+
+  /// Load notification permission status from SharedPreferences
+  static Future<bool> _loadPermissionStatusFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_notificationPermissionKey) ?? false;
+    } catch (e) {
+      _logger.e('Error loading notification permission from storage: $e');
+      return false;
+    }
+  }
+
+  /// Save notification permission status to SharedPreferences
+  static Future<void> _savePermissionStatusToStorage(bool isGranted) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_notificationPermissionKey, isGranted);
+      _logger.d('Saved notification permission status to storage: $isGranted');
+    } catch (e) {
+      _logger.e('Error saving notification permission to storage: $e');
+    }
   }
 
   /// Show a test notification (requires permission)
@@ -473,8 +517,9 @@ class NotificationService {
   static Future<void> cancelAllNotifications() async {
     try {
       await _flutterLocalNotificationsPlugin.cancelAll();
-      // Update cache to reflect that notifications are disabled
+      // Update cache and storage to reflect that notifications are disabled
       _cachedNotificationPermission = false;
+      await _savePermissionStatusToStorage(false);
       _logger.i('All notifications cancelled');
     } catch (e) {
       _logger.e('Error cancelling notifications: $e');
