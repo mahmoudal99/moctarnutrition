@@ -175,6 +175,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                 mealPlan: mealPlanProvider.mealPlan!,
                 user: authProvider.userModel,
                 cheatDay: _cheatDay,
+                selectedDate: DateTime.now(), // Pass current date for consumption tracking
               ),
             ),
           );

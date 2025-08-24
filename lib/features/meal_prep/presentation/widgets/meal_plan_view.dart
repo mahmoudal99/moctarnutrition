@@ -8,6 +8,7 @@ import 'nutrition_summary_card.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/providers/meal_plan_provider.dart';
 import '../../../../shared/services/streak_service.dart';
+import '../../../../shared/services/daily_consumption_service.dart';
 import '../../../../shared/providers/auth_provider.dart';
 
 class MealPlanView extends StatefulWidget {
@@ -15,7 +16,8 @@ class MealPlanView extends StatefulWidget {
   final VoidCallback? onMealTap;
   final UserModel? user; // Add user parameter for cheat day info
   final String? cheatDay; // Add cheat day parameter
-  final DateTime? selectedDate; // Add selected date parameter for consumption tracking
+  final DateTime?
+      selectedDate; // Add selected date parameter for consumption tracking
 
   const MealPlanView({
     super.key,
@@ -90,6 +92,22 @@ class _MealPlanViewState extends State<MealPlanView>
       parent: _nutritionAnimationController,
       curve: Curves.elasticOut,
     ));
+
+    // Load consumption data for the initial day
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadConsumptionData();
+    });
+
+    // Add page change listener to load consumption data when switching days
+    _pageController.addListener(() {
+      if (_pageController.page != null) {
+        final newIndex = _pageController.page!.round();
+        if (newIndex != _currentDayIndex) {
+          _currentDayIndex = newIndex;
+          _loadConsumptionData();
+        }
+      }
+    });
   }
 
   @override
@@ -98,6 +116,48 @@ class _MealPlanViewState extends State<MealPlanView>
     _scrollController.dispose();
     _nutritionAnimationController.dispose();
     super.dispose();
+  }
+
+  /// Load consumption data for the current day and apply it to meals
+  Future<void> _loadConsumptionData() async {
+    if (widget.selectedDate == null) return;
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userId = authProvider.userModel?.id;
+
+      if (userId != null) {
+        final consumptionData =
+            await DailyConsumptionService.getDailyConsumptionSummary(
+          userId,
+          widget.selectedDate!,
+        );
+
+        if (consumptionData != null) {
+          final mealConsumption =
+              Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
+
+          // Apply consumption data to the current day's meals
+          final currentMealDay = widget.mealPlan.mealDays[_currentDayIndex];
+          for (final meal in currentMealDay.meals) {
+            if (mealConsumption.containsKey(meal.id)) {
+              meal.isConsumed = mealConsumption[meal.id]!;
+            }
+          }
+
+          // Recalculate nutrition
+          currentMealDay.calculateConsumedNutrition();
+
+          // Trigger rebuild
+          setState(() {});
+
+          print(
+              'MealPlanView - Applied consumption data for ${widget.selectedDate!.toIso8601String()}: $mealConsumption');
+        }
+      }
+    } catch (e) {
+      print('MealPlanView - Error loading consumption data: $e');
+    }
   }
 
   void _onScroll() {
@@ -469,31 +529,39 @@ class _MealPlanViewState extends State<MealPlanView>
     // Check if all meals of this type are consumed
     final allConsumed = meals.every((meal) => meal.isConsumed);
     final anyConsumed = meals.any((meal) => meal.isConsumed);
-    
+
     return GestureDetector(
       onTap: () async {
         // Toggle consumption for all meals of this type
         final newStatus = !allConsumed;
-        final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
-        
+        final mealPlanProvider =
+            Provider.of<MealPlanProvider>(context, listen: false);
+
         for (final meal in meals) {
-          mealPlanProvider.updateMealConsumption(meal.id, newStatus, widget.selectedDate);
+          mealPlanProvider.updateMealConsumption(
+              meal.id, newStatus, widget.selectedDate);
         }
-        
+
         // Increment streak when marking meals as done (only if not already done)
         if (newStatus && !allConsumed) {
           try {
-            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+            final authProvider =
+                Provider.of<AuthProvider>(context, listen: false);
             final userId = authProvider.userModel?.id;
-            
+
             if (userId != null) {
               // Use the selected date if available, otherwise use current date
               final targetDate = widget.selectedDate ?? DateTime.now();
               await StreakService.incrementStreak(userId);
-              
+
               // Log the streak increment
-              final currentStreak = await StreakService.getCurrentStreak(userId);
-              print('MealPlanView - Streak incremented to $currentStreak for date: ${targetDate.toIso8601String()}');
+              final currentStreak =
+                  await StreakService.getCurrentStreak(userId);
+              print(
+                  'MealPlanView - Streak incremented to $currentStreak for date: ${targetDate.toIso8601String()}');
+
+              // Refresh consumption data to update the UI
+              await _loadConsumptionData();
             }
           } catch (e) {
             print('MealPlanView - Error incrementing streak: $e');
@@ -506,12 +574,12 @@ class _MealPlanViewState extends State<MealPlanView>
           vertical: 4,
         ),
         decoration: BoxDecoration(
-          color: allConsumed 
+          color: allConsumed
               ? AppConstants.successColor.withOpacity(0.1)
               : AppConstants.warningColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: allConsumed 
+            color: allConsumed
                 ? AppConstants.successColor.withOpacity(0.3)
                 : AppConstants.warningColor.withOpacity(0.3),
             width: 1,
@@ -523,16 +591,16 @@ class _MealPlanViewState extends State<MealPlanView>
             Icon(
               allConsumed ? Icons.check_circle : Icons.radio_button_unchecked,
               size: 12,
-              color: allConsumed 
-                  ? AppConstants.successColor 
+              color: allConsumed
+                  ? AppConstants.successColor
                   : AppConstants.warningColor,
             ),
             const SizedBox(width: 4),
             Text(
               allConsumed ? 'Done' : 'Mark as Done',
               style: AppTextStyles.caption.copyWith(
-                color: allConsumed 
-                    ? AppConstants.successColor 
+                color: allConsumed
+                    ? AppConstants.successColor
                     : AppConstants.warningColor,
                 fontWeight: FontWeight.w600,
                 fontSize: 10,

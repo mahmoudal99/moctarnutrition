@@ -226,6 +226,8 @@ class MealPlanProvider with ChangeNotifier {
         isConsumed,
       );
       
+      _logger.d('MealPlanProvider - Saved consumption for meal $mealId to DailyConsumptionService');
+      
       // Also update the in-memory meal plan for immediate UI updates
       // Find the meal and update its consumption status
       for (final mealDay in _mealPlan!.mealDays) {

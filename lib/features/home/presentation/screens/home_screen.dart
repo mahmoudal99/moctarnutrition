@@ -171,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _currentDayMeals = MealDay(
           id: '${templateMealDay.id}_${_selectedDate.toIso8601String()}',
           date: _selectedDate,
-          meals: templateMealDay.meals.map((meal) => meal.copyWith()).toList(),
+          meals: templateMealDay.meals.map((meal) => meal.copyWith()).toList(), // Keep original meal IDs
           totalCalories: templateMealDay.totalCalories,
           totalProtein: templateMealDay.totalProtein,
           totalCarbs: templateMealDay.totalCarbs,
@@ -187,13 +187,21 @@ class _HomeScreenState extends State<HomeScreen> {
         if (consumptionData != null) {
           _logger.d(
               'HomeScreen - Loaded consumption data for ${_selectedDate.toIso8601String()}: ${consumptionData['consumedCalories']} calories');
+          
+          // Debug: Log the meal consumption data
+          final mealConsumption = Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
+          _logger.d('HomeScreen - Meal consumption data: $mealConsumption');
+          
+          // Debug: Log the template meal IDs
+          _logger.d('HomeScreen - Template meal IDs: ${_currentDayMeals!.meals.map((m) => m.id).toList()}');
 
           // Apply consumption data to meals
-          final mealConsumption =
-              Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
           for (final meal in _currentDayMeals!.meals) {
             if (mealConsumption.containsKey(meal.id)) {
               meal.isConsumed = mealConsumption[meal.id]!;
+              _logger.d('HomeScreen - Applied consumption ${mealConsumption[meal.id]} to meal: ${meal.name} (${meal.id})');
+            } else {
+              _logger.d('HomeScreen - No consumption data for meal: ${meal.name} (${meal.id})');
             }
           }
 
@@ -211,12 +219,6 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           _currentDayMeals!.calculateConsumedNutrition();
         }
-
-        _logger.d(
-            'HomeScreen - Updated current day meals: ${_getDayName(_currentDayMeals!.date)}');
-        _logger.d(
-            'HomeScreen - Total calories: ${_currentDayMeals!.totalCalories}, Consumed: ${_currentDayMeals!.consumedCalories}');
-
         setState(() {});
       } else {
         _logger.w('HomeScreen - Invalid weekday index: $weekdayIndex');
@@ -286,22 +288,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
             if (mealDayIndex >= 0 &&
                 mealDayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
-              final updatedMealDay =
-                  mealPlanProvider.mealPlan!.mealDays[mealDayIndex];
-              // Update current day meals with latest data
-              _currentDayMeals = updatedMealDay;
-              _currentDayMeals!.calculateConsumedNutrition();
-              _logger.d(
-                  'HomeScreen - Updated current day meals: ${_getDayName(_currentDayMeals?.date)}');
+              // Don't override _currentDayMeals here - let the date selection handle it
+              _logger.d('HomeScreen - Found meal day for index: $mealDayIndex');
             } else {
               _logger
                   .w('HomeScreen - No meal day found for index: $mealDayIndex');
-              _currentDayMeals = null;
             }
           } catch (e) {
             // No meal day found for this date
             _logger.w('HomeScreen - Error finding meal day: $e');
-            _currentDayMeals = null;
           }
         } else {
           _logger.d('HomeScreen - No meal plan available');
@@ -472,13 +467,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     size: 16,
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    '$_currentStreak',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
+                  // AnimatedCounter( // Removed as per edit hint
+                  //   value: _currentStreak.toDouble(),
+                  //   style: AppTextStyles.bodySmall.copyWith(
+                  //     fontWeight: FontWeight.w600,
+                  //     color: Colors.black,
+                  //   ),
+                  //   duration: const Duration(milliseconds: 600),
+                  //   curve: Curves.easeOutCubic,
+                  // ),
                 ],
               ),
             ),

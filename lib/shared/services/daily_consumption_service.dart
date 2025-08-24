@@ -84,13 +84,14 @@ class DailyConsumptionService {
         nutritionData = Map<String, double>.from(existingData['nutritionData'] ?? {});
       }
       
-      // Update meal consumption
-      mealConsumption[mealId] = isConsumed;
+      // Use the original meal ID (without date suffix) for consistency
+      final originalMealId = mealId.split('_').first; // Remove date suffix if present
+      mealConsumption[originalMealId] = isConsumed;
       
       // Save updated data
       await saveDailyConsumption(userId, date, mealConsumption, nutritionData);
       
-      _logger.d('Updated meal consumption for $mealId on ${date.toIso8601String()}: $isConsumed');
+      _logger.d('Updated meal consumption for $originalMealId on ${date.toIso8601String()}: $isConsumed');
     } catch (e) {
       _logger.e('Failed to update meal consumption: $e');
       rethrow;

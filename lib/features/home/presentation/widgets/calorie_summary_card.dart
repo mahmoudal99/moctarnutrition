@@ -3,6 +3,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/calorie_calculation_service.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/nutrition_calculation_service.dart';
+import '../../../../shared/widgets/animated_counter.dart';
 import 'activity_ring.dart';
 
 class CalorieSummaryCard extends StatelessWidget {
@@ -51,13 +52,15 @@ class CalorieSummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Calories left
-                Text(
-                  caloriesLeft.toString(),
+                AnimatedCounter(
+                  value: caloriesLeft.toDouble(),
                   style: const TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutCubic,
                 ),
                 const SizedBox(height: 4),
                 const Row(

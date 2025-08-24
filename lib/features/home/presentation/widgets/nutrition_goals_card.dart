@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/calorie_calculation_service.dart';
 import '../../../../shared/models/meal_model.dart';
+import '../../../../shared/widgets/animated_counter.dart';
 
 class NutritionGoalsCard extends StatefulWidget {
   final MacroBreakdown macros;
@@ -46,17 +47,17 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
 
         const SizedBox(height: AppConstants.spacingM),
 
-        // Pagination dots
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildPaginationDot(0, true),
-            const SizedBox(width: 8),
-            _buildPaginationDot(1, false),
-            const SizedBox(width: 8),
-            _buildPaginationDot(2, false),
-          ],
-        ),
+        // // Pagination dots
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: [
+        //     _buildPaginationDot(0, true),
+        //     const SizedBox(width: 8),
+        //     _buildPaginationDot(1, false),
+        //     const SizedBox(width: 8),
+        //     _buildPaginationDot(2, false),
+        //   ],
+        // ),
       ],
     );
   }
@@ -82,13 +83,16 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Macro amount
-          Text(
-            '${macroData.grams}g',
+          AnimatedCounter(
+            value: macroData.grams.toDouble(),
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            suffix: 'g',
           ),
           const SizedBox(
             height: AppConstants.spacingS,
