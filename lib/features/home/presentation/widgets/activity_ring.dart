@@ -24,19 +24,6 @@ class ActivityRing extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Background ring (empty gray ring)
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.grey.shade300,
-                width: 8,
-              ),
-            ),
-          ),
-
           // Progress ring (shows consumed calories progress)
           SizedBox(
             width: 80,
@@ -44,7 +31,7 @@ class ActivityRing extends StatelessWidget {
             child: CircularProgressIndicator(
               value: clampedProgress,
               strokeWidth: 8,
-              backgroundColor: Colors.transparent,
+              backgroundColor: Colors.grey.shade300,
               valueColor: AlwaysStoppedAnimation<Color>(
                 clampedProgress >= 1.0
                     ? AppConstants.successColor

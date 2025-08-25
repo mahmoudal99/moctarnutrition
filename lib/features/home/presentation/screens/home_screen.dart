@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late DateTime _selectedDate;
   CalorieTargets? _calorieTargets;
   MealDay? _currentDayMeals;
+  Map<DateTime, Map<String, dynamic>> _dailyConsumptionData = {};
   bool _isLoading = true;
   bool _isLoadingMealPlan = false;
   int _currentStreak = 0; // Add streak tracking
@@ -83,6 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
         // Load current day's meals
         _loadCurrentDayMeals();
 
+        // Load multi-day consumption data for DaySelector
+        await _loadMultiDayConsumptionData();
+
         // Load current streak
         _loadCurrentStreak();
       } else {
@@ -140,6 +144,72 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isLoadingMealPlan = false;
       });
+    }
+  }
+
+  /// Load consumption data for the last 6 days (5 previous + today)
+  Future<void> _loadMultiDayConsumptionData() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+    final userId = authProvider.userModel?.id;
+    
+    if (userId == null || mealPlanProvider.mealPlan == null) return;
+    
+    try {
+      final now = DateTime.now();
+      final startDate = now.subtract(const Duration(days: 5));
+      
+      // Clear existing data
+      _dailyConsumptionData.clear();
+      
+      // Load consumption data for each day
+      for (int i = 0; i < 6; i++) {
+        final date = startDate.add(Duration(days: i));
+        
+        // Get consumption data from service
+        final consumptionData = await DailyConsumptionService.getDailyConsumptionSummary(
+          userId,
+          date,
+        );
+        
+        if (consumptionData != null) {
+          // Calculate actual consumed calories from meal plan data
+          final weekdayIndex = date.weekday - 1;
+          if (weekdayIndex >= 0 && weekdayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
+            final templateMealDay = mealPlanProvider.mealPlan!.mealDays[weekdayIndex];
+            final mealConsumption = Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
+            
+            // Calculate consumed nutrition from the template meals
+            double consumedCalories = 0.0;
+            double consumedProtein = 0.0;
+            double consumedCarbs = 0.0;
+            double consumedFat = 0.0;
+            
+            for (final meal in templateMealDay.meals) {
+              if (mealConsumption[meal.id] == true) {
+                consumedCalories += meal.nutrition.calories;
+                consumedProtein += meal.nutrition.protein;
+                consumedCarbs += meal.nutrition.carbs;
+                consumedFat += meal.nutrition.fat;
+              }
+            }
+            
+            // Update the consumption data with calculated values
+            consumptionData['consumedCalories'] = consumedCalories;
+            consumptionData['consumedProtein'] = consumedProtein;
+            consumptionData['consumedCarbs'] = consumedCarbs;
+            consumptionData['consumedFat'] = consumedFat;
+            
+            _logger.d('HomeScreen - Calculated consumption for ${date.toIso8601String()}: $consumedCalories calories');
+          }
+          
+          _dailyConsumptionData[date] = consumptionData;
+        }
+      }
+      
+      _logger.d('HomeScreen - Loaded consumption data for ${_dailyConsumptionData.length} days');
+    } catch (e) {
+      _logger.e('HomeScreen - Error loading multi-day consumption data: $e');
     }
   }
 
@@ -270,6 +340,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Reload meals for the selected date
     _loadCurrentDayMeals();
+    
+    // Refresh multi-day consumption data to update progress indicators
+    _loadMultiDayConsumptionData();
+    
+    // Debug logging to see what data we have after loading
+    _logger.d('HomeScreen - After date selection, _dailyConsumptionData: ${_dailyConsumptionData.map((key, value) => MapEntry('${key.year}-${key.month}-${key.day}', value['consumedCalories']))}');
   }
 
   @override
@@ -331,6 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onDateSelected: _onDateSelected,
                           currentDayMeals: _currentDayMeals,
                           targetCalories: _calorieTargets?.dailyTarget,
+                          dailyConsumptionData: _dailyConsumptionData,
                         ),
                         const SizedBox(height: 24),
                         // Calorie Summary Card
