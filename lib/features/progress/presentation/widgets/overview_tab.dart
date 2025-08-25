@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/progress_service.dart';
-import '../../../../shared/services/streak_service.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class OverviewTab extends StatelessWidget {
   final Future<OverviewData>? dataFuture;
   final Function(int)? onWeekSelected;
   final int selectedWeekOffset;
+  final ScrollController? scrollController;
 
   const OverviewTab({
-    super.key, 
+    super.key,
     this.dataFuture,
     this.onWeekSelected,
     this.selectedWeekOffset = 0,
+    this.scrollController,
   });
 
   @override
@@ -30,9 +30,9 @@ class OverviewTab extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline,
+                const Icon(Icons.error_outline,
                     size: 48, color: AppConstants.errorColor),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppConstants.spacingM),
                 Text(
                   'Failed to load overview data',
                   style: AppTextStyles.body1
@@ -46,6 +46,7 @@ class OverviewTab extends StatelessWidget {
         final data = snapshot.data ?? OverviewData.empty();
 
         return SingleChildScrollView(
+          controller: scrollController,
           padding: const EdgeInsets.all(AppConstants.spacingM),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,22 +54,26 @@ class OverviewTab extends StatelessWidget {
               // Streak and Weight cards on same row
               Row(
                 children: [
-                  Expanded(child: _buildStreakCard()),
+                  Expanded(child: StreakCard(dataFuture: dataFuture)),
                   const SizedBox(width: AppConstants.spacingM),
-                  Expanded(child: _buildWeightProgressCard()),
+                  Expanded(child: WeightProgressCard(dataFuture: dataFuture)),
                 ],
               ),
               const SizedBox(height: AppConstants.spacingM),
 
               // Goal Progress Line Graph - EXACTLY as shown
-              _buildGoalProgressGraph(),
+              GoalProgressGraph(),
               const SizedBox(height: AppConstants.spacingM),
 
               // BMI Widget - EXACTLY as shown
-              _buildBMIWidget(),
+              TotalCaloriesCard(
+                dataFuture: dataFuture,
+                selectedWeekOffset: selectedWeekOffset,
+                onWeekSelected: onWeekSelected,
+              ),
               const SizedBox(height: AppConstants.spacingM),
               // Total Calories Card - EXACTLY as shown
-              _buildTotalCaloriesCard(),
+              BMIWidget(dataFuture: dataFuture),
               const SizedBox(height: AppConstants.spacingL),
             ],
           ),
@@ -76,9 +81,16 @@ class OverviewTab extends StatelessWidget {
       },
     );
   }
+}
 
-  // Streak Card - EXACTLY matching screenshot
-  Widget _buildStreakCard() {
+// Streak Card - EXACTLY matching screenshot
+class StreakCard extends StatelessWidget {
+  final Future<OverviewData>? dataFuture;
+
+  const StreakCard({super.key, this.dataFuture});
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<OverviewData>(
       future: dataFuture,
       builder: (context, snapshot) {
@@ -148,7 +160,10 @@ class OverviewTab extends StatelessWidget {
               ),
               const SizedBox(height: AppConstants.spacingS),
               // Reduced spacing
-              Expanded(child: _buildWeekProgressIndicator(lastCompletedDate, currentStreak)),
+              Expanded(
+                  child: WeekProgressIndicator(
+                      lastCompletedDate: lastCompletedDate,
+                      currentStreak: currentStreak)),
               // Use Expanded to fill remaining space
             ],
           ),
@@ -156,63 +171,77 @@ class OverviewTab extends StatelessWidget {
       },
     );
   }
+}
 
-  // Week progress indicator - EXACTLY as shown
-  Widget _buildWeekProgressIndicator(DateTime? lastCompletedDate, int currentStreak) {
+// Week progress indicator - EXACTLY as shown
+class WeekProgressIndicator extends StatelessWidget {
+  final DateTime? lastCompletedDate;
+  final int currentStreak;
+
+  const WeekProgressIndicator({
+    super.key,
+    this.lastCompletedDate,
+    required this.currentStreak,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    
+
     // Calculate which days should be highlighted based on the streak
     return Row(
       children: days.asMap().entries.map((entry) {
         final index = entry.key;
         final day = entry.value;
-        
+
         // Calculate if this day should be completed
         // Monday = 0, Tuesday = 1, ..., Sunday = 6
         // For a 2-day streak ending on Monday (today), highlight Monday (index 0) and Sunday (index 6)
         bool isCompleted = false;
-        
+
         if (currentStreak > 0) {
           // Get today's weekday (1 = Monday, 7 = Sunday)
           final today = DateTime.now();
           final todayWeekday = today.weekday; // 1 = Monday, 7 = Sunday
-          
+
           // Convert to 0-based index for our array
           final todayIndex = todayWeekday - 1; // Monday = 0, Sunday = 6
-          
+
           // Calculate which days in the past should be highlighted
           // For a 2-day streak, highlight today and yesterday
           final daysToHighlight = currentStreak;
-          
+
           // Check if this index represents a day that should be highlighted
           // We need to go back from today by the streak count
           for (int i = 0; i < daysToHighlight; i++) {
             final targetWeekday = todayWeekday - i;
-            final targetIndex = (targetWeekday - 1 + 7) % 7; // Handle negative numbers
-            
+            final targetIndex =
+                (targetWeekday - 1 + 7) % 7; // Handle negative numbers
+
             if (index == targetIndex) {
               isCompleted = true;
               break;
             }
           }
         }
-        
+
         return Expanded(
           child: Container(
             height: 24,
-            margin: const EdgeInsets.symmetric(horizontal: 1), // 1px margin between circles
+            margin: const EdgeInsets.symmetric(horizontal: 1),
+            // 1px margin between circles
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isCompleted 
-                  ? AppConstants.warningColor 
+              color: isCompleted
+                  ? AppConstants.warningColor
                   : AppConstants.borderColor,
             ),
             child: Center(
               child: Text(
                 day,
                 style: TextStyle(
-                  color: isCompleted 
-                      ? AppConstants.surfaceColor 
+                  color: isCompleted
+                      ? AppConstants.surfaceColor
                       : AppConstants.textTertiary,
                   fontWeight: FontWeight.bold,
                   fontSize: 10,
@@ -224,9 +253,16 @@ class OverviewTab extends StatelessWidget {
       }).toList(),
     );
   }
+}
 
-  // Weight Progress Card - EXACTLY as shown in screenshot
-  Widget _buildWeightProgressCard() {
+// Weight Progress Card - EXACTLY as shown in screenshot
+class WeightProgressCard extends StatelessWidget {
+  final Future<OverviewData>? dataFuture;
+
+  const WeightProgressCard({super.key, this.dataFuture});
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<OverviewData>(
       future: dataFuture,
       builder: (context, snapshot) {
@@ -426,9 +462,12 @@ class OverviewTab extends StatelessWidget {
     // Cap at 100% maximum
     return progress.clamp(0.0, 100.0);
   }
+}
 
-  // Goal Progress Line Graph - EXACTLY as shown in screenshot
-  Widget _buildGoalProgressGraph() {
+// Goal Progress Line Graph - EXACTLY as shown in screenshot
+class GoalProgressGraph extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppConstants.spacingL),
@@ -470,16 +509,19 @@ class OverviewTab extends StatelessWidget {
           const SizedBox(height: AppConstants.spacingL),
           SizedBox(
             height: 200,
-            child: _buildWeightChart(),
+            child: WeightChart(),
           ),
           const SizedBox(height: AppConstants.spacingM),
         ],
       ),
     );
   }
+}
 
-  // Weight chart - EXACTLY as shown in screenshot
-  Widget _buildWeightChart() {
+// Weight chart - EXACTLY as shown in screenshot
+class WeightChart extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       height: 200,
       child: Row(
@@ -514,9 +556,16 @@ class OverviewTab extends StatelessWidget {
       ),
     );
   }
+}
 
-  // BMI Widget - EXACTLY as shown in screenshot
-  Widget _buildBMIWidget() {
+// BMI Widget - EXACTLY as shown in screenshot
+class BMIWidget extends StatelessWidget {
+  final Future<OverviewData>? dataFuture;
+
+  const BMIWidget({super.key, this.dataFuture});
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<OverviewData>(
       future: dataFuture,
       builder: (context, snapshot) {
@@ -643,16 +692,23 @@ class OverviewTab extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppConstants.spacingM),
-              _buildBMIScale(bmiData.currentBMI), // Pass real BMI value
+              BMIScale(currentBMI: bmiData.currentBMI), // Pass real BMI value
             ],
           ),
         );
       },
     );
   }
+}
 
-  // BMI scale - EXACTLY as shown in screenshot
-  Widget _buildBMIScale(double currentBMI) {
+// BMI scale - EXACTLY as shown in screenshot
+class BMIScale extends StatelessWidget {
+  final double currentBMI;
+
+  const BMIScale({super.key, required this.currentBMI});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         // Container to hold the bar and indicator
@@ -704,7 +760,7 @@ class OverviewTab extends StatelessWidget {
         ),
         const SizedBox(height: AppConstants.spacingS),
         // Legend below
-        _buildBMILegend(),
+        BMILegend(),
       ],
     );
   }
@@ -725,20 +781,31 @@ class OverviewTab extends StatelessWidget {
     // Convert to pixel position on the bar
     return position * barWidth;
   }
+}
 
-  Widget _buildBMILegend() {
+class BMILegend extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildLegendItem('Underweight', Colors.blue),
-        _buildLegendItem('Healthy', Colors.green),
-        _buildLegendItem('Overweight', Colors.orange),
-        _buildLegendItem('Obese', Colors.red),
+        LegendItem(label: 'Underweight', color: Colors.blue),
+        LegendItem(label: 'Healthy', color: Colors.green),
+        LegendItem(label: 'Overweight', color: Colors.orange),
+        LegendItem(label: 'Obese', color: Colors.red),
       ],
     );
   }
+}
 
-  Widget _buildLegendItem(String label, Color color) {
+class LegendItem extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const LegendItem({super.key, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
@@ -759,9 +826,23 @@ class OverviewTab extends StatelessWidget {
       ],
     );
   }
+}
 
-  // Total Calories Card - EXACTLY as shown in screenshot
-  Widget _buildTotalCaloriesCard() {
+// Total Calories Card - EXACTLY as shown in screenshot
+class TotalCaloriesCard extends StatelessWidget {
+  final Future<OverviewData>? dataFuture;
+  final int selectedWeekOffset;
+  final Function(int)? onWeekSelected;
+
+  const TotalCaloriesCard({
+    super.key,
+    this.dataFuture,
+    required this.selectedWeekOffset,
+    this.onWeekSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<OverviewData>(
       future: dataFuture,
       builder: (context, snapshot) {
@@ -780,17 +861,18 @@ class OverviewTab extends StatelessWidget {
 
         final data = snapshot.data ?? OverviewData.empty();
         final dailyCalories = data.dailyCalories;
-        
+
         // DEBUG: Log what data we're getting
         print('=== OVERVIEW TAB DEBUG ===');
         print('Daily calories data length: ${dailyCalories.dailyData.length}');
         print('Weekly total: ${dailyCalories.weeklyTotal}');
         print('Weekly average: ${dailyCalories.weeklyAverage}');
         for (final dayData in dailyCalories.dailyData) {
-          print('Date: ${dayData.date.toIso8601String()}, Weekday: ${dayData.date.weekday}, Calories: ${dayData.totalCalories}');
+          print(
+              'Date: ${dayData.date.toIso8601String()}, Weekday: ${dayData.date.weekday}, Calories: ${dayData.totalCalories}');
         }
         print('========================');
-        
+
         if (dailyCalories.dailyData.isEmpty) {
           return Container(
             width: double.infinity,
@@ -831,95 +913,106 @@ class OverviewTab extends StatelessWidget {
         return Column(
           children: [
             // Weekly Filters
-            Container(
-              width: double.infinity,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppConstants.borderColor.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              ),
-              child: Row(
-                children: [
-                  Expanded(child: _buildWeekFilter('This Week', 0, selectedWeekOffset == 0)),
-                  Container(
-                    width: 1,
-                    height: 20,
-                    color: AppConstants.borderColor.withOpacity(0.5),
-                  ),
-                  Expanded(child: _buildWeekFilter('Last Week', 1, selectedWeekOffset == 1)),
-                  Container(
-                    width: 1,
-                    height: 20,
-                    color: AppConstants.borderColor.withOpacity(0.5),
-                  ),
-                  Expanded(child: _buildWeekFilter('2 Wks Ago', 2, selectedWeekOffset == 2)),
-                  Container(
-                    width: 1,
-                    height: 20,
-                    color: AppConstants.borderColor.withOpacity(0.5),
-                  ),
-                  Expanded(child: _buildWeekFilter('3 Wks Ago', 3, selectedWeekOffset == 3)),
-                ],
-              ),
+            WeekFilters(
+              selectedWeekOffset: selectedWeekOffset,
+              onWeekSelected: onWeekSelected,
             ),
             const SizedBox(height: AppConstants.spacingM),
             // Calories Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppConstants.spacingL),
-              decoration: BoxDecoration(
-                color: AppConstants.surfaceColor,
-                borderRadius: BorderRadius.circular(AppConstants.radiusL),
-                boxShadow: AppConstants.shadowM,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Total Calories',
-                    style: AppTextStyles.body1.copyWith(
-                      color: AppConstants.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  Row(
-                    children: [
-                      Text(
-                        dailyCalories.weeklyTotal.toStringAsFixed(0),
-                        style: AppTextStyles.heading2.copyWith(
-                          color: AppConstants.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(width: AppConstants.spacingS),
-                      Text(
-                        'cals',
-                        style: AppTextStyles.body1.copyWith(
-                          color: AppConstants.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  SizedBox(
-                    height: 200,
-                    child: _buildCaloriesChart(dailyCalories.dailyData),
-                  ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  _buildCaloriesLegend(),
-                ],
-              ),
-            ),
+            CaloriesCard(dailyCalories: dailyCalories),
           ],
         );
       },
     );
   }
+}
 
-  Widget _buildWeekFilter(String label, int weekOffset, bool isSelected) {
+class WeekFilters extends StatelessWidget {
+  final int selectedWeekOffset;
+  final Function(int)? onWeekSelected;
+
+  const WeekFilters({
+    super.key,
+    required this.selectedWeekOffset,
+    this.onWeekSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 40,
+      decoration: BoxDecoration(
+        color: AppConstants.borderColor.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+              child: WeekFilter(
+                  label: 'This Week',
+                  weekOffset: 0,
+                  isSelected: selectedWeekOffset == 0,
+                  onTap: onWeekSelected)),
+          Container(
+            width: 1,
+            height: 20,
+            color: AppConstants.borderColor.withOpacity(0.5),
+          ),
+          Expanded(
+              child: WeekFilter(
+                  label: 'Last Week',
+                  weekOffset: 1,
+                  isSelected: selectedWeekOffset == 1,
+                  onTap: onWeekSelected)),
+          Container(
+            width: 1,
+            height: 20,
+            color: AppConstants.borderColor.withOpacity(0.5),
+          ),
+          Expanded(
+              child: WeekFilter(
+                  label: '2 Wks Ago',
+                  weekOffset: 2,
+                  isSelected: selectedWeekOffset == 2,
+                  onTap: onWeekSelected)),
+          Container(
+            width: 1,
+            height: 20,
+            color: AppConstants.borderColor.withOpacity(0.5),
+          ),
+          Expanded(
+              child: WeekFilter(
+                  label: '3 Wks Ago',
+                  weekOffset: 3,
+                  isSelected: selectedWeekOffset == 3,
+                  onTap: onWeekSelected)),
+        ],
+      ),
+    );
+  }
+}
+
+class WeekFilter extends StatelessWidget {
+  final String label;
+  final int weekOffset;
+  final bool isSelected;
+  final Function(int)? onTap;
+
+  const WeekFilter({
+    super.key,
+    required this.label,
+    required this.weekOffset,
+    required this.isSelected,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (onWeekSelected != null) {
-          onWeekSelected!(weekOffset);
+        if (onTap != null) {
+          onTap!(weekOffset);
         }
       },
       child: Container(
@@ -941,14 +1034,79 @@ class OverviewTab extends StatelessWidget {
       ),
     );
   }
+}
 
-  // Calories chart - EXACTLY as shown in screenshot
-  Widget _buildCaloriesChart(List<DailyCaloriesPoint> dailyData) {
+class CaloriesCard extends StatelessWidget {
+  final DailyCaloriesData dailyCalories;
+
+  const CaloriesCard({super.key, required this.dailyCalories});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppConstants.spacingL),
+      decoration: BoxDecoration(
+        color: AppConstants.surfaceColor,
+        borderRadius: BorderRadius.circular(AppConstants.radiusL),
+        boxShadow: AppConstants.shadowM,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Total Calories',
+            style: AppTextStyles.body1.copyWith(
+              color: AppConstants.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+          Row(
+            children: [
+              Text(
+                dailyCalories.weeklyTotal.toStringAsFixed(0),
+                style: AppTextStyles.heading2.copyWith(
+                  color: AppConstants.textPrimary,
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacingS),
+              Text(
+                'cals',
+                style: AppTextStyles.body1.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+          SizedBox(
+            height: 200,
+            child: CaloriesChart(dailyData: dailyCalories.dailyData),
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+          CaloriesLegend(),
+        ],
+      ),
+    );
+  }
+}
+
+// Calories chart - EXACTLY as shown in screenshot
+class CaloriesChart extends StatelessWidget {
+  final List<DailyCaloriesPoint> dailyData;
+
+  const CaloriesChart({super.key, required this.dailyData});
+
+  @override
+  Widget build(BuildContext context) {
     // Calculate the maximum calories for proper scaling
-    final maxCalories = dailyData.isNotEmpty 
-        ? dailyData.map((d) => d.totalCalories).reduce((a, b) => a > b ? a : b).clamp(500.0, 2000.0)
+    final maxCalories = dailyData.isNotEmpty
+        ? dailyData
+            .map((d) => d.totalCalories)
+            .reduce((a, b) => a > b ? a : b)
+            .clamp(500.0, 2000.0)
         : 1500.0;
-    
+
     return Row(
       children: [
         SizedBox(
@@ -957,8 +1115,10 @@ class OverviewTab extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('${maxCalories.toInt()}', style: AppTextStyles.caption),
-              Text('${(maxCalories * 0.67).toInt()}', style: AppTextStyles.caption),
-              Text('${(maxCalories * 0.33).toInt()}', style: AppTextStyles.caption),
+              Text('${(maxCalories * 0.67).toInt()}',
+                  style: AppTextStyles.caption),
+              Text('${(maxCalories * 0.33).toInt()}',
+                  style: AppTextStyles.caption),
               Text('0', style: AppTextStyles.caption),
             ],
           ),
@@ -988,13 +1148,15 @@ class OverviewTab extends StatelessWidget {
                 children: dailyData.asMap().entries.map((entry) {
                   final index = entry.key;
                   final dayData = entry.value;
-                  
+
                   // Get the day abbreviation from the actual date
-                  final dayAbbreviation = _getDayAbbreviation(dayData.date.weekday);
-                  
+                  final dayAbbreviation =
+                      _getDayAbbreviation(dayData.date.weekday);
+
                   // DEBUG: Log the date matching
-                  print('Chart - Index $index (${dayAbbreviation}): Date ${dayData.date.toIso8601String()}, Calories: ${dayData.totalCalories}');
-                  
+                  print(
+                      'Chart - Index $index (${dayAbbreviation}): Date ${dayData.date.toIso8601String()}, Calories: ${dayData.totalCalories}');
+
                   if (dayData.totalCalories == 0) {
                     return SizedBox(
                       width: 20,
@@ -1009,14 +1171,15 @@ class OverviewTab extends StatelessWidget {
                                 child: Container(
                                   width: 20,
                                   height: 1,
-                                  color: AppConstants.borderColor.withOpacity(0.3),
+                                  color:
+                                      AppConstants.borderColor.withOpacity(0.3),
                                 ),
                               ),
                             ),
                           ),
                           // Day label at the bottom
                           Text(
-                            dayAbbreviation, 
+                            dayAbbreviation,
                             style: AppTextStyles.caption,
                             textAlign: TextAlign.center,
                           ),
@@ -1024,15 +1187,18 @@ class OverviewTab extends StatelessWidget {
                       ),
                     );
                   }
-                  
+
                   // Calculate bar heights based on actual consumed calories
-                  final totalHeight = (dayData.totalCalories / maxCalories) * 200;
-                  
+                  final totalHeight =
+                      (dayData.totalCalories / maxCalories) * 200;
+
                   // Calculate individual macro heights (convert from calories to height)
-                  final proteinHeight = (dayData.proteinCalories / maxCalories) * 200;
-                  final carbsHeight = (dayData.carbsCalories / maxCalories) * 200;
+                  final proteinHeight =
+                      (dayData.proteinCalories / maxCalories) * 200;
+                  final carbsHeight =
+                      (dayData.carbsCalories / maxCalories) * 200;
                   final fatsHeight = (dayData.fatsCalories / maxCalories) * 200;
-                  
+
                   return SizedBox(
                     width: 20,
                     height: 200, // Match the container height
@@ -1077,7 +1243,8 @@ class OverviewTab extends StatelessWidget {
                                 // Fats (top)
                                 if (fatsHeight > 0)
                                   Positioned(
-                                    bottom: (proteinHeight + carbsHeight).clamp(0, 200),
+                                    bottom: (proteinHeight + carbsHeight)
+                                        .clamp(0, 200),
                                     left: 0,
                                     child: Container(
                                       width: 20,
@@ -1097,7 +1264,7 @@ class OverviewTab extends StatelessWidget {
                         ),
                         // Day label at the bottom
                         Text(
-                          dayAbbreviation, 
+                          dayAbbreviation,
                           style: AppTextStyles.caption,
                           textAlign: TextAlign.center,
                         ),
@@ -1113,29 +1280,40 @@ class OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _buildCaloriesLegend() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildLegendItem('Protein', AppConstants.proteinColor),
-        _buildLegendItem('Carbs', AppConstants.carbsColor),
-        _buildLegendItem('Fats', AppConstants.fatColor),
-      ],
-    );
-  }
-
   /// Get day abbreviation from weekday number
   String _getDayAbbreviation(int weekday) {
     switch (weekday) {
-      case 1: return 'M'; // Monday
-      case 2: return 'T'; // Tuesday
-      case 3: return 'W'; // Wednesday
-      case 4: return 'T'; // Thursday
-      case 5: return 'F'; // Friday
-      case 6: return 'S'; // Saturday
-      case 7: return 'S'; // Sunday
-      default: return '?';
+      case 1:
+        return 'M'; // Monday
+      case 2:
+        return 'T'; // Tuesday
+      case 3:
+        return 'W'; // Wednesday
+      case 4:
+        return 'T'; // Thursday
+      case 5:
+        return 'F'; // Friday
+      case 6:
+        return 'S'; // Saturday
+      case 7:
+        return 'S'; // Sunday
+      default:
+        return '?';
     }
+  }
+}
+
+class CaloriesLegend extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        LegendItem(label: 'Protein', color: AppConstants.proteinColor),
+        LegendItem(label: 'Carbs', color: AppConstants.carbsColor),
+        LegendItem(label: 'Fats', color: AppConstants.fatColor),
+      ],
+    );
   }
 }
 

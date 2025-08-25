@@ -26,6 +26,7 @@ class ProgressScreen extends StatefulWidget {
 class _ProgressScreenState extends State<ProgressScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late ScrollController _overviewScrollController;
   Future<ProgressSummary>? _progressSummaryFuture;
   Future<List<WeightDataPoint>>? _weightDataFuture;
   Future<List<MoodDataPoint>>? _moodDataFuture;
@@ -38,6 +39,7 @@ class _ProgressScreenState extends State<ProgressScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _overviewScrollController = ScrollController();
     _loadData();
   }
 
@@ -51,6 +53,7 @@ class _ProgressScreenState extends State<ProgressScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _overviewScrollController.dispose();
     super.dispose();
   }
 
@@ -336,10 +339,10 @@ class _ProgressScreenState extends State<ProgressScreen>
               controller: _tabController,
               children: [
                 OverviewTab(
-                  key: ValueKey('overview_$_selectedWeekOffset'),
                   dataFuture: _overviewDataFuture,
                   onWeekSelected: _selectWeek,
                   selectedWeekOffset: _selectedWeekOffset,
+                  scrollController: _overviewScrollController,
                 ),
                 WeightTab(dataFuture: _weightDataFuture),
                 MoodTab(dataFuture: _moodDataFuture),
