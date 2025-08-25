@@ -96,14 +96,17 @@ class _ProgressScreenState extends State<ProgressScreen>
       final today = DateTime(now.year, now.month, now.day);
       
       // Calculate the start date for the selected week
-      final weekStart = today.subtract(Duration(days: today.weekday - 1)); // Monday of current week
-      final selectedWeekStart = weekStart.subtract(Duration(days: _selectedWeekOffset * 7)); // Go back by selected weeks
+      // Get the Monday of the current week
+      final currentWeekMonday = today.subtract(Duration(days: today.weekday - 1));
+      
+      // Go back by the selected week offset to get the target week's Monday
+      final targetWeekMonday = currentWeekMonday.subtract(Duration(days: _selectedWeekOffset * 7));
       
       final dailyData = <DailyCaloriesPoint>[];
       
       // Get data for the selected week (7 days total)
       for (int i = 0; i < 7; i++) {
-        final date = selectedWeekStart.add(Duration(days: i));
+        final date = targetWeekMonday.add(Duration(days: i));
         final weekdayIndex = date.weekday - 1; // Monday = 0, Sunday = 6
         
         if (weekdayIndex >= 0 && weekdayIndex < mealPlan.mealDays.length) {

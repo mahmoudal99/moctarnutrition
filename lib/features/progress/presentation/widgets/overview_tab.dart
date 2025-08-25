@@ -944,8 +944,6 @@ class OverviewTab extends StatelessWidget {
 
   // Calories chart - EXACTLY as shown in screenshot
   Widget _buildCaloriesChart(List<DailyCaloriesPoint> dailyData) {
-    final days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-    
     // Calculate the maximum calories for proper scaling
     final maxCalories = dailyData.isNotEmpty 
         ? dailyData.map((d) => d.totalCalories).reduce((a, b) => a > b ? a : b).clamp(500.0, 2000.0)
@@ -987,50 +985,49 @@ class OverviewTab extends StatelessWidget {
               // Bars - Use real consumption data
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: days.asMap().entries.map((entry) {
+                children: dailyData.asMap().entries.map((entry) {
                   final index = entry.key;
-                  final day = entry.value;
+                  final dayData = entry.value;
                   
-                  // Find consumption data for this day by matching the actual date
-                  // Use the SAME LOGIC as ProgressService - get data for today and past 6 days
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  final targetDate = today.subtract(Duration(days: 6 - index)); // index 0 = 6 days ago, index 6 = today
+                  // Get the day abbreviation from the actual date
+                  final dayAbbreviation = _getDayAbbreviation(dayData.date.weekday);
                   
                   // DEBUG: Log the date matching
-                  print('Chart - Index $index (${day}): Looking for date ${targetDate.toIso8601String()}');
-                  
-                  final dayData = dailyData.firstWhere(
-                    (d) => d.date.year == targetDate.year && 
-                           d.date.month == targetDate.month && 
-                           d.date.day == targetDate.day,
-                    orElse: () {
-                      print('Chart - No match found for ${targetDate.toIso8601String()}, using fallback');
-                      return DailyCaloriesPoint(
-                        date: targetDate,
-                        totalCalories: 0,
-                        protein: 0,
-                        carbs: 0,
-                        fats: 0,
-                      );
-                    },
-                  );
-                  
-                  print('Chart - Found data for ${day}: ${dayData.totalCalories} calories');
+                  print('Chart - Index $index (${dayAbbreviation}): Date ${dayData.date.toIso8601String()}, Calories: ${dayData.totalCalories}');
                   
                   if (dayData.totalCalories == 0) {
                     return SizedBox(
                       width: 20,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      height: 220, // Total height for chart + label
+                      child: Stack(
                         children: [
-                          Container(
-                            width: 20,
-                            height: 1,
-                            color: AppConstants.borderColor.withOpacity(0.3),
+                          // Empty bar (just a line)
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            child: Container(
+                              width: 20,
+                              height: 200,
+                              child: Center(
+                                child: Container(
+                                  width: 20,
+                                  height: 1,
+                                  color: AppConstants.borderColor.withOpacity(0.3),
+                                ),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(day, style: AppTextStyles.caption),
+                          // Day label at the bottom
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Text(
+                              dayAbbreviation, 
+                              style: AppTextStyles.caption,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -1115,7 +1112,7 @@ class OverviewTab extends StatelessWidget {
                           left: 0,
                           right: 0,
                           child: Text(
-                            day, 
+                            dayAbbreviation, 
                             style: AppTextStyles.caption,
                             textAlign: TextAlign.center,
                           ),
@@ -1141,6 +1138,20 @@ class OverviewTab extends StatelessWidget {
         _buildLegendItem('Fats', AppConstants.fatColor),
       ],
     );
+  }
+
+  /// Get day abbreviation from weekday number
+  String _getDayAbbreviation(int weekday) {
+    switch (weekday) {
+      case 1: return 'M'; // Monday
+      case 2: return 'T'; // Tuesday
+      case 3: return 'W'; // Wednesday
+      case 4: return 'T'; // Thursday
+      case 5: return 'F'; // Friday
+      case 6: return 'S'; // Saturday
+      case 7: return 'S'; // Sunday
+      default: return '?';
+    }
   }
 }
 
