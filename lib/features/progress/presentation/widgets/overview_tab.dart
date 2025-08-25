@@ -998,16 +998,13 @@ class OverviewTab extends StatelessWidget {
                   if (dayData.totalCalories == 0) {
                     return SizedBox(
                       width: 20,
-                      height: 220, // Total height for chart + label
-                      child: Stack(
+                      height: 200, // Match the container height
+                      child: Column(
                         children: [
-                          // Empty bar (just a line)
-                          Positioned(
-                            top: 0,
-                            left: 0,
+                          // Empty bar area (just a line)
+                          Expanded(
                             child: Container(
                               width: 20,
-                              height: 200,
                               child: Center(
                                 child: Container(
                                   width: 20,
@@ -1018,15 +1015,10 @@ class OverviewTab extends StatelessWidget {
                             ),
                           ),
                           // Day label at the bottom
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: Text(
-                              dayAbbreviation, 
-                              style: AppTextStyles.caption,
-                              textAlign: TextAlign.center,
-                            ),
+                          Text(
+                            dayAbbreviation, 
+                            style: AppTextStyles.caption,
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -1043,16 +1035,13 @@ class OverviewTab extends StatelessWidget {
                   
                   return SizedBox(
                     width: 20,
-                    height: 220, // Total height for chart + label
-                    child: Stack(
+                    height: 200, // Match the container height
+                    child: Column(
                       children: [
                         // Stacked nutrition bars using real consumption data with clear divisions
-                        Positioned(
-                          top: 0,
-                          left: 0,
+                        Expanded(
                           child: Container(
                             width: 20,
-                            height: 200,
                             child: Stack(
                               children: [
                                 // Protein (bottom)
@@ -1107,15 +1096,10 @@ class OverviewTab extends StatelessWidget {
                           ),
                         ),
                         // Day label at the bottom
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Text(
-                            dayAbbreviation, 
-                            style: AppTextStyles.caption,
-                            textAlign: TextAlign.center,
-                          ),
+                        Text(
+                          dayAbbreviation, 
+                          style: AppTextStyles.caption,
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
