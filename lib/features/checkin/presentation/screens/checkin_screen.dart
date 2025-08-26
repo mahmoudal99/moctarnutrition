@@ -34,11 +34,6 @@ class _CheckinScreenState extends State<CheckinScreen> {
     await checkinProvider.refresh();
   }
 
-  Future<void> _cleanupData() async {
-    final checkinProvider =
-        Provider.of<CheckinProvider>(context, listen: false);
-    await checkinProvider.markOverdueCheckins();
-  }
 
   @override
   Widget build(BuildContext context) {

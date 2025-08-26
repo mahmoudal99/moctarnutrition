@@ -97,7 +97,7 @@ class CheckinStatusCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
+            const Icon(
               Icons.check_circle,
               color: Colors.white,
               size: 20,
@@ -182,30 +182,12 @@ class CheckinStatusCard extends StatelessWidget {
   Widget _buildPendingContent() {
     final now = DateTime.now();
     final isSunday = now.weekday == 7;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(
-              isSunday ? Icons.schedule : Icons.event,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              isSunday ? 'Time for your weekly check-in' : 'Check-in day is Sunday',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
         Text(
-          isSunday 
+          isSunday
               ? 'Take a progress photo to track your fitness journey'
               : 'Come back on Sunday to submit your weekly check-in.',
           style: AppTextStyles.bodySmall.copyWith(
@@ -217,7 +199,36 @@ class CheckinStatusCard extends StatelessWidget {
   }
 
   Widget _buildActionButton() {
-    if (currentCheckin?.status == CheckinStatus.completed) {
+    final now = DateTime.now();
+    final isSunday = now.weekday == 7;
+    final today = DateTime(now.year, now.month, now.day);
+    final daysUntilSunday = _calculateDaysUntilSunday(today);
+    final nextCheckinText = daysUntilSunday == 0
+        ? 'Check-in today'
+        : 'Next check-in: ${daysUntilSunday}d';
+    if (!isSunday) {
+      return Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: Container(
+          height: 40, // Fixed height for the grey section
+          decoration: BoxDecoration(
+            color: AppConstants.borderColor.withOpacity(0.3),
+            borderRadius:
+                const BorderRadius.all(Radius.circular(AppConstants.radiusL)),
+          ),
+          child: Center(
+            child: Text(
+              nextCheckinText,
+              style: AppTextStyles.body2.copyWith(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      );
+    } else if (currentCheckin?.status == CheckinStatus.completed) {
       return SizedBox(
         width: double.infinity,
         child: OutlinedButton.icon(
@@ -237,18 +248,21 @@ class CheckinStatusCard extends StatelessWidget {
         ),
       );
     } else {
-      final now = DateTime.now();
-      final isSunday = now.weekday == 7;
-      
       return SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
-          onPressed: isSunday ? onCheckinNow : null,
-          icon: Icon(isSunday ? Icons.camera_alt : Icons.schedule),
-          label: Text(isSunday ? 'Take Progress Photo' : 'Check-in on Sunday'),
+          onPressed: onCheckinNow,
+          icon: const Icon(
+            Icons.camera_alt,
+            color: AppConstants.textSecondary,
+          ),
+          label: const Text(
+            'Take Progress Photo',
+            style: TextStyle(color: Colors.black87),
+          ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: isSunday ? Colors.white : Colors.white.withOpacity(0.3),
-            foregroundColor: isSunday ? _getPrimaryColor() : Colors.white.withOpacity(0.7),
+            backgroundColor: Colors.white,
+            foregroundColor: _getPrimaryColor(),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -325,7 +339,7 @@ class CheckinStatusCard extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-    
+
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {
@@ -334,16 +348,27 @@ class CheckinStatusCard extends StatelessWidget {
       return '$difference days ago';
     } else {
       final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
       ];
       return '${months[date.month - 1]} ${date.day}';
     }
   }
 
-  int _getDaysUntilSunday() {
-    final now = DateTime.now();
-    final daysUntilSunday = (7 - now.weekday) % 7;
-    return daysUntilSunday == 0 ? 7 : daysUntilSunday;
+  /// Calculate days until next Sunday (0 if today is Sunday)
+  int _calculateDaysUntilSunday(DateTime today) {
+    final weekday = today.weekday; // 1 = Monday, 7 = Sunday
+    if (weekday == 7) return 0; // Today is Sunday
+    return 7 - weekday; // Days until next Sunday
   }
-} 
+}

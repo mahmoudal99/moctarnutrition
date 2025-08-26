@@ -23,10 +23,7 @@ class DaySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final days = _generateDays();
-    
-    // Debug logging to see what data we're receiving
-    print('DaySelector - Build called with dailyConsumptionData: ${dailyConsumptionData?.map((key, value) => MapEntry('${key.year}-${key.month}-${key.day}', value['consumedCalories']))}');
-    
+
     return SizedBox(
       height: 60,
       child: Row(
@@ -36,9 +33,6 @@ class DaySelector extends StatelessWidget {
           final isToday = _isSameDay(day, DateTime.now());
           final isPast = day.isBefore(DateTime.now().subtract(const Duration(days: 1)));
           final isFuture = day.isAfter(DateTime.now().add(const Duration(days: 1)));
-          
-          // Debug logging for isToday check
-          print('DaySelector - Day: ${day.toIso8601String()}, isToday: $isToday, DateTime.now(): ${DateTime.now().toIso8601String()}');
           
           // Check if this day has consumption data
           final normalizedDay = DateTime(day.year, day.month, day.day);
