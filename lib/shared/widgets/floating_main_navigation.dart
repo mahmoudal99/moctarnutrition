@@ -58,7 +58,7 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
       ),
       const _NavItem(
         icon: Icons.restaurant_menu,
-        label: 'Meal Prep',
+        label: 'My Meals',
         route: '/meal-prep',
       ),
       const _NavItem(
