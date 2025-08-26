@@ -12,6 +12,7 @@ import '../../../../shared/services/streak_service.dart';
 import '../widgets/day_selector.dart';
 import '../widgets/calorie_summary_card.dart';
 import '../widgets/nutrition_goals_card.dart';
+import '../widgets/next_meal_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Refresh streak when dependencies change (e.g., returning from meal prep screen)
     _loadCurrentStreak();
   }
 
@@ -432,6 +432,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         else
                           _buildNoDataCard('No Nutrition Goals',
                               'Complete onboarding to set goals'),
+                        const SizedBox(height: 20),
+                        // Next Meal Card
+                        NextMealCard(
+                          currentDayMeals: _currentDayMeals,
+                          selectedDate: _selectedDate,
+                        ),
                         const SizedBox(
                             height: 100), // Space for bottom navigation
                       ],
@@ -440,35 +446,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDebugInfo(
-      AuthProvider authProvider, MealPlanProvider mealPlanProvider) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Debug Info',
-            style: AppTextStyles.heading5.copyWith(color: Colors.blue),
-          ),
-          const SizedBox(height: 8),
-          Text('Auth: ${authProvider.isAuthenticated ? 'Yes' : 'No'}'),
-          Text('User: ${authProvider.userModel?.name ?? 'null'}'),
-          Text('Calorie Targets: ${_calorieTargets?.dailyTarget ?? 'null'}'),
-          Text('Meal Plan: ${mealPlanProvider.mealPlan?.title ?? 'null'}'),
-          Text('Current Day: ${_getDayName(_currentDayMeals?.date) ?? 'null'}'),
-          Text('Loading: $_isLoading, Meal Plan Loading: $_isLoadingMealPlan'),
-        ],
-      ),
     );
   }
 
