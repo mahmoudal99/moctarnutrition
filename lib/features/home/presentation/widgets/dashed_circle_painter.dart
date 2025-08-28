@@ -32,7 +32,7 @@ class DashedCirclePainter extends CustomPainter {
     for (int i = 0; i < dashCount; i++) {
       final startAngle = i * (dashAngle + gapAngle) * math.pi / 180;
       final sweepAngle = dashAngle * math.pi / 180;
-      
+
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,

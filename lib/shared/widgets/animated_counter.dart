@@ -38,7 +38,7 @@ class _AnimatedCounterState extends State<AnimatedCounter>
       duration: widget.duration,
       vsync: this,
     );
-    
+
     _animation = Tween<double>(
       begin: 0,
       end: 1,
@@ -46,10 +46,10 @@ class _AnimatedCounterState extends State<AnimatedCounter>
       parent: _controller,
       curve: widget.curve,
     ));
-    
+
     _currentValue = widget.value;
     _previousValue = widget.value;
-    
+
     // Start the initial animation
     _controller.forward();
   }
@@ -57,12 +57,13 @@ class _AnimatedCounterState extends State<AnimatedCounter>
   @override
   void didUpdateWidget(AnimatedCounter oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     if (oldWidget.value != widget.value) {
-      print('AnimatedCounter - Value changed from $_previousValue to ${widget.value}');
+      print(
+          'AnimatedCounter - Value changed from $_previousValue to ${widget.value}');
       _previousValue = _currentValue;
       _currentValue = widget.value;
-      
+
       // Reset and start the animation
       _controller.reset();
       _controller.forward();
@@ -80,11 +81,11 @@ class _AnimatedCounterState extends State<AnimatedCounter>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        final animatedValue = _previousValue + 
+        final animatedValue = _previousValue +
             (_currentValue - _previousValue) * _animation.value;
-        
+
         final displayValue = animatedValue.isNaN ? 0.0 : animatedValue;
-        
+
         return Text(
           '${widget.prefix ?? ''}${displayValue.round()}${widget.suffix ?? ''}',
           style: widget.style,

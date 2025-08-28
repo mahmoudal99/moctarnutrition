@@ -21,7 +21,7 @@ class PersonalizedTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final defaultStyle = style ?? AppTextStyles.bodyLarge;
     final finalStyle = defaultStyle.copyWith(fontWeight: FontWeight.w600);
-    
+
     if (userName != null && userName!.isNotEmpty) {
       final nameIndex = title.indexOf('{name}');
       if (nameIndex != -1) {
@@ -46,7 +46,7 @@ class PersonalizedTitle extends StatelessWidget {
         );
       }
     }
-    
+
     // Fallback case
     return Text(
       fallbackTitle ?? title.replaceAll('{name}', 'your'),
@@ -54,4 +54,4 @@ class PersonalizedTitle extends StatelessWidget {
       textAlign: textAlign ?? TextAlign.start,
     );
   }
-} 
+}

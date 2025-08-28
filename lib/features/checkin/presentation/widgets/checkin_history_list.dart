@@ -28,9 +28,9 @@ class CheckinHistoryList extends StatelessWidget {
     return Column(
       children: [
         ...checkins.map((checkin) => _CheckinHistoryItem(
-          checkin: checkin,
-          onTap: () => onCheckinTap(checkin),
-        )),
+              checkin: checkin,
+              onTap: () => onCheckinTap(checkin),
+            )),
         if (showLoadMore && onLoadMore != null)
           Padding(
             padding: const EdgeInsets.only(top: 16),
@@ -152,7 +152,7 @@ class _CheckinHistoryItem extends StatelessWidget {
                 },
               );
             }
-            
+
             // Second priority: Show Firebase URL if available
             if (checkin.photoThumbnailUrl != null) {
               return CachedNetworkImage(
@@ -176,7 +176,7 @@ class _CheckinHistoryItem extends StatelessWidget {
                 ),
               );
             }
-            
+
             // Last resort: No photo available
             return Container(
               color: AppConstants.textTertiary.withOpacity(0.1),
@@ -322,7 +322,7 @@ class _CheckinHistoryItem extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-    
+
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {
@@ -334,10 +334,20 @@ class _CheckinHistoryItem extends StatelessWidget {
       return '$weeks ${weeks == 1 ? 'week' : 'weeks'} ago';
     } else {
       final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
       ];
       return '${months[date.month - 1]} ${date.day}';
     }
   }
-} 
+}

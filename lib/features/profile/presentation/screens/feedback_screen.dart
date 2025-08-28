@@ -392,7 +392,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         description: _descriptionController.text.trim(),
         suggestions: _suggestionsController.text.trim(),
       );
-      final emailSubject = EmailTemplates.buildFeedbackSubject(_titleController.text.trim());
+      final emailSubject =
+          EmailTemplates.buildFeedbackSubject(_titleController.text.trim());
 
       final emailUrl = Uri.parse(
           'mailto:${EmailTemplates.feedbackEmail}?subject=${Uri.encodeComponent(emailSubject)}&body=${Uri.encodeComponent(emailBody)}');
@@ -442,4 +443,4 @@ App Version: 1.0.0
       return 'Device info unavailable: $e';
     }
   }
-} 
+}

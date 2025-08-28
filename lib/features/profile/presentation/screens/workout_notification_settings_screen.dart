@@ -20,14 +20,14 @@ class WorkoutNotificationSettingsScreen extends StatefulWidget {
 class _WorkoutNotificationSettingsScreenState
     extends State<WorkoutNotificationSettingsScreen> {
   static final _logger = Logger();
-  
+
   late UserModel _user;
   late UserPreferences _preferences;
 
   // Notification settings
   late bool _workoutNotificationsEnabled;
   late TimeOfDay _notificationTime;
-  
+
   bool _isLoading = false;
   bool _hasChanges = false;
 
@@ -44,7 +44,7 @@ class _WorkoutNotificationSettingsScreenState
 
     // Initialize notification settings
     _workoutNotificationsEnabled = _preferences.workoutNotificationsEnabled;
-    
+
     // Parse notification time from string format "HH:mm"
     if (_preferences.workoutNotificationTime != null) {
       final timeParts = _preferences.workoutNotificationTime!.split(':');
@@ -99,7 +99,7 @@ class _WorkoutNotificationSettingsScreenState
 
   Future<void> _toggleWorkoutNotifications(bool enabled) async {
     HapticFeedback.lightImpact();
-    
+
     setState(() {
       _workoutNotificationsEnabled = enabled;
       _markAsChanged();
@@ -107,7 +107,8 @@ class _WorkoutNotificationSettingsScreenState
 
     if (enabled) {
       // Request notification permission if enabling
-      final permissionResult = await NotificationService.requestNotificationPermission();
+      final permissionResult =
+          await NotificationService.requestNotificationPermission();
       if (!permissionResult.isGranted) {
         setState(() {
           _workoutNotificationsEnabled = false;
@@ -134,13 +135,14 @@ class _WorkoutNotificationSettingsScreenState
 
     try {
       // Convert TimeOfDay to string format "HH:mm"
-      final notificationTimeString = 
+      final notificationTimeString =
           '${_notificationTime.hour.toString().padLeft(2, '0')}:${_notificationTime.minute.toString().padLeft(2, '0')}';
 
       // Create updated preferences
       final updatedPreferences = _preferences.copyWith(
         workoutNotificationsEnabled: _workoutNotificationsEnabled,
-        workoutNotificationTime: _workoutNotificationsEnabled ? notificationTimeString : null,
+        workoutNotificationTime:
+            _workoutNotificationsEnabled ? notificationTimeString : null,
       );
 
       // Create updated user
@@ -195,8 +197,9 @@ class _WorkoutNotificationSettingsScreenState
 
   Future<void> _scheduleWorkoutNotifications() async {
     try {
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
-      
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
+
       // Check if workout plan is loaded
       if (workoutProvider.currentWorkoutPlan == null) {
         _logger.d('No workout plan loaded, skipping notification scheduling');
@@ -204,10 +207,11 @@ class _WorkoutNotificationSettingsScreenState
       }
 
       final workoutPlan = workoutProvider.currentWorkoutPlan!;
-      final notificationTimeString = 
+      final notificationTimeString =
           '${_notificationTime.hour.toString().padLeft(2, '0')}:${_notificationTime.minute.toString().padLeft(2, '0')}';
 
-      _logger.d('Scheduling workout notifications for user ${_user.id} at $notificationTimeString');
+      _logger.d(
+          'Scheduling workout notifications for user ${_user.id} at $notificationTimeString');
 
       // Schedule notifications
       await NotificationService.scheduleWorkoutNotifications(
@@ -500,4 +504,4 @@ class _WorkoutNotificationSettingsScreenState
       ),
     );
   }
-} 
+}

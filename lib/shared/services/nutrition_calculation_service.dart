@@ -29,7 +29,8 @@ class NutritionCalculationService {
         totalSugar += ingredient.nutrition!.sugar;
         totalSodium += ingredient.nutrition!.sodium;
 
-        _logger.d('Added ${ingredient.name}: ${ingredient.nutrition!.calories.toStringAsFixed(1)} cal');
+        _logger.d(
+            'Added ${ingredient.name}: ${ingredient.nutrition!.calories.toStringAsFixed(1)} cal');
       } else {
         _logger.w('No nutrition data available for ${ingredient.name}');
       }
@@ -91,7 +92,8 @@ class NutritionCalculationService {
   }
 
   /// Calculate nutrition for an entire meal plan
-  static Map<String, double> calculateMealPlanNutrition(MealPlanModel mealPlan) {
+  static Map<String, double> calculateMealPlanNutrition(
+      MealPlanModel mealPlan) {
     _logger.i('Calculating nutrition for meal plan: ${mealPlan.title}');
 
     double totalCalories = 0.0;
@@ -195,8 +197,6 @@ class NutritionCalculationService {
       'context': context,
     };
   }
-
-
 
   /// Apply nutrition calculations to a meal and update its nutrition data
   static void applyCalculatedNutritionToMeal(Meal meal) {

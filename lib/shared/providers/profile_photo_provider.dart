@@ -20,9 +20,10 @@ class ProfilePhotoProvider extends ChangeNotifier {
   /// Load the stored profile photo for the current user
   Future<void> _loadProfilePhoto() async {
     if (_currentUserId == null) return;
-    
+
     try {
-      final base64Image = await ProfilePhotoService.getProfilePhoto(_currentUserId!);
+      final base64Image =
+          await ProfilePhotoService.getProfilePhoto(_currentUserId!);
       if (base64Image != null) {
         _storedProfilePhoto = base64Image;
         notifyListeners();
@@ -35,9 +36,10 @@ class ProfilePhotoProvider extends ChangeNotifier {
   /// Update the profile photo
   Future<bool> updateProfilePhoto(String imagePath) async {
     if (_currentUserId == null) return false;
-    
+
     try {
-      final success = await ProfilePhotoService.storeProfilePhoto(_currentUserId!, imagePath);
+      final success = await ProfilePhotoService.storeProfilePhoto(
+          _currentUserId!, imagePath);
       if (success) {
         await _loadProfilePhoto(); // Reload the photo
         return true;
@@ -51,9 +53,10 @@ class ProfilePhotoProvider extends ChangeNotifier {
   /// Remove the profile photo
   Future<bool> removeProfilePhoto() async {
     if (_currentUserId == null) return false;
-    
+
     try {
-      final success = await ProfilePhotoService.removeProfilePhoto(_currentUserId!);
+      final success =
+          await ProfilePhotoService.removeProfilePhoto(_currentUserId!);
       if (success) {
         _storedProfilePhoto = null;
         notifyListeners();
@@ -83,4 +86,4 @@ class ProfilePhotoProvider extends ChangeNotifier {
     _currentUserId = null;
     notifyListeners();
   }
-} 
+}

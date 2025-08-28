@@ -6,7 +6,8 @@ void main() {
     group('getInitials', () {
       test('should return first and last name initials for full name', () {
         expect(AvatarUtils.getInitials('John Doe', 'john@example.com'), 'JD');
-        expect(AvatarUtils.getInitials('Mary Jane Smith', 'mary@example.com'), 'MS');
+        expect(AvatarUtils.getInitials('Mary Jane Smith', 'mary@example.com'),
+            'MS');
       });
 
       test('should return first two letters for single name', () {
@@ -25,7 +26,8 @@ void main() {
         expect(AvatarUtils.getInitials(null, 'a@example.com'), 'A');
       });
 
-      test('should return default "U" when both name and email are null/empty', () {
+      test('should return default "U" when both name and email are null/empty',
+          () {
         expect(AvatarUtils.getInitials(null, null), 'U');
         expect(AvatarUtils.getInitials('', ''), 'U');
         expect(AvatarUtils.getInitials(null, ''), 'U');
@@ -35,22 +37,31 @@ void main() {
 
     group('getAvatarBackgroundColor', () {
       test('should return consistent color for same input', () {
-        final color1 = AvatarUtils.getAvatarBackgroundColor('John Doe', 'john@example.com');
-        final color2 = AvatarUtils.getAvatarBackgroundColor('John Doe', 'john@example.com');
+        final color1 = AvatarUtils.getAvatarBackgroundColor(
+            'John Doe', 'john@example.com');
+        final color2 = AvatarUtils.getAvatarBackgroundColor(
+            'John Doe', 'john@example.com');
         expect(color1, equals(color2));
       });
 
       test('should return different colors for different inputs', () {
-        final color1 = AvatarUtils.getAvatarBackgroundColor('John Doe', 'john@example.com');
-        final color2 = AvatarUtils.getAvatarBackgroundColor('Jane Smith', 'jane@example.com');
+        final color1 = AvatarUtils.getAvatarBackgroundColor(
+            'John Doe', 'john@example.com');
+        final color2 = AvatarUtils.getAvatarBackgroundColor(
+            'Jane Smith', 'jane@example.com');
         expect(color1, isNot(equals(color2)));
       });
 
       test('should handle null inputs gracefully', () {
-        expect(() => AvatarUtils.getAvatarBackgroundColor(null, null), returnsNormally);
-        expect(() => AvatarUtils.getAvatarBackgroundColor('John', null), returnsNormally);
-        expect(() => AvatarUtils.getAvatarBackgroundColor(null, 'john@example.com'), returnsNormally);
+        expect(() => AvatarUtils.getAvatarBackgroundColor(null, null),
+            returnsNormally);
+        expect(() => AvatarUtils.getAvatarBackgroundColor('John', null),
+            returnsNormally);
+        expect(
+            () =>
+                AvatarUtils.getAvatarBackgroundColor(null, 'john@example.com'),
+            returnsNormally);
       });
     });
   });
-} 
+}

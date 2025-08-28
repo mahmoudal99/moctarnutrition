@@ -15,14 +15,17 @@ class WorkoutNotificationService {
     Future.microtask(() async {
       try {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+        final workoutProvider =
+            Provider.of<WorkoutProvider>(context, listen: false);
 
         // Check if user is authenticated and has workout notifications enabled
         if (!authProvider.isAuthenticated ||
             authProvider.userModel == null ||
             !authProvider.userModel!.preferences.workoutNotificationsEnabled ||
-            authProvider.userModel!.preferences.workoutNotificationTime == null) {
-          _logger.d('Workout notifications not enabled or missing time preference');
+            authProvider.userModel!.preferences.workoutNotificationTime ==
+                null) {
+          _logger.d(
+              'Workout notifications not enabled or missing time preference');
           return;
         }
 
@@ -39,7 +42,8 @@ class WorkoutNotificationService {
             pendingNotifications.where((n) => n.id >= 1000).length;
 
         if (workoutNotifications > 30) {
-          _logger.d('Workout notifications already scheduled ($workoutNotifications), skipping');
+          _logger.d(
+              'Workout notifications already scheduled ($workoutNotifications), skipping');
           return;
         }
 
@@ -47,7 +51,8 @@ class WorkoutNotificationService {
         final workoutPlan = workoutProvider.currentWorkoutPlan!;
         final notificationTime = user.preferences.workoutNotificationTime!;
 
-        _logger.d('Scheduling workout notifications in background for user ${user.id} at $notificationTime');
+        _logger.d(
+            'Scheduling workout notifications in background for user ${user.id} at $notificationTime');
 
         // Schedule notifications
         await NotificationService.scheduleWorkoutNotifications(

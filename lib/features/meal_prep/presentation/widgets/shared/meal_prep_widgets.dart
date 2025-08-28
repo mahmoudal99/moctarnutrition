@@ -34,7 +34,8 @@ class MealInfoCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: (iconColor ?? AppConstants.primaryColor).withOpacity(0.1),
+                  color:
+                      (iconColor ?? AppConstants.primaryColor).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(AppConstants.radiusM),
                 ),
                 child: Icon(
@@ -263,4 +264,4 @@ class EmptyStateWidget extends StatelessWidget {
       ),
     );
   }
-} 
+}

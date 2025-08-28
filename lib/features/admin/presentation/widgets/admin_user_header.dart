@@ -10,8 +10,9 @@ class AdminUserHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final handle = '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
-    
+    final handle =
+        '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -66,9 +67,12 @@ class AdminUserHeader extends StatelessWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          _buildBadge(_roleLabel(user.role), _roleColor(user.role)),
+                          _buildBadge(
+                              _roleLabel(user.role), _roleColor(user.role)),
                           const SizedBox(width: 8),
-                          _buildBadge(_subscriptionLabel(user.subscriptionStatus), _subscriptionColor(user.subscriptionStatus)),
+                          _buildBadge(
+                              _subscriptionLabel(user.subscriptionStatus),
+                              _subscriptionColor(user.subscriptionStatus)),
                         ],
                       ),
                     ],

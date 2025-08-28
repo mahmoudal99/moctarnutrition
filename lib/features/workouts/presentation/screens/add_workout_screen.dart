@@ -392,9 +392,11 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (_isLoading || _exercises.isEmpty) ? null : _createWorkout,
+                  onPressed: (_isLoading || _exercises.isEmpty)
+                      ? null
+                      : _createWorkout,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _exercises.isEmpty 
+                    backgroundColor: _exercises.isEmpty
                         ? AppConstants.textTertiary.withOpacity(0.3)
                         : AppConstants.primaryColor,
                     foregroundColor: AppConstants.surfaceColor,
@@ -405,7 +407,9 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                   child: _isLoading
                       ? const CircularProgressIndicator(
                           color: AppConstants.surfaceColor)
-                      : Text(_exercises.isEmpty ? 'Add at least one exercise' : 'Create Workout'),
+                      : Text(_exercises.isEmpty
+                          ? 'Add at least one exercise'
+                          : 'Create Workout'),
                 ),
               ),
             ),

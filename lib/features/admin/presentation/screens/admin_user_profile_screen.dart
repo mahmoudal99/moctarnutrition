@@ -126,8 +126,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                     icon: Icons.person_outline,
                     children: [
                       AdminInfoRow(
-                          label: 'Age',
-                          value: '${user.preferences.age} years'),
+                          label: 'Age', value: '${user.preferences.age} years'),
                       AdminInfoRow(
                           label: 'Weight',
                           value: '${user.preferences.weight} kg'),
@@ -135,8 +134,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                           label: 'Height',
                           value: '${user.preferences.height} cm'),
                       AdminInfoRow(
-                          label: 'Gender',
-                          value: user.preferences.gender),
+                          label: 'Gender', value: user.preferences.gender),
                       AdminInfoRow(
                         label: 'BMI',
                         value: _calculateBMIDisplay(),
@@ -157,8 +155,8 @@ class AdminUserProfileScreen extends StatelessWidget {
                       ),
                       AdminInfoRow(
                         label: 'Activity Level',
-                        value: _activityLevelLabel(
-                            user.preferences.activityLevel),
+                        value:
+                            _activityLevelLabel(user.preferences.activityLevel),
                       ),
                       AdminInfoRow(
                         label: 'Target Calories',
@@ -176,11 +174,9 @@ class AdminUserProfileScreen extends StatelessWidget {
                     children: [
                       AdminInfoRow(
                         label: 'Dietary Restrictions',
-                        value: (user.preferences.dietaryRestrictions)
-                                .isEmpty
+                        value: (user.preferences.dietaryRestrictions).isEmpty
                             ? 'None'
-                            : user.preferences.dietaryRestrictions
-                                    .join(', '),
+                            : user.preferences.dietaryRestrictions.join(', '),
                       ),
                       AdminInfoRow(
                         label: 'Preferred Workouts',
@@ -188,7 +184,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                                 .isEmpty
                             ? 'None'
                             : user.preferences.preferredWorkoutStyles
-                                    .join(', '),
+                                .join(', '),
                       ),
                     ],
                   ),
@@ -220,17 +216,20 @@ class AdminUserProfileScreen extends StatelessWidget {
                                 Wrap(
                                   spacing: 6,
                                   runSpacing: 6,
-                                  children: user.preferences.preferredCuisines.map((cuisine) {
+                                  children: user.preferences.preferredCuisines
+                                      .map((cuisine) {
                                     return Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppConstants.accentColor.withOpacity(0.1),
+                                        color: AppConstants.accentColor
+                                            .withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
-                                          color: AppConstants.accentColor.withOpacity(0.3),
+                                          color: AppConstants.accentColor
+                                              .withOpacity(0.3),
                                           width: 1,
                                         ),
                                       ),
@@ -266,17 +265,20 @@ class AdminUserProfileScreen extends StatelessWidget {
                                 Wrap(
                                   spacing: 6,
                                   runSpacing: 6,
-                                  children: user.preferences.favoriteFoods.map((food) {
+                                  children: user.preferences.favoriteFoods
+                                      .map((food) {
                                     return Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppConstants.primaryColor.withOpacity(0.1),
+                                        color: AppConstants.primaryColor
+                                            .withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
-                                          color: AppConstants.primaryColor.withOpacity(0.3),
+                                          color: AppConstants.primaryColor
+                                              .withOpacity(0.3),
                                           width: 1,
                                         ),
                                       ),
@@ -312,17 +314,20 @@ class AdminUserProfileScreen extends StatelessWidget {
                                 Wrap(
                                   spacing: 6,
                                   runSpacing: 6,
-                                  children: user.preferences.foodsToAvoid.map((food) {
+                                  children:
+                                      user.preferences.foodsToAvoid.map((food) {
                                     return Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppConstants.errorColor.withOpacity(0.1),
+                                        color: AppConstants.errorColor
+                                            .withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
-                                          color: AppConstants.errorColor.withOpacity(0.3),
+                                          color: AppConstants.errorColor
+                                              .withOpacity(0.3),
                                           width: 1,
                                         ),
                                       ),
@@ -355,11 +360,13 @@ class AdminUserProfileScreen extends StatelessWidget {
                       title: 'Allergies & Intolerances',
                       icon: Icons.warning_amber_outlined,
                       children: user.preferences.allergies.map((allergy) {
-                        final severity = allergy['severity'] as String? ?? 'mild';
+                        final severity =
+                            allergy['severity'] as String? ?? 'mild';
                         final notes = allergy['notes'] as String?;
                         return AdminInfoRow(
                           label: allergy['name'] as String? ?? 'Unknown',
-                          value: '${_getSeverityLabel(severity)}${notes != null ? ' - $notes' : ''}',
+                          value:
+                              '${_getSeverityLabel(severity)}${notes != null ? ' - $notes' : ''}',
                           valueColor: _getSeverityColor(severity),
                         );
                       }).toList(),
@@ -471,7 +478,7 @@ class AdminUserProfileScreen extends StatelessWidget {
     if (timing == null) return [];
 
     final List<AdminInfoRow> rows = [];
-    
+
     // Meal frequency
     final frequency = timing['mealFrequency'] as String?;
     if (frequency != null) {
@@ -538,7 +545,7 @@ class AdminUserProfileScreen extends StatelessWidget {
     if (cooking == null) return [];
 
     final List<AdminInfoRow> rows = [];
-    
+
     // Cooking frequency
     final frequency = cooking['frequency'] as String?;
     if (frequency != null) {
@@ -740,7 +747,7 @@ class AdminUserProfileScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        
+
         // Protein per kg/lb
         Row(
           children: [
@@ -799,9 +806,10 @@ class AdminUserProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-        
+
         // Additional info
-        if (proteinTargets['weightBase'] != null || proteinTargets['fitnessGoal'] != null) ...[
+        if (proteinTargets['weightBase'] != null ||
+            proteinTargets['fitnessGoal'] != null) ...[
           const SizedBox(height: 8),
           Wrap(
             spacing: 6,
@@ -809,7 +817,8 @@ class AdminUserProfileScreen extends StatelessWidget {
             children: [
               if (proteinTargets['fitnessGoal'] != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppConstants.accentColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -828,7 +837,8 @@ class AdminUserProfileScreen extends StatelessWidget {
                 ),
               if (proteinTargets['weightBase'] != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppConstants.secondaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -902,7 +912,7 @@ class AdminUserProfileScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        
+
         // RMR and TDEE
         Row(
           children: [
@@ -962,7 +972,7 @@ class AdminUserProfileScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         // Macronutrient breakdown
         if (calorieTargets['macros'] != null) ...[
           Text(
@@ -973,11 +983,13 @@ class AdminUserProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          _buildMacroBreakdown(calorieTargets['macros'] as Map<String, dynamic>),
+          _buildMacroBreakdown(
+              calorieTargets['macros'] as Map<String, dynamic>),
         ],
-        
+
         // Additional info
-        if (calorieTargets['fitnessGoal'] != null || calorieTargets['activityLevel'] != null) ...[
+        if (calorieTargets['fitnessGoal'] != null ||
+            calorieTargets['activityLevel'] != null) ...[
           const SizedBox(height: 8),
           Wrap(
             spacing: 6,
@@ -985,7 +997,8 @@ class AdminUserProfileScreen extends StatelessWidget {
             children: [
               if (calorieTargets['fitnessGoal'] != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppConstants.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -1004,7 +1017,8 @@ class AdminUserProfileScreen extends StatelessWidget {
                 ),
               if (calorieTargets['activityLevel'] != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppConstants.secondaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -1058,9 +1072,10 @@ class AdminUserProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMacroRow(String name, Map<String, dynamic>? macro, Color color, IconData icon) {
+  Widget _buildMacroRow(
+      String name, Map<String, dynamic>? macro, Color color, IconData icon) {
     if (macro == null) return const SizedBox.shrink();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(

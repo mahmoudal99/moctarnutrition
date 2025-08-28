@@ -80,7 +80,8 @@ class ProfileDeleteAccountDialog {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text('Delete Account'),
@@ -122,4 +123,4 @@ class ProfileDeleteAccountDialog {
       }
     }
   }
-} 
+}

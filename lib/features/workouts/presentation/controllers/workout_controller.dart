@@ -12,11 +12,13 @@ class WorkoutController {
   static Future<void> loadWorkoutPlanIfNeeded(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     Provider.of<UserProvider>(context, listen: false);
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
 
     // Check if user is authenticated
     if (!authProvider.isAuthenticated || authProvider.userModel == null) {
-      _logger.w('Cannot load workout plan: user not authenticated or userModel is null');
+      _logger.w(
+          'Cannot load workout plan: user not authenticated or userModel is null');
       return;
     }
 
@@ -24,19 +26,23 @@ class WorkoutController {
     final currentWorkoutPlan = workoutProvider.currentWorkoutPlan;
     if (currentWorkoutPlan != null) {
       if (currentWorkoutPlan.userId == authProvider.userModel!.id) {
-        _logger.d('Workout plan already loaded for current user, skipping API call');
+        _logger.d(
+            'Workout plan already loaded for current user, skipping API call');
         // Still schedule notifications in case they were missed (non-blocking)
         WorkoutNotificationService.scheduleNotificationsInBackground(context);
         return;
       } else {
-        _logger.d('Workout plan belongs to different user, clearing and reloading');
+        _logger.d(
+            'Workout plan belongs to different user, clearing and reloading');
         await workoutProvider.clearWorkoutPlanForUserChange();
       }
     }
 
     // Load workout plan for current user
-    final workoutStyles = authProvider.userModel!.preferences.preferredWorkoutStyles;
-    _logger.d('Loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
+    final workoutStyles =
+        authProvider.userModel!.preferences.preferredWorkoutStyles;
+    _logger.d(
+        'Loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
     await workoutProvider.loadWorkoutPlan(
         authProvider.userModel!.id, workoutStyles, authProvider.userModel);
 
@@ -47,27 +53,34 @@ class WorkoutController {
   static Future<void> loadWorkoutPlan(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     Provider.of<UserProvider>(context, listen: false);
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
 
     if (authProvider.isAuthenticated && authProvider.userModel != null) {
-      final workoutStyles = authProvider.userModel!.preferences.preferredWorkoutStyles;
-      _logger.d('Force loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
+      final workoutStyles =
+          authProvider.userModel!.preferences.preferredWorkoutStyles;
+      _logger.d(
+          'Force loading workout plan for user ${authProvider.userModel!.id} with styles: $workoutStyles');
       await workoutProvider.loadWorkoutPlan(
           authProvider.userModel!.id, workoutStyles, authProvider.userModel);
     } else {
-      _logger.w('Cannot load workout plan: user not authenticated or userModel is null');
+      _logger.w(
+          'Cannot load workout plan: user not authenticated or userModel is null');
     }
   }
 
   static Future<void> refreshWorkoutPlan(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
 
     if (authProvider.isAuthenticated && authProvider.userModel != null) {
       await workoutProvider.clearLocalCache();
 
-      final workoutStyles = authProvider.userModel!.preferences.preferredWorkoutStyles;
-      _logger.d('Refreshing workout plan for user ${authProvider.userModel!.id}');
+      final workoutStyles =
+          authProvider.userModel!.preferences.preferredWorkoutStyles;
+      _logger
+          .d('Refreshing workout plan for user ${authProvider.userModel!.id}');
       await workoutProvider.loadWorkoutPlan(
           authProvider.userModel!.id, workoutStyles, authProvider.userModel);
 
@@ -78,11 +91,13 @@ class WorkoutController {
 
   static bool shouldReloadWorkoutPlan(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
 
     return authProvider.isAuthenticated &&
         authProvider.userModel != null &&
         workoutProvider.currentWorkoutPlan != null &&
-        workoutProvider.currentWorkoutPlan!.userId != authProvider.userModel!.id;
+        workoutProvider.currentWorkoutPlan!.userId !=
+            authProvider.userModel!.id;
   }
 }

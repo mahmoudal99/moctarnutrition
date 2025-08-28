@@ -42,4 +42,4 @@ class WorkoutMessageGenerator {
         return 'Ready for your $categoryName workout?';
     }
   }
-} 
+}

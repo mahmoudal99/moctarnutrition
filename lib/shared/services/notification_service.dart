@@ -25,7 +25,8 @@ class NotificationService {
   static const int PROGRESS_REMINDER_ID = 5;
 
   /// SharedPreferences keys
-  static const String _notificationPermissionKey = 'notification_permission_granted';
+  static const String _notificationPermissionKey =
+      'notification_permission_granted';
 
   /// Generate a unique notification ID
   static int _generateNotificationId() {
@@ -74,19 +75,21 @@ class NotificationService {
     // Handle notification tap logic here
   }
 
-    /// Check if notification permissions are granted
+  /// Check if notification permissions are granted
   static Future<bool> areNotificationsEnabled() async {
     try {
       // First, try to load from cache
       if (_cachedNotificationPermission != null) {
-        _logger.d('Notification permission (cached): $_cachedNotificationPermission');
+        _logger.d(
+            'Notification permission (cached): $_cachedNotificationPermission');
         return _cachedNotificationPermission!;
       }
 
       // If no cache, try to load from storage
       final storedPermission = await _loadPermissionStatusFromStorage();
       _cachedNotificationPermission = storedPermission;
-      _logger.d('Notification permission (loaded from storage): $storedPermission');
+      _logger.d(
+          'Notification permission (loaded from storage): $storedPermission');
 
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         // For iOS, we'll trust the stored value since checking requires permission request
@@ -95,15 +98,16 @@ class NotificationService {
         // For Android, verify with permission_handler and update if different
         final status = await Permission.notification.status;
         final isGranted = status == PermissionStatus.granted;
-        
+
         if (isGranted != storedPermission) {
           // Update cache and storage if different
           _cachedNotificationPermission = isGranted;
           await _savePermissionStatusToStorage(isGranted);
           _logger.d('Updated Android notification permission: $isGranted');
         }
-        
-        _logger.d('Android notification permission: status=$status, isGranted=$isGranted');
+
+        _logger.d(
+            'Android notification permission: status=$status, isGranted=$isGranted');
         return isGranted;
       }
     } catch (e) {

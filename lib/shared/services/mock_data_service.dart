@@ -29,7 +29,8 @@ class MockDataService {
       id: const Uuid().v4(),
       userId: 'current_user',
       title: 'Fallback $days-Day Meal Plan',
-      description: 'Backup meal plan generated when AI service is unavailable. All required meals are included.',
+      description:
+          'Backup meal plan generated when AI service is unavailable. All required meals are included.',
       startDate: DateTime.now(),
       endDate: DateTime.now().add(Duration(days: days - 1)),
       mealDays: mealDays,
@@ -49,26 +50,28 @@ class MockDataService {
     int dayIndex,
     List<MealType> requiredMealTypes,
   ) {
-    print('Generating mock meal day for day $dayIndex with required meals: ${requiredMealTypes.map((t) => t.name).join(', ')}');
-    
+    print(
+        'Generating mock meal day for day $dayIndex with required meals: ${requiredMealTypes.map((t) => t.name).join(', ')}');
+
     final date = DateTime.now().add(Duration(days: dayIndex - 1));
     final daySeed = DateTime.now().millisecondsSinceEpoch + dayIndex;
-    
-    final meals = _generateMockMealsWithTypes(preferences, requiredMealTypes, daySeed);
-    
+
+    final meals =
+        _generateMockMealsWithTypes(preferences, requiredMealTypes, daySeed);
+
     // Calculate totals from meals
     double totalCalories = 0;
     double totalProtein = 0;
     double totalCarbs = 0;
     double totalFat = 0;
-    
+
     for (final meal in meals) {
       totalCalories += meal.nutrition.calories;
       totalProtein += meal.nutrition.protein;
       totalCarbs += meal.nutrition.carbs;
       totalFat += meal.nutrition.fat;
     }
-    
+
     return MealDay(
       id: const Uuid().v4(),
       date: date,
@@ -81,85 +84,210 @@ class MockDataService {
   }
 
   /// Generate mock meals for fallback
-  static List<Meal> _generateMockMeals(
-      DietPlanPreferences preferences, [int? seed]) {
+  static List<Meal> _generateMockMeals(DietPlanPreferences preferences,
+      [int? seed]) {
     // Create varied meal options based on preferences
     final isVegan = preferences.dietaryRestrictions.contains('Vegan');
     final isVegetarian = preferences.dietaryRestrictions.contains('Vegetarian');
 
-    final breakfastOptions = isVegan ? [
-      ('Oatmeal with Berries', 'Steel-cut oats topped with fresh berries and maple syrup'),
-      ('Vegan Protein Smoothie Bowl', 'Plant-based smoothie bowl with berries and granola'),
-      ('Avocado Toast', 'Whole grain toast with avocado and microgreens'),
-      ('Vegan Breakfast Burrito', 'Tofu scramble with black beans and salsa in a whole wheat tortilla'),
-      ('Chia Pudding', 'Chia seeds soaked in almond milk with fresh fruits'),
-    ] : isVegetarian ? [
-      ('Oatmeal with Berries', 'Steel-cut oats topped with fresh berries and honey'),
-      ('Greek Yogurt Parfait', 'Greek yogurt layered with granola and mixed berries'),
-      ('Protein Smoothie Bowl', 'Nutritious smoothie bowl with berries and granola'),
-      ('Avocado Toast', 'Whole grain toast with avocado, eggs, and microgreens'),
-      ('Breakfast Burrito', 'Scrambled eggs with black beans and salsa in a whole wheat tortilla'),
-    ] : [
-      ('Oatmeal with Berries', 'Steel-cut oats topped with fresh berries and honey'),
-      ('Greek Yogurt Parfait', 'Greek yogurt layered with granola and mixed berries'),
-      ('Protein Smoothie Bowl', 'Nutritious smoothie bowl with berries and granola'),
-      ('Avocado Toast', 'Whole grain toast with avocado, eggs, and microgreens'),
-      ('Breakfast Burrito', 'Scrambled eggs with black beans and salsa in a whole wheat tortilla'),
-    ];
+    final breakfastOptions = isVegan
+        ? [
+            (
+              'Oatmeal with Berries',
+              'Steel-cut oats topped with fresh berries and maple syrup'
+            ),
+            (
+              'Vegan Protein Smoothie Bowl',
+              'Plant-based smoothie bowl with berries and granola'
+            ),
+            ('Avocado Toast', 'Whole grain toast with avocado and microgreens'),
+            (
+              'Vegan Breakfast Burrito',
+              'Tofu scramble with black beans and salsa in a whole wheat tortilla'
+            ),
+            (
+              'Chia Pudding',
+              'Chia seeds soaked in almond milk with fresh fruits'
+            ),
+          ]
+        : isVegetarian
+            ? [
+                (
+                  'Oatmeal with Berries',
+                  'Steel-cut oats topped with fresh berries and honey'
+                ),
+                (
+                  'Greek Yogurt Parfait',
+                  'Greek yogurt layered with granola and mixed berries'
+                ),
+                (
+                  'Protein Smoothie Bowl',
+                  'Nutritious smoothie bowl with berries and granola'
+                ),
+                (
+                  'Avocado Toast',
+                  'Whole grain toast with avocado, eggs, and microgreens'
+                ),
+                (
+                  'Breakfast Burrito',
+                  'Scrambled eggs with black beans and salsa in a whole wheat tortilla'
+                ),
+              ]
+            : [
+                (
+                  'Oatmeal with Berries',
+                  'Steel-cut oats topped with fresh berries and honey'
+                ),
+                (
+                  'Greek Yogurt Parfait',
+                  'Greek yogurt layered with granola and mixed berries'
+                ),
+                (
+                  'Protein Smoothie Bowl',
+                  'Nutritious smoothie bowl with berries and granola'
+                ),
+                (
+                  'Avocado Toast',
+                  'Whole grain toast with avocado, eggs, and microgreens'
+                ),
+                (
+                  'Breakfast Burrito',
+                  'Scrambled eggs with black beans and salsa in a whole wheat tortilla'
+                ),
+              ];
 
-    final lunchOptions = isVegan ? [
-      ('Quinoa Buddha Bowl', 'Quinoa bowl with roasted vegetables and tahini dressing'),
-      ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
-      ('Mediterranean Plate', 'Hummus, falafel, and fresh vegetables'),
-      ('Vegan Wrap', 'Chickpea and avocado wrap with mixed greens'),
-      ('Vegan Buddha Bowl', 'Brown rice with tofu, vegetables, and peanut sauce'),
-    ] : isVegetarian ? [
-      ('Quinoa Buddha Bowl', 'Quinoa bowl with roasted vegetables and tahini dressing'),
-      ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
-      ('Mediterranean Plate', 'Hummus, falafel, and fresh vegetables'),
-      ('Vegetarian Wrap', 'Cheese and avocado wrap with mixed greens'),
-      ('Vegetarian Buddha Bowl', 'Brown rice with eggs, vegetables, and peanut sauce'),
-    ] : [
-      ('Grilled Chicken Salad', 'Fresh salad with grilled chicken and vegetables'),
-      ('Quinoa Buddha Bowl', 'Quinoa bowl with roasted vegetables and tahini dressing'),
-      ('Turkey Wrap', 'Turkey and avocado wrap with mixed greens'),
-      ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
-      ('Mediterranean Plate', 'Hummus, falafel, and fresh vegetables'),
-    ];
+    final lunchOptions = isVegan
+        ? [
+            (
+              'Quinoa Buddha Bowl',
+              'Quinoa bowl with roasted vegetables and tahini dressing'
+            ),
+            ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
+            ('Mediterranean Plate', 'Hummus, falafel, and fresh vegetables'),
+            ('Vegan Wrap', 'Chickpea and avocado wrap with mixed greens'),
+            (
+              'Vegan Buddha Bowl',
+              'Brown rice with tofu, vegetables, and peanut sauce'
+            ),
+          ]
+        : isVegetarian
+            ? [
+                (
+                  'Quinoa Buddha Bowl',
+                  'Quinoa bowl with roasted vegetables and tahini dressing'
+                ),
+                ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
+                (
+                  'Mediterranean Plate',
+                  'Hummus, falafel, and fresh vegetables'
+                ),
+                (
+                  'Vegetarian Wrap',
+                  'Cheese and avocado wrap with mixed greens'
+                ),
+                (
+                  'Vegetarian Buddha Bowl',
+                  'Brown rice with eggs, vegetables, and peanut sauce'
+                ),
+              ]
+            : [
+                (
+                  'Grilled Chicken Salad',
+                  'Fresh salad with grilled chicken and vegetables'
+                ),
+                (
+                  'Quinoa Buddha Bowl',
+                  'Quinoa bowl with roasted vegetables and tahini dressing'
+                ),
+                ('Turkey Wrap', 'Turkey and avocado wrap with mixed greens'),
+                ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
+                (
+                  'Mediterranean Plate',
+                  'Hummus, falafel, and fresh vegetables'
+                ),
+              ];
 
-    final dinnerOptions = isVegan ? [
-      ('Vegan Pasta', 'Whole wheat pasta with tomato sauce and vegetables'),
-      ('Tofu Stir-Fry', 'Stir-fried tofu with broccoli and brown rice'),
-      ('Vegan Buddha Bowl', 'Quinoa with roasted vegetables and tahini dressing'),
-      ('Lentil Curry', 'Spiced lentil curry with brown rice'),
-      ('Vegan Tacos', 'Black bean and vegetable tacos with avocado'),
-    ] : isVegetarian ? [
-      ('Vegetarian Pasta', 'Whole wheat pasta with tomato sauce and vegetables'),
-      ('Eggplant Parmesan', 'Baked eggplant with marinara and cheese'),
-      ('Vegetarian Buddha Bowl', 'Quinoa with roasted vegetables and tahini dressing'),
-      ('Lentil Curry', 'Spiced lentil curry with brown rice'),
-      ('Vegetarian Tacos', 'Black bean and vegetable tacos with cheese'),
-    ] : [
-      ('Salmon with Quinoa', 'Baked salmon with quinoa and roasted vegetables'),
-      ('Lean Beef Stir-Fry', 'Stir-fried beef with broccoli and brown rice'),
-      ('Vegetarian Pasta', 'Whole wheat pasta with tomato sauce and vegetables'),
-      ('Grilled Shrimp Skewers', 'Grilled shrimp with couscous and vegetables'),
-      ('Chicken Breast with Sweet Potato', 'Grilled chicken with roasted sweet potato'),
-    ];
+    final dinnerOptions = isVegan
+        ? [
+            (
+              'Vegan Pasta',
+              'Whole wheat pasta with tomato sauce and vegetables'
+            ),
+            ('Tofu Stir-Fry', 'Stir-fried tofu with broccoli and brown rice'),
+            (
+              'Vegan Buddha Bowl',
+              'Quinoa with roasted vegetables and tahini dressing'
+            ),
+            ('Lentil Curry', 'Spiced lentil curry with brown rice'),
+            ('Vegan Tacos', 'Black bean and vegetable tacos with avocado'),
+          ]
+        : isVegetarian
+            ? [
+                (
+                  'Vegetarian Pasta',
+                  'Whole wheat pasta with tomato sauce and vegetables'
+                ),
+                (
+                  'Eggplant Parmesan',
+                  'Baked eggplant with marinara and cheese'
+                ),
+                (
+                  'Vegetarian Buddha Bowl',
+                  'Quinoa with roasted vegetables and tahini dressing'
+                ),
+                ('Lentil Curry', 'Spiced lentil curry with brown rice'),
+                (
+                  'Vegetarian Tacos',
+                  'Black bean and vegetable tacos with cheese'
+                ),
+              ]
+            : [
+                (
+                  'Salmon with Quinoa',
+                  'Baked salmon with quinoa and roasted vegetables'
+                ),
+                (
+                  'Lean Beef Stir-Fry',
+                  'Stir-fried beef with broccoli and brown rice'
+                ),
+                (
+                  'Vegetarian Pasta',
+                  'Whole wheat pasta with tomato sauce and vegetables'
+                ),
+                (
+                  'Grilled Shrimp Skewers',
+                  'Grilled shrimp with couscous and vegetables'
+                ),
+                (
+                  'Chicken Breast with Sweet Potato',
+                  'Grilled chicken with roasted sweet potato'
+                ),
+              ];
 
-    final snackOptions = isVegan ? [
-      ('Vegan Yogurt with Nuts', 'Plant-based yogurt with mixed nuts'),
-      ('Apple with Almond Butter', 'Fresh apple slices with almond butter'),
-      ('Vegan Protein Bar', 'Homemade protein bar with nuts and dried fruit'),
-      ('Hummus with Carrots', 'Fresh carrot sticks with hummus'),
-      ('Mixed Nuts', 'Assorted nuts and dried fruits'),
-    ] : [
-      ('Greek Yogurt with Nuts', 'Protein-rich snack with mixed nuts'),
-      ('Apple with Almond Butter', 'Fresh apple slices with almond butter'),
-      ('Protein Bar', 'Homemade protein bar with nuts and dried fruit'),
-      ('Hummus with Carrots', 'Fresh carrot sticks with hummus'),
-      ('Mixed Nuts', 'Assorted nuts and dried fruits'),
-    ];
+    final snackOptions = isVegan
+        ? [
+            ('Vegan Yogurt with Nuts', 'Plant-based yogurt with mixed nuts'),
+            (
+              'Apple with Almond Butter',
+              'Fresh apple slices with almond butter'
+            ),
+            (
+              'Vegan Protein Bar',
+              'Homemade protein bar with nuts and dried fruit'
+            ),
+            ('Hummus with Carrots', 'Fresh carrot sticks with hummus'),
+            ('Mixed Nuts', 'Assorted nuts and dried fruits'),
+          ]
+        : [
+            ('Greek Yogurt with Nuts', 'Protein-rich snack with mixed nuts'),
+            (
+              'Apple with Almond Butter',
+              'Fresh apple slices with almond butter'
+            ),
+            ('Protein Bar', 'Homemade protein bar with nuts and dried fruit'),
+            ('Hummus with Carrots', 'Fresh carrot sticks with hummus'),
+            ('Mixed Nuts', 'Assorted nuts and dried fruits'),
+          ];
 
     // Select random meals based on preferences
     final random = seed ?? DateTime.now().millisecondsSinceEpoch;
@@ -212,79 +340,204 @@ class MockDataService {
     final isVegan = preferences.dietaryRestrictions.contains('Vegan');
     final isVegetarian = preferences.dietaryRestrictions.contains('Vegetarian');
 
-    final breakfastOptions = isVegan ? [
-      ('Oatmeal with Berries', 'Steel-cut oats topped with fresh berries and maple syrup'),
-      ('Vegan Protein Smoothie Bowl', 'Plant-based smoothie bowl with berries and granola'),
-      ('Avocado Toast', 'Whole grain toast with avocado and microgreens'),
-      ('Vegan Breakfast Burrito', 'Tofu scramble with black beans and salsa in a whole wheat tortilla'),
-      ('Chia Pudding', 'Chia seeds soaked in almond milk with fresh fruits'),
-    ] : isVegetarian ? [
-      ('Oatmeal with Berries', 'Steel-cut oats topped with fresh berries and honey'),
-      ('Greek Yogurt Parfait', 'Greek yogurt layered with granola and mixed berries'),
-      ('Protein Smoothie Bowl', 'Nutritious smoothie bowl with berries and granola'),
-      ('Avocado Toast', 'Whole grain toast with avocado, eggs, and microgreens'),
-      ('Breakfast Burrito', 'Scrambled eggs with black beans and salsa in a whole wheat tortilla'),
-    ] : [
-      ('Oatmeal with Berries', 'Steel-cut oats topped with fresh berries and honey'),
-      ('Greek Yogurt Parfait', 'Greek yogurt layered with granola and mixed berries'),
-      ('Protein Smoothie Bowl', 'Nutritious smoothie bowl with berries and granola'),
-      ('Avocado Toast', 'Whole grain toast with avocado, eggs, and microgreens'),
-      ('Breakfast Burrito', 'Scrambled eggs with black beans and salsa in a whole wheat tortilla'),
-    ];
+    final breakfastOptions = isVegan
+        ? [
+            (
+              'Oatmeal with Berries',
+              'Steel-cut oats topped with fresh berries and maple syrup'
+            ),
+            (
+              'Vegan Protein Smoothie Bowl',
+              'Plant-based smoothie bowl with berries and granola'
+            ),
+            ('Avocado Toast', 'Whole grain toast with avocado and microgreens'),
+            (
+              'Vegan Breakfast Burrito',
+              'Tofu scramble with black beans and salsa in a whole wheat tortilla'
+            ),
+            (
+              'Chia Pudding',
+              'Chia seeds soaked in almond milk with fresh fruits'
+            ),
+          ]
+        : isVegetarian
+            ? [
+                (
+                  'Oatmeal with Berries',
+                  'Steel-cut oats topped with fresh berries and honey'
+                ),
+                (
+                  'Greek Yogurt Parfait',
+                  'Greek yogurt layered with granola and mixed berries'
+                ),
+                (
+                  'Protein Smoothie Bowl',
+                  'Nutritious smoothie bowl with berries and granola'
+                ),
+                (
+                  'Avocado Toast',
+                  'Whole grain toast with avocado, eggs, and microgreens'
+                ),
+                (
+                  'Breakfast Burrito',
+                  'Scrambled eggs with black beans and salsa in a whole wheat tortilla'
+                ),
+              ]
+            : [
+                (
+                  'Oatmeal with Berries',
+                  'Steel-cut oats topped with fresh berries and honey'
+                ),
+                (
+                  'Greek Yogurt Parfait',
+                  'Greek yogurt layered with granola and mixed berries'
+                ),
+                (
+                  'Protein Smoothie Bowl',
+                  'Nutritious smoothie bowl with berries and granola'
+                ),
+                (
+                  'Avocado Toast',
+                  'Whole grain toast with avocado, eggs, and microgreens'
+                ),
+                (
+                  'Breakfast Burrito',
+                  'Scrambled eggs with black beans and salsa in a whole wheat tortilla'
+                ),
+              ];
 
-    final lunchOptions = isVegan ? [
-      ('Quinoa Buddha Bowl', 'Quinoa bowl with roasted vegetables and tahini dressing'),
-      ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
-      ('Mediterranean Plate', 'Hummus, falafel, and fresh vegetables'),
-      ('Vegan Wrap', 'Chickpea and avocado wrap with mixed greens'),
-      ('Vegan Buddha Bowl', 'Brown rice with tofu, vegetables, and peanut sauce'),
-    ] : isVegetarian ? [
-      ('Quinoa Buddha Bowl', 'Quinoa bowl with roasted vegetables and tahini dressing'),
-      ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
-      ('Mediterranean Plate', 'Hummus, falafel, and fresh vegetables'),
-      ('Vegetarian Wrap', 'Cheese and avocado wrap with mixed greens'),
-      ('Vegetarian Buddha Bowl', 'Brown rice with eggs, vegetables, and peanut sauce'),
-    ] : [
-      ('Grilled Chicken Salad', 'Fresh salad with grilled chicken and vegetables'),
-      ('Quinoa Buddha Bowl', 'Quinoa bowl with roasted vegetables and tahini dressing'),
-      ('Turkey Wrap', 'Turkey and avocado wrap with mixed greens'),
-      ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
-      ('Mediterranean Plate', 'Hummus, falafel, and fresh vegetables'),
-    ];
+    final lunchOptions = isVegan
+        ? [
+            (
+              'Quinoa Buddha Bowl',
+              'Quinoa bowl with roasted vegetables and tahini dressing'
+            ),
+            ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
+            ('Mediterranean Plate', 'Hummus, falafel, and fresh vegetables'),
+            ('Vegan Wrap', 'Chickpea and avocado wrap with mixed greens'),
+            (
+              'Vegan Buddha Bowl',
+              'Brown rice with tofu, vegetables, and peanut sauce'
+            ),
+          ]
+        : isVegetarian
+            ? [
+                (
+                  'Quinoa Buddha Bowl',
+                  'Quinoa bowl with roasted vegetables and tahini dressing'
+                ),
+                ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
+                (
+                  'Mediterranean Plate',
+                  'Hummus, falafel, and fresh vegetables'
+                ),
+                (
+                  'Vegetarian Wrap',
+                  'Cheese and avocado wrap with mixed greens'
+                ),
+                (
+                  'Vegetarian Buddha Bowl',
+                  'Brown rice with eggs, vegetables, and peanut sauce'
+                ),
+              ]
+            : [
+                (
+                  'Grilled Chicken Salad',
+                  'Fresh salad with grilled chicken and vegetables'
+                ),
+                (
+                  'Quinoa Buddha Bowl',
+                  'Quinoa bowl with roasted vegetables and tahini dressing'
+                ),
+                ('Turkey Wrap', 'Turkey and avocado wrap with mixed greens'),
+                ('Lentil Soup', 'Hearty lentil soup with vegetables and herbs'),
+                (
+                  'Mediterranean Plate',
+                  'Hummus, falafel, and fresh vegetables'
+                ),
+              ];
 
-    final dinnerOptions = isVegan ? [
-      ('Vegan Pasta', 'Whole wheat pasta with tomato sauce and vegetables'),
-      ('Tofu Stir-Fry', 'Stir-fried tofu with broccoli and brown rice'),
-      ('Vegan Buddha Bowl', 'Quinoa with roasted vegetables and tahini dressing'),
-      ('Lentil Curry', 'Spiced lentil curry with brown rice'),
-      ('Vegan Tacos', 'Black bean and vegetable tacos with avocado'),
-    ] : isVegetarian ? [
-      ('Vegetarian Pasta', 'Whole wheat pasta with tomato sauce and vegetables'),
-      ('Eggplant Parmesan', 'Baked eggplant with marinara and cheese'),
-      ('Vegetarian Buddha Bowl', 'Quinoa with roasted vegetables and tahini dressing'),
-      ('Lentil Curry', 'Spiced lentil curry with brown rice'),
-      ('Vegetarian Tacos', 'Black bean and vegetable tacos with cheese'),
-    ] : [
-      ('Salmon with Quinoa', 'Baked salmon with quinoa and roasted vegetables'),
-      ('Lean Beef Stir-Fry', 'Stir-fried beef with broccoli and brown rice'),
-      ('Vegetarian Pasta', 'Whole wheat pasta with tomato sauce and vegetables'),
-      ('Grilled Shrimp Skewers', 'Grilled shrimp with couscous and vegetables'),
-      ('Chicken Breast with Sweet Potato', 'Grilled chicken with roasted sweet potato'),
-    ];
+    final dinnerOptions = isVegan
+        ? [
+            (
+              'Vegan Pasta',
+              'Whole wheat pasta with tomato sauce and vegetables'
+            ),
+            ('Tofu Stir-Fry', 'Stir-fried tofu with broccoli and brown rice'),
+            (
+              'Vegan Buddha Bowl',
+              'Quinoa with roasted vegetables and tahini dressing'
+            ),
+            ('Lentil Curry', 'Spiced lentil curry with brown rice'),
+            ('Vegan Tacos', 'Black bean and vegetable tacos with avocado'),
+          ]
+        : isVegetarian
+            ? [
+                (
+                  'Vegetarian Pasta',
+                  'Whole wheat pasta with tomato sauce and vegetables'
+                ),
+                (
+                  'Eggplant Parmesan',
+                  'Baked eggplant with marinara and cheese'
+                ),
+                (
+                  'Vegetarian Buddha Bowl',
+                  'Quinoa with roasted vegetables and tahini dressing'
+                ),
+                ('Lentil Curry', 'Spiced lentil curry with brown rice'),
+                (
+                  'Vegetarian Tacos',
+                  'Black bean and vegetable tacos with cheese'
+                ),
+              ]
+            : [
+                (
+                  'Salmon with Quinoa',
+                  'Baked salmon with quinoa and roasted vegetables'
+                ),
+                (
+                  'Lean Beef Stir-Fry',
+                  'Stir-fried beef with broccoli and brown rice'
+                ),
+                (
+                  'Vegetarian Pasta',
+                  'Whole wheat pasta with tomato sauce and vegetables'
+                ),
+                (
+                  'Grilled Shrimp Skewers',
+                  'Grilled shrimp with couscous and vegetables'
+                ),
+                (
+                  'Chicken Breast with Sweet Potato',
+                  'Grilled chicken with roasted sweet potato'
+                ),
+              ];
 
-    final snackOptions = isVegan ? [
-      ('Vegan Yogurt with Nuts', 'Plant-based yogurt with mixed nuts'),
-      ('Apple with Almond Butter', 'Fresh apple slices with almond butter'),
-      ('Vegan Protein Bar', 'Homemade protein bar with nuts and dried fruit'),
-      ('Hummus with Carrots', 'Fresh carrot sticks with hummus'),
-      ('Mixed Nuts', 'Assorted nuts and dried fruits'),
-    ] : [
-      ('Greek Yogurt with Nuts', 'Protein-rich snack with mixed nuts'),
-      ('Apple with Almond Butter', 'Fresh apple slices with almond butter'),
-      ('Protein Bar', 'Homemade protein bar with nuts and dried fruit'),
-      ('Hummus with Carrots', 'Fresh carrot sticks with hummus'),
-      ('Mixed Nuts', 'Assorted nuts and dried fruits'),
-    ];
+    final snackOptions = isVegan
+        ? [
+            ('Vegan Yogurt with Nuts', 'Plant-based yogurt with mixed nuts'),
+            (
+              'Apple with Almond Butter',
+              'Fresh apple slices with almond butter'
+            ),
+            (
+              'Vegan Protein Bar',
+              'Homemade protein bar with nuts and dried fruit'
+            ),
+            ('Hummus with Carrots', 'Fresh carrot sticks with hummus'),
+            ('Mixed Nuts', 'Assorted nuts and dried fruits'),
+          ]
+        : [
+            ('Greek Yogurt with Nuts', 'Protein-rich snack with mixed nuts'),
+            (
+              'Apple with Almond Butter',
+              'Fresh apple slices with almond butter'
+            ),
+            ('Protein Bar', 'Homemade protein bar with nuts and dried fruit'),
+            ('Hummus with Carrots', 'Fresh carrot sticks with hummus'),
+            ('Mixed Nuts', 'Assorted nuts and dried fruits'),
+          ];
 
     final meals = <Meal>[];
     final random = seed;
@@ -298,32 +551,37 @@ class MockDataService {
 
       switch (mealType) {
         case MealType.breakfast:
-          final breakfast = breakfastOptions[(random + mealIndex) % breakfastOptions.length];
+          final breakfast =
+              breakfastOptions[(random + mealIndex) % breakfastOptions.length];
           name = breakfast.$1;
           description = breakfast.$2;
           calories = (preferences.targetCalories * 0.25).round();
           break;
         case MealType.lunch:
-          final lunch = lunchOptions[(random + mealIndex) % lunchOptions.length];
+          final lunch =
+              lunchOptions[(random + mealIndex) % lunchOptions.length];
           name = lunch.$1;
           description = lunch.$2;
           calories = (preferences.targetCalories * 0.35).round();
           break;
         case MealType.dinner:
-          final dinner = dinnerOptions[(random + mealIndex) % dinnerOptions.length];
+          final dinner =
+              dinnerOptions[(random + mealIndex) % dinnerOptions.length];
           name = dinner.$1;
           description = dinner.$2;
           calories = (preferences.targetCalories * 0.35).round();
           break;
         case MealType.snack:
-          final snack = snackOptions[(random + mealIndex) % snackOptions.length];
+          final snack =
+              snackOptions[(random + mealIndex) % snackOptions.length];
           name = snack.$1;
           description = snack.$2;
           calories = (preferences.targetCalories * 0.05).round();
           break;
       }
 
-      meals.add(_createMockMeal(name, description, mealType, calories, preferences));
+      meals.add(
+          _createMockMeal(name, description, mealType, calories, preferences));
       mealIndex++;
     }
 
@@ -372,4 +630,4 @@ class MockDataService {
       isDairyFree: preferences.dietaryRestrictions.contains('Dairy-Free'),
     );
   }
-} 
+}

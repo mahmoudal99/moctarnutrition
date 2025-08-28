@@ -36,7 +36,8 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
           child: Column(
             children: [
               const SizedBox(height: AppConstants.spacingXL),
@@ -128,7 +129,8 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
         style: AppTextStyles.bodyMedium,
         decoration: InputDecoration(
           labelText: 'Email',
-          prefixIcon: const Icon(Icons.email, color: AppConstants.primaryColor, size: 20),
+          prefixIcon: const Icon(Icons.email,
+              color: AppConstants.primaryColor, size: 20),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppConstants.spacingM,
@@ -285,7 +287,8 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.resetPassword(_emailController.text.trim());
+    final success =
+        await authProvider.resetPassword(_emailController.text.trim());
 
     if (success && mounted) {
       setState(() {
@@ -303,7 +306,8 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
 
   void _handleResendEmail() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.resetPassword(_emailController.text.trim());
+    final success =
+        await authProvider.resetPassword(_emailController.text.trim());
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -321,4 +325,4 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
       );
     }
   }
-} 
+}

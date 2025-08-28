@@ -119,4 +119,4 @@ class WorkoutAppHeader extends StatelessWidget {
       ),
     );
   }
-} 
+}

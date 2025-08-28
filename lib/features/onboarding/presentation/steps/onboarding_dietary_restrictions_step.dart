@@ -141,9 +141,15 @@ class _SelectionCard extends StatelessWidget {
                 ),
                 Icon(
                   isMultiSelect
-                      ? (isSelected ? Icons.check_box : Icons.check_box_outline_blank)
-                      : (isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked),
-                  color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
+                      ? (isSelected
+                          ? Icons.check_box
+                          : Icons.check_box_outline_blank)
+                      : (isSelected
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_unchecked),
+                  color: isSelected
+                      ? AppConstants.primaryColor
+                      : AppConstants.textTertiary,
                   size: 20,
                 ),
               ],
@@ -153,4 +159,4 @@ class _SelectionCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

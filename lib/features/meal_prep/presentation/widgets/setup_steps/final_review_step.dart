@@ -154,7 +154,9 @@ class FinalReviewStep extends StatelessWidget {
                     _reviewRow(
                       icon: _iconFor('goal'),
                       label: 'Fitness Goal',
-                      value: selectedFitnessGoal != null ? _fitnessGoalName(selectedFitnessGoal!) : _fitnessGoalName(userPreferences.fitnessGoal),
+                      value: selectedFitnessGoal != null
+                          ? _fitnessGoalName(selectedFitnessGoal!)
+                          : _fitnessGoalName(userPreferences.fitnessGoal),
                       isFromClient: selectedFitnessGoal == null,
                       clientValue:
                           '${_fitnessGoalName(userPreferences.fitnessGoal)} (client)',

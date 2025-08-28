@@ -112,4 +112,4 @@ class MockStat {
   final String label;
 
   const MockStat({required this.value, required this.label});
-} 
+}

@@ -78,11 +78,13 @@ class CheckinProvider extends ChangeNotifier {
 
       _logger.i('Loaded ${checkins.length} check-ins');
       for (final checkin in checkins) {
-        _logger.d('Check-in: ${checkin.id} - Week: ${checkin.weekStartDate} - Status: ${checkin.status}');
+        _logger.d(
+            'Check-in: ${checkin.id} - Week: ${checkin.weekStartDate} - Status: ${checkin.status}');
       }
 
       if (refresh) {
-        _logger.d('Refreshing - setting _userCheckins to ${checkins.length} items');
+        _logger.d(
+            'Refreshing - setting _userCheckins to ${checkins.length} items');
         _userCheckins = checkins;
       } else {
         _logger.d('Adding ${checkins.length} items to existing list');
@@ -94,8 +96,10 @@ class CheckinProvider extends ChangeNotifier {
         _lastDocument = await _getLastDocument(user.uid);
       }
 
-      _logger.d('Total check-ins in provider after assignment: ${_userCheckins.length}');
-      _logger.d('Provider _userCheckins content: ${_userCheckins.map((c) => '${c.id}:${c.status}').toList()}');
+      _logger.d(
+          'Total check-ins in provider after assignment: ${_userCheckins.length}');
+      _logger.d(
+          'Provider _userCheckins content: ${_userCheckins.map((c) => '${c.id}:${c.status}').toList()}');
       notifyListeners();
     } catch (e) {
       _logger.e('Error loading check-ins: $e');
@@ -152,8 +156,10 @@ class CheckinProvider extends ChangeNotifier {
       }
 
       // Check if there's already a completed check-in for this week
-      final existingCheckin = await CheckinService.getCurrentWeekCheckin(user.uid);
-      if (existingCheckin != null && existingCheckin.status == CheckinStatus.completed) {
+      final existingCheckin =
+          await CheckinService.getCurrentWeekCheckin(user.uid);
+      if (existingCheckin != null &&
+          existingCheckin.status == CheckinStatus.completed) {
         _setError('You have already submitted a check-in for this week');
         return false;
       }
@@ -266,7 +272,7 @@ class CheckinProvider extends ChangeNotifier {
 
       // Clean up duplicate pending check-ins first
       await CheckinService.cleanupDuplicatePendingCheckins(user.uid);
-      
+
       // Then mark overdue check-ins and create missing weekly ones
       await CheckinService.markOverdueCheckins(user.uid);
 
@@ -286,15 +292,15 @@ class CheckinProvider extends ChangeNotifier {
       _logger.d('Loading current week check-in...');
       await loadCurrentWeekCheckin();
       _logger.d('Current week check-in loaded');
-      
+
       _logger.d('Loading user check-ins...');
       await loadUserCheckins(refresh: true);
       _logger.d('User check-ins loaded');
-      
+
       _logger.d('Loading progress summary...');
       await loadProgressSummary();
       _logger.d('Progress summary loaded');
-      
+
       _logger.i('Refresh completed successfully');
     } catch (e) {
       _logger.e('Error during refresh: $e');
@@ -342,9 +348,8 @@ class CheckinProvider extends ChangeNotifier {
         // we'll use a different approach by getting the check-in ID
         // and then fetching the document snapshot
         final checkin = recentCheckins.first;
-        final docRef = FirebaseFirestore.instance
-            .collection('checkins')
-            .doc(checkin.id);
+        final docRef =
+            FirebaseFirestore.instance.collection('checkins').doc(checkin.id);
         return await docRef.get();
       }
       return null;

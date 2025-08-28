@@ -71,7 +71,8 @@ class OnboardingFoodPreferencesStep extends StatelessWidget {
     );
   }
 
-  Widget _buildInputSection(BuildContext context, {
+  Widget _buildInputSection(
+    BuildContext context, {
     required String label,
     required String hint,
     required List<String> items,
@@ -95,7 +96,8 @@ class OnboardingFoodPreferencesStep extends StatelessWidget {
                 .map((item) => Chip(
                       label: Text(item),
                       onDeleted: () => onRemove(item),
-                      backgroundColor: AppConstants.primaryColor.withOpacity(0.08),
+                      backgroundColor:
+                          AppConstants.primaryColor.withOpacity(0.08),
                       labelStyle: AppTextStyles.bodyMedium,
                     ))
                 .toList(),
@@ -141,4 +143,4 @@ class OnboardingFoodPreferencesStep extends StatelessWidget {
       ],
     );
   }
-} 
+}

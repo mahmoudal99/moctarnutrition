@@ -99,7 +99,7 @@ class _OnboardingDesiredWeightStepState
                 painter: RulerPainter(),
               ),
 
-                            // Weight Picker - Horizontal scroll
+              // Weight Picker - Horizontal scroll
               NotificationListener<ScrollNotification>(
                 onNotification: (ScrollNotification notification) {
                   if (notification is ScrollStartNotification) {
@@ -114,7 +114,7 @@ class _OnboardingDesiredWeightStepState
                   itemBuilder: (context, index) {
                     double weight = 36.0 + (index * 0.5);
                     bool isSelected = (weight == _currentWeight);
-                    
+
                     return Container(
                       width: 60,
                       alignment: Alignment.center,

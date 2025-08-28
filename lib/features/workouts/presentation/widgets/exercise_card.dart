@@ -77,7 +77,7 @@ class ExerciseCard extends StatelessWidget {
                     const SizedBox(width: AppConstants.spacingM),
                     _buildExerciseInfo(
                       Icons.repeat,
-                      exercise.duration != null 
+                      exercise.duration != null
                           ? '${exercise.duration}s'
                           : '${exercise.reps} reps',
                     ),
@@ -137,4 +137,4 @@ class ExerciseCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

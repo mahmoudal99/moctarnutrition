@@ -168,4 +168,4 @@ class WorkoutLoadingState extends StatelessWidget {
       ),
     );
   }
-} 
+}

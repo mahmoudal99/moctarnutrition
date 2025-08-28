@@ -17,10 +17,12 @@ class FloatingAdminScreenWrapper extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<FloatingAdminScreenWrapper> createState() => _FloatingAdminScreenWrapperState();
+  State<FloatingAdminScreenWrapper> createState() =>
+      _FloatingAdminScreenWrapperState();
 }
 
-class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper> {
+class _FloatingAdminScreenWrapperState
+    extends State<FloatingAdminScreenWrapper> {
   @override
   Widget build(BuildContext context) {
     return BottomBar(
@@ -93,7 +95,9 @@ class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper>
                 width: 20,
                 height: 20,
                 colorFilter: ColorFilter.mode(
-                  isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
+                  isSelected
+                      ? AppConstants.primaryColor
+                      : AppConstants.textTertiary,
                   BlendMode.srcIn,
                 ),
               ),
@@ -102,7 +106,9 @@ class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper>
                 label,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.caption.copyWith(
-                  color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
+                  color: isSelected
+                      ? AppConstants.primaryColor
+                      : AppConstants.textTertiary,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
@@ -112,4 +118,4 @@ class _FloatingAdminScreenWrapperState extends State<FloatingAdminScreenWrapper>
       ),
     );
   }
-} 
+}

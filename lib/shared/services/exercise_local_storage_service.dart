@@ -20,7 +20,7 @@ class ExerciseLocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     final exercisesJson = prefs.getString(_exercisesKey);
     if (exercisesJson == null) return [];
-    
+
     final List<dynamic> exercisesList = jsonDecode(exercisesJson);
     return exercisesList.map((json) => Exercise.fromJson(json)).toList();
   }
@@ -49,7 +49,7 @@ class ExerciseLocalStorageService {
   Future<bool> isCacheStale() async {
     final lastUpdated = await getLastUpdated();
     if (lastUpdated == null) return true;
-    
+
     final now = DateTime.now();
     final difference = now.difference(lastUpdated);
     return difference.inHours > 24;
@@ -62,4 +62,4 @@ class ExerciseLocalStorageService {
     await prefs.remove(_muscleGroupsKey);
     await prefs.remove(_lastUpdatedKey);
   }
-} 
+}

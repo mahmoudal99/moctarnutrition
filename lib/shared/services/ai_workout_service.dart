@@ -24,7 +24,7 @@ class AIWorkoutService {
     String userId,
   ) async {
     _logger.i('Generating AI workout plan for user: ${user.id}');
-    
+
     try {
       final workoutPlan = await _generateWorkoutPlanWithRetry(user, userId);
       _logger.i('Successfully generated workout plan: ${workoutPlan.title}');
@@ -54,7 +54,8 @@ class AIWorkoutService {
         await Future.delayed(Duration(seconds: attempt * 2));
       }
     }
-    throw Exception('Failed to generate workout plan after $maxRetries attempts');
+    throw Exception(
+        'Failed to generate workout plan after $maxRetries attempts');
   }
 
   /// Internal workout plan generation
@@ -63,7 +64,7 @@ class AIWorkoutService {
     String userId,
   ) async {
     final workoutPrompt = _buildWorkoutPlanPrompt(user);
-    
+
     final requestBody = {
       'model': ConfigService.openAIModel,
       'messages': [
@@ -96,25 +97,28 @@ class AIWorkoutService {
       _logger.i('Workout plan response received successfully');
 
       try {
-        final workoutPlan = await _parseWorkoutPlanFromAI(content, user, userId);
+        final workoutPlan =
+            await _parseWorkoutPlanFromAI(content, user, userId);
         return workoutPlan;
       } catch (e) {
         if (e is ValidationException) {
-          _logger.w('Workout plan validation failed: ${e.message}. Regenerating...');
+          _logger.w(
+              'Workout plan validation failed: ${e.message}. Regenerating...');
           throw e; // This will trigger retry
         }
         rethrow;
       }
     } else {
       _logger.e('API Error: ${response.statusCode} - ${response.body}');
-      throw Exception('Failed to generate workout plan: ${response.statusCode}');
+      throw Exception(
+          'Failed to generate workout plan: ${response.statusCode}');
     }
   }
 
   /// Build the prompt for workout plan generation
   static String _buildWorkoutPlanPrompt(UserModel user) {
     final prefs = user.preferences;
-    
+
     return '''
 Generate a personalized 7-day workout plan based on the following user preferences:
 
@@ -284,20 +288,19 @@ Safety first:
       // Extract JSON from the response
       final jsonStart = content.indexOf('{');
       final jsonEnd = content.lastIndexOf('}') + 1;
-      
+
       if (jsonStart == -1 || jsonEnd == 0) {
         throw ValidationException('No valid JSON found in AI response');
       }
-      
+
       final jsonString = content.substring(jsonStart, jsonEnd);
       final jsonData = jsonDecode(jsonString);
-      
+
       // Validate the JSON structure
       await _validateWorkoutPlanJson(jsonData);
-      
+
       // Convert to WorkoutPlanModel
       return _convertJsonToWorkoutPlan(jsonData, user, userId);
-      
     } catch (e) {
       _logger.e('Failed to parse workout plan: $e');
       throw ValidationException('Failed to parse workout plan: $e');
@@ -305,35 +308,43 @@ Safety first:
   }
 
   /// Validate workout plan JSON structure
-  static Future<void> _validateWorkoutPlanJson(Map<String, dynamic> json) async {
+  static Future<void> _validateWorkoutPlanJson(
+      Map<String, dynamic> json) async {
     final requiredFields = ['title', 'description', 'dailyWorkouts'];
-    
+
     for (final field in requiredFields) {
       if (!json.containsKey(field)) {
         throw ValidationException('Missing required field: $field');
       }
     }
-    
+
     if (json['dailyWorkouts'] is! List) {
       throw ValidationException('dailyWorkouts must be an array');
     }
-    
+
     final dailyWorkouts = json['dailyWorkouts'] as List;
     if (dailyWorkouts.isEmpty) {
       throw ValidationException('dailyWorkouts cannot be empty');
     }
-    
+
     // Validate each daily workout
     for (int i = 0; i < dailyWorkouts.length; i++) {
       final dailyWorkout = dailyWorkouts[i];
       if (dailyWorkout is! Map<String, dynamic>) {
         throw ValidationException('dailyWorkout[$i] must be an object');
       }
-      
-      final requiredDailyFields = ['id', 'dayName', 'title', 'description', 'workouts'];
+
+      final requiredDailyFields = [
+        'id',
+        'dayName',
+        'title',
+        'description',
+        'workouts'
+      ];
       for (final field in requiredDailyFields) {
         if (!dailyWorkout.containsKey(field)) {
-          throw ValidationException('Missing required field in dailyWorkout[$i]: $field');
+          throw ValidationException(
+              'Missing required field in dailyWorkout[$i]: $field');
         }
       }
     }
@@ -474,4 +485,4 @@ Safety first:
         return 'Strength';
     }
   }
-} 
+}

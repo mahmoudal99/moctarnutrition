@@ -20,17 +20,20 @@ class NutritionVerificationService {
     String preparationState = 'unspecified',
   }) async {
     try {
-      _logger.i('Starting nutrition verification for $ingredientName: $amount $unit');
+      _logger.i(
+          'Starting nutrition verification for $ingredientName: $amount $unit');
 
       // Validate input
       if (amount <= 0 || amount > 1000) {
-        _logger.w('Invalid amount $amount for $ingredientName, defaulting to 100g');
+        _logger.w(
+            'Invalid amount $amount for $ingredientName, defaulting to 100g');
         amount = 100.0;
         unit = 'grams';
       }
 
       // Check dietary restrictions
-      final restrictionCheck = await _checkDietaryRestrictions(ingredientName, dietaryRestrictions);
+      final restrictionCheck =
+          await _checkDietaryRestrictions(ingredientName, dietaryRestrictions);
       if (restrictionCheck != null) {
         return restrictionCheck;
       }
@@ -40,7 +43,8 @@ class NutritionVerificationService {
       if (_nutritionCache.containsKey(cacheKey)) {
         _logger.i('Using cached nutrition data for $ingredientName');
         final usdaData = _nutritionCache[cacheKey]!;
-        final comparison = NutritionComparisonService.compareNutrition(claimedNutrition, usdaData);
+        final comparison = NutritionComparisonService.compareNutrition(
+            claimedNutrition, usdaData);
         return NutritionVerificationResult(
           isVerified: comparison.isWithinTolerance,
           confidence: comparison.confidence,
@@ -53,14 +57,18 @@ class NutritionVerificationService {
       }
 
       // Step 1: Map ingredient name to USDA-compatible search term
-      final usdaSearchTerm = await IngredientNameMapperService.mapToUSDASearchTerm(ingredientName);
-      _logger.i('Mapped "$ingredientName" to USDA search term: "$usdaSearchTerm"');
+      final usdaSearchTerm =
+          await IngredientNameMapperService.mapToUSDASearchTerm(ingredientName);
+      _logger
+          .i('Mapped "$ingredientName" to USDA search term: "$usdaSearchTerm"');
 
       // Step 2: Search USDA with the mapped name
       final searchResults = await USDAClientService.searchFood(usdaSearchTerm);
       if (searchResults.isEmpty) {
-        _logger.w('No USDA data found for $usdaSearchTerm, attempting Open Food Facts fallback');
-        final fallbackNutrition = await _getOpenFoodFactsNutrition(ingredientName, amount, unit);
+        _logger.w(
+            'No USDA data found for $usdaSearchTerm, attempting Open Food Facts fallback');
+        final fallbackNutrition =
+            await _getOpenFoodFactsNutrition(ingredientName, amount, unit);
         return NutritionVerificationResult(
           isVerified: false,
           confidence: 0.0,
@@ -77,10 +85,13 @@ class NutritionVerificationService {
       _logger.i('Selected best USDA match: ${bestMatch.description}');
 
       // Step 4: Get detailed nutrition data from USDA
-      final foodDetails = await USDAClientService.getFoodDetails(bestMatch.fdcId);
+      final foodDetails =
+          await USDAClientService.getFoodDetails(bestMatch.fdcId);
       if (foodDetails == null) {
-        _logger.w('Could not retrieve details for $usdaSearchTerm (FDC ID: ${bestMatch.fdcId})');
-        final fallbackNutrition = await _getOpenFoodFactsNutrition(ingredientName, amount, unit);
+        _logger.w(
+            'Could not retrieve details for $usdaSearchTerm (FDC ID: ${bestMatch.fdcId})');
+        final fallbackNutrition =
+            await _getOpenFoodFactsNutrition(ingredientName, amount, unit);
         return NutritionVerificationResult(
           isVerified: false,
           confidence: 0.0,
@@ -94,23 +105,26 @@ class NutritionVerificationService {
 
       // Step 5: Convert amount to grams
       final amountInGrams = await UnitConverterService.convertToGrams(
-        amount, 
-        unit, 
-        ingredientName, 
+        amount,
+        unit,
+        ingredientName,
         foodDetails.foodPortions,
       );
 
       // Step 6: Calculate expected nutrition for the amount
-      final expectedNutrition = NutritionComparisonService.calculateNutritionForAmount(
+      final expectedNutrition =
+          NutritionComparisonService.calculateNutritionForAmount(
         foodDetails.nutritionPer100g,
         amountInGrams,
         unit,
       );
 
       // Step 7: Validate nutrition data
-      if (!NutritionComparisonService.validateNutritionData(expectedNutrition, ingredientName)) {
+      if (!NutritionComparisonService.validateNutritionData(
+          expectedNutrition, ingredientName)) {
         _logger.w('Invalid nutrition data for $ingredientName, using fallback');
-        final fallbackNutrition = await _getOpenFoodFactsNutrition(ingredientName, amount, unit);
+        final fallbackNutrition =
+            await _getOpenFoodFactsNutrition(ingredientName, amount, unit);
         return NutritionVerificationResult(
           isVerified: false,
           confidence: 0.0,
@@ -126,17 +140,24 @@ class NutritionVerificationService {
       _nutritionCache[cacheKey] = expectedNutrition;
 
       // Step 9: Compare claimed vs expected nutrition
-      final comparison = NutritionComparisonService.compareNutrition(claimedNutrition, expectedNutrition);
+      final comparison = NutritionComparisonService.compareNutrition(
+          claimedNutrition, expectedNutrition);
 
       // Step 10: Sanity check for unreasonable values
       if (comparison.suggestedCorrection != null) {
-        final calorieDiff = ((comparison.suggestedCorrection!['calories'] ?? 0.0) - (claimedNutrition['calories'] ?? 0.0)).abs();
-        if (calorieDiff > (claimedNutrition['calories'] ?? 100.0) * 0.5 || comparison.confidence < 0.8) {
-          _logger.w('Rejected correction for $ingredientName: large discrepancy or low confidence (${comparison.confidence})');
+        final calorieDiff =
+            ((comparison.suggestedCorrection!['calories'] ?? 0.0) -
+                    (claimedNutrition['calories'] ?? 0.0))
+                .abs();
+        if (calorieDiff > (claimedNutrition['calories'] ?? 100.0) * 0.5 ||
+            comparison.confidence < 0.8) {
+          _logger.w(
+              'Rejected correction for $ingredientName: large discrepancy or low confidence (${comparison.confidence})');
           return NutritionVerificationResult(
             isVerified: false,
             confidence: comparison.confidence,
-            message: 'Unreasonable correction or low confidence. Manual review required.',
+            message:
+                'Unreasonable correction or low confidence. Manual review required.',
             suggestedCorrection: null,
             suggestedReplacement: null,
             usdaData: expectedNutrition,
@@ -145,8 +166,9 @@ class NutritionVerificationService {
         }
       }
 
-      _logger.i('Verified $ingredientName: $amount $unit, USDA match: ${foodDetails.description}, Confidence: ${comparison.confidence}');
-      
+      _logger.i(
+          'Verified $ingredientName: $amount $unit, USDA match: ${foodDetails.description}, Confidence: ${comparison.confidence}');
+
       return NutritionVerificationResult(
         isVerified: comparison.isWithinTolerance,
         confidence: comparison.confidence,
@@ -158,7 +180,8 @@ class NutritionVerificationService {
       );
     } catch (e) {
       _logger.e('Nutrition verification error for $ingredientName: $e');
-      final fallbackNutrition = await _getOpenFoodFactsNutrition(ingredientName, amount, unit);
+      final fallbackNutrition =
+          await _getOpenFoodFactsNutrition(ingredientName, amount, unit);
       return NutritionVerificationResult(
         isVerified: false,
         confidence: 0.0,
@@ -180,11 +203,43 @@ class NutritionVerificationService {
 
     // Dietary restriction mappings
     final restrictedIngredients = {
-      'Vegan': ['meat', 'fish', 'dairy', 'eggs', 'honey', 'gelatin', 'whey', 'casein'],
+      'Vegan': [
+        'meat',
+        'fish',
+        'dairy',
+        'eggs',
+        'honey',
+        'gelatin',
+        'whey',
+        'casein'
+      ],
       'Vegetarian': ['meat', 'fish', 'gelatin'],
-      'Gluten-Free': ['wheat', 'barley', 'rye', 'flour', 'bread', 'pasta', 'couscous'],
-      'Dairy-Free': ['milk', 'cheese', 'yogurt', 'butter', 'cream', 'whey', 'casein'],
-      'Nut-Free': ['peanuts', 'almonds', 'walnuts', 'cashews', 'pecans', 'hazelnuts'],
+      'Gluten-Free': [
+        'wheat',
+        'barley',
+        'rye',
+        'flour',
+        'bread',
+        'pasta',
+        'couscous'
+      ],
+      'Dairy-Free': [
+        'milk',
+        'cheese',
+        'yogurt',
+        'butter',
+        'cream',
+        'whey',
+        'casein'
+      ],
+      'Nut-Free': [
+        'peanuts',
+        'almonds',
+        'walnuts',
+        'cashews',
+        'pecans',
+        'hazelnuts'
+      ],
     };
 
     for (final ingredient in meal.ingredients) {
@@ -200,7 +255,8 @@ class NutritionVerificationService {
             ) ==
             true) {
           restrictionViolation = restriction;
-          suggestedReplacement = await _getReplacementIngredient(ingredient.name, restriction);
+          suggestedReplacement =
+              await _getReplacementIngredient(ingredient.name, restriction);
           break;
         }
       }
@@ -292,7 +348,8 @@ class NutritionVerificationService {
   }
 
   /// Extract nutrition data from ingredient if available
-  static Map<String, double>? _extractNutritionFromIngredient(RecipeIngredient ingredient) {
+  static Map<String, double>? _extractNutritionFromIngredient(
+      RecipeIngredient ingredient) {
     if (ingredient.nutrition != null) {
       return {
         'calories': ingredient.nutrition!.calories.toDouble(),
@@ -308,7 +365,8 @@ class NutritionVerificationService {
   }
 
   /// Select the best USDA search result
-  static USDASearchResult _selectBestMatch(List<USDASearchResult> results, String query) {
+  static USDASearchResult _selectBestMatch(
+      List<USDASearchResult> results, String query) {
     final queryLower = query.toLowerCase();
     return results.reduce((a, b) {
       int scoreA = 0;
@@ -319,8 +377,10 @@ class NutritionVerificationService {
       if (b.dataType == 'Foundation' || b.dataType == 'Survey') scoreB += 20;
 
       // Prioritize exact or close name matches
-      final aMatchScore = _calculateMatchScore(queryLower, a.description.toLowerCase());
-      final bMatchScore = _calculateMatchScore(queryLower, b.description.toLowerCase());
+      final aMatchScore =
+          _calculateMatchScore(queryLower, a.description.toLowerCase());
+      final bMatchScore =
+          _calculateMatchScore(queryLower, b.description.toLowerCase());
       scoreA += aMatchScore;
       scoreB += bMatchScore;
 
@@ -329,24 +389,37 @@ class NutritionVerificationService {
       if (b.brandOwner.isEmpty) scoreB += 10;
 
       // Match preparation state
-      if (queryLower.contains('cooked') && a.description.toLowerCase().contains('cooked')) scoreA += 15;
-      if (queryLower.contains('cooked') && b.description.toLowerCase().contains('cooked')) scoreB += 15;
-      if (queryLower.contains('raw') && a.description.toLowerCase().contains('raw')) scoreA += 15;
-      if (queryLower.contains('raw') && b.description.toLowerCase().contains('raw')) scoreB += 15;
+      if (queryLower.contains('cooked') &&
+          a.description.toLowerCase().contains('cooked')) scoreA += 15;
+      if (queryLower.contains('cooked') &&
+          b.description.toLowerCase().contains('cooked')) scoreB += 15;
+      if (queryLower.contains('raw') &&
+          a.description.toLowerCase().contains('raw')) scoreA += 15;
+      if (queryLower.contains('raw') &&
+          b.description.toLowerCase().contains('raw')) scoreB += 15;
 
       // Penalize processed foods
-      if (a.description.toLowerCase().contains('instant') || a.description.toLowerCase().contains('flavored')) scoreA -= 10;
-      if (b.description.toLowerCase().contains('instant') || b.description.toLowerCase().contains('flavored')) scoreB -= 10;
+      if (a.description.toLowerCase().contains('instant') ||
+          a.description.toLowerCase().contains('flavored')) scoreA -= 10;
+      if (b.description.toLowerCase().contains('instant') ||
+          b.description.toLowerCase().contains('flavored')) scoreB -= 10;
 
       // Specific ingredient matching - heavily penalize wrong categories
-      if (queryLower.contains('sesame') && !a.description.toLowerCase().contains('sesame')) scoreA -= 50;
-      if (queryLower.contains('sesame') && !b.description.toLowerCase().contains('sesame')) scoreB -= 50;
-      if (queryLower.contains('oat') && !a.description.toLowerCase().contains('oat')) scoreA -= 50;
-      if (queryLower.contains('oat') && !b.description.toLowerCase().contains('oat')) scoreB -= 50;
-      if (queryLower.contains('tofu') && !a.description.toLowerCase().contains('tofu')) scoreA -= 50;
-      if (queryLower.contains('tofu') && !b.description.toLowerCase().contains('tofu')) scoreB -= 50;
+      if (queryLower.contains('sesame') &&
+          !a.description.toLowerCase().contains('sesame')) scoreA -= 50;
+      if (queryLower.contains('sesame') &&
+          !b.description.toLowerCase().contains('sesame')) scoreB -= 50;
+      if (queryLower.contains('oat') &&
+          !a.description.toLowerCase().contains('oat')) scoreA -= 50;
+      if (queryLower.contains('oat') &&
+          !b.description.toLowerCase().contains('oat')) scoreB -= 50;
+      if (queryLower.contains('tofu') &&
+          !a.description.toLowerCase().contains('tofu')) scoreA -= 50;
+      if (queryLower.contains('tofu') &&
+          !b.description.toLowerCase().contains('tofu')) scoreB -= 50;
 
-      _logger.i('Match scores for $query: ${a.description} ($scoreA) vs ${b.description} ($scoreB)');
+      _logger.i(
+          'Match scores for $query: ${a.description} ($scoreA) vs ${b.description} ($scoreB)');
       return scoreA >= scoreB ? a : b;
     });
   }
@@ -355,12 +428,14 @@ class NutritionVerificationService {
   static int _calculateMatchScore(String query, String description) {
     int score = 0;
     final queryWords = query.split(' ').map((w) => w.trim()).toList();
-    final descWords = description.split(' ').map((w) => w.trim().toLowerCase()).toList();
+    final descWords =
+        description.split(' ').map((w) => w.trim().toLowerCase()).toList();
 
     for (final word in queryWords) {
       if (descWords.contains(word.toLowerCase())) {
         score += 15; // Exact word match
-      } else if (descWords.any((dw) => dw.contains(word.toLowerCase()) || word.toLowerCase().contains(dw))) {
+      } else if (descWords.any((dw) =>
+          dw.contains(word.toLowerCase()) || word.toLowerCase().contains(dw))) {
         score += 7; // Partial match
       }
     }
@@ -369,20 +444,55 @@ class NutritionVerificationService {
 
   /// Check dietary restrictions and suggest replacements
   static Future<NutritionVerificationResult?> _checkDietaryRestrictions(
-    String ingredientName, 
+    String ingredientName,
     List<String> dietaryRestrictions,
   ) async {
     final restrictedIngredients = {
-      'Vegan': ['meat', 'fish', 'dairy', 'eggs', 'honey', 'gelatin', 'whey', 'casein'],
+      'Vegan': [
+        'meat',
+        'fish',
+        'dairy',
+        'eggs',
+        'honey',
+        'gelatin',
+        'whey',
+        'casein'
+      ],
       'Vegetarian': ['meat', 'fish', 'gelatin'],
-      'Gluten-Free': ['wheat', 'barley', 'rye', 'flour', 'bread', 'pasta', 'couscous'],
-      'Dairy-Free': ['milk', 'cheese', 'yogurt', 'butter', 'cream', 'whey', 'casein'],
-      'Nut-Free': ['peanuts', 'almonds', 'walnuts', 'cashews', 'pecans', 'hazelnuts'],
+      'Gluten-Free': [
+        'wheat',
+        'barley',
+        'rye',
+        'flour',
+        'bread',
+        'pasta',
+        'couscous'
+      ],
+      'Dairy-Free': [
+        'milk',
+        'cheese',
+        'yogurt',
+        'butter',
+        'cream',
+        'whey',
+        'casein'
+      ],
+      'Nut-Free': [
+        'peanuts',
+        'almonds',
+        'walnuts',
+        'cashews',
+        'pecans',
+        'hazelnuts'
+      ],
     };
 
     for (final restriction in dietaryRestrictions) {
-      if (restrictedIngredients[restriction]?.any((r) => ingredientName.toLowerCase().contains(r)) == true) {
-        final replacement = await _getReplacementIngredient(ingredientName, restriction);
+      if (restrictedIngredients[restriction]
+              ?.any((r) => ingredientName.toLowerCase().contains(r)) ==
+          true) {
+        final replacement =
+            await _getReplacementIngredient(ingredientName, restriction);
         return NutritionVerificationResult(
           isVerified: false,
           confidence: 0.0,
@@ -398,7 +508,8 @@ class NutritionVerificationService {
   }
 
   /// Get replacement ingredient for dietary restrictions
-  static Future<RecipeIngredient?> _getReplacementIngredient(String ingredientName, String restriction) async {
+  static Future<RecipeIngredient?> _getReplacementIngredient(
+      String ingredientName, String restriction) async {
     // Use Open Food Facts to find suitable replacements
     final replacementQueries = {
       'Vegan': {
@@ -423,7 +534,8 @@ class NutritionVerificationService {
         if (ingredientLower.contains(entry.key)) {
           // Try to find nutrition data for the replacement
           for (final replacement in entry.value) {
-            final nutrition = await _getOpenFoodFactsNutrition(replacement, 100, 'grams');
+            final nutrition =
+                await _getOpenFoodFactsNutrition(replacement, 100, 'grams');
             if (nutrition != null) {
               return RecipeIngredient(
                 name: replacement,
@@ -448,7 +560,8 @@ class NutritionVerificationService {
   }
 
   /// Fetch fallback nutrition from Open Food Facts
-  static Future<Map<String, double>?> _getOpenFoodFactsNutrition(String ingredientName, double amount, String unit) async {
+  static Future<Map<String, double>?> _getOpenFoodFactsNutrition(
+      String ingredientName, double amount, String unit) async {
     // This would be implemented in a separate OpenFoodFactsService
     // For now, return null to indicate no fallback data
     _logger.w('Open Food Facts fallback not implemented for $ingredientName');

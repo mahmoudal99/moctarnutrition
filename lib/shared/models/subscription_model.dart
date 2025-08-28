@@ -1,4 +1,5 @@
 enum SubscriptionPlan { free, basic, premium }
+
 enum BillingCycle { monthly, yearly }
 
 class SubscriptionModel {
@@ -135,13 +136,14 @@ class SubscriptionFeatures {
     return features[plan] ?? [];
   }
 
-  static bool hasFeature(SubscriptionPlan userPlan, SubscriptionPlan requiredPlan) {
+  static bool hasFeature(
+      SubscriptionPlan userPlan, SubscriptionPlan requiredPlan) {
     final planOrder = {
       SubscriptionPlan.free: 0,
       SubscriptionPlan.basic: 1,
       SubscriptionPlan.premium: 2,
     };
-    
+
     return planOrder[userPlan]! >= planOrder[requiredPlan]!;
   }
 }
@@ -178,7 +180,8 @@ class PricingTier {
         monthlyPrice: 0,
         yearlyPrice: 0,
         yearlySavings: 0,
-        features: SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.free),
+        features:
+            SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.free),
         isRecommended: true,
       ),
       PricingTier(
@@ -188,7 +191,8 @@ class PricingTier {
         monthlyPrice: 9.99,
         yearlyPrice: 99.99,
         yearlySavings: 19.89,
-        features: SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.basic),
+        features:
+            SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.basic),
         isPopular: true,
       ),
       PricingTier(
@@ -198,8 +202,9 @@ class PricingTier {
         monthlyPrice: 19.99,
         yearlyPrice: 199.99,
         yearlySavings: 39.89,
-        features: SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.premium),
+        features:
+            SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.premium),
       ),
     ];
   }
-} 
+}

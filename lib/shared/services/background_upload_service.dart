@@ -14,20 +14,21 @@ class BackgroundUploadService {
   static final FirebaseStorage _storage = FirebaseStorage.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const _uuid = Uuid();
-  
+
   // Notification plugin
-  static final FlutterLocalNotificationsPlugin _notifications = 
+  static final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
   static Future<void> initialize() async {
     // Initialize notifications with passive settings (no auto permission requests)
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
     );
-    
+
     const initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
@@ -45,7 +46,7 @@ class BackgroundUploadService {
   }) async {
     try {
       _logger.i('Starting background upload for checkin: $checkinId');
-      
+
       // Save image locally first
       final localImagePath = await _saveImageLocally(
         imageBytes: imageBytes,
@@ -53,9 +54,9 @@ class BackgroundUploadService {
         checkinId: checkinId,
         uploadType: uploadType,
       );
-      
+
       _logger.i('Image saved locally: $localImagePath');
-      
+
       // Start background upload process
       _uploadInBackgroundWithRetry(
         localImagePath: localImagePath,
@@ -64,7 +65,6 @@ class BackgroundUploadService {
         uploadType: uploadType,
         maxRetries: 3,
       );
-      
     } catch (e) {
       _logger.e('Error starting background upload: $e');
       rethrow;
@@ -81,25 +81,25 @@ class BackgroundUploadService {
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final uploadsDir = path.join(appDir.path, 'uploads', uploadType);
-      
+
       // Create directory if it doesn't exist
       final directory = Directory(uploadsDir);
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
-      
+
       // Generate unique filename
       final uuid = const Uuid().v4();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = '${uuid}_${checkinId}_$timestamp.jpg';
       final savedPath = path.join(uploadsDir, fileName);
-      
+
       _logger.i('Saving image to: $savedPath');
-      
+
       // Save the image bytes to file
       final file = File(savedPath);
       await file.writeAsBytes(imageBytes);
-      
+
       _logger.i('Image saved successfully to: $savedPath');
       return savedPath;
     } catch (e) {
@@ -117,40 +117,43 @@ class BackgroundUploadService {
     int maxRetries = 3,
   }) async {
     int retryCount = 0;
-    
+
     while (retryCount < maxRetries) {
       try {
-        _logger.i('Attempting background upload (attempt ${retryCount + 1}/$maxRetries) for checkin: $checkinId');
-        
+        _logger.i(
+            'Attempting background upload (attempt ${retryCount + 1}/$maxRetries) for checkin: $checkinId');
+
         await _uploadInBackground(
           localImagePath: localImagePath,
           userId: userId,
           checkinId: checkinId,
           uploadType: uploadType,
         );
-        
-        _logger.i('Background upload completed successfully for checkin: $checkinId');
+
+        _logger.i(
+            'Background upload completed successfully for checkin: $checkinId');
         return; // Success, exit retry loop
-        
       } catch (e) {
         retryCount++;
-        _logger.e('Background upload attempt $retryCount failed for checkin $checkinId: $e');
-        
+        _logger.e(
+            'Background upload attempt $retryCount failed for checkin $checkinId: $e');
+
         if (retryCount >= maxRetries) {
           _logger.e('All retry attempts failed for checkin: $checkinId');
           await _showNotification(
             title: 'Upload Failed',
-            body: 'Failed to upload image after $maxRetries attempts. Please try again.',
+            body:
+                'Failed to upload image after $maxRetries attempts. Please try again.',
             isError: true,
           );
           return;
         }
-        
+
         // Wait before retry with exponential backoff
         final delay = Duration(seconds: 2 * retryCount);
         _logger.i('Waiting ${delay.inSeconds} seconds before retry...');
         await Future.delayed(delay);
-        
+
         await _showNotification(
           title: 'Upload Retry',
           body: 'Retrying upload (attempt ${retryCount + 1}/$maxRetries)...',
@@ -167,36 +170,39 @@ class BackgroundUploadService {
     required String uploadType,
   }) async {
     try {
-      _logger.i('Starting actual upload to Firebase Storage for checkin: $checkinId');
-      
+      _logger.i(
+          'Starting actual upload to Firebase Storage for checkin: $checkinId');
+
       // Read the image file
       final imageFile = File(localImagePath);
       if (!await imageFile.exists()) {
         throw Exception('Local image file not found: $localImagePath');
       }
-      
+
       final imageBytes = await imageFile.readAsBytes();
       _logger.i('Read image bytes: ${imageBytes.length} bytes');
-      
+
       // Create thumbnail
       final thumbnailBytes = await _createThumbnail(imageBytes);
       _logger.i('Created thumbnail: ${thumbnailBytes.length} bytes');
-      
+
       // Upload to Firebase Storage
       final storageRef = _storage.ref();
-      final fullPhotoRef = storageRef.child('$uploadType/$userId/$checkinId/full_${path.basename(localImagePath)}');
-      final thumbnailRef = storageRef.child('$uploadType/$userId/$checkinId/thumb_${path.basename(localImagePath)}');
-      
+      final fullPhotoRef = storageRef.child(
+          '$uploadType/$userId/$checkinId/full_${path.basename(localImagePath)}');
+      final thumbnailRef = storageRef.child(
+          '$uploadType/$userId/$checkinId/thumb_${path.basename(localImagePath)}');
+
       _logger.i('Uploading full image to: ${fullPhotoRef.fullPath}');
       await fullPhotoRef.putData(imageBytes);
       final fullPhotoUrl = await fullPhotoRef.getDownloadURL();
       _logger.i('Full image uploaded successfully: $fullPhotoUrl');
-      
+
       _logger.i('Uploading thumbnail to: ${thumbnailRef.fullPath}');
       await thumbnailRef.putData(thumbnailBytes);
       final thumbnailUrl = await thumbnailRef.getDownloadURL();
       _logger.i('Thumbnail uploaded successfully: $thumbnailUrl');
-      
+
       // Update checkin with photo URLs
       _logger.i('Updating checkin with photo URLs: $checkinId');
       await _updateCheckinWithPhotoUrls(
@@ -204,7 +210,7 @@ class BackgroundUploadService {
         photoUrl: fullPhotoUrl,
         photoThumbnailUrl: thumbnailUrl,
       );
-      
+
       // Show success notification
       await _showNotification(
         title: 'Upload Complete',
@@ -213,8 +219,8 @@ class BackgroundUploadService {
       );
 
       // Don't clean up local file - keep it for immediate display
-      _logger.i('Background upload process completed successfully for checkin: $checkinId');
-      
+      _logger.i(
+          'Background upload process completed successfully for checkin: $checkinId');
     } catch (e) {
       _logger.e('Error in background upload for checkin $checkinId: $e');
       rethrow;
@@ -225,18 +231,18 @@ class BackgroundUploadService {
   static Future<Uint8List> _createThumbnail(Uint8List imageBytes) async {
     try {
       final image = img.decodeImage(imageBytes);
-      
+
       if (image == null) {
         throw Exception('Failed to decode image for thumbnail creation');
       }
-      
+
       final thumbnail = img.copyResize(
         image,
         width: 300,
         height: 300,
         interpolation: img.Interpolation.linear,
       );
-      
+
       return Uint8List.fromList(img.encodeJpg(thumbnail, quality: 80));
     } catch (e) {
       _logger.e('Error creating thumbnail: $e');
@@ -252,13 +258,13 @@ class BackgroundUploadService {
   }) async {
     try {
       final checkinRef = _firestore.collection('checkins').doc(checkinId);
-      
+
       await checkinRef.update({
         'photoUrl': photoUrl,
         'photoThumbnailUrl': photoThumbnailUrl,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      
+
       _logger.i('Checkin updated with photo URLs: $checkinId');
     } catch (e) {
       _logger.e('Error updating checkin with photo URLs: $e');
@@ -312,15 +318,18 @@ class BackgroundUploadService {
     try {
       final uploadsDir = await getUploadsDirectory(uploadType);
       final directory = Directory(uploadsDir);
-      
+
       if (!await directory.exists()) {
         return [];
       }
 
-      final files = await directory.list().where((entity) => 
-        entity is File && path.extension(entity.path) == '.jpg'
-      ).cast<File>().toList();
-      
+      final files = await directory
+          .list()
+          .where((entity) =>
+              entity is File && path.extension(entity.path) == '.jpg')
+          .cast<File>()
+          .toList();
+
       return files;
     } catch (e) {
       _logger.e('Error getting local uploads: $e');
@@ -333,7 +342,7 @@ class BackgroundUploadService {
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final uploadsDir = Directory(path.join(appDir.path, 'uploads'));
-      
+
       if (!await uploadsDir.exists()) {
         return;
       }
@@ -359,7 +368,7 @@ class BackgroundUploadService {
   static Future<void> retryFailedUploads() async {
     try {
       final failedUploads = await getLocalUploads('checkins');
-      
+
       if (failedUploads.isEmpty) {
         await _showNotification(
           title: 'No Failed Uploads',
@@ -378,7 +387,7 @@ class BackgroundUploadService {
           // Extract info from filename (assuming format: uuid_timestamp.jpg)
           final fileName = path.basename(file.path);
           final parts = fileName.split('_');
-          
+
           if (parts.length >= 2) {
             // For now, we'll just clean up old files since we can't easily extract userId/checkinId
             await file.delete();
@@ -408,12 +417,12 @@ class BackgroundUploadService {
     try {
       final checkinRef = _firestore.collection('checkins').doc(checkinId);
       final doc = await checkinRef.get();
-      
+
       if (doc.exists) {
         final data = doc.data();
-        return data != null && 
-               data['photoUrl'] != null && 
-               data['photoThumbnailUrl'] != null;
+        return data != null &&
+            data['photoUrl'] != null &&
+            data['photoThumbnailUrl'] != null;
       }
       return false;
     } catch (e) {
@@ -427,7 +436,7 @@ class BackgroundUploadService {
     try {
       final hasPhotos = await hasPhotoUrls(checkinId);
       final localUploads = await getLocalUploads('checkins');
-      
+
       return {
         'hasPhotos': hasPhotos,
         'pendingUploads': localUploads.length,
@@ -448,22 +457,22 @@ class BackgroundUploadService {
   static Future<String?> getLocalImagePath(String checkinId) async {
     try {
       final localUploads = await getLocalUploads('checkins');
-      
+
       // Find the image that belongs to this checkin
       for (final file in localUploads) {
         final fileName = path.basename(file.path);
         final parts = fileName.split('_');
-        
+
         // Format: uuid_checkinId_timestamp.jpg
         if (parts.length >= 3 && parts[1] == checkinId) {
           return file.path;
         }
       }
-      
+
       return null;
     } catch (e) {
       _logger.e('Error getting local image path for checkin $checkinId: $e');
       return null;
     }
   }
-} 
+}

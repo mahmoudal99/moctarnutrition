@@ -14,7 +14,8 @@ class MealPlanStorageService {
       final mealPlanJson = jsonEncode(mealPlan.toJson());
       final key = '${_mealPlanKeyPrefix}${mealPlan.userId}';
       await prefs.setString(key, mealPlanJson);
-      print('Meal plan saved to shared preferences for user ${mealPlan.userId}');
+      print(
+          'Meal plan saved to shared preferences for user ${mealPlan.userId}');
     } catch (e) {
       print('Error saving meal plan to shared preferences: $e');
       throw Exception('Failed to save meal plan: $e');
@@ -28,7 +29,7 @@ class MealPlanStorageService {
       final key = '${_mealPlanKeyPrefix}$userId';
       final mealPlanJson = prefs.getString(key);
       if (mealPlanJson == null) return null;
-      
+
       final Map<String, dynamic> map = jsonDecode(mealPlanJson);
       final mealPlan = MealPlanModel.fromJson(map);
       print('Meal plan loaded from shared preferences for user $userId');
@@ -40,7 +41,8 @@ class MealPlanStorageService {
   }
 
   /// Save diet plan preferences to shared preferences
-  static Future<void> saveDietPreferences(DietPlanPreferences preferences, String userId) async {
+  static Future<void> saveDietPreferences(
+      DietPlanPreferences preferences, String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final preferencesJson = jsonEncode(_dietPreferencesToJson(preferences));
@@ -60,7 +62,7 @@ class MealPlanStorageService {
       final key = '${_dietPreferencesKeyPrefix}$userId';
       final preferencesJson = prefs.getString(key);
       if (preferencesJson == null) return null;
-      
+
       final Map<String, dynamic> map = jsonDecode(preferencesJson);
       final preferences = _dietPreferencesFromJson(map);
       print('Diet preferences loaded from shared preferences for user $userId');
@@ -98,7 +100,8 @@ class MealPlanStorageService {
   }
 
   /// Convert DietPlanPreferences to JSON
-  static Map<String, dynamic> _dietPreferencesToJson(DietPlanPreferences preferences) {
+  static Map<String, dynamic> _dietPreferencesToJson(
+      DietPlanPreferences preferences) {
     return {
       'age': preferences.age,
       'gender': preferences.gender,
@@ -127,7 +130,8 @@ class MealPlanStorageService {
   }
 
   /// Convert JSON to DietPlanPreferences
-  static DietPlanPreferences _dietPreferencesFromJson(Map<String, dynamic> json) {
+  static DietPlanPreferences _dietPreferencesFromJson(
+      Map<String, dynamic> json) {
     return DietPlanPreferences(
       age: json['age'] as int,
       gender: json['gender'] as String,
@@ -156,8 +160,10 @@ class MealPlanStorageService {
       proteinTargets: json['proteinTargets'] as Map<String, dynamic>?,
       calorieTargets: json['calorieTargets'] as Map<String, dynamic>?,
       allergies: json['allergies'] as List<Map<String, dynamic>>?,
-      mealTimingPreferences: json['mealTimingPreferences'] as Map<String, dynamic>?,
-      batchCookingPreferences: json['batchCookingPreferences'] as Map<String, dynamic>?,
+      mealTimingPreferences:
+          json['mealTimingPreferences'] as Map<String, dynamic>?,
+      batchCookingPreferences:
+          json['batchCookingPreferences'] as Map<String, dynamic>?,
     );
   }
-} 
+}

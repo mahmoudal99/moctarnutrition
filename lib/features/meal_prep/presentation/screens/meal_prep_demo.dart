@@ -16,7 +16,7 @@ class MealPrepDemo extends StatefulWidget {
 
 class _MealPrepDemoState extends State<MealPrepDemo> {
   int _currentDemo = 0;
-  
+
   // Mock meal plan for demo
   final MealPlanModel _mockMealPlan = MealPlanModel(
     id: 'demo-plan',
@@ -52,7 +52,11 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
               RecipeIngredient(name: 'Berries', amount: 0.5, unit: 'cup'),
               RecipeIngredient(name: 'Honey', amount: 1, unit: 'tbsp'),
             ],
-            instructions: ['Mix oats with water', 'Add berries', 'Drizzle honey'],
+            instructions: [
+              'Mix oats with water',
+              'Add berries',
+              'Drizzle honey'
+            ],
             prepTime: 5,
             cookTime: 10,
             servings: 1,
@@ -240,7 +244,7 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          
+
           // MealInfoCard demo
           MealInfoCard(
             title: 'Sample Meal',
@@ -253,9 +257,9 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // NutritionChip demo
           Row(
             children: const [
@@ -266,18 +270,18 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
               NutritionChip(label: 'F', value: '12g', color: Colors.orange),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // MealPrepProgressIndicator demo
           MealPrepProgressIndicator(
             progress: 0.75,
             message: 'Generating your meal plan...',
             showPercentage: true,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // SectionHeader demo
           SectionHeader(
             title: 'Nutrition Summary',
@@ -291,9 +295,9 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
               },
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // EmptyStateWidget demo
           EmptyStateWidget(
             icon: Icons.no_food,
@@ -310,4 +314,4 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
       ),
     );
   }
-} 
+}

@@ -13,7 +13,7 @@ class EmailTemplates {
     required String actualBehavior,
   }) {
     final timestamp = DateTime.now().toIso8601String();
-    
+
     return '''
 Bug Report Submission
 ====================
@@ -68,7 +68,7 @@ This bug report was submitted through the Moctar Nutrition app.
     required String suggestions,
   }) {
     final timestamp = DateTime.now().toIso8601String();
-    
+
     return '''
 Feedback Submission
 ==================
@@ -107,10 +107,10 @@ This feedback was submitted through the Moctar Nutrition app.
   static const String feedbackEmail = 'mahmoud.al808@gmail.com';
 
   /// EmailJS Template Examples
-  /// 
+  ///
   /// These are examples of EmailJS templates you can use.
   /// Copy these templates to your EmailJS dashboard.
-  
+
   /// Example EmailJS template for meal plan ready notification
   static const String emailJsMealPlanTemplate = '''
 Subject: Your Personalized Meal Plan is Ready! 🍽️
@@ -194,4 +194,4 @@ Subject: {{subject}}
   </div>
 </div>
 ''';
-} 
+}

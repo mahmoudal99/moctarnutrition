@@ -76,7 +76,8 @@ class OnboardingStepBuilder {
         return OnboardingBMIStep(
           bmi: _calculateBMI(data.height, data.weight),
           bmiCategory: _getBMICategory(_calculateBMI(data.height, data.weight)),
-          bmiColor: _getBMIColor(_getBMICategory(_calculateBMI(data.height, data.weight))),
+          bmiColor: _getBMIColor(
+              _getBMICategory(_calculateBMI(data.height, data.weight))),
           height: data.height,
           weight: data.weight,
         );

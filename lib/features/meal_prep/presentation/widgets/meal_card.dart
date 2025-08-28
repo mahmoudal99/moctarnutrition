@@ -32,21 +32,22 @@ class _MealCardState extends State<MealCard> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: widget.onTap ?? () {
-        HapticFeedback.lightImpact();
-        _navigateToMealDetail(context);
-      },
+      onTap: widget.onTap ??
+          () {
+            HapticFeedback.lightImpact();
+            _navigateToMealDetail(context);
+          },
       borderRadius: BorderRadius.circular(AppConstants.radiusS),
       child: Container(
         margin: const EdgeInsets.all(AppConstants.spacingS),
         padding: const EdgeInsets.all(AppConstants.spacingS),
         decoration: BoxDecoration(
-          color: widget.meal.isConsumed 
+          color: widget.meal.isConsumed
               ? AppConstants.primaryColor.withOpacity(0.05)
               : AppConstants.backgroundColor,
           borderRadius: BorderRadius.circular(AppConstants.radiusS),
           border: Border.all(
-            color: widget.meal.isConsumed 
+            color: widget.meal.isConsumed
                 ? AppConstants.primaryColor.withOpacity(0.3)
                 : AppConstants.textTertiary.withOpacity(0.2),
             width: widget.meal.isConsumed ? 2 : 1,
@@ -66,11 +67,11 @@ class _MealCardState extends State<MealCard> {
                         widget.meal.name,
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
-                          decoration: widget.meal.isConsumed 
-                              ? TextDecoration.lineThrough 
+                          decoration: widget.meal.isConsumed
+                              ? TextDecoration.lineThrough
                               : null,
-                          color: widget.meal.isConsumed 
-                              ? AppConstants.textSecondary 
+                          color: widget.meal.isConsumed
+                              ? AppConstants.textSecondary
                               : AppConstants.textPrimary,
                         ),
                       ),
@@ -90,8 +91,8 @@ class _MealCardState extends State<MealCard> {
                       '${widget.meal.nutrition.calories} cal',
                       style: AppTextStyles.caption.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: widget.meal.isConsumed 
-                            ? AppConstants.primaryColor 
+                        color: widget.meal.isConsumed
+                            ? AppConstants.primaryColor
                             : AppConstants.accentColor,
                       ),
                     ),
@@ -111,8 +112,8 @@ class _MealCardState extends State<MealCard> {
             const SizedBox(height: AppConstants.spacingS),
             Row(
               children: [
-                _buildNutritionChip(
-                    'P', '${widget.meal.nutrition.protein.toStringAsFixed(0)}g'),
+                _buildNutritionChip('P',
+                    '${widget.meal.nutrition.protein.toStringAsFixed(0)}g'),
                 const SizedBox(width: AppConstants.spacingS),
                 _buildNutritionChip(
                     'C', '${widget.meal.nutrition.carbs.toStringAsFixed(0)}g'),
@@ -178,7 +179,7 @@ class _MealCardState extends State<MealCard> {
       default:
         chipColor = AppConstants.primaryColor;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingXS,
@@ -228,7 +229,7 @@ class _MealCardState extends State<MealCard> {
   void _navigateToMealDetail(BuildContext context) {
     // Add haptic feedback
     HapticFeedback.lightImpact();
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -239,4 +240,4 @@ class _MealCardState extends State<MealCard> {
       ),
     );
   }
-} 
+}

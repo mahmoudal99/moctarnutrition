@@ -31,14 +31,15 @@ class _DroppableDayAreaState extends State<DroppableDayArea> {
     return DragTarget<DailyWorkout>(
       onWillAccept: (data) {
         // Only accept if it's a different day and we're in edit mode
-        return widget.isEditMode && 
-               data != null && 
-               data.dayName != widget.dayName &&
-               !data.isRestDay;
+        return widget.isEditMode &&
+            data != null &&
+            data.dayName != widget.dayName &&
+            !data.isRestDay;
       },
       onAccept: (data) {
         // Swap the workouts between the two days
-        final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+        final workoutProvider =
+            Provider.of<WorkoutProvider>(context, listen: false);
         workoutProvider.swapDailyWorkouts(data.dayName, widget.dayName);
       },
       onMove: (details) {
@@ -58,7 +59,7 @@ class _DroppableDayAreaState extends State<DroppableDayArea> {
             vertical: AppConstants.spacingS,
           ),
           decoration: BoxDecoration(
-            color: _isDragOver 
+            color: _isDragOver
                 ? AppConstants.primaryColor.withOpacity(0.05)
                 : Colors.transparent,
             border: _isDragOver
@@ -119,4 +120,4 @@ class _DroppableDayAreaState extends State<DroppableDayArea> {
       ),
     );
   }
-} 
+}

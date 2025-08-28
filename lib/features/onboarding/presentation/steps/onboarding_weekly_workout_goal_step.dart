@@ -28,13 +28,22 @@ class _OnboardingWeeklyWorkoutGoalStepState
   late bool _isSpecificDaysMode;
 
   final List<int> _workoutDaysOptions = [1, 2, 3, 4, 5, 6, 7];
-  final List<String> _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final List<String> _dayNames = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun'
+  ];
 
   @override
   void initState() {
     super.initState();
     _selectedDaysPerWeek = widget.selectedDaysPerWeek ?? 3;
-    _selectedSpecificDays = widget.selectedSpecificDays ?? [1, 3, 5]; // Mon, Wed, Fri
+    _selectedSpecificDays =
+        widget.selectedSpecificDays ?? [1, 3, 5]; // Mon, Wed, Fri
     _isSpecificDaysMode = false;
   }
 
@@ -46,7 +55,7 @@ class _OnboardingWeeklyWorkoutGoalStepState
         // Segmented control for selection type
         _buildSegmentedControl(),
         const SizedBox(height: AppConstants.spacingL),
-        
+
         // Days per week options or specific days
         _isSpecificDaysMode
             ? _buildSpecificDaysOptions()
@@ -110,9 +119,7 @@ class _OnboardingWeeklyWorkoutGoalStepState
           horizontal: AppConstants.spacingM,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppConstants.primaryColor
-              : Colors.transparent,
+          color: isSelected ? AppConstants.primaryColor : Colors.transparent,
           borderRadius: BorderRadius.circular(AppConstants.radiusS),
         ),
         child: Text(
@@ -175,7 +182,8 @@ class _OnboardingWeeklyWorkoutGoalStepState
                       color: isSelected
                           ? AppConstants.primaryColor
                           : AppConstants.textPrimary,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -261,7 +269,8 @@ class _OnboardingWeeklyWorkoutGoalStepState
                       color: isSelected
                           ? AppConstants.primaryColor
                           : AppConstants.textPrimary,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -316,4 +325,4 @@ class _OnboardingWeeklyWorkoutGoalStepState
         return '$days days a week';
     }
   }
-} 
+}

@@ -20,7 +20,8 @@ class AdminMealPlanSetupScreen extends StatefulWidget {
   const AdminMealPlanSetupScreen({super.key, required this.user});
 
   @override
-  State<AdminMealPlanSetupScreen> createState() => _AdminMealPlanSetupScreenState();
+  State<AdminMealPlanSetupScreen> createState() =>
+      _AdminMealPlanSetupScreenState();
 }
 
 class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
@@ -46,8 +47,9 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   void _initializeFromClientPreferences() {
     _logger.i('Initializing from client preferences');
     _logger.i('Client fitness goal: ${widget.user.preferences.fitnessGoal}');
-    _logger.i('Client target calories: ${widget.user.preferences.targetCalories}');
-    
+    _logger
+        .i('Client target calories: ${widget.user.preferences.targetCalories}');
+
     // Pre-select fitness goal from client's onboarding choice
     if (widget.user.preferences.fitnessGoal != null) {
       _selectedFitnessGoal = widget.user.preferences.fitnessGoal!;
@@ -72,7 +74,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
 
   String _getFitnessGoalLabel(FitnessGoal? goal) {
     if (goal == null) return '';
-    
+
     switch (goal) {
       case FitnessGoal.weightLoss:
         return 'Weight Loss';
@@ -180,23 +182,24 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         break;
       case 4:
         // Final review step - check all required fields
-        isValid = _selectedFitnessGoal != null && 
-                  _targetCalories >= 1200 && 
-                  _targetCalories <= 4000;
+        isValid = _selectedFitnessGoal != null &&
+            _targetCalories >= 1200 &&
+            _targetCalories <= 4000;
         break;
       default:
         isValid = false;
         break;
     }
-    
+
     // Debug logging
     _logger.i('Step $_setupStep validation: $isValid');
     if (_setupStep == 0) _logger.d('Fitness goal: $_selectedFitnessGoal');
     if (_setupStep == 1) _logger.d('Target calories: $_targetCalories');
     if (_setupStep == 4) {
-      _logger.i('Final validation - Fitness goal: $_selectedFitnessGoal, Calories: $_targetCalories');
+      _logger.i(
+          'Final validation - Fitness goal: $_selectedFitnessGoal, Calories: $_targetCalories');
     }
-    
+
     return isValid;
   }
 
@@ -252,7 +255,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         activityLevel: prefs.activityLevel,
         dietaryRestrictions: prefs.dietaryRestrictions,
         preferredWorkoutStyles: prefs.preferredWorkoutStyles,
-        nutritionGoal: _getFitnessGoalLabel(_selectedFitnessGoal ?? prefs.fitnessGoal),
+        nutritionGoal:
+            _getFitnessGoalLabel(_selectedFitnessGoal ?? prefs.fitnessGoal),
         preferredCuisines: List<String>.from(prefs.preferredCuisines),
         foodsToAvoid: List<String>.from(prefs.foodsToAvoid),
         favoriteFoods: List<String>.from(prefs.favoriteFoods),
@@ -280,7 +284,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         },
       );
       _logger.i('Meal plan generated: ${mealPlan.toJson()}');
-      
+
       // Debug: Check ingredients for each meal
       for (int i = 0; i < mealPlan.mealDays.length; i++) {
         final day = mealPlan.mealDays[i];
@@ -291,25 +295,29 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           _logger.d('    Ingredients:');
           for (int k = 0; k < meal.ingredients.length; k++) {
             final ingredient = meal.ingredients[k];
-            _logger.d('      ${k + 1}. ${ingredient.name} - ${ingredient.amount} ${ingredient.unit}');
+            _logger.d(
+                '      ${k + 1}. ${ingredient.name} - ${ingredient.amount} ${ingredient.unit}');
           }
         }
       }
-      
+
       // Check if this was a fallback meal plan
-      final isFallbackPlan = mealPlan.title.contains('Fallback') || mealPlan.description.contains('fallback');
-      
+      final isFallbackPlan = mealPlan.title.contains('Fallback') ||
+          mealPlan.description.contains('fallback');
+
       // Ensure the meal plan has the correct userId
       final mealPlanWithUser = mealPlan.copyWith(userId: userId);
       _logger.i('Saving meal plan to Firestore with userId: $userId');
-      final mealPlanRef = await FirebaseFirestore.instance.collection('meal_plans').add(mealPlanWithUser.toJson());
+      final mealPlanRef = await FirebaseFirestore.instance
+          .collection('meal_plans')
+          .add(mealPlanWithUser.toJson());
       _logger.i('Meal plan saved with ID: ${mealPlanRef.id}');
       // Update user's mealPlanId
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'mealPlanId': mealPlanRef.id,
       });
       _logger.i('Updated user document with mealPlanId: ${mealPlanRef.id}');
-      
+
       // Send email notification to user
       try {
         final emailSent = await EmailService.sendMealPlanReadyEmail(
@@ -317,26 +325,30 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           userName: widget.user.name ?? widget.user.email.split('@').first,
           mealPlanId: mealPlanRef.id,
           planDuration: _selectedDays,
-          fitnessGoal: _getFitnessGoalLabel(_selectedFitnessGoal ?? widget.user.preferences.fitnessGoal),
+          fitnessGoal: _getFitnessGoalLabel(
+              _selectedFitnessGoal ?? widget.user.preferences.fitnessGoal),
           targetCalories: _targetCalories,
         );
-        
+
         if (emailSent) {
-          _logger.i('Meal plan ready email sent successfully to: ${widget.user.email}');
+          _logger.i(
+              'Meal plan ready email sent successfully to: ${widget.user.email}');
         } else {
-          _logger.w('Failed to send meal plan ready email to: ${widget.user.email}');
+          _logger.w(
+              'Failed to send meal plan ready email to: ${widget.user.email}');
         }
       } catch (e) {
         _logger.e('Error sending meal plan ready email: $e');
         // Don't fail the entire operation if email fails
       }
-      
+
       if (mounted) {
         // Show appropriate message based on whether it was a fallback plan
         if (isFallbackPlan) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Meal plan generated using backup recipes due to high demand. All required meals are included!'),
+              content: Text(
+                  'Meal plan generated using backup recipes due to high demand. All required meals are included!'),
               backgroundColor: AppConstants.warningColor ?? Colors.orange,
               duration: const Duration(seconds: 4),
             ),
@@ -349,11 +361,12 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
             ),
           );
         }
-        
+
         Navigator.of(context).pop(true); // Return success
       }
     } catch (e, stack) {
-      _logger.e('Error generating or saving meal plan: $e', error: e, stackTrace: stack);
+      _logger.e('Error generating or saving meal plan: $e',
+          error: e, stackTrace: stack);
       setState(() {
         _isLoading = false;
         _completedDays = 0;
@@ -362,24 +375,39 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       if (mounted) {
         // Show more user-friendly error message
         String errorMessage = 'Failed to generate meal plan';
-        if (e.toString().contains('QuotaExceededException') || e.toString().contains('quota exceeded')) {
-          errorMessage = 'Free token limit reached. Please try again tomorrow or contact support to upgrade your plan.';
-        } else if (e.toString().contains('AuthenticationException') || e.toString().contains('Invalid API key')) {
-          errorMessage = 'API key authentication failed. Please check your OpenAI configuration.';
-        } else if (e.toString().contains('RegionNotSupportedException') || e.toString().contains('not supported')) {
-          errorMessage = 'OpenAI is not available in your region. Please contact support.';
-        } else if (e.toString().contains('RateLimitException') || e.toString().contains('rate limit')) {
-          errorMessage = 'Service is temporarily busy. Please try again in a few minutes.';
-        } else if (e.toString().contains('ServerOverloadedException') || e.toString().contains('overloaded')) {
-          errorMessage = 'OpenAI servers are overloaded. Please try again later.';
-        } else if (e.toString().contains('SlowDownException') || e.toString().contains('slow down')) {
-          errorMessage = 'Too many requests. Please wait a moment and try again.';
-        } else if (e.toString().contains('network') || e.toString().contains('connection')) {
-          errorMessage = 'Network connection issue. Please check your internet and try again.';
+        if (e.toString().contains('QuotaExceededException') ||
+            e.toString().contains('quota exceeded')) {
+          errorMessage =
+              'Free token limit reached. Please try again tomorrow or contact support to upgrade your plan.';
+        } else if (e.toString().contains('AuthenticationException') ||
+            e.toString().contains('Invalid API key')) {
+          errorMessage =
+              'API key authentication failed. Please check your OpenAI configuration.';
+        } else if (e.toString().contains('RegionNotSupportedException') ||
+            e.toString().contains('not supported')) {
+          errorMessage =
+              'OpenAI is not available in your region. Please contact support.';
+        } else if (e.toString().contains('RateLimitException') ||
+            e.toString().contains('rate limit')) {
+          errorMessage =
+              'Service is temporarily busy. Please try again in a few minutes.';
+        } else if (e.toString().contains('ServerOverloadedException') ||
+            e.toString().contains('overloaded')) {
+          errorMessage =
+              'OpenAI servers are overloaded. Please try again later.';
+        } else if (e.toString().contains('SlowDownException') ||
+            e.toString().contains('slow down')) {
+          errorMessage =
+              'Too many requests. Please wait a moment and try again.';
+        } else if (e.toString().contains('network') ||
+            e.toString().contains('connection')) {
+          errorMessage =
+              'Network connection issue. Please check your internet and try again.';
         } else {
-          errorMessage = 'Unable to generate meal plan at this time. Please try again.';
+          errorMessage =
+              'Unable to generate meal plan at this time. Please try again.';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -411,7 +439,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           ),
           const SizedBox(height: AppConstants.spacingL),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
               _getLoadingMessage(),
               style: AppTextStyles.heading4,
@@ -420,16 +449,19 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           ),
           const SizedBox(height: AppConstants.spacingS),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Text(
               'Hang tight while we craft delicious, healthy recipes just for you!',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: AppConstants.textSecondary),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: AppConstants.spacingL),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
             child: Column(
               children: [
                 TweenAnimationBuilder<double>(
@@ -441,8 +473,10 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                   builder: (context, value, child) {
                     return LinearProgressIndicator(
                       value: value,
-                      backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
+                      backgroundColor:
+                          AppConstants.textTertiary.withOpacity(0.2),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppConstants.primaryColor),
                       minHeight: 8,
                     );
                   },
@@ -524,14 +558,19 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                 children: List.generate(6, (i) {
                   // Use the same colors as user onboarding for first 4 steps, then distinct colors for last 2
                   final List<Color> stepColors = [
-                    AppConstants.primaryColor,    // Step 0: Goal Selection (Green - main goal)
-                    AppConstants.accentColor,     // Step 1: Meal Frequency (Dark Green - meal planning)
-                    AppConstants.secondaryColor,  // Step 2: Calories (Light Green - energy/nutrition)
-                    AppConstants.warningColor,    // Step 3: Cheat Day (Orange - indulgence)
-                    Colors.purple,                // Step 4: Plan Duration (Purple - commitment)
-                    Colors.blue,                  // Step 5: Final Review (Blue - completion)
+                    AppConstants
+                        .primaryColor, // Step 0: Goal Selection (Green - main goal)
+                    AppConstants
+                        .accentColor, // Step 1: Meal Frequency (Dark Green - meal planning)
+                    AppConstants
+                        .secondaryColor, // Step 2: Calories (Light Green - energy/nutrition)
+                    AppConstants
+                        .warningColor, // Step 3: Cheat Day (Orange - indulgence)
+                    Colors
+                        .purple, // Step 4: Plan Duration (Purple - commitment)
+                    Colors.blue, // Step 5: Final Review (Blue - completion)
                   ];
-                  
+
                   // Each dot shows its own color when completed, current step color when current, or gray when not reached
                   Color color;
                   if (i < _setupStep) {
@@ -539,12 +578,14 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                     color = stepColors[i];
                   } else if (i == _setupStep) {
                     // Current step shows warning color if invalid, or its own color if valid
-                    color = _isCurrentStepValid() ? stepColors[i] : (AppConstants.warningColor ?? Colors.orange);
+                    color = _isCurrentStepValid()
+                        ? stepColors[i]
+                        : (AppConstants.warningColor ?? Colors.orange);
                   } else {
                     // Future steps show gray
                     color = AppConstants.textTertiary.withOpacity(0.2);
                   }
-                  
+
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -573,7 +614,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
             ],
           ),
         ),
-        
+
         // Step content
         Expanded(
           child: Padding(
@@ -584,44 +625,52 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                 // Show validation message if current step is not valid
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: !_isCurrentStepValid() 
-                    ? Container(
-                        key: ValueKey('validation_$_setupStep'),
-                        margin: const EdgeInsets.only(top: AppConstants.spacingM),
-                        padding: const EdgeInsets.all(AppConstants.spacingM),
-                        decoration: BoxDecoration(
-                          color: AppConstants.warningColor?.withOpacity(0.1) ?? Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                          border: Border.all(
-                            color: AppConstants.warningColor?.withOpacity(0.3) ?? Colors.orange.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 16,
-                              color: AppConstants.warningColor ?? Colors.orange,
+                  child: !_isCurrentStepValid()
+                      ? Container(
+                          key: ValueKey('validation_$_setupStep'),
+                          margin:
+                              const EdgeInsets.only(top: AppConstants.spacingM),
+                          padding: const EdgeInsets.all(AppConstants.spacingM),
+                          decoration: BoxDecoration(
+                            color:
+                                AppConstants.warningColor?.withOpacity(0.1) ??
+                                    Colors.orange.withOpacity(0.1),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusS),
+                            border: Border.all(
+                              color:
+                                  AppConstants.warningColor?.withOpacity(0.3) ??
+                                      Colors.orange.withOpacity(0.3),
                             ),
-                            const SizedBox(width: AppConstants.spacingS),
-                            Expanded(
-                              child: Text(
-                                _getValidationMessage(),
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppConstants.warningColor ?? Colors.orange,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: 16,
+                                color:
+                                    AppConstants.warningColor ?? Colors.orange,
+                              ),
+                              const SizedBox(width: AppConstants.spacingS),
+                              Expanded(
+                                child: Text(
+                                  _getValidationMessage(),
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppConstants.warningColor ??
+                                        Colors.orange,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),
           ),
         ),
-        
+
         // Navigation buttons
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -648,7 +697,9 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           targetCalories: _targetCalories,
           onChanged: (calories) => setState(() => _targetCalories = calories),
           userName: widget.user.name,
-          clientTargetCalories: widget.user.preferences.targetCalories > 0 ? widget.user.preferences.targetCalories : null,
+          clientTargetCalories: widget.user.preferences.targetCalories > 0
+              ? widget.user.preferences.targetCalories
+              : null,
         );
       case 2:
         return CheatDayStep(
@@ -659,9 +710,11 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       case 3:
         return PlanDurationStep(
           weeklyRotation: _weeklyRotation,
-          onToggleWeeklyRotation: (value) => setState(() => _weeklyRotation = value),
+          onToggleWeeklyRotation: (value) =>
+              setState(() => _weeklyRotation = value),
           remindersEnabled: _remindersEnabled,
-          onToggleReminders: (value) => setState(() => _remindersEnabled = value),
+          onToggleReminders: (value) =>
+              setState(() => _remindersEnabled = value),
           userName: widget.user.name,
         );
       case 4:
@@ -679,7 +732,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
 
   Widget _buildNavigationButtons() {
     final isCurrentStepValid = _isCurrentStepValid();
-    
+
     return Row(
       children: [
         if (_setupStep > 0)
@@ -691,19 +744,19 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           ),
         if (_setupStep > 0) const SizedBox(width: 12),
         Expanded(
-                      child: ElevatedButton(
-              onPressed: isCurrentStepValid 
-                  ? (_setupStep == 4 ? _onSavePlan : _onNextStep)
-                  : null,
+          child: ElevatedButton(
+            onPressed: isCurrentStepValid
+                ? (_setupStep == 4 ? _onSavePlan : _onNextStep)
+                : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: isCurrentStepValid 
-                  ? AppConstants.primaryColor 
+              backgroundColor: isCurrentStepValid
+                  ? AppConstants.primaryColor
                   : AppConstants.textTertiary.withOpacity(0.3),
-              foregroundColor: isCurrentStepValid 
-                  ? AppConstants.surfaceColor 
+              foregroundColor: isCurrentStepValid
+                  ? AppConstants.surfaceColor
                   : AppConstants.textSecondary,
             ),
-                          child: Text(_setupStep == 4 ? 'Generate Plan' : 'Next'),
+            child: Text(_setupStep == 4 ? 'Generate Plan' : 'Next'),
           ),
         ),
       ],
@@ -724,9 +777,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : _buildStepContent(prefs),
+      body: _isLoading ? _buildLoadingState() : _buildStepContent(prefs),
     );
   }
-} 
+}

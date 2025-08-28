@@ -216,8 +216,12 @@ class ProteinCalculationService {
     );
   }
 
-  static ProteinTargets _calculateStrengthTargets(double weight,
-      double leanBodyMass, double bodyFatPercentage, bool isVegan, UserPreferences preferences) {
+  static ProteinTargets _calculateStrengthTargets(
+      double weight,
+      double leanBodyMass,
+      double bodyFatPercentage,
+      bool isVegan,
+      UserPreferences preferences) {
     // Strength athletes need higher protein
     final proteinPerKg = isVegan ? 2.0 : 1.7;
     final dailyProtein = weight * proteinPerKg;
@@ -230,7 +234,8 @@ class ProteinCalculationService {
       weightBase: 'total body weight',
       baseWeight: weight,
       fitnessGoal: 'Strength',
-      recommendations: _getEnhancedStrengthRecommendations(isVegan, preferences),
+      recommendations:
+          _getEnhancedStrengthRecommendations(isVegan, preferences),
     );
   }
 
@@ -340,89 +345,100 @@ class ProteinCalculationService {
     return baseRecommendations;
   }
 
-    static List<String> _getEnhancedMaintenanceRecommendations(bool isVegan, UserPreferences preferences) {
+  static List<String> _getEnhancedMaintenanceRecommendations(
+      bool isVegan, UserPreferences preferences) {
     final baseRecommendations = [
       'Maintain consistent protein intake across meals',
       'Focus on whole food protein sources',
     ];
-    
+
     if (isVegan) {
       baseRecommendations.addAll([
         'Ensure variety in plant protein sources',
         'Include protein in most meals',
       ]);
     }
-    
+
     // Add meal timing specific recommendations
     if (preferences.mealTimingPreferences != null) {
-      final mealFrequency = preferences.mealTimingPreferences!['mealFrequency'] as String?;
+      final mealFrequency =
+          preferences.mealTimingPreferences!['mealFrequency'] as String?;
       if (mealFrequency == 'intermittentFasting') {
-        baseRecommendations.add('Distribute protein evenly across eating windows');
+        baseRecommendations
+            .add('Distribute protein evenly across eating windows');
       }
     }
-    
+
     return baseRecommendations;
   }
 
-    static List<String> _getEnhancedEnduranceRecommendations(bool isVegan, UserPreferences preferences) {
+  static List<String> _getEnhancedEnduranceRecommendations(
+      bool isVegan, UserPreferences preferences) {
     final baseRecommendations = [
       'Moderate protein needs for endurance training',
       'Focus on timing protein around workouts',
       'Balance protein with adequate carbohydrates',
     ];
-    
+
     if (isVegan) {
       baseRecommendations.addAll([
         'Include protein in recovery meals',
         'Choose easily digestible plant proteins post-workout',
       ]);
     }
-    
+
     // Add workout style specific recommendations
     if (preferences.preferredWorkoutStyles.isNotEmpty) {
       if (preferences.preferredWorkoutStyles.contains('Cardio')) {
-        baseRecommendations.add('Include protein in post-cardio recovery meals');
+        baseRecommendations
+            .add('Include protein in post-cardio recovery meals');
       }
       if (preferences.preferredWorkoutStyles.contains('Running')) {
-        baseRecommendations.add('Prioritize protein within 30 minutes after long runs');
+        baseRecommendations
+            .add('Prioritize protein within 30 minutes after long runs');
       }
     }
-    
+
     return baseRecommendations;
   }
 
-    static List<String> _getEnhancedStrengthRecommendations(bool isVegan, UserPreferences preferences) {
+  static List<String> _getEnhancedStrengthRecommendations(
+      bool isVegan, UserPreferences preferences) {
     final baseRecommendations = [
       'Higher protein needs for strength training',
       'Consume protein within 1-2 hours after strength workouts',
       'Include protein in pre-workout meals',
     ];
-    
+
     if (isVegan) {
       baseRecommendations.addAll([
         'Consider timing plant protein intake around workouts',
         'Use protein powders to meet higher targets',
       ]);
     }
-    
+
     // Add workout style specific recommendations
     if (preferences.preferredWorkoutStyles.isNotEmpty) {
       if (preferences.preferredWorkoutStyles.contains('Strength Training')) {
-        baseRecommendations.add('Prioritize protein within 30 minutes after strength sessions');
+        baseRecommendations.add(
+            'Prioritize protein within 30 minutes after strength sessions');
       }
       if (preferences.preferredWorkoutStyles.contains('Weightlifting')) {
-        baseRecommendations.add('Include protein in both pre and post-workout meals');
+        baseRecommendations
+            .add('Include protein in both pre and post-workout meals');
       }
     }
-    
+
     // Add meal timing specific recommendations
     if (preferences.mealTimingPreferences != null) {
-      final mealFrequency = preferences.mealTimingPreferences!['mealFrequency'] as String?;
+      final mealFrequency =
+          preferences.mealTimingPreferences!['mealFrequency'] as String?;
       if (mealFrequency == 'intermittentFasting') {
-        baseRecommendations.add('Time eating windows around strength training sessions');
+        baseRecommendations
+            .add('Time eating windows around strength training sessions');
       }
     }
-    
+
     return baseRecommendations;
   }
 

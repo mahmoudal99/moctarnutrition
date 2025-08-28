@@ -80,8 +80,8 @@ class ExerciseDetailsSheet extends StatelessWidget {
                 const SizedBox(height: AppConstants.spacingL),
                 _buildDetailRow('Sets', '${exercise.sets}'),
                 _buildDetailRow(
-                  'Reps/Duration', 
-                  exercise.duration != null 
+                  'Reps/Duration',
+                  exercise.duration != null
                       ? '${exercise.duration} seconds'
                       : '${exercise.reps} reps',
                 ),
@@ -101,16 +101,19 @@ class ExerciseDetailsSheet extends StatelessWidget {
                 const SizedBox(height: AppConstants.spacingS),
                 Wrap(
                   spacing: AppConstants.spacingS,
-                  children: exercise.muscleGroups.map((muscleGroup) => 
-                    Chip(
-                      label: Text(muscleGroup),
-                      backgroundColor: AppConstants.primaryColor.withOpacity(0.1),
-                      labelStyle: AppTextStyles.bodySmall.copyWith(
-                        color: AppConstants.primaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ).toList(),
+                  children: exercise.muscleGroups
+                      .map(
+                        (muscleGroup) => Chip(
+                          label: Text(muscleGroup),
+                          backgroundColor:
+                              AppConstants.primaryColor.withOpacity(0.1),
+                          labelStyle: AppTextStyles.bodySmall.copyWith(
+                            color: AppConstants.primaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
                 const SizedBox(height: AppConstants.spacingL),
                 SizedBox(
@@ -162,4 +165,4 @@ class ExerciseDetailsSheet extends StatelessWidget {
       ),
     );
   }
-} 
+}

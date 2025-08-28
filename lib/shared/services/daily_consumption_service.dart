@@ -20,20 +20,22 @@ class DailyConsumptionService {
       final prefs = await SharedPreferences.getInstance();
       final dateKey = _getDateKey(date);
       final key = '${_consumptionKeyPrefix}${userId}_$dateKey';
-      
+
       final consumptionData = {
         'date': date.toIso8601String(),
         'mealConsumption': mealConsumption,
         'nutritionData': nutritionData,
         'lastUpdated': DateTime.now().toIso8601String(),
       };
-      
+
       final jsonData = jsonEncode(consumptionData);
       await prefs.setString(key, jsonData);
-      
-      _logger.d('Saved consumption data for $dateKey: ${consumptionData['nutritionData']}');
+
+      _logger.d(
+          'Saved consumption data for $dateKey: ${consumptionData['nutritionData']}');
     } catch (e) {
-      _logger.e('Failed to save consumption data for ${date.toIso8601String()}: $e');
+      _logger.e(
+          'Failed to save consumption data for ${date.toIso8601String()}: $e');
       rethrow;
     }
   }
@@ -47,16 +49,18 @@ class DailyConsumptionService {
       final prefs = await SharedPreferences.getInstance();
       final dateKey = _getDateKey(date);
       final key = '${_consumptionKeyPrefix}${userId}_$dateKey';
-      
+
       final jsonData = prefs.getString(key);
       if (jsonData == null) return null;
-      
+
       final consumptionData = jsonDecode(jsonData) as Map<String, dynamic>;
-      _logger.d('Loaded consumption data for $dateKey: ${consumptionData['nutritionData']}');
-      
+      _logger.d(
+          'Loaded consumption data for $dateKey: ${consumptionData['nutritionData']}');
+
       return consumptionData;
     } catch (e) {
-      _logger.e('Failed to load consumption data for ${date.toIso8601String()}: $e');
+      _logger.e(
+          'Failed to load consumption data for ${date.toIso8601String()}: $e');
       return null;
     }
   }
@@ -78,23 +82,28 @@ class DailyConsumptionService {
         'consumedCarbs': 0.0,
         'consumedFat': 0.0,
       };
-      
+
       if (existingData != null) {
-        mealConsumption = Map<String, bool>.from(existingData['mealConsumption'] ?? {});
-        nutritionData = Map<String, double>.from(existingData['nutritionData'] ?? {});
+        mealConsumption =
+            Map<String, bool>.from(existingData['mealConsumption'] ?? {});
+        nutritionData =
+            Map<String, double>.from(existingData['nutritionData'] ?? {});
       }
-      
+
       // Use the original meal ID (without date suffix) for consistency
-      final originalMealId = mealId.split('_').first; // Remove date suffix if present
+      final originalMealId =
+          mealId.split('_').first; // Remove date suffix if present
       mealConsumption[originalMealId] = isConsumed;
-      
+
       // Recalculate nutrition data based on current meal consumption
-      nutritionData = await _recalculateNutritionData(userId, date, mealConsumption);
-      
+      nutritionData =
+          await _recalculateNutritionData(userId, date, mealConsumption);
+
       // Save updated data
       await saveDailyConsumption(userId, date, mealConsumption, nutritionData);
-      
-      _logger.d('Updated meal consumption for $originalMealId on ${date.toIso8601String()}: $isConsumed');
+
+      _logger.d(
+          'Updated meal consumption for $originalMealId on ${date.toIso8601String()}: $isConsumed');
       _logger.d('Updated nutrition data: $nutritionData');
     } catch (e) {
       _logger.e('Failed to update meal consumption: $e');
@@ -104,26 +113,23 @@ class DailyConsumptionService {
 
   /// Recalculate nutrition data based on meal consumption
   static Future<Map<String, double>> _recalculateNutritionData(
-    String userId, 
-    DateTime date, 
-    Map<String, bool> mealConsumption
-  ) async {
+      String userId, DateTime date, Map<String, bool> mealConsumption) async {
     try {
       double totalCalories = 0.0;
       double totalProtein = 0.0;
       double totalCarbs = 0.0;
       double totalFats = 0.0;
-      
+
       // Get the meal plan for this user to calculate nutrition
       // This is a simplified approach - you might need to implement this based on your meal plan structure
       final mealPlan = await _getUserMealPlan(userId);
-      
+
       if (mealPlan != null) {
         // Calculate nutrition from consumed meals
         for (final entry in mealConsumption.entries) {
           final mealId = entry.key;
           final isConsumed = entry.value;
-          
+
           if (isConsumed) {
             // Find the meal in the meal plan and add its nutrition
             final meal = _findMealInPlan(mealPlan, mealId);
@@ -136,7 +142,7 @@ class DailyConsumptionService {
           }
         }
       }
-      
+
       return {
         'consumedCalories': totalCalories,
         'consumedProtein': totalProtein,
@@ -186,10 +192,12 @@ class DailyConsumptionService {
     try {
       final consumptionData = await loadDailyConsumption(userId, date);
       if (consumptionData == null) return null;
-      
-      final mealConsumption = Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
-      final nutritionData = Map<String, double>.from(consumptionData['nutritionData'] ?? {});
-      
+
+      final mealConsumption =
+          Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
+      final nutritionData =
+          Map<String, double>.from(consumptionData['nutritionData'] ?? {});
+
       return {
         'date': date,
         'mealConsumption': mealConsumption,
@@ -213,7 +221,7 @@ class DailyConsumptionService {
       final prefs = await SharedPreferences.getInstance();
       final dateKey = _getDateKey(date);
       final key = '${_consumptionKeyPrefix}${userId}_$dateKey';
-      
+
       await prefs.remove(key);
       _logger.d('Cleared consumption data for $dateKey');
     } catch (e) {

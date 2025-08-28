@@ -291,7 +291,7 @@ class OnboardingWorkoutNotificationsStepWithActions extends StatelessWidget {
     required this.onEnable,
   });
 
-    @override
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(

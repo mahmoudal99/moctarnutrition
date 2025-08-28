@@ -142,4 +142,4 @@ class MealFrequencyStep extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -12,12 +12,12 @@ class WorkoutPlanStorageService {
   static Future<void> saveWorkoutPlan(WorkoutPlanModel workoutPlan) async {
     try {
       _logger.d('Saving workout plan to Firestore: ${workoutPlan.id}');
-      
+
       await _firestore
           .collection(_collectionName)
           .doc(workoutPlan.id)
           .set(workoutPlan.toJson());
-      
+
       _logger.i('Workout plan saved successfully: ${workoutPlan.id}');
     } catch (e) {
       _logger.e('Failed to save workout plan: $e');
@@ -29,7 +29,7 @@ class WorkoutPlanStorageService {
   static Future<WorkoutPlanModel?> getWorkoutPlan(String userId) async {
     try {
       _logger.d('Fetching workout plan for user: $userId');
-      
+
       final querySnapshot = await _firestore
           .collection(_collectionName)
           .where('userId', isEqualTo: userId)
@@ -57,12 +57,12 @@ class WorkoutPlanStorageService {
   static Future<void> updateWorkoutPlan(WorkoutPlanModel workoutPlan) async {
     try {
       _logger.d('Updating workout plan: ${workoutPlan.id}');
-      
+
       await _firestore
           .collection(_collectionName)
           .doc(workoutPlan.id)
           .update(workoutPlan.toJson());
-      
+
       _logger.i('Workout plan updated successfully: ${workoutPlan.id}');
     } catch (e) {
       _logger.e('Failed to update workout plan: $e');
@@ -74,7 +74,7 @@ class WorkoutPlanStorageService {
   static Future<void> deactivateUserWorkoutPlans(String userId) async {
     try {
       _logger.d('Deactivating all workout plans for user: $userId');
-      
+
       final querySnapshot = await _firestore
           .collection(_collectionName)
           .where('userId', isEqualTo: userId)
@@ -82,13 +82,14 @@ class WorkoutPlanStorageService {
           .get();
 
       final batch = _firestore.batch();
-      
+
       for (final doc in querySnapshot.docs) {
         batch.update(doc.reference, {'isActive': false});
       }
-      
+
       await batch.commit();
-      _logger.i('Deactivated ${querySnapshot.docs.length} workout plans for user: $userId');
+      _logger.i(
+          'Deactivated ${querySnapshot.docs.length} workout plans for user: $userId');
     } catch (e) {
       _logger.e('Failed to deactivate workout plans: $e');
       rethrow;
@@ -99,12 +100,9 @@ class WorkoutPlanStorageService {
   static Future<void> deleteWorkoutPlan(String workoutPlanId) async {
     try {
       _logger.d('Deleting workout plan: $workoutPlanId');
-      
-      await _firestore
-          .collection(_collectionName)
-          .doc(workoutPlanId)
-          .delete();
-      
+
+      await _firestore.collection(_collectionName).doc(workoutPlanId).delete();
+
       _logger.i('Workout plan deleted successfully: $workoutPlanId');
     } catch (e) {
       _logger.e('Failed to delete workout plan: $e');
@@ -130,10 +128,11 @@ class WorkoutPlanStorageService {
   }
 
   /// Get workout plan history for user
-  static Future<List<WorkoutPlanModel>> getWorkoutPlanHistory(String userId) async {
+  static Future<List<WorkoutPlanModel>> getWorkoutPlanHistory(
+      String userId) async {
     try {
       _logger.d('Fetching workout plan history for user: $userId');
-      
+
       final querySnapshot = await _firestore
           .collection(_collectionName)
           .where('userId', isEqualTo: userId)
@@ -143,7 +142,7 @@ class WorkoutPlanStorageService {
       final workoutPlans = querySnapshot.docs
           .map((doc) => WorkoutPlanModel.fromJson(doc.data()))
           .toList();
-      
+
       _logger.i('Found ${workoutPlans.length} workout plans in history');
       return workoutPlans;
     } catch (e) {
@@ -151,4 +150,4 @@ class WorkoutPlanStorageService {
       rethrow;
     }
   }
-} 
+}

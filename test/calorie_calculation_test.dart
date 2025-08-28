@@ -17,7 +17,7 @@ void main() {
       );
 
       final targets = CalorieCalculationService.calculateCalorieTargets(user);
-      
+
       // BMR should be approximately 1780 kcal
       expect(targets.rmr, closeTo(1780, 10));
     });
@@ -35,7 +35,7 @@ void main() {
       );
 
       final targets = CalorieCalculationService.calculateCalorieTargets(user);
-      
+
       // BMR should be approximately 1395 kcal
       expect(targets.rmr, closeTo(1395, 10));
     });
@@ -51,7 +51,7 @@ void main() {
       );
 
       final targets = CalorieCalculationService.calculateCalorieTargets(user);
-      
+
       // TDEE should be BMR × 1.55 for moderately active
       final expectedTDEE = targets.rmr * 1.55;
       expect(targets.tdee, closeTo(expectedTDEE, 10));
@@ -68,7 +68,7 @@ void main() {
       );
 
       final targets = CalorieCalculationService.calculateCalorieTargets(user);
-      
+
       // Daily target should be TDEE - 500 for weight loss
       expect(targets.dailyTarget, closeTo(targets.tdee - 500, 10));
     });
@@ -84,7 +84,7 @@ void main() {
       );
 
       final targets = CalorieCalculationService.calculateCalorieTargets(user);
-      
+
       // Daily target should be TDEE + 300 for muscle gain
       expect(targets.dailyTarget, closeTo(targets.tdee + 300, 10));
     });
@@ -101,18 +101,19 @@ void main() {
 
       final targets = CalorieCalculationService.calculateCalorieTargets(user);
       final macros = targets.macros;
-      
+
       // Verify protein calories = grams × 4 (allow for rounding)
       expect(macros.protein.calories, closeTo(macros.protein.grams * 4, 1));
-      
+
       // Verify carb calories = grams × 4 (allow for rounding)
       expect(macros.carbs.calories, closeTo(macros.carbs.grams * 4, 1));
-      
+
       // Verify fat calories = grams × 9 (allow for rounding)
       expect(macros.fat.calories, closeTo(macros.fat.grams * 9, 5));
-      
+
       // Verify total macro calories equal daily target (allow for small rounding differences)
-      final totalMacroCalories = macros.protein.calories + macros.carbs.calories + macros.fat.calories;
+      final totalMacroCalories =
+          macros.protein.calories + macros.carbs.calories + macros.fat.calories;
       expect(totalMacroCalories, closeTo(targets.dailyTarget, 5));
     });
 
@@ -128,9 +129,12 @@ void main() {
 
       final targets = CalorieCalculationService.calculateCalorieTargets(user);
       final macros = targets.macros;
-      
-      final totalPercentage = macros.protein.percentage + macros.carbs.percentage + macros.fat.percentage;
-      expect(totalPercentage, closeTo(100, 1)); // Allow 1% tolerance for rounding
+
+      final totalPercentage = macros.protein.percentage +
+          macros.carbs.percentage +
+          macros.fat.percentage;
+      expect(
+          totalPercentage, closeTo(100, 1)); // Allow 1% tolerance for rounding
     });
 
     test('Minimum safe calories are enforced', () {
@@ -144,7 +148,7 @@ void main() {
       );
 
       final targets = CalorieCalculationService.calculateCalorieTargets(user);
-      
+
       // Should not go below minimum safe calories (1200 for females)
       expect(targets.dailyTarget, greaterThanOrEqualTo(1200));
     });
@@ -160,9 +164,10 @@ void main() {
         fitnessGoal: FitnessGoal.weightLoss,
       );
 
-      final weightLossTargets = CalorieCalculationService.calculateCalorieTargets(weightLossUser);
+      final weightLossTargets =
+          CalorieCalculationService.calculateCalorieTargets(weightLossUser);
       final weightLossProtein = weightLossTargets.macros.protein.grams;
-      
+
       // Should be around 2.2g/kg for weight loss
       expect(weightLossProtein, closeTo(80 * 2.2, 20));
 
@@ -176,9 +181,10 @@ void main() {
         fitnessGoal: FitnessGoal.muscleGain,
       );
 
-      final muscleGainTargets = CalorieCalculationService.calculateCalorieTargets(muscleGainUser);
+      final muscleGainTargets =
+          CalorieCalculationService.calculateCalorieTargets(muscleGainUser);
       final muscleGainProtein = muscleGainTargets.macros.protein.grams;
-      
+
       // Should be around 1.6g/kg for muscle gain
       expect(muscleGainProtein, closeTo(80 * 1.6, 20));
     });

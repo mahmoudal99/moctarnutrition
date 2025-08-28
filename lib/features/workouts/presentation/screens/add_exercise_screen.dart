@@ -54,17 +54,18 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
           order: widget.workout.exercises.length + 1,
           formCues: exercise.formCues,
         );
-        
+
         if (mounted) {
           // Provide haptic feedback for successful addition
           HapticFeedback.lightImpact();
-          
+
           Navigator.pop(context, exerciseWithOrder); // Return the exercise
         }
       } else {
         // For existing workouts, add to the actual workout
-        final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
-        
+        final workoutProvider =
+            Provider.of<WorkoutProvider>(context, listen: false);
+
         // Set the correct order for the new exercise
         final newOrder = widget.workout.exercises.length + 1;
         final exerciseWithOrder = Exercise(
@@ -83,17 +84,17 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
           order: newOrder,
           formCues: exercise.formCues,
         );
-        
+
         await workoutProvider.addExerciseToWorkout(
-          widget.dailyWorkout.dayName, 
-          widget.workout.id, 
+          widget.dailyWorkout.dayName,
+          widget.workout.id,
           exerciseWithOrder,
         );
-        
+
         if (mounted) {
           // Provide haptic feedback for successful addition
           HapticFeedback.lightImpact();
-          
+
           Navigator.pop(context, true); // Return true to indicate success
         }
       }
@@ -132,7 +133,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
               children: [
                 // Search and filter section
                 ExerciseSearchFilter(),
-                
+
                 // Exercises list
                 Expanded(
                   child: exerciseProvider.isLoading
@@ -235,4 +236,4 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
       },
     );
   }
-} 
+}

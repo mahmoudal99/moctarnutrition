@@ -13,28 +13,29 @@ class StreakService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final key = '${_streakKeyPrefix}${userId}';
-      
+
       final streakData = prefs.getString(key);
       if (streakData == null) return 0;
-      
+
       final data = jsonDecode(streakData) as Map<String, dynamic>;
-      final lastCompletedDate = DateTime.parse(data['lastCompletedDate'] as String);
+      final lastCompletedDate =
+          DateTime.parse(data['lastCompletedDate'] as String);
       final streakCount = data['streakCount'] as int;
-      
+
       // Check if the last completed date was yesterday (to maintain streak)
       final now = DateTime.now();
       final yesterday = DateTime(now.year, now.month, now.day - 1);
-      
+
       // If last completed was yesterday, streak continues
       if (_isSameDay(lastCompletedDate, yesterday)) {
         return streakCount;
       }
-      
+
       // If last completed was today, streak continues
       if (_isSameDay(lastCompletedDate, now)) {
         return streakCount;
       }
-      
+
       // If last completed was before yesterday, streak is broken
       return 0;
     } catch (e) {
@@ -48,48 +49,51 @@ class StreakService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final key = '${_streakKeyPrefix}${userId}';
-      
+
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      
+
       // Get current streak data
       final streakData = prefs.getString(key);
       int currentStreak = 0;
       DateTime? lastCompletedDate;
-      
+
       if (streakData != null) {
         final data = jsonDecode(streakData) as Map<String, dynamic>;
         currentStreak = data['streakCount'] as int;
         lastCompletedDate = DateTime.parse(data['lastCompletedDate'] as String);
       }
-      
+
       // Check if we already completed today
       if (lastCompletedDate != null && _isSameDay(lastCompletedDate, today)) {
         // Already completed today, return current streak
         return currentStreak;
       }
-      
+
       // Check if this continues the streak (completed yesterday)
       final yesterday = DateTime(today.year, today.month, today.day - 1);
-      if (lastCompletedDate != null && _isSameDay(lastCompletedDate, yesterday)) {
+      if (lastCompletedDate != null &&
+          _isSameDay(lastCompletedDate, yesterday)) {
         // Continue streak
         currentStreak++;
-      } else if (lastCompletedDate == null || !_isSameDay(lastCompletedDate, today)) {
+      } else if (lastCompletedDate == null ||
+          !_isSameDay(lastCompletedDate, today)) {
         // Start new streak or continue if completed today
-        if (lastCompletedDate == null || !_isSameDay(lastCompletedDate, today)) {
+        if (lastCompletedDate == null ||
+            !_isSameDay(lastCompletedDate, today)) {
           currentStreak = 1;
         }
       }
-      
+
       // Save updated streak data
       final newStreakData = {
         'streakCount': currentStreak,
         'lastCompletedDate': today.toIso8601String(),
         'lastUpdated': now.toIso8601String(),
       };
-      
+
       await prefs.setString(key, jsonEncode(newStreakData));
-      
+
       _logger.d('Updated streak for user $userId: $currentStreak days');
       return currentStreak;
     } catch (e) {
@@ -100,9 +104,9 @@ class StreakService {
 
   /// Check if a date is the same day (ignoring time)
   static bool _isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year && 
-           date1.month == date2.month && 
-           date1.day == date2.day;
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   /// Reset streak for a user (useful for testing or manual reset)
@@ -123,15 +127,15 @@ class StreakService {
       final currentStreak = await getCurrentStreak(userId);
       final prefs = await SharedPreferences.getInstance();
       final key = '${_streakKeyPrefix}${userId}';
-      
+
       final streakData = prefs.getString(key);
       DateTime? lastCompletedDate;
-      
+
       if (streakData != null) {
         final data = jsonDecode(streakData) as Map<String, dynamic>;
         lastCompletedDate = DateTime.parse(data['lastCompletedDate'] as String);
       }
-      
+
       return {
         'currentStreak': currentStreak,
         'lastCompletedDate': lastCompletedDate,
@@ -152,48 +156,51 @@ class StreakService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final key = '${_streakKeyPrefix}${userId}';
-      
+
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      
+
       // Get current streak data
       final streakData = prefs.getString(key);
       int currentStreak = 0;
       DateTime? lastCompletedDate;
-      
+
       if (streakData != null) {
         final data = jsonDecode(streakData) as Map<String, dynamic>;
         currentStreak = data['streakCount'] as int;
         lastCompletedDate = DateTime.parse(data['lastCompletedDate'] as String);
       }
-      
+
       // Check if we already completed today
       if (lastCompletedDate != null && _isSameDay(lastCompletedDate, today)) {
         // Already completed today, return current streak
         return currentStreak;
       }
-      
+
       // Check if this continues the streak (completed yesterday)
       final yesterday = DateTime(today.year, today.month, today.day - 1);
-      if (lastCompletedDate != null && _isSameDay(lastCompletedDate, yesterday)) {
+      if (lastCompletedDate != null &&
+          _isSameDay(lastCompletedDate, yesterday)) {
         // Continue streak
         currentStreak++;
-      } else if (lastCompletedDate == null || !_isSameDay(lastCompletedDate, today)) {
+      } else if (lastCompletedDate == null ||
+          !_isSameDay(lastCompletedDate, today)) {
         // Start new streak or continue if completed today
-        if (lastCompletedDate == null || !_isSameDay(lastCompletedDate, today)) {
+        if (lastCompletedDate == null ||
+            !_isSameDay(lastCompletedDate, today)) {
           currentStreak = 1;
         }
       }
-      
+
       // Save updated streak data
       final newStreakData = {
         'streakCount': currentStreak,
         'lastCompletedDate': today.toIso8601String(),
         'lastUpdated': now.toIso8601String(),
       };
-      
+
       await prefs.setString(key, jsonEncode(newStreakData));
-      
+
       _logger.d('Incremented streak for user $userId: $currentStreak days');
       return currentStreak;
     } catch (e) {

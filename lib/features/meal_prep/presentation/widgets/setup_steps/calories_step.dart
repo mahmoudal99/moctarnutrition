@@ -6,7 +6,8 @@ class CaloriesStep extends StatelessWidget {
   final int targetCalories;
   final ValueChanged<int> onChanged;
   final String? userName;
-  final int? clientTargetCalories; // Client's calculated calories from onboarding
+  final int?
+      clientTargetCalories; // Client's calculated calories from onboarding
 
   const CaloriesStep({
     super.key,
@@ -26,7 +27,7 @@ class CaloriesStep extends StatelessWidget {
           title: 'Set {name}\'s Daily Calorie Target',
           fallbackTitle: 'Set Your Daily Calorie Target',
         ),
-        
+
         // Show client's calculated calories if available
         if (clientTargetCalories != null) ...[
           const SizedBox(height: AppConstants.spacingM),
@@ -72,11 +73,12 @@ class CaloriesStep extends StatelessWidget {
             ),
           ),
         ],
-        
+
         const SizedBox(height: AppConstants.spacingL),
-        
+
         // Show if admin has adjusted from client's choice
-        if (clientTargetCalories != null && targetCalories != clientTargetCalories) ...[
+        if (clientTargetCalories != null &&
+            targetCalories != clientTargetCalories) ...[
           Container(
             padding: const EdgeInsets.all(AppConstants.spacingM),
             decoration: BoxDecoration(
@@ -109,7 +111,7 @@ class CaloriesStep extends StatelessWidget {
           ),
           const SizedBox(height: AppConstants.spacingM),
         ],
-        
+
         Slider(
           value: targetCalories.toDouble(),
           min: 1200,

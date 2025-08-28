@@ -24,4 +24,4 @@ class UserProvider extends ChangeNotifier {
     await _storageService.clearUser();
     notifyListeners();
   }
-} 
+}

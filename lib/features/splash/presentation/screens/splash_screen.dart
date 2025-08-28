@@ -14,20 +14,20 @@ class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController _textController;
   late AnimationController _fadeController;
-  
+
   late Animation<Offset> _textSlideAnimation;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize animation controllers with shorter durations
     _textController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -61,13 +61,13 @@ class _SplashScreenState extends State<SplashScreen>
     if (mounted) {
       _textController.forward();
     }
-    
+
     // Start fade animation
     await Future.delayed(const Duration(milliseconds: 400));
     if (mounted) {
       _fadeController.forward();
     }
-    
+
     // Navigate to get-started after animations complete
     await Future.delayed(const Duration(milliseconds: 1000));
     if (mounted) {
@@ -114,9 +114,9 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Subtitle with fade animation
                 FadeTransition(
                   opacity: _fadeAnimation,
@@ -134,9 +134,9 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 80),
-                
+
                 // Loading indicator
                 FadeTransition(
                   opacity: _fadeAnimation,
@@ -158,4 +158,4 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
   }
-} 
+}

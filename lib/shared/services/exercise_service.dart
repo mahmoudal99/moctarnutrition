@@ -5,25 +5,29 @@ import '../models/workout_model.dart';
 
 class FreeExerciseService {
   static final _logger = Logger();
-  
-  static const String _baseUrl = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main';
+
+  static const String _baseUrl =
+      'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main';
   static const String _exercisesUrl = '$_baseUrl/dist/exercises.json';
 
   /// Get all exercises from the free exercise database
   Future<List<Exercise>> getAllExercises() async {
     try {
       _logger.d('Fetching all exercises from free-exercise-db');
-      
+
       final response = await http.get(Uri.parse(_exercisesUrl));
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final exercises = data.map((json) => _mapApiExerciseToExercise(json)).toList();
-        
-        _logger.d('Successfully fetched ${exercises.length} exercises from free-exercise-db');
+        final exercises =
+            data.map((json) => _mapApiExerciseToExercise(json)).toList();
+
+        _logger.d(
+            'Successfully fetched ${exercises.length} exercises from free-exercise-db');
         return exercises;
       } else {
-        _logger.e('Failed to fetch exercises: ${response.statusCode} - ${response.body}');
+        _logger.e(
+            'Failed to fetch exercises: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to fetch exercises: ${response.statusCode}');
       }
     } catch (e) {
@@ -36,14 +40,13 @@ class FreeExerciseService {
   Future<List<Exercise>> getExercisesByTarget(String target) async {
     try {
       _logger.d('Fetching exercises for target muscle: $target');
-      
+
       final allExercises = await getAllExercises();
       final targetExercises = allExercises.where((exercise) {
-        return exercise.muscleGroups.any((muscle) => 
-          muscle.toLowerCase().contains(target.toLowerCase())
-        );
+        return exercise.muscleGroups.any(
+            (muscle) => muscle.toLowerCase().contains(target.toLowerCase()));
       }).toList();
-      
+
       _logger.d('Found ${targetExercises.length} exercises for target $target');
       return targetExercises;
     } catch (e) {
@@ -56,13 +59,17 @@ class FreeExerciseService {
   Future<List<Exercise>> getExercisesByEquipment(String equipment) async {
     try {
       _logger.d('Fetching exercises for equipment: $equipment');
-      
+
       final allExercises = await getAllExercises();
       final equipmentExercises = allExercises.where((exercise) {
-        return exercise.equipment?.toLowerCase().contains(equipment.toLowerCase()) ?? false;
+        return exercise.equipment
+                ?.toLowerCase()
+                .contains(equipment.toLowerCase()) ??
+            false;
       }).toList();
-      
-      _logger.d('Found ${equipmentExercises.length} exercises for equipment $equipment');
+
+      _logger.d(
+          'Found ${equipmentExercises.length} exercises for equipment $equipment');
       return equipmentExercises;
     } catch (e) {
       _logger.e('Error fetching exercises for equipment $equipment: $e');
@@ -74,14 +81,14 @@ class FreeExerciseService {
   Future<List<String>> getTargetMuscles() async {
     try {
       _logger.d('Fetching available target muscles');
-      
+
       final allExercises = await getAllExercises();
       final Set<String> muscles = {};
-      
+
       for (final exercise in allExercises) {
         muscles.addAll(exercise.muscleGroups);
       }
-      
+
       final muscleList = muscles.toList()..sort();
       _logger.d('Found ${muscleList.length} target muscles');
       return muscleList;
@@ -95,16 +102,16 @@ class FreeExerciseService {
   Future<List<String>> getEquipment() async {
     try {
       _logger.d('Fetching available equipment');
-      
+
       final allExercises = await getAllExercises();
       final Set<String> equipment = {};
-      
+
       for (final exercise in allExercises) {
         if (exercise.equipment != null && exercise.equipment!.isNotEmpty) {
           equipment.add(exercise.equipment!);
         }
       }
-      
+
       final equipmentList = equipment.toList()..sort();
       _logger.d('Found ${equipmentList.length} equipment types');
       return equipmentList;
@@ -118,16 +125,17 @@ class FreeExerciseService {
   Future<List<Exercise>> searchExercises(String query) async {
     try {
       _logger.d('Searching exercises with query: $query');
-      
+
       final allExercises = await getAllExercises();
       final lowercaseQuery = query.toLowerCase();
-      
+
       final filteredExercises = allExercises.where((exercise) {
         return exercise.name.toLowerCase().contains(lowercaseQuery) ||
-               exercise.description.toLowerCase().contains(lowercaseQuery);
+            exercise.description.toLowerCase().contains(lowercaseQuery);
       }).toList();
-      
-      _logger.d('Found ${filteredExercises.length} exercises matching "$query"');
+
+      _logger
+          .d('Found ${filteredExercises.length} exercises matching "$query"');
       return filteredExercises;
     } catch (e) {
       _logger.e('Error searching exercises: $e');
@@ -139,16 +147,16 @@ class FreeExerciseService {
   Future<Exercise?> getExerciseById(String id) async {
     try {
       _logger.d('Fetching exercise by ID: $id');
-      
+
       final allExercises = await getAllExercises();
       final exercise = allExercises.where((e) => e.id == id).firstOrNull;
-      
+
       if (exercise != null) {
         _logger.d('Found exercise: ${exercise.name}');
       } else {
         _logger.w('Exercise with ID $id not found');
       }
-      
+
       return exercise;
     } catch (e) {
       _logger.e('Error fetching exercise $id: $e');
@@ -160,17 +168,17 @@ class FreeExerciseService {
   Future<List<String>> getPrimaryMuscles() async {
     try {
       _logger.d('Fetching available primary target muscles');
-      
+
       final allExercises = await getAllExercises();
       final Set<String> muscles = {};
-      
+
       for (final exercise in allExercises) {
         // Only include primary muscles for cleaner filtering
         if (exercise.muscleGroups.isNotEmpty) {
           muscles.add(exercise.muscleGroups.first);
         }
       }
-      
+
       final muscleList = muscles.toList()..sort();
       _logger.d('Found ${muscleList.length} primary target muscles');
       return muscleList;
@@ -205,9 +213,9 @@ class FreeExerciseService {
     if (exerciseId == null || images == null || images.isEmpty) {
       return null;
     }
-    
+
     // Return the first image URL
     final imagePath = images.first.toString();
     return '$_baseUrl/exercises/$imagePath';
   }
-} 
+}

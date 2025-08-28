@@ -4,23 +4,28 @@ import 'package:logger/logger.dart';
 /// Service for managing environment-specific configurations
 class ConfigService {
   static final _logger = Logger();
-  static const String _defaultOpenAIUrl = 'https://api.openai.com/v1/chat/completions';
-  static const String _defaultModel = 'gpt-4o-mini'; // Changed from 'gpt-4o' to use 2.5M free tokens/day
+  static const String _defaultOpenAIUrl =
+      'https://api.openai.com/v1/chat/completions';
+  static const String _defaultModel =
+      'gpt-4o-mini'; // Changed from 'gpt-4o' to use 2.5M free tokens/day
   static const double _defaultTemperature = 0.7;
   static const int _defaultMaxTokens = 4000;
 
   /// Get OpenAI API key from environment variables
   static String get openAIApiKey {
     final apiKey = dotenv.env['OPENAI_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty || apiKey == 'your_openai_api_key_here') {
+    if (apiKey == null ||
+        apiKey.isEmpty ||
+        apiKey == 'your_openai_api_key_here') {
       throw Exception('OPENAI_API_KEY not found or not configured. '
           'Please copy .env.example to .env and set your actual OpenAI API key.');
     }
-    
+
     // Log the first and last few characters of the API key for debugging
-    final maskedKey = '${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 10)}';
+    final maskedKey =
+        '${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 10)}';
     _logger.i('ConfigService: Using OpenAI API key: $maskedKey');
-    
+
     return apiKey;
   }
 
@@ -93,13 +98,16 @@ class ConfigService {
     final missingVars = <String>[];
     for (final varName in requiredVars) {
       final value = dotenv.env[varName];
-      if (value == null || value.isEmpty || value == 'your_openai_api_key_here') {
+      if (value == null ||
+          value.isEmpty ||
+          value == 'your_openai_api_key_here') {
         missingVars.add(varName);
       }
     }
 
     if (missingVars.isNotEmpty) {
-      throw Exception('Missing or invalid required environment variables: ${missingVars.join(', ')}. '
+      throw Exception(
+          'Missing or invalid required environment variables: ${missingVars.join(', ')}. '
           'Please copy .env.example to .env and configure your API key.');
     }
   }
@@ -127,4 +135,4 @@ class ConfigService {
       'hasApiKey': openAIApiKey.isNotEmpty,
     };
   }
-} 
+}

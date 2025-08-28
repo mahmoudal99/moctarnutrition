@@ -33,7 +33,7 @@ class GoalSelectionStep extends StatelessWidget {
           title: "What's {name}'s primary nutrition goal?",
           fallbackTitle: "What's your primary nutrition goal?",
         ),
-        
+
         // Show client's onboarding choice if available
         if (clientFitnessGoal != null) ...[
           const SizedBox(height: AppConstants.spacingM),
@@ -56,7 +56,7 @@ class GoalSelectionStep extends StatelessWidget {
                 ),
                 const SizedBox(width: AppConstants.spacingS),
                 Expanded(
-                  child:                   Text(
+                  child: Text(
                     'Client selected: ${_getFitnessGoalTitle(clientFitnessGoal!)} during onboarding',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppConstants.successColor,
@@ -68,9 +68,9 @@ class GoalSelectionStep extends StatelessWidget {
             ),
           ),
         ],
-        
+
         const SizedBox(height: AppConstants.spacingL),
-        
+
         // Pre-select client's choice if no admin selection yet
         if (selected == null && clientGoal != null) ...[
           Container(
@@ -105,14 +105,14 @@ class GoalSelectionStep extends StatelessWidget {
           ),
           const SizedBox(height: AppConstants.spacingM),
         ],
-        
+
         Wrap(
           spacing: AppConstants.spacingM,
           runSpacing: AppConstants.spacingM,
           children: FitnessGoal.values.map((goal) {
             final isSelected = selected == goal;
             final isClientChoice = clientGoal == goal;
-            
+
             return ChoiceChip(
               label: Row(
                 mainAxisSize: MainAxisSize.min,

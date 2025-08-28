@@ -14,7 +14,8 @@ class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final UserLocalStorageService _storageService = UserLocalStorageService();
+  static final UserLocalStorageService _storageService =
+      UserLocalStorageService();
 
   // Auth state stream
   static Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -33,9 +34,10 @@ class AuthService {
   }) async {
     try {
       _logger.i('Attempting to sign up with email: $email');
-      
+
       // Create user with Firebase Auth
-      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      final UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -56,9 +58,9 @@ class AuthService {
         final prefs = await SharedPreferences.getInstance();
         final proteinTargetsJson = prefs.getString('temp_protein_targets');
         final calorieTargetsJson = prefs.getString('temp_calorie_targets');
-        
+
         UserPreferences updatedPreferences = localUser.preferences;
-        
+
         // Add calculated nutrition targets if available
         if (proteinTargetsJson != null) {
           try {
@@ -71,20 +73,21 @@ class AuthService {
             print('SignUp: Error parsing protein targets: $e');
           }
         }
-        
+
         if (calorieTargetsJson != null) {
           try {
             final calorieTargets = jsonDecode(calorieTargetsJson);
             updatedPreferences = updatedPreferences.copyWith(
               calorieTargets: calorieTargets,
-              targetCalories: calorieTargets['dailyTarget'] ?? updatedPreferences.targetCalories,
+              targetCalories: calorieTargets['dailyTarget'] ??
+                  updatedPreferences.targetCalories,
             );
             print('SignUp: Added calculated calorie targets');
           } catch (e) {
             print('SignUp: Error parsing calorie targets: $e');
           }
         }
-        
+
         userModel = localUser.copyWith(
           id: user.uid,
           email: email,
@@ -96,11 +99,15 @@ class AuthService {
           updatedAt: DateTime.now(),
         );
         print('SignUp: Using onboarding data from SharedPreferences:');
-        print('  dietaryRestrictions: ${userModel.preferences.dietaryRestrictions}');
-        print('  workoutStyles: ${userModel.preferences.preferredWorkoutStyles}');
-        print('  proteinTargets: ${userModel.preferences.proteinTargets != null ? 'Available' : 'Not available'}');
-        print('  calorieTargets: ${userModel.preferences.calorieTargets != null ? 'Available' : 'Not available'}');
-        
+        print(
+            '  dietaryRestrictions: ${userModel.preferences.dietaryRestrictions}');
+        print(
+            '  workoutStyles: ${userModel.preferences.preferredWorkoutStyles}');
+        print(
+            '  proteinTargets: ${userModel.preferences.proteinTargets != null ? 'Available' : 'Not available'}');
+        print(
+            '  calorieTargets: ${userModel.preferences.calorieTargets != null ? 'Available' : 'Not available'}');
+
         // Clear temporary nutrition targets
         await prefs.remove('temp_protein_targets');
         await prefs.remove('temp_calorie_targets');
@@ -139,7 +146,8 @@ class AuthService {
   }) async {
     try {
       _logger.i('Attempting to sign in with email: $email');
-      final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      final UserCredential userCredential =
+          await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -152,9 +160,12 @@ class AuthService {
       if (userModel == null) {
         // Migration: Try to load from SharedPreferences and upload to Firestore
         final localUser = await _storageService.loadUser();
-        print('AuthService migration: Loaded localUser from SharedPreferences:');
-        print('  dietaryRestrictions:  [32m${localUser?.preferences.dietaryRestrictions} [0m');
-        print('  workoutStyles:  [34m${localUser?.preferences.preferredWorkoutStyles} [0m');
+        print(
+            'AuthService migration: Loaded localUser from SharedPreferences:');
+        print(
+            '  dietaryRestrictions:  [32m${localUser?.preferences.dietaryRestrictions} [0m');
+        print(
+            '  workoutStyles:  [34m${localUser?.preferences.preferredWorkoutStyles} [0m');
         if (localUser != null) {
           final migratedUser = localUser.copyWith(
             id: user.uid,
@@ -167,12 +178,15 @@ class AuthService {
             updatedAt: DateTime.now(),
           );
           print('AuthService migration: Migrated user to Firestore:');
-          print('  dietaryRestrictions:  [32m${migratedUser.preferences.dietaryRestrictions} [0m');
-          print('  workoutStyles:  [34m${migratedUser.preferences.preferredWorkoutStyles} [0m');
+          print(
+              '  dietaryRestrictions:  [32m${migratedUser.preferences.dietaryRestrictions} [0m');
+          print(
+              '  workoutStyles:  [34m${migratedUser.preferences.preferredWorkoutStyles} [0m');
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
           await _storageService.clearUser(); // Clear local user after migration
-          _logger.i('Migrated user from SharedPreferences to Firestore: ${user.uid}');
+          _logger.i(
+              'Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
           throw Exception('User profile not found');
         }
@@ -196,12 +210,14 @@ class AuthService {
       if (googleUser == null) {
         throw Exception('Google sign in was cancelled');
       }
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
       final User? user = userCredential.user;
       if (user == null) {
         throw Exception('Failed to sign in with Google');
@@ -215,9 +231,9 @@ class AuthService {
           final prefs = await SharedPreferences.getInstance();
           final proteinTargetsJson = prefs.getString('temp_protein_targets');
           final calorieTargetsJson = prefs.getString('temp_calorie_targets');
-          
+
           UserPreferences updatedPreferences = localUser.preferences;
-          
+
           // Add calculated nutrition targets if available
           if (proteinTargetsJson != null) {
             try {
@@ -230,20 +246,21 @@ class AuthService {
               print('Google SignIn: Error parsing protein targets: $e');
             }
           }
-          
+
           if (calorieTargetsJson != null) {
             try {
               final calorieTargets = jsonDecode(calorieTargetsJson);
               updatedPreferences = updatedPreferences.copyWith(
                 calorieTargets: calorieTargets,
-                targetCalories: calorieTargets['dailyTarget'] ?? updatedPreferences.targetCalories,
+                targetCalories: calorieTargets['dailyTarget'] ??
+                    updatedPreferences.targetCalories,
               );
               print('Google SignIn: Added calculated calorie targets');
             } catch (e) {
               print('Google SignIn: Error parsing calorie targets: $e');
             }
           }
-          
+
           final migratedUser = localUser.copyWith(
             id: user.uid,
             email: user.email ?? localUser.email,
@@ -256,12 +273,13 @@ class AuthService {
           );
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
-          
+
           // Clear temporary nutrition targets
           await prefs.remove('temp_protein_targets');
           await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
-          _logger.i('Migrated user from SharedPreferences to Firestore: ${user.uid}');
+          _logger.i(
+              'Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
           // Create new user document for first-time Google sign in
           userModel = UserModel(
@@ -278,22 +296,27 @@ class AuthService {
             updatedAt: DateTime.now(),
           );
           await _createUserDocument(userModel);
-          _logger.i('Created new user document for Google sign in: ${user.uid}');
+          _logger
+              .i('Created new user document for Google sign in: ${user.uid}');
         }
       }
       _logger.i('Google sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase Auth error during Google sign in: ${e.code} - ${e.message}');
+      _logger.e(
+          'Firebase Auth error during Google sign in: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
       _logger.e('Unexpected error during Google sign in: $e');
       if (e.toString().contains('cloud_firestore/unavailable')) {
-        throw Exception('Firebase service is temporarily unavailable. Please try again in a few moments.');
+        throw Exception(
+            'Firebase service is temporarily unavailable. Please try again in a few moments.');
       } else if (e.toString().contains('cloud_firestore/permission-denied')) {
-        throw Exception('Permission denied. Please ensure you are properly authenticated.');
+        throw Exception(
+            'Permission denied. Please ensure you are properly authenticated.');
       } else if (e.toString().contains('network')) {
-        throw Exception('Network error. Please check your internet connection and try again.');
+        throw Exception(
+            'Network error. Please check your internet connection and try again.');
       } else {
         throw Exception('Failed to sign in with Google: $e');
       }
@@ -318,7 +341,8 @@ class AuthService {
         idToken: appleCredential.identityToken,
         accessToken: appleCredential.authorizationCode,
       );
-      final UserCredential userCredential = await _auth.signInWithCredential(oauthCredential);
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(oauthCredential);
       final User? user = userCredential.user;
       if (user == null) {
         throw Exception('Failed to sign in with Apple');
@@ -332,9 +356,9 @@ class AuthService {
           final prefs = await SharedPreferences.getInstance();
           final proteinTargetsJson = prefs.getString('temp_protein_targets');
           final calorieTargetsJson = prefs.getString('temp_calorie_targets');
-          
+
           UserPreferences updatedPreferences = localUser.preferences;
-          
+
           // Add calculated nutrition targets if available
           if (proteinTargetsJson != null) {
             try {
@@ -347,21 +371,24 @@ class AuthService {
               print('Apple SignIn: Error parsing protein targets: $e');
             }
           }
-          
+
           if (calorieTargetsJson != null) {
             try {
               final calorieTargets = jsonDecode(calorieTargetsJson);
               updatedPreferences = updatedPreferences.copyWith(
                 calorieTargets: calorieTargets,
-                targetCalories: calorieTargets['dailyTarget'] ?? updatedPreferences.targetCalories,
+                targetCalories: calorieTargets['dailyTarget'] ??
+                    updatedPreferences.targetCalories,
               );
               print('Apple SignIn: Added calculated calorie targets');
             } catch (e) {
               print('Apple SignIn: Error parsing calorie targets: $e');
             }
           }
-          
-          final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
+
+          final displayName =
+              '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'
+                  .trim();
           final migratedUser = localUser.copyWith(
             id: user.uid,
             email: user.email ?? appleCredential.email ?? localUser.email,
@@ -373,14 +400,17 @@ class AuthService {
           );
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
-          
+
           // Clear temporary nutrition targets
           await prefs.remove('temp_protein_targets');
           await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
-          _logger.i('Migrated user from SharedPreferences to Firestore: ${user.uid}');
+          _logger.i(
+              'Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
-          final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
+          final displayName =
+              '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'
+                  .trim();
           userModel = UserModel(
             id: user.uid,
             email: user.email ?? appleCredential.email ?? '',
@@ -395,22 +425,27 @@ class AuthService {
             updatedAt: DateTime.now(),
           );
           await _createUserDocument(userModel);
-          _logger.i('Created new user document for Apple sign in: ${user.uid} with name: $displayName');
+          _logger.i(
+              'Created new user document for Apple sign in: ${user.uid} with name: $displayName');
         }
       }
       _logger.i('Apple sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase Auth error during Apple sign in: ${e.code} - ${e.message}');
+      _logger.e(
+          'Firebase Auth error during Apple sign in: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
       _logger.e('Unexpected error during Apple sign in: $e');
       if (e.toString().contains('cloud_firestore/unavailable')) {
-        throw Exception('Firebase service is temporarily unavailable. Please try again in a few moments.');
+        throw Exception(
+            'Firebase service is temporarily unavailable. Please try again in a few moments.');
       } else if (e.toString().contains('cloud_firestore/permission-denied')) {
-        throw Exception('Permission denied. Please ensure you are properly authenticated.');
+        throw Exception(
+            'Permission denied. Please ensure you are properly authenticated.');
       } else if (e.toString().contains('network')) {
-        throw Exception('Network error. Please check your internet connection and try again.');
+        throw Exception(
+            'Network error. Please check your internet connection and try again.');
       } else {
         throw Exception('Failed to sign in with Apple: $e');
       }
@@ -435,9 +470,9 @@ class AuthService {
           final prefs = await SharedPreferences.getInstance();
           final proteinTargetsJson = prefs.getString('temp_protein_targets');
           final calorieTargetsJson = prefs.getString('temp_calorie_targets');
-          
+
           UserPreferences updatedPreferences = localUser.preferences;
-          
+
           // Add calculated nutrition targets if available
           if (proteinTargetsJson != null) {
             try {
@@ -450,20 +485,21 @@ class AuthService {
               print('Anonymous SignIn: Error parsing protein targets: $e');
             }
           }
-          
+
           if (calorieTargetsJson != null) {
             try {
               final calorieTargets = jsonDecode(calorieTargetsJson);
               updatedPreferences = updatedPreferences.copyWith(
                 calorieTargets: calorieTargets,
-                targetCalories: calorieTargets['dailyTarget'] ?? updatedPreferences.targetCalories,
+                targetCalories: calorieTargets['dailyTarget'] ??
+                    updatedPreferences.targetCalories,
               );
               print('Anonymous SignIn: Added calculated calorie targets');
             } catch (e) {
               print('Anonymous SignIn: Error parsing calorie targets: $e');
             }
           }
-          
+
           final migratedUser = localUser.copyWith(
             id: user.uid,
             email: 'guest@championsgym.com',
@@ -475,12 +511,13 @@ class AuthService {
           );
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
-          
+
           // Clear temporary nutrition targets
           await prefs.remove('temp_protein_targets');
           await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
-          _logger.i('Migrated anonymous user from SharedPreferences to Firestore: ${user.uid}');
+          _logger.i(
+              'Migrated anonymous user from SharedPreferences to Firestore: ${user.uid}');
         } else {
           userModel = UserModel(
             id: user.uid,
@@ -501,16 +538,20 @@ class AuthService {
       _logger.i('Anonymous sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase Auth error during anonymous sign in: ${e.code} - ${e.message}');
+      _logger.e(
+          'Firebase Auth error during anonymous sign in: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
       _logger.e('Unexpected error during anonymous sign in: $e');
       if (e.toString().contains('cloud_firestore/unavailable')) {
-        throw Exception('Firebase service is temporarily unavailable. Please try again in a few moments.');
+        throw Exception(
+            'Firebase service is temporarily unavailable. Please try again in a few moments.');
       } else if (e.toString().contains('cloud_firestore/permission-denied')) {
-        throw Exception('Permission denied. Please ensure you are properly authenticated.');
+        throw Exception(
+            'Permission denied. Please ensure you are properly authenticated.');
       } else if (e.toString().contains('network')) {
-        throw Exception('Network error. Please check your internet connection and try again.');
+        throw Exception(
+            'Network error. Please check your internet connection and try again.');
       } else {
         throw Exception('Failed to sign in anonymously: $e');
       }
@@ -521,7 +562,7 @@ class AuthService {
   static Future<void> signOut() async {
     try {
       _logger.i('Signing out user');
-      
+
       await Future.wait([
         _auth.signOut(),
         _googleSignIn.signOut(),
@@ -539,17 +580,18 @@ class AuthService {
   static Future<void> resetPassword(String email) async {
     try {
       _logger.i('Attempting to reset password for: $email');
-      
+
       // Validate email format before sending
       if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
         throw Exception('Please enter a valid email address.');
       }
-      
+
       await _auth.sendPasswordResetEmail(email: email);
-      
+
       _logger.i('Password reset email sent successfully');
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase Auth error during password reset: ${e.code} - ${e.message}');
+      _logger.e(
+          'Firebase Auth error during password reset: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
       _logger.e('Unexpected error during password reset: $e');
@@ -562,20 +604,22 @@ class AuthService {
     try {
       _logger.i('AuthService - Updating user profile: ${userModel.id}');
       _logger.d('AuthService - New name: "${userModel.name}"');
-      
+
       await _updateUserDocument(userModel);
       _logger.i('AuthService - Firestore document updated');
-      
+
       // Update Firebase Auth display name if it changed
       final currentUser = _auth.currentUser;
       if (currentUser != null && currentUser.displayName != userModel.name) {
-        _logger.d('AuthService - Updating Firebase Auth display name from "${currentUser.displayName}" to "${userModel.name}"');
+        _logger.d(
+            'AuthService - Updating Firebase Auth display name from "${currentUser.displayName}" to "${userModel.name}"');
         await currentUser.updateDisplayName(userModel.name);
         _logger.i('AuthService - Firebase Auth display name updated');
       } else {
-        _logger.d('AuthService - Firebase Auth display name unchanged or user not found');
+        _logger.d(
+            'AuthService - Firebase Auth display name unchanged or user not found');
       }
-      
+
       _logger.i('AuthService - User profile updated successfully');
     } catch (e) {
       _logger.e('AuthService - Error updating user profile: $e');
@@ -587,31 +631,31 @@ class AuthService {
   static Future<void> deleteAccount() async {
     try {
       _logger.i('Attempting to delete user account');
-      
+
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
         throw Exception('No user is currently signed in');
       }
 
       final userId = currentUser.uid;
-      
+
       // Delete all user data from Firestore
       await _retryFirestoreOperation(() async {
         _logger.i('Deleting all user data from Firestore: $userId');
-        
+
         // Delete user document
         await _firestore.collection('users').doc(userId).delete();
         _logger.i('User document deleted successfully');
-        
+
         // Delete all check-ins for the user
         await _deleteUserCheckins(userId);
-        
+
         // Delete all workout plans for the user
         await _deleteUserWorkoutPlans(userId);
-        
+
         // Delete all meal plans for the user
         await _deleteUserMealPlans(userId);
-        
+
         _logger.i('All user data deleted successfully');
       });
 
@@ -622,16 +666,17 @@ class AuthService {
 
       // Clear local storage
       await _storageService.clearUser();
-      
+
       // Clear meal plan data from local storage
       await _clearMealPlanData(userId);
-      
+
       // Sign out to complete the deletion process
       await signOut();
-      
+
       _logger.i('User account deleted successfully');
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase Auth error during account deletion: ${e.code} - ${e.message}');
+      _logger.e(
+          'Firebase Auth error during account deletion: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
       _logger.e('Unexpected error during account deletion: $e');
@@ -643,7 +688,7 @@ class AuthService {
   static Future<void> _deleteUserCheckins(String userId) async {
     try {
       _logger.i('Deleting all check-ins for user: $userId');
-      
+
       final querySnapshot = await _firestore
           .collection('checkins')
           .where('userId', isEqualTo: userId)
@@ -653,9 +698,10 @@ class AuthService {
       for (final doc in querySnapshot.docs) {
         batch.delete(doc.reference);
       }
-      
+
       await batch.commit();
-      _logger.i('Deleted ${querySnapshot.docs.length} check-ins for user: $userId');
+      _logger.i(
+          'Deleted ${querySnapshot.docs.length} check-ins for user: $userId');
     } catch (e) {
       _logger.e('Error deleting user check-ins: $e');
       // Don't rethrow - we want to continue with account deletion even if check-in deletion fails
@@ -666,7 +712,7 @@ class AuthService {
   static Future<void> _deleteUserWorkoutPlans(String userId) async {
     try {
       _logger.i('Deleting all workout plans for user: $userId');
-      
+
       final querySnapshot = await _firestore
           .collection('workout_plans')
           .where('userId', isEqualTo: userId)
@@ -676,9 +722,10 @@ class AuthService {
       for (final doc in querySnapshot.docs) {
         batch.delete(doc.reference);
       }
-      
+
       await batch.commit();
-      _logger.i('Deleted ${querySnapshot.docs.length} workout plans for user: $userId');
+      _logger.i(
+          'Deleted ${querySnapshot.docs.length} workout plans for user: $userId');
     } catch (e) {
       _logger.e('Error deleting user workout plans: $e');
       // Don't rethrow - we want to continue with account deletion even if workout plan deletion fails
@@ -689,7 +736,7 @@ class AuthService {
   static Future<void> _deleteUserMealPlans(String userId) async {
     try {
       _logger.i('Deleting all meal plans for user: $userId');
-      
+
       final querySnapshot = await _firestore
           .collection('meal_plans')
           .where('userId', isEqualTo: userId)
@@ -699,9 +746,10 @@ class AuthService {
       for (final doc in querySnapshot.docs) {
         batch.delete(doc.reference);
       }
-      
+
       await batch.commit();
-      _logger.i('Deleted ${querySnapshot.docs.length} meal plans for user: $userId');
+      _logger.i(
+          'Deleted ${querySnapshot.docs.length} meal plans for user: $userId');
     } catch (e) {
       _logger.e('Error deleting user meal plans: $e');
       // Don't rethrow - we want to continue with account deletion even if meal plan deletion fails
@@ -724,7 +772,7 @@ class AuthService {
   static Future<UserModel?> getCurrentUserModel() async {
     final user = currentUser;
     if (user == null) return null;
-    
+
     return await _getUserDocument(user.uid);
   }
 
@@ -737,9 +785,12 @@ class AuthService {
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-      
+
       _logger.i('Creating user document for: ${userModel.id}');
-      await _firestore.collection('users').doc(userModel.id).set(userModel.toJson());
+      await _firestore
+          .collection('users')
+          .doc(userModel.id)
+          .set(userModel.toJson());
       _logger.i('User document created successfully');
     });
   }
@@ -751,7 +802,7 @@ class AuthService {
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-      
+
       _logger.i('Getting user document for: $userId');
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
@@ -770,25 +821,31 @@ class AuthService {
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-      
+
       _logger.i('AuthService - Updating user document for: ${userModel.id}');
       _logger.d('AuthService - User data to update: ${userModel.toJson()}');
-      
-      await _firestore.collection('users').doc(userModel.id).update(userModel.toJson());
+
+      await _firestore
+          .collection('users')
+          .doc(userModel.id)
+          .update(userModel.toJson());
       _logger.i('AuthService - User document updated successfully');
     });
   }
 
   // Retry logic for Firestore operations
-  static Future<T> _retryFirestoreOperation<T>(Future<T> Function() operation, {int maxRetries = 3}) async {
+  static Future<T> _retryFirestoreOperation<T>(Future<T> Function() operation,
+      {int maxRetries = 3}) async {
     int attempts = 0;
     while (attempts < maxRetries) {
       try {
         return await operation();
       } catch (e) {
         attempts++;
-        if (e.toString().contains('cloud_firestore/unavailable') && attempts < maxRetries) {
-          _logger.w('Firestore unavailable, retrying in ${attempts * 2} seconds... (attempt $attempts/$maxRetries)');
+        if (e.toString().contains('cloud_firestore/unavailable') &&
+            attempts < maxRetries) {
+          _logger.w(
+              'Firestore unavailable, retrying in ${attempts * 2} seconds... (attempt $attempts/$maxRetries)');
           await Future.delayed(Duration(seconds: attempts * 2));
           continue;
         }
@@ -805,7 +862,7 @@ class AuthService {
   }) async {
     try {
       _logger.i('Attempting to change password');
-      
+
       final User? currentUser = _auth.currentUser;
       if (currentUser == null) {
         throw Exception('User not authenticated');
@@ -835,13 +892,15 @@ class AuthService {
   static Exception _handleFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        return Exception('No user found with this email address. Please check the email or create a new account.');
+        return Exception(
+            'No user found with this email address. Please check the email or create a new account.');
       case 'wrong-password':
         return Exception('Incorrect password. Please try again.');
       case 'email-already-in-use':
         return Exception('An account with this email already exists.');
       case 'weak-password':
-        return Exception('Password is too weak. Please choose a stronger password.');
+        return Exception(
+            'Password is too weak. Please choose a stronger password.');
       case 'invalid-email':
         return Exception('Please enter a valid email address.');
       case 'user-disabled':
@@ -853,19 +912,24 @@ class AuthService {
       case 'network-request-failed':
         return Exception('Network error. Please check your connection.');
       case 'invalid-action-code':
-        return Exception('The password reset link is invalid or has expired. Please request a new one.');
+        return Exception(
+            'The password reset link is invalid or has expired. Please request a new one.');
       case 'expired-action-code':
-        return Exception('The password reset link has expired. Please request a new one.');
+        return Exception(
+            'The password reset link has expired. Please request a new one.');
       case 'user-mismatch':
-        return Exception('The email address doesn\'t match the reset link. Please use the correct email.');
+        return Exception(
+            'The email address doesn\'t match the reset link. Please use the correct email.');
       case 'requires-recent-login':
-        return Exception('For security reasons, please sign in again before deleting your account.');
+        return Exception(
+            'For security reasons, please sign in again before deleting your account.');
       case 'user-token-expired':
         return Exception('Your session has expired. Please sign in again.');
       case 'invalid-credential':
-        return Exception('Invalid credentials. Please check your email and password.');
+        return Exception(
+            'Invalid credentials. Please check your email and password.');
       default:
         return Exception('Authentication failed: ${e.message}');
     }
   }
-} 
+}

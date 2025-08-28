@@ -22,7 +22,8 @@ class OnboardingGenderStep extends StatelessWidget {
           onSelect('Male');
         }),
         const SizedBox(height: AppConstants.spacingM),
-        _buildGenderOption('Female', Icons.female, selectedGender == 'Female', () {
+        _buildGenderOption('Female', Icons.female, selectedGender == 'Female',
+            () {
           HapticFeedback.lightImpact();
           onSelect('Female');
         }),
@@ -30,17 +31,22 @@ class OnboardingGenderStep extends StatelessWidget {
     );
   }
 
-  Widget _buildGenderOption(String gender, IconData icon, bool isSelected, VoidCallback onTap) {
+  Widget _buildGenderOption(
+      String gender, IconData icon, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(AppConstants.spacingL),
         decoration: BoxDecoration(
-          color: isSelected ? AppConstants.primaryColor.withOpacity(0.1) : AppConstants.surfaceColor,
+          color: isSelected
+              ? AppConstants.primaryColor.withOpacity(0.1)
+              : AppConstants.surfaceColor,
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
           border: Border.all(
-            color: isSelected ? AppConstants.primaryColor : AppConstants.borderColor,
+            color: isSelected
+                ? AppConstants.primaryColor
+                : AppConstants.borderColor,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -49,12 +55,16 @@ class OnboardingGenderStep extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppConstants.spacingS),
               decoration: BoxDecoration(
-                color: isSelected ? AppConstants.primaryColor : AppConstants.surfaceColor,
+                color: isSelected
+                    ? AppConstants.primaryColor
+                    : AppConstants.surfaceColor,
                 borderRadius: BorderRadius.circular(AppConstants.radiusS),
               ),
               child: Icon(
                 icon,
-                color: isSelected ? AppConstants.surfaceColor : AppConstants.textSecondary,
+                color: isSelected
+                    ? AppConstants.surfaceColor
+                    : AppConstants.textSecondary,
                 size: 24,
               ),
             ),
@@ -64,7 +74,9 @@ class OnboardingGenderStep extends StatelessWidget {
                 gender,
                 style: AppTextStyles.bodyLarge.copyWith(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? AppConstants.primaryColor : AppConstants.textPrimary,
+                  color: isSelected
+                      ? AppConstants.primaryColor
+                      : AppConstants.textPrimary,
                 ),
               ),
             ),

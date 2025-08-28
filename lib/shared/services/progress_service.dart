@@ -38,7 +38,7 @@ class ProgressService {
   static Future<List<WeightDataPoint>> getWeightProgress(String userId) async {
     try {
       final checkins = await getUserCheckins(userId);
-      
+
       return checkins
           .where((checkin) => checkin.weight != null)
           .map((checkin) => WeightDataPoint(
@@ -57,7 +57,7 @@ class ProgressService {
   static Future<List<MoodDataPoint>> getMoodProgress(String userId) async {
     try {
       final checkins = await getUserCheckins(userId);
-      
+
       return checkins
           .where((checkin) => checkin.mood != null)
           .map((checkin) => MoodDataPoint(
@@ -79,10 +79,10 @@ class ProgressService {
       String userId, String measurementType) async {
     try {
       final checkins = await getUserCheckins(userId);
-      
+
       return checkins
-          .where((checkin) => 
-              checkin.measurements != null && 
+          .where((checkin) =>
+              checkin.measurements != null &&
               checkin.measurements!.containsKey(measurementType))
           .map((checkin) => MeasurementDataPoint(
                 date: checkin.weekStartDate,
@@ -102,13 +102,13 @@ class ProgressService {
     try {
       final checkins = await getUserCheckins(userId);
       final measurementTypes = <String>{};
-      
+
       for (final checkin in checkins) {
         if (checkin.measurements != null) {
           measurementTypes.addAll(checkin.measurements!.keys);
         }
       }
-      
+
       return measurementTypes.toList()..sort();
     } catch (e) {
       _logger.e('Error getting measurement types: $e');
@@ -120,7 +120,7 @@ class ProgressService {
   static Future<ProgressSummary> getProgressSummary(String userId) async {
     try {
       final checkins = await getUserCheckins(userId);
-      
+
       if (checkins.isEmpty) {
         return ProgressSummary.empty();
       }
@@ -134,7 +134,7 @@ class ProgressService {
         final startWeight = weights.first;
         final weightChange = currentWeight - startWeight;
         final averageWeight = weights.reduce((a, b) => a + b) / weights.length;
-        
+
         weightStats = WeightStats(
           current: currentWeight,
           start: startWeight,
@@ -145,15 +145,20 @@ class ProgressService {
       }
 
       // Mood statistics
-      final moodData = checkins.where((c) => c.energyLevel != null && c.motivationLevel != null).toList();
+      final moodData = checkins
+          .where((c) => c.energyLevel != null && c.motivationLevel != null)
+          .toList();
       MoodStats? moodStats;
       if (moodData.isNotEmpty) {
         final energyLevels = moodData.map((c) => c.energyLevel!).toList();
-        final motivationLevels = moodData.map((c) => c.motivationLevel!).toList();
-        
+        final motivationLevels =
+            moodData.map((c) => c.motivationLevel!).toList();
+
         moodStats = MoodStats(
-          averageEnergy: energyLevels.reduce((a, b) => a + b) / energyLevels.length,
-          averageMotivation: motivationLevels.reduce((a, b) => a + b) / motivationLevels.length,
+          averageEnergy:
+              energyLevels.reduce((a, b) => a + b) / energyLevels.length,
+          averageMotivation: motivationLevels.reduce((a, b) => a + b) /
+              motivationLevels.length,
           currentEnergy: energyLevels.last.toDouble(),
           currentMotivation: motivationLevels.last.toDouble(),
           dataPoints: moodData.length,
@@ -163,19 +168,19 @@ class ProgressService {
       // Measurement statistics
       final measurementTypes = await getUserMeasurementTypes(userId);
       final measurementStats = <String, MeasurementStats>{};
-      
+
       for (final type in measurementTypes) {
         final typeData = checkins
             .where((c) => c.measurements?.containsKey(type) == true)
             .toList();
-        
+
         if (typeData.isNotEmpty) {
           final values = typeData.map((c) => c.measurements![type]!).toList();
           final current = values.last;
           final start = values.first;
           final change = current - start;
           final average = values.reduce((a, b) => a + b) / values.length;
-          
+
           measurementStats[type] = MeasurementStats(
             type: type,
             current: current,
@@ -202,54 +207,62 @@ class ProgressService {
   }
 
   /// Get overview data for the overview tab
-  static Future<OverviewData> getOverviewData(String userId, {UserModel? userModel}) async {
+  static Future<OverviewData> getOverviewData(String userId,
+      {UserModel? userModel}) async {
     try {
-      _logger.d('getOverviewData called with userId: $userId, userModel: ${userModel?.id ?? 'null'}');
-      
+      _logger.d(
+          'getOverviewData called with userId: $userId, userModel: ${userModel?.id ?? 'null'}');
+
       // Always get current streak regardless of checkins
       final currentStreak = await StreakService.getCurrentStreak(userId);
       final streakStats = await StreakService.getStreakStats(userId);
       _logger.d('Streak data - current: $currentStreak, stats: $streakStats');
-      
+
       final checkins = await getUserCheckins(userId);
       _logger.d('Found ${checkins.length} checkins');
-      
+
       WeightProgressData? weightProgress;
-      
+
       // Always create weight progress data using user preferences
       if (userModel != null) {
         final startWeight = userModel.preferences.weight;
         final goalWeight = userModel.preferences.desiredWeight;
-        
+
         // Get current weight from check-ins if available, otherwise use starting weight
         double currentWeight = startWeight;
         if (checkins.isNotEmpty) {
           final weightData = checkins.where((c) => c.weight != null).toList();
           _logger.d('Found ${weightData.length} weight data points');
-          
+
           if (weightData.isNotEmpty) {
             currentWeight = weightData.last.weight!;
             _logger.d('Using check-in weight: $currentWeight');
           } else {
-            _logger.d('No check-in weight data, using onboarding weight: $currentWeight');
+            _logger.d(
+                'No check-in weight data, using onboarding weight: $currentWeight');
           }
         } else {
           _logger.d('No check-ins, using onboarding weight: $currentWeight');
         }
-        
-        _logger.d('Weight progress - current: $currentWeight, start: $startWeight, goal: $goalWeight');
-        
+
+        _logger.d(
+            'Weight progress - current: $currentWeight, start: $startWeight, goal: $goalWeight');
+
         weightProgress = WeightProgressData(
           currentWeight: currentWeight,
           startWeight: startWeight,
           goalWeight: goalWeight,
-          progressPercentage: _calculateWeightProgress(startWeight, currentWeight, goalWeight),
-          dataPoints: checkins.isNotEmpty 
-              ? checkins.where((c) => c.weight != null).map((c) => WeightDataPoint(
-                  date: c.weekStartDate,
-                  weight: c.weight!,
-                  weekRange: c.weekRange,
-                )).toList()
+          progressPercentage:
+              _calculateWeightProgress(startWeight, currentWeight, goalWeight),
+          dataPoints: checkins.isNotEmpty
+              ? checkins
+                  .where((c) => c.weight != null)
+                  .map((c) => WeightDataPoint(
+                        date: c.weekStartDate,
+                        weight: c.weight!,
+                        weekRange: c.weekRange,
+                      ))
+                  .toList()
               : [],
         );
       }
@@ -257,7 +270,7 @@ class ProgressService {
       // Get daily calories data for the current week
       final dailyCalories = await _getDailyCaloriesDataForWeek(userId);
       _logger.d('Daily calories data loaded');
-      
+
       // Get BMI data from user preferences
       final bmiData = _getBMIDataFromUser(userModel);
       _logger.d('BMI data created: ${bmiData.currentBMI}');
@@ -279,29 +292,36 @@ class ProgressService {
   }
 
   /// Get daily calories data for the current week
-  static Future<DailyCaloriesData> _getDailyCaloriesDataForWeek(String userId) async {
+  static Future<DailyCaloriesData> _getDailyCaloriesDataForWeek(
+      String userId) async {
     try {
       final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day); // Get today's date without time
-      
-      _logger.d('ProgressService - Getting daily calories for week starting: ${today.toIso8601String()}');
+      final today = DateTime(
+          now.year, now.month, now.day); // Get today's date without time
+
+      _logger.d(
+          'ProgressService - Getting daily calories for week starting: ${today.toIso8601String()}');
       _logger.d('ProgressService - User ID: $userId');
       _logger.d('ProgressService - Today is: ${today.toIso8601String()}');
-      
+
       final dailyData = <DailyCaloriesPoint>[];
-      
+
       // Get consumption data for TODAY and the last 6 days (7 days total)
       for (int i = 6; i >= 0; i--) {
         final date = today.subtract(Duration(days: i));
-        
+
         try {
-          _logger.d('ProgressService - Checking date: ${date.toIso8601String()} (weekday: ${date.weekday})');
-          
+          _logger.d(
+              'ProgressService - Checking date: ${date.toIso8601String()} (weekday: ${date.weekday})');
+
           // Use the SAME LOGIC as home screen - call with the actual date
-          final consumptionData = await DailyConsumptionService.getDailyConsumptionSummary(userId, date);
-          
+          final consumptionData =
+              await DailyConsumptionService.getDailyConsumptionSummary(
+                  userId, date);
+
           if (consumptionData != null) {
-            _logger.d('ProgressService - Found data for ${date.toIso8601String()}: ${consumptionData['consumedCalories']} calories');
+            _logger.d(
+                'ProgressService - Found data for ${date.toIso8601String()}: ${consumptionData['consumedCalories']} calories');
             dailyData.add(DailyCaloriesPoint(
               date: date,
               totalCalories: consumptionData['consumedCalories'] ?? 0.0,
@@ -310,7 +330,8 @@ class ProgressService {
               fats: consumptionData['consumedFat'] ?? 0.0,
             ));
           } else {
-            _logger.d('ProgressService - NO DATA found for ${date.toIso8601String()}');
+            _logger.d(
+                'ProgressService - NO DATA found for ${date.toIso8601String()}');
             // No consumption data for this day
             dailyData.add(DailyCaloriesPoint(
               date: date,
@@ -321,7 +342,8 @@ class ProgressService {
             ));
           }
         } catch (e) {
-          _logger.w('Error getting consumption data for ${date.toIso8601String()}: $e');
+          _logger.w(
+              'Error getting consumption data for ${date.toIso8601String()}: $e');
           // Add empty data for this day
           dailyData.add(DailyCaloriesPoint(
             date: date,
@@ -332,9 +354,10 @@ class ProgressService {
           ));
         }
       }
-      
-      final weeklyTotal = dailyData.fold(0.0, (sum, day) => sum + day.totalCalories);
-      
+
+      final weeklyTotal =
+          dailyData.fold(0.0, (sum, day) => sum + day.totalCalories);
+
       return DailyCaloriesData(
         dailyData: dailyData,
         weeklyTotal: weeklyTotal,
@@ -348,30 +371,33 @@ class ProgressService {
 
   /// Get BMI data from user preferences
   static BMIData _getBMIDataFromUser(UserModel? userModel) {
-    _logger.d('_getBMIDataFromUser called with userModel: ${userModel?.id ?? 'null'}');
-    
+    _logger.d(
+        '_getBMIDataFromUser called with userModel: ${userModel?.id ?? 'null'}');
+
     if (userModel == null) {
       _logger.w('UserModel is null, returning empty BMI data');
       return BMIData.empty();
     }
-    
+
     final preferences = userModel.preferences;
-    _logger.d('User preferences - weight: ${preferences.weight}, height: ${preferences.height}');
-    
+    _logger.d(
+        'User preferences - weight: ${preferences.weight}, height: ${preferences.height}');
+
     final height = preferences.height;
     final currentWeight = preferences.weight;
-    
+
     if (height <= 0 || currentWeight <= 0) {
-      _logger.w('Invalid height or weight - height: $height, weight: $currentWeight');
+      _logger.w(
+          'Invalid height or weight - height: $height, weight: $currentWeight');
       return BMIData.empty();
     }
-    
+
     // Use the BMI calculation that already exists in your system
     final bmi = currentWeight / ((height / 100) * (height / 100));
     final bmiCategory = _getBMICategory(bmi);
-    
+
     _logger.d('Calculated BMI: $bmi, category: $bmiCategory');
-    
+
     return BMIData(
       currentBMI: bmi,
       bmiCategory: bmiCategory,
@@ -382,14 +408,15 @@ class ProgressService {
   }
 
   /// Calculate weight progress percentage
-  static double _calculateWeightProgress(double start, double current, double goal) {
+  static double _calculateWeightProgress(
+      double start, double current, double goal) {
     if (start == goal) return 100.0;
-    
+
     final totalChange = (goal - start).abs();
     final currentChange = (current - start).abs();
-    
+
     if (totalChange == 0) return 100.0;
-    
+
     final progress = (currentChange / totalChange) * 100;
     return progress.clamp(0.0, 100.0);
   }
@@ -404,9 +431,9 @@ class ProgressService {
 
   /// Check if two dates are the same day
   static bool _isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year && 
-           date1.month == date2.month && 
-           date1.day == date2.day;
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 }
 
@@ -524,12 +551,12 @@ class MoodStats {
 
   double get overallMoodScore => (averageEnergy + averageMotivation) / 2;
   double get currentMoodScore => (currentEnergy + currentMotivation) / 2;
-  
+
   String get moodTrend {
     if (dataPoints < 2) return 'Not enough data';
     final currentScore = currentMoodScore;
     final avgScore = overallMoodScore;
-    
+
     if (currentScore > avgScore + 0.5) return 'Improving';
     if (currentScore < avgScore - 0.5) return 'Declining';
     return 'Stable';
@@ -560,11 +587,12 @@ class MeasurementStats {
   }
 
   bool get hasProgress => dataPoints > 1;
-  
+
   String get formattedType {
-    return type.split('_').map((word) => 
-        word[0].toUpperCase() + word.substring(1).toLowerCase()
-    ).join(' ');
+    return type
+        .split('_')
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
   }
 }
 
@@ -627,8 +655,9 @@ class WeightProgressData {
 
   double get weightChange => currentWeight - startWeight;
   double get weightToGoal => goalWeight - currentWeight;
-  bool get isOnTrack => (goalWeight > startWeight && currentWeight <= goalWeight) ||
-                        (goalWeight < startWeight && currentWeight >= goalWeight);
+  bool get isOnTrack =>
+      (goalWeight > startWeight && currentWeight <= goalWeight) ||
+      (goalWeight < startWeight && currentWeight >= goalWeight);
 }
 
 class DailyCaloriesPoint {

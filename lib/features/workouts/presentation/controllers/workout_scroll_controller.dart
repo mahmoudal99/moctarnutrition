@@ -39,11 +39,13 @@ class WorkoutScrollController {
   void _onScroll() {
     scrollOffset = scrollController.offset;
 
-    if (scrollOffset > scrollThreshold && toggleAnimationController.value == 0) {
+    if (scrollOffset > scrollThreshold &&
+        toggleAnimationController.value == 0) {
       toggleAnimationController.forward();
       // Add haptic feedback when toggle appears
       HapticFeedback.selectionClick();
-    } else if (scrollOffset <= scrollThreshold && toggleAnimationController.value == 1) {
+    } else if (scrollOffset <= scrollThreshold &&
+        toggleAnimationController.value == 1) {
       toggleAnimationController.reverse();
     }
   }

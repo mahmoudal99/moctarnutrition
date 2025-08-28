@@ -327,4 +327,4 @@ class DayView extends StatelessWidget {
         return AppConstants.primaryColor;
     }
   }
-} 
+}

@@ -35,10 +35,11 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     if (_currentCheckin?.photoUrl != null) {
       return; // Already has photo URL, no need to check
     }
-    
+
     try {
-      final hasPhotoUrls = await BackgroundUploadService.hasPhotoUrls(_currentCheckin!.id);
-      
+      final hasPhotoUrls =
+          await BackgroundUploadService.hasPhotoUrls(_currentCheckin!.id);
+
       if (hasPhotoUrls) {
         // Photo URLs are now available, refresh the checkin data
         await _refreshCheckinData();
@@ -58,16 +59,18 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
 
   Future<void> _refreshCheckinData() async {
     try {
-      final checkinProvider = Provider.of<CheckinProvider>(context, listen: false);
+      final checkinProvider =
+          Provider.of<CheckinProvider>(context, listen: false);
       await checkinProvider.refresh();
-      
+
       // Find the updated checkin
       final updatedCheckin = checkinProvider.userCheckins.firstWhere(
         (checkin) => checkin.id == _currentCheckin!.id,
         orElse: () => _currentCheckin!,
       );
-      
-      if (updatedCheckin.photoUrl != null && updatedCheckin.photoUrl != _currentCheckin?.photoUrl) {
+
+      if (updatedCheckin.photoUrl != null &&
+          updatedCheckin.photoUrl != _currentCheckin?.photoUrl) {
         setState(() {
           _currentCheckin = updatedCheckin;
         });
@@ -82,13 +85,14 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final checkin = _currentCheckin ?? widget.checkin;
-    
+
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
         title: Text(
           checkin.weekRangeWithYear,
-          style: AppTextStyles.heading4.copyWith(color: AppConstants.textPrimary),
+          style:
+              AppTextStyles.heading4.copyWith(color: AppConstants.textPrimary),
         ),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
@@ -99,13 +103,13 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
         actions: [
           if (checkin.photoUrl == null)
             IconButton(
-              icon: _isRefreshing 
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.refresh, color: AppConstants.textPrimary),
+              icon: _isRefreshing
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh, color: AppConstants.textPrimary),
               onPressed: _isRefreshing ? null : _refreshCheckinData,
               tooltip: 'Refresh photo',
             ),
@@ -132,7 +136,9 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
               _buildMeasurementsSection(checkin),
               const SizedBox(height: 24),
             ],
-            if (checkin.mood != null || checkin.energyLevel != null || checkin.motivationLevel != null) ...[
+            if (checkin.mood != null ||
+                checkin.energyLevel != null ||
+                checkin.motivationLevel != null) ...[
               _buildMoodSection(checkin),
               const SizedBox(height: 24),
             ],
@@ -194,20 +200,22 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                  errorWidget: (context, url, error) => _buildNoPhotoPlaceholder(checkin),
+                  errorWidget: (context, url, error) =>
+                      _buildNoPhotoPlaceholder(checkin),
                 );
               }
               return _buildNoPhotoPlaceholder(checkin);
             },
           );
         }
-        
+
         // Second priority: If no local image, check if we need to refresh data for Firebase URL
-        if (checkin.photoUrl == null && checkin.status == CheckinStatus.completed) {
+        if (checkin.photoUrl == null &&
+            checkin.status == CheckinStatus.completed) {
           // Try to refresh the checkin data to get the Firebase URL
           _refreshCheckinDataIfNeeded();
         }
-        
+
         // Third priority: Show Firebase URL if available
         if (checkin.photoUrl != null && checkin.photoUrl!.isNotEmpty) {
           return CachedNetworkImage(
@@ -219,10 +227,11 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
                 child: CircularProgressIndicator(),
               ),
             ),
-            errorWidget: (context, url, error) => _buildNoPhotoPlaceholder(checkin),
+            errorWidget: (context, url, error) =>
+                _buildNoPhotoPlaceholder(checkin),
           );
         }
-        
+
         // Last resort: No photo available
         return _buildNoPhotoPlaceholder(checkin);
       },
@@ -723,7 +732,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-    
+
     if (difference == 0) {
       return 'Today at ${_formatTime(date)}';
     } else if (difference == 1) {
@@ -732,8 +741,18 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       return '$difference days ago';
     } else {
       final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
       ];
       return '${months[date.month - 1]} ${date.day}, ${date.year}';
     }
@@ -744,4 +763,4 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     final minute = date.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
   }
-} 
+}

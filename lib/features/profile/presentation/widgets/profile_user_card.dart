@@ -26,7 +26,8 @@ class ProfileUserCard extends StatelessWidget {
     return Consumer<ProfilePhotoProvider>(
       builder: (context, profilePhotoProvider, child) {
         return Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           elevation: 2,
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -37,7 +38,8 @@ class ProfileUserCard extends StatelessWidget {
                     profilePhotoProvider.hasProfilePhoto
                         ? CircleAvatar(
                             radius: 38,
-                            backgroundImage: profilePhotoProvider.getProfilePhotoImage(),
+                            backgroundImage:
+                                profilePhotoProvider.getProfilePhotoImage(),
                           )
                         : AvatarUtils.buildAvatar(
                             photoUrl: user.photoUrl,
@@ -79,12 +81,14 @@ class ProfileUserCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          if (user.subscriptionStatus == SubscriptionStatus.premium)
+                          if (user.subscriptionStatus ==
+                              SubscriptionStatus.premium)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppConstants.primaryColor.withOpacity(0.12),
+                                color:
+                                    AppConstants.primaryColor.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text('Premium',
@@ -97,7 +101,8 @@ class ProfileUserCard extends StatelessWidget {
                                 color: AppConstants.textTertiary),
                             onPressed: () {
                               HapticFeedback.lightImpact();
-                              _showEditProfileDialog(context, user, authProvider);
+                              _showEditProfileDialog(
+                                  context, user, authProvider);
                             },
                             tooltip: 'Edit profile',
                             padding: EdgeInsets.zero,
@@ -157,8 +162,8 @@ class ProfileUserCard extends StatelessWidget {
     return '${months[date.month - 1]} ${date.year}';
   }
 
-  void _showEditProfileDialog(
-      BuildContext context, UserModel user, app_auth.AuthProvider authProvider) {
+  void _showEditProfileDialog(BuildContext context, UserModel user,
+      app_auth.AuthProvider authProvider) {
     final nameController = TextEditingController(text: user.name ?? '');
     final logger = Logger();
     bool isLoading = false;
@@ -211,8 +216,8 @@ class ProfileUserCard extends StatelessWidget {
 
                           try {
                             // Update the AuthProvider which will handle both Firebase and local storage
-                            final success =
-                                await authProvider.updateUserProfile(updatedUser);
+                            final success = await authProvider
+                                .updateUserProfile(updatedUser);
 
                             logger.d('Edit profile - Update result: $success');
 
@@ -221,7 +226,8 @@ class ProfileUserCard extends StatelessWidget {
                               // Profile update handled silently - the UI will reflect the changes automatically
                             }
                           } catch (e) {
-                            logger.e('Edit profile - Error updating profile: $e');
+                            logger
+                                .e('Edit profile - Error updating profile: $e');
                             if (context.mounted) {
                               Navigator.of(context).pop();
                               // Error handled silently - user can try again if needed
@@ -239,7 +245,8 @@ class ProfileUserCard extends StatelessWidget {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text('Save'),
@@ -250,4 +257,4 @@ class ProfileUserCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

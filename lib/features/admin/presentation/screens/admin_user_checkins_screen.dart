@@ -55,7 +55,6 @@ class AdminUserCheckinsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 const SizedBox(height: 24),
 
                 // Stats section

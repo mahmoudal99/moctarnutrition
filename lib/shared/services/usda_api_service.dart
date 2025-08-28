@@ -1,7 +1,11 @@
 // Re-export types for backward compatibility
 export 'usda_client_service.dart' show USDASearchResult, USDAFoodDetails;
 export 'nutrition_comparison_service.dart' show NutritionComparison;
-export 'nutrition_verification_service.dart' show NutritionVerificationResult, MealVerificationResult, IngredientVerificationDetail;
+export 'nutrition_verification_service.dart'
+    show
+        NutritionVerificationResult,
+        MealVerificationResult,
+        IngredientVerificationDetail;
 
 import 'package:logger/logger.dart';
 import 'ingredient_name_mapper_service.dart';
@@ -16,14 +20,16 @@ class USDAApiService {
   /// Search for a food item in USDA database (delegated to USDAClientService)
   static Future<List<USDASearchResult>> searchFood(String query) async {
     // This is now handled by USDAClientService
-    _logger.w('searchFood is deprecated. Use USDAClientService.searchFood instead.');
+    _logger.w(
+        'searchFood is deprecated. Use USDAClientService.searchFood instead.');
     return USDAClientService.searchFood(query);
   }
 
   /// Get detailed nutritional information for a specific food (delegated to USDAClientService)
   static Future<USDAFoodDetails?> getFoodDetails(int fdcId) async {
     // This is now handled by USDAClientService
-    _logger.w('getFoodDetails is deprecated. Use USDAClientService.getFoodDetails instead.');
+    _logger.w(
+        'getFoodDetails is deprecated. Use USDAClientService.getFoodDetails instead.');
     return USDAClientService.getFoodDetails(fdcId);
   }
 
@@ -66,4 +72,4 @@ class USDAApiService {
       'nutritionVerification': NutritionVerificationService.getCacheStats(),
     };
   }
-} 
+}

@@ -135,10 +135,10 @@ class RateLimitService {
         }
 
         print('API call successful${context != null ? ' for $context' : ''}');
-        
+
         // Track token usage for free token monitoring
         _trackTokenUsage(response, context);
-        
+
         return response;
       },
       maxAttempts: _maxRetries,
@@ -225,19 +225,19 @@ class RateLimitService {
         final promptTokens = usage['prompt_tokens'] ?? 0;
         final completionTokens = usage['completion_tokens'] ?? 0;
         final totalTokens = usage['total_tokens'] ?? 0;
-        
+
         print('Token usage${context != null ? ' for $context' : ''}:');
         print('  - Prompt tokens: $promptTokens');
         print('  - Completion tokens: $completionTokens');
         print('  - Total tokens: $totalTokens');
-        
+
         // Calculate remaining free tokens (2.5M for GPT-4o-mini)
         final dailyTokensUsed = _getDailyTokenUsage();
         final remainingFreeTokens = 2500000 - dailyTokensUsed;
-        
+
         print('  - Daily tokens used: $dailyTokensUsed');
         print('  - Remaining free tokens: $remainingFreeTokens');
-        
+
         if (remainingFreeTokens < 100000) {
           print('⚠️ WARNING: Low free token balance remaining!');
         }

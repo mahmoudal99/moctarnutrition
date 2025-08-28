@@ -24,7 +24,6 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
   int _currentIndex = 0;
 
   List<_NavItem> _buildNavItems(UserModel? user) {
-
     if (user != null && user.role == UserRole.admin) {
       return [
         const _NavItem(
@@ -112,7 +111,8 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
     );
   }
 
-  Widget _buildFloatingBottomBar(List<_NavItem> items, int currentIndex, BuildContext context) {
+  Widget _buildFloatingBottomBar(
+      List<_NavItem> items, int currentIndex, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       child: Row(
@@ -141,15 +141,20 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
                   children: [
                     Icon(
                       item.icon,
-                      color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
+                      color: isSelected
+                          ? AppConstants.primaryColor
+                          : AppConstants.textTertiary,
                       size: 20,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.label,
                       style: AppTextStyles.caption.copyWith(
-                        color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        color: isSelected
+                            ? AppConstants.primaryColor
+                            : AppConstants.textTertiary,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
                       ),
                     ),
                   ],
@@ -173,4 +178,4 @@ class _NavItem {
     required this.label,
     required this.route,
   });
-} 
+}

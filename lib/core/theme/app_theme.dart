@@ -48,7 +48,8 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppConstants.primaryColor,
           side: const BorderSide(color: AppConstants.primaryColor),
-          textStyle: AppTextStyles.button.copyWith(color: AppConstants.primaryColor),
+          textStyle:
+              AppTextStyles.button.copyWith(color: AppConstants.primaryColor),
           padding: const EdgeInsets.symmetric(
             horizontal: AppConstants.spacingL,
             vertical: AppConstants.spacingM,
@@ -61,7 +62,8 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppConstants.primaryColor,
-          textStyle: AppTextStyles.button.copyWith(color: AppConstants.primaryColor),
+          textStyle:
+              AppTextStyles.button.copyWith(color: AppConstants.primaryColor),
           padding: const EdgeInsets.symmetric(
             horizontal: AppConstants.spacingM,
             vertical: AppConstants.spacingS,
@@ -81,7 +83,8 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
-          borderSide: const BorderSide(color: AppConstants.primaryColor, width: 2),
+          borderSide:
+              const BorderSide(color: AppConstants.primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -91,8 +94,10 @@ class AppTheme {
           horizontal: AppConstants.spacingM,
           vertical: AppConstants.spacingM,
         ),
-        labelStyle: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
-        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textTertiary),
+        labelStyle: AppTextStyles.bodyMedium
+            .copyWith(color: AppConstants.textSecondary),
+        hintStyle:
+            AppTextStyles.bodyMedium.copyWith(color: AppConstants.textTertiary),
       ),
       cardTheme: CardTheme(
         color: AppConstants.surfaceColor,
@@ -142,13 +147,20 @@ class AppTheme {
         onError: AppConstants.surfaceColor,
       ),
       textTheme: TextTheme(
-        displayLarge: AppTextStyles.heading1.copyWith(color: AppConstants.surfaceColor),
-        displayMedium: AppTextStyles.heading2.copyWith(color: AppConstants.surfaceColor),
-        displaySmall: AppTextStyles.heading3.copyWith(color: AppConstants.surfaceColor),
-        headlineMedium: AppTextStyles.heading4.copyWith(color: AppConstants.surfaceColor),
-        bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppConstants.surfaceColor),
-        bodyMedium: AppTextStyles.bodyMedium.copyWith(color: AppConstants.surfaceColor),
-        bodySmall: AppTextStyles.bodySmall.copyWith(color: AppConstants.textTertiary),
+        displayLarge:
+            AppTextStyles.heading1.copyWith(color: AppConstants.surfaceColor),
+        displayMedium:
+            AppTextStyles.heading2.copyWith(color: AppConstants.surfaceColor),
+        displaySmall:
+            AppTextStyles.heading3.copyWith(color: AppConstants.surfaceColor),
+        headlineMedium:
+            AppTextStyles.heading4.copyWith(color: AppConstants.surfaceColor),
+        bodyLarge:
+            AppTextStyles.bodyLarge.copyWith(color: AppConstants.surfaceColor),
+        bodyMedium:
+            AppTextStyles.bodyMedium.copyWith(color: AppConstants.surfaceColor),
+        bodySmall:
+            AppTextStyles.bodySmall.copyWith(color: AppConstants.textTertiary),
         labelSmall: AppTextStyles.caption,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -170,7 +182,8 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppConstants.primaryColor,
           side: const BorderSide(color: AppConstants.primaryColor),
-          textStyle: AppTextStyles.button.copyWith(color: AppConstants.primaryColor),
+          textStyle:
+              AppTextStyles.button.copyWith(color: AppConstants.primaryColor),
           padding: const EdgeInsets.symmetric(
             horizontal: AppConstants.spacingL,
             vertical: AppConstants.spacingM,
@@ -183,7 +196,8 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppConstants.primaryColor,
-          textStyle: AppTextStyles.button.copyWith(color: AppConstants.primaryColor),
+          textStyle:
+              AppTextStyles.button.copyWith(color: AppConstants.primaryColor),
           padding: const EdgeInsets.symmetric(
             horizontal: AppConstants.spacingM,
             vertical: AppConstants.spacingS,
@@ -203,7 +217,8 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
-          borderSide: const BorderSide(color: AppConstants.primaryColor, width: 2),
+          borderSide:
+              const BorderSide(color: AppConstants.primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -213,8 +228,10 @@ class AppTheme {
           horizontal: AppConstants.spacingM,
           vertical: AppConstants.spacingM,
         ),
-        labelStyle: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
-        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textTertiary),
+        labelStyle: AppTextStyles.bodyMedium
+            .copyWith(color: AppConstants.textSecondary),
+        hintStyle:
+            AppTextStyles.bodyMedium.copyWith(color: AppConstants.textTertiary),
       ),
       cardTheme: CardTheme(
         color: const Color(0xFF1F2937),
@@ -245,4 +262,4 @@ class AppTheme {
       scaffoldBackgroundColor: const Color(0xFF111827),
     );
   }
-} 
+}

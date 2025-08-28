@@ -30,11 +30,11 @@ class ProfilePhotoService {
 
       final List<int> imageBytes = await imageFile.readAsBytes();
       final String base64Image = base64Encode(imageBytes);
-      
+
       final prefs = await SharedPreferences.getInstance();
       final String key = '$_keyPrefix$userId';
       await prefs.setString(key, base64Image);
-      
+
       _logger.d('Profile photo stored successfully for user: $userId');
       return true;
     } catch (e) {
@@ -49,7 +49,7 @@ class ProfilePhotoService {
       final prefs = await SharedPreferences.getInstance();
       final String key = '$_keyPrefix$userId';
       await prefs.remove(key);
-      
+
       _logger.d('Profile photo removed successfully for user: $userId');
       return true;
     } catch (e) {
@@ -74,4 +74,4 @@ class ProfilePhotoService {
   static String getProfilePhotoKey(String userId) {
     return '$_keyPrefix$userId';
   }
-} 
+}

@@ -75,7 +75,8 @@ class PhotoCaptureWidget extends StatelessWidget {
               left: 12,
               right: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.6),
                   borderRadius: BorderRadius.circular(8),
@@ -273,4 +274,4 @@ class PhotoCaptureWidget extends StatelessWidget {
       }
     }
   }
-} 
+}

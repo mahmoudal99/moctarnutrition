@@ -26,23 +26,24 @@ class _MealDetailScreenState extends State<MealDetailScreen>
   late Animation<double> _nutritionOpacityAnimation;
   late Animation<double> _pillOpacityAnimation;
   late Animation<double> _pillScaleAnimation;
-  
+
   double _scrollOffset = 0.0;
-  static const double _scrollThreshold = 100.0; // Reduced threshold for easier testing
+  static const double _scrollThreshold =
+      100.0; // Reduced threshold for easier testing
 
   @override
   void initState() {
     super.initState();
     _loadVerificationResult();
-    
+
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    
+
     _nutritionAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _nutritionScaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
@@ -50,7 +51,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
       parent: _nutritionAnimationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _nutritionOpacityAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
@@ -58,7 +59,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
       parent: _nutritionAnimationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _pillOpacityAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -66,7 +67,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
       parent: _nutritionAnimationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _pillScaleAnimation = Tween<double>(
       begin: 0.8,
       end: 1.0,
@@ -87,10 +88,12 @@ class _MealDetailScreenState extends State<MealDetailScreen>
     setState(() {
       _scrollOffset = _scrollController.offset;
     });
-    
-    if (_scrollOffset > _scrollThreshold && _nutritionAnimationController.value == 0) {
+
+    if (_scrollOffset > _scrollThreshold &&
+        _nutritionAnimationController.value == 0) {
       _nutritionAnimationController.forward();
-    } else if (_scrollOffset <= _scrollThreshold && _nutritionAnimationController.value == 1) {
+    } else if (_scrollOffset <= _scrollThreshold &&
+        _nutritionAnimationController.value == 1) {
       _nutritionAnimationController.reverse();
     }
   }

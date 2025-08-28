@@ -13,7 +13,7 @@ class NotificationsToggle extends StatefulWidget {
 
 class _NotificationsToggleState extends State<NotificationsToggle> {
   static final _logger = AppLogger.instance;
-  
+
   bool _notificationsEnabled = false;
   bool _isLoading = false;
 
@@ -39,7 +39,8 @@ class _NotificationsToggleState extends State<NotificationsToggle> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.notifications, color: AppConstants.textSecondary),
+      leading:
+          const Icon(Icons.notifications, color: AppConstants.textSecondary),
       title: Text(
         'Notifications',
         style: AppTextStyles.bodyMedium,
@@ -55,21 +56,24 @@ class _NotificationsToggleState extends State<NotificationsToggle> {
         onChanged: _isLoading ? null : _handleNotificationToggle,
         activeColor: AppConstants.primaryColor,
       ),
-      onTap: _isLoading ? null : () => _handleNotificationToggle(!_notificationsEnabled),
+      onTap: _isLoading
+          ? null
+          : () => _handleNotificationToggle(!_notificationsEnabled),
     );
   }
 
   /// Handle the notification toggle change
   Future<void> _handleNotificationToggle(bool enabled) async {
     HapticFeedback.lightImpact();
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
       if (enabled) {
         // User wants to enable notifications - request permission
-        final permissionResult = await NotificationService.requestNotificationPermission();
-        
+        final permissionResult =
+            await NotificationService.requestNotificationPermission();
+
         if (permissionResult.isGranted) {
           setState(() => _notificationsEnabled = true);
           await NotificationService.showTestNotification();
@@ -89,5 +93,4 @@ class _NotificationsToggleState extends State<NotificationsToggle> {
       setState(() => _isLoading = false);
     }
   }
-
 }

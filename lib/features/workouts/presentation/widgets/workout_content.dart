@@ -78,4 +78,4 @@ class WorkoutContent extends StatelessWidget {
       );
     }).toList();
   }
-} 
+}

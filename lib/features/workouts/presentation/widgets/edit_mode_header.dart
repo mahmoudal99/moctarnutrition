@@ -85,4 +85,4 @@ class EditModeHeader extends StatelessWidget {
       },
     );
   }
-} 
+}

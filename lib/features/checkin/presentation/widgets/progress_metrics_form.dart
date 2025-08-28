@@ -30,7 +30,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
     'Left Calf',
     'Right Calf',
   ];
-  
+
   bool _showMeasurements = false;
 
   @override
@@ -168,7 +168,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
         itemBuilder: (context, index) {
           final type = _measurementTypes[index];
           final controller = _measurementControllers[type]!;
-          
+
           return _buildMeasurementField(
             controller: controller,
             label: type,
@@ -240,7 +240,8 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
                 color: AppConstants.primaryColor,
               ),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
         ),
       ],
@@ -299,7 +300,8 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
                   color: AppConstants.primaryColor,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             ),
           ),
         ),
@@ -311,7 +313,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
     setState(() {
       _showMeasurements = !_showMeasurements;
     });
-    
+
     // If hiding measurements, clear all data
     if (!_showMeasurements) {
       for (final controller in _measurementControllers.values) {
@@ -323,7 +325,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
 
   void _updateMeasurement(String type, String value) {
     final measurements = Map<String, double>.from(widget.measurements);
-    
+
     if (value.isNotEmpty) {
       final doubleValue = double.tryParse(value);
       if (doubleValue != null) {
@@ -332,7 +334,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
     } else {
       measurements.remove(type);
     }
-    
+
     widget.onMeasurementsChanged(measurements);
   }
-} 
+}

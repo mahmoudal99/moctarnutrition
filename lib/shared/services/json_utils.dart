@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 /// Utility class for cleaning and fixing JSON responses from AI
 class JsonUtils {
   static final _logger = Logger();
+
   /// Clean and fix common JSON issues from AI responses
   static String cleanAndFixJson(String aiResponse) {
     // Remove markdown code fences if present
@@ -53,7 +54,8 @@ class JsonUtils {
     final closeBrackets = ']'.allMatches(jsonString).length;
 
     if (openBraces != closeBraces || openBrackets != closeBrackets) {
-      _logger.w('JSON appears to be truncated. Open braces: $openBraces, Close braces: $closeBraces');
+      _logger.w(
+          'JSON appears to be truncated. Open braces: $openBraces, Close braces: $closeBraces');
       _logger.w('Open brackets: $openBrackets, Close brackets: $closeBrackets');
       throw Exception('AI response was truncated. Please try again.');
     }
@@ -62,7 +64,8 @@ class JsonUtils {
   /// Remove single-line and multi-line comments
   static String _removeComments(String jsonString) {
     // Remove single-line comments (// ...)
-    String cleaned = jsonString.replaceAll(RegExp(r'//.*$', multiLine: true), '');
+    String cleaned =
+        jsonString.replaceAll(RegExp(r'//.*$', multiLine: true), '');
 
     // Remove multi-line comments (/* ... */)
     cleaned = cleaned.replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '');
@@ -119,9 +122,11 @@ class JsonUtils {
       final data = jsonDecode(jsonString);
       return Map<String, dynamic>.from(data);
     } catch (e) {
-      _logger.e('JSON parsing failed${context != null ? ' for $context' : ''}: $e');
+      _logger.e(
+          'JSON parsing failed${context != null ? ' for $context' : ''}: $e');
       _logger.e('JSON string: $jsonString');
-      throw Exception('Failed to parse JSON${context != null ? ' for $context' : ''}: $e');
+      throw Exception(
+          'Failed to parse JSON${context != null ? ' for $context' : ''}: $e');
     }
   }
 
@@ -140,4 +145,4 @@ class JsonUtils {
     if (value is String) return double.tryParse(value) ?? 0.0;
     return 0.0;
   }
-} 
+}

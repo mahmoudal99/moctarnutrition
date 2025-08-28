@@ -50,7 +50,8 @@ class DraggableWorkoutCard extends StatelessWidget {
                         padding: const EdgeInsets.all(AppConstants.spacingXS),
                         decoration: BoxDecoration(
                           color: AppConstants.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusXS),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusXS),
                         ),
                         child: Icon(
                           Icons.drag_handle,
@@ -184,4 +185,4 @@ class DraggableWorkoutCard extends StatelessWidget {
   void _showWorkoutDetails(BuildContext context) {
     context.push('/workout-details', extra: dailyWorkout);
   }
-} 
+}

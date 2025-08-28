@@ -47,7 +47,8 @@ class OnboardingAllergiesStep extends StatefulWidget {
   });
 
   @override
-  State<OnboardingAllergiesStep> createState() => _OnboardingAllergiesStepState();
+  State<OnboardingAllergiesStep> createState() =>
+      _OnboardingAllergiesStepState();
 }
 
 class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
@@ -102,13 +103,14 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
           ),
         ),
         const SizedBox(height: AppConstants.spacingL),
-        
+
         // Common allergies grid
         Wrap(
           spacing: AppConstants.spacingS,
           runSpacing: AppConstants.spacingS,
           children: _commonAllergies.map((allergy) {
-            final isSelected = widget.selectedAllergies.any((item) => item.name == allergy);
+            final isSelected =
+                widget.selectedAllergies.any((item) => item.name == allergy);
             return _AllergyChip(
               label: allergy,
               isSelected: isSelected,
@@ -116,14 +118,14 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
             );
           }).toList(),
         ),
-        
+
         const SizedBox(height: AppConstants.spacingL),
-        
+
         // Custom allergy input
         _buildCustomAllergyInput(),
-        
+
         const SizedBox(height: AppConstants.spacingL),
-        
+
         // Selected allergies list
         if (widget.selectedAllergies.isNotEmpty) ...[
           Text(
@@ -132,10 +134,10 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
           ),
           const SizedBox(height: AppConstants.spacingM),
           ...widget.selectedAllergies.map((allergy) => _AllergyCard(
-            allergy: allergy,
-            onEdit: () => _editAllergy(allergy),
-            onDelete: () => _removeAllergy(allergy),
-          )),
+                allergy: allergy,
+                onEdit: () => _editAllergy(allergy),
+                onDelete: () => _removeAllergy(allergy),
+              )),
         ],
       ],
     );
@@ -168,7 +170,7 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
             label: 'Allergy/Intolerance Name',
           ),
           const SizedBox(height: AppConstants.spacingM),
-          
+
           // Severity selector
           Text(
             'Severity Level',
@@ -200,7 +202,7 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: AppConstants.spacingM),
           CustomTextField(
             controller: _notesController,
@@ -208,7 +210,7 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
             label: 'Notes (Optional)',
             maxLines: 2,
           ),
-          
+
           const SizedBox(height: AppConstants.spacingM),
           SizedBox(
             width: double.infinity,
@@ -251,8 +253,9 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
   }
 
   void _toggleAllergy(String allergyName) {
-    final existingIndex = widget.selectedAllergies.indexWhere((item) => item.name == allergyName);
-    
+    final existingIndex =
+        widget.selectedAllergies.indexWhere((item) => item.name == allergyName);
+
     if (existingIndex != -1) {
       // Remove if already selected
       final newAllergies = List<AllergyItem>.from(widget.selectedAllergies);
@@ -275,10 +278,12 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
       newAllergies.add(AllergyItem(
         name: _allergyController.text.trim(),
         severity: _selectedSeverity,
-        notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+        notes: _notesController.text.trim().isNotEmpty
+            ? _notesController.text.trim()
+            : null,
       ));
       widget.onAllergiesChanged(newAllergies);
-      
+
       // Reset form
       _allergyController.clear();
       _notesController.clear();
@@ -294,7 +299,7 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
     setState(() {
       _selectedSeverity = allergy.severity;
     });
-    
+
     // Remove the old one and add the new one when user confirms
     _removeAllergy(allergy);
   }
@@ -462,4 +467,4 @@ class _AllergyCard extends StatelessWidget {
         return 'Anaphylaxis';
     }
   }
-} 
+}

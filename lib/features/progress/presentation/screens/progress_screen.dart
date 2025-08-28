@@ -33,7 +33,8 @@ class _ProgressScreenState extends State<ProgressScreen>
   Future<List<String>>? _measurementTypesFuture;
   Map<String, Future<List<MeasurementDataPoint>>> _measurementDataFutures = {};
   Future<OverviewData>? _overviewDataFuture;
-  int _selectedWeekOffset = 0; // 0 = this week, 1 = last week, 2 = 2 weeks ago, 3 = 3 weeks ago
+  int _selectedWeekOffset =
+      0; // 0 = this week, 1 = last week, 2 = 2 weeks ago, 3 = 3 weeks ago
 
   @override
   void initState() {
@@ -86,52 +87,60 @@ class _ProgressScreenState extends State<ProgressScreen>
   }
 
   /// Get overview data using the SAME LOGIC as home screen
-  Future<OverviewData> _getOverviewDataWithMealPlan(String userId, UserModel? userModel) async {
+  Future<OverviewData> _getOverviewDataWithMealPlan(
+      String userId, UserModel? userModel) async {
     try {
-      final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+      final mealPlanProvider =
+          Provider.of<MealPlanProvider>(context, listen: false);
       final mealPlan = mealPlanProvider.mealPlan;
-      
+
       if (mealPlan == null) {
         return OverviewData.empty();
       }
 
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      
+
       // Calculate the start date for the selected week
       // Get the Monday of the current week
-      final currentWeekMonday = today.subtract(Duration(days: today.weekday - 1));
-      
+      final currentWeekMonday =
+          today.subtract(Duration(days: today.weekday - 1));
+
       // Go back by the selected week offset to get the target week's Monday
-      final targetWeekMonday = currentWeekMonday.subtract(Duration(days: _selectedWeekOffset * 7));
-      
+      final targetWeekMonday =
+          currentWeekMonday.subtract(Duration(days: _selectedWeekOffset * 7));
+
       final dailyData = <DailyCaloriesPoint>[];
-      
+
       // Get data for the selected week (7 days total)
       for (int i = 0; i < 7; i++) {
         final date = targetWeekMonday.add(Duration(days: i));
         final weekdayIndex = date.weekday - 1; // Monday = 0, Sunday = 6
-        
+
         if (weekdayIndex >= 0 && weekdayIndex < mealPlan.mealDays.length) {
           final templateMealDay = mealPlan.mealDays[weekdayIndex];
-          
+
           // Create meal day for this date (same as home screen)
           final mealDay = MealDay(
             id: '${templateMealDay.id}_${date.toIso8601String()}',
             date: date,
-            meals: templateMealDay.meals.map((meal) => meal.copyWith()).toList(),
+            meals:
+                templateMealDay.meals.map((meal) => meal.copyWith()).toList(),
             totalCalories: templateMealDay.totalCalories,
             totalProtein: templateMealDay.totalProtein,
             totalCarbs: templateMealDay.totalCarbs,
             totalFat: templateMealDay.totalFat,
           );
-          
+
           // Load consumption data for this date (same as home screen)
-          final consumptionData = await DailyConsumptionService.getDailyConsumptionSummary(userId, date);
-          
+          final consumptionData =
+              await DailyConsumptionService.getDailyConsumptionSummary(
+                  userId, date);
+
           if (consumptionData != null) {
-            final mealConsumption = Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
-            
+            final mealConsumption = Map<String, bool>.from(
+                consumptionData['mealConsumption'] ?? {});
+
             // Apply consumption data to meals (same as home screen)
             for (final meal in mealDay.meals) {
               if (mealConsumption.containsKey(meal.id)) {
@@ -140,10 +149,10 @@ class _ProgressScreenState extends State<ProgressScreen>
                 meal.isConsumed = false;
               }
             }
-            
+
             // Calculate consumed nutrition (same as home screen)
             mealDay.calculateConsumedNutrition();
-            
+
             dailyData.add(DailyCaloriesPoint(
               date: date,
               totalCalories: mealDay.consumedCalories,
@@ -157,7 +166,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               meal.isConsumed = false;
             }
             mealDay.calculateConsumedNutrition();
-            
+
             dailyData.add(DailyCaloriesPoint(
               date: date,
               totalCalories: mealDay.consumedCalories,
@@ -177,9 +186,10 @@ class _ProgressScreenState extends State<ProgressScreen>
           ));
         }
       }
-      
-      final weeklyTotal = dailyData.fold(0.0, (sum, day) => sum + day.totalCalories);
-      
+
+      final weeklyTotal =
+          dailyData.fold(0.0, (sum, day) => sum + day.totalCalories);
+
       // Get streak data
       final streakData = await StreakService.getCurrentStreak(userId);
       final streak = StreakData(
@@ -187,23 +197,24 @@ class _ProgressScreenState extends State<ProgressScreen>
         isActive: streakData > 0,
         lastCompletedDate: null,
       );
-      
+
       // Get weight progress data from user preferences and check-ins
       WeightProgressData? weightProgress;
       if (userModel != null) {
         final startWeight = userModel.preferences.weight;
         final goalWeight = userModel.preferences.desiredWeight;
-        
+
         // Get current weight from check-ins if available
         double currentWeight = startWeight;
         final checkins = await ProgressService.getUserCheckins(userId);
         if (checkins.isNotEmpty) {
           final weightData = checkins.where((c) => c.weight != null).toList();
           if (weightData.isNotEmpty) {
-            currentWeight = weightData.last.weight!; // Use latest check-in weight
+            currentWeight =
+                weightData.last.weight!; // Use latest check-in weight
           }
         }
-        
+
         // Calculate progress percentage
         double progressPercentage = 0.0;
         if (startWeight != goalWeight) {
@@ -212,22 +223,25 @@ class _ProgressScreenState extends State<ProgressScreen>
           progressPercentage = (currentDistance / totalDistance) * 100;
           progressPercentage = progressPercentage.clamp(0.0, 100.0);
         }
-        
+
         weightProgress = WeightProgressData(
           currentWeight: currentWeight,
           startWeight: startWeight,
           goalWeight: goalWeight,
           progressPercentage: progressPercentage,
-          dataPoints: checkins.isNotEmpty 
-              ? checkins.where((c) => c.weight != null).map((c) => WeightDataPoint(
-                  date: c.weekStartDate,
-                  weight: c.weight!,
-                  weekRange: c.weekRange,
-                )).toList()
+          dataPoints: checkins.isNotEmpty
+              ? checkins
+                  .where((c) => c.weight != null)
+                  .map((c) => WeightDataPoint(
+                        date: c.weekStartDate,
+                        weight: c.weight!,
+                        weekRange: c.weekRange,
+                      ))
+                  .toList()
               : [],
         );
       }
-      
+
       return OverviewData(
         streak: streak,
         weightProgress: weightProgress,
@@ -251,7 +265,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     if (userId != null) {
       setState(() {
-        _overviewDataFuture = ProgressService.getOverviewData(userId, userModel: userModel);
+        _overviewDataFuture =
+            ProgressService.getOverviewData(userId, userModel: userModel);
       });
     }
   }
@@ -276,18 +291,18 @@ class _ProgressScreenState extends State<ProgressScreen>
     if (userModel == null) {
       return BMIData.empty();
     }
-    
+
     final preferences = userModel.preferences;
     final height = preferences.height;
     final currentWeight = preferences.weight;
-    
+
     if (height <= 0 || currentWeight <= 0) {
       return BMIData.empty();
     }
-    
+
     final bmi = currentWeight / ((height / 100) * (height / 100));
     final bmiCategory = _getBMICategory(bmi);
-    
+
     return BMIData(
       currentBMI: bmi,
       bmiCategory: bmiCategory,

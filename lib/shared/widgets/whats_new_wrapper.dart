@@ -33,7 +33,7 @@ class _WhatsNewWrapperState extends State<WhatsNewWrapper> {
       setState(() {
         _packageInfo = packageInfo;
       });
-      
+
       if (widget.shouldCheckForNewVersion) {
         _checkAndShowWhatsNew(packageInfo.version);
       }
@@ -44,14 +44,15 @@ class _WhatsNewWrapperState extends State<WhatsNewWrapper> {
 
   Future<void> _checkAndShowWhatsNew(String currentVersion) async {
     if (_hasCheckedVersion) return;
-    
+
     try {
-      final hasViewed = await VersionTrackingService.hasViewedCurrentVersion(currentVersion);
-      
+      final hasViewed =
+          await VersionTrackingService.hasViewedCurrentVersion(currentVersion);
+
       if (!hasViewed && mounted) {
         // Show the modal after a short delay to ensure the UI is fully loaded
         await Future.delayed(const Duration(milliseconds: 1000));
-        
+
         if (mounted) {
           showDialog(
             context: context,
@@ -73,4 +74,4 @@ class _WhatsNewWrapperState extends State<WhatsNewWrapper> {
   Widget build(BuildContext context) {
     return widget.child;
   }
-} 
+}

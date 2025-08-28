@@ -108,4 +108,4 @@ class AdminInfoRow extends StatelessWidget {
       ),
     );
   }
-} 
+}

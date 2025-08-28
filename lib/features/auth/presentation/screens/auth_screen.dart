@@ -11,7 +11,7 @@ import '../../../profile/presentation/screens/privacy_policy_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   final bool isSignUp;
-  
+
   const AuthScreen({super.key, this.isSignUp = false});
 
   @override
@@ -47,7 +47,8 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
           child: Column(
             children: [
               const SizedBox(height: AppConstants.spacingXL),
@@ -98,7 +99,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         const SizedBox(height: AppConstants.spacingXS),
         Text(
-          _isSignUp 
+          _isSignUp
               ? 'Create your account to save your progress'
               : 'Welcome back! Sign in to continue',
           style: AppTextStyles.bodyMedium.copyWith(
@@ -138,7 +139,8 @@ class _AuthScreenState extends State<AuthScreen> {
               if (value == null || value.isEmpty) {
                 return 'Please enter your email';
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(value)) {
                 return 'Please enter a valid email';
               }
               return null;
@@ -179,7 +181,8 @@ class _AuthScreenState extends State<AuthScreen> {
               child: TextButton(
                 onPressed: () => context.push('/password-reset'),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.spacingS),
                   minimumSize: const Size(0, 32),
                 ),
                 child: Text(
@@ -258,8 +261,8 @@ class _AuthScreenState extends State<AuthScreen> {
           width: double.infinity,
           height: 52,
           child: CustomButton(
-            text: authProvider.isLoading 
-                ? 'Please wait...' 
+            text: authProvider.isLoading
+                ? 'Please wait...'
                 : (_isSignUp ? 'Create Account' : 'Sign In'),
             isLoading: authProvider.isLoading,
             onPressed: _handleAuth,
@@ -349,9 +352,7 @@ class _AuthScreenState extends State<AuthScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          _isSignUp 
-              ? 'Already have an account? ' 
-              : 'Don\'t have an account? ',
+          _isSignUp ? 'Already have an account? ' : 'Don\'t have an account? ',
           style: AppTextStyles.bodySmall.copyWith(
             color: AppConstants.textSecondary,
           ),
@@ -360,7 +361,8 @@ class _AuthScreenState extends State<AuthScreen> {
           onTap: () {
             setState(() {
               _isSignUp = !_isSignUp;
-              _acceptedTerms = false; // Reset terms acceptance when switching modes
+              _acceptedTerms =
+                  false; // Reset terms acceptance when switching modes
             });
           },
           child: Text(
@@ -380,9 +382,12 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         Row(
           children: [
-            Expanded(child: Divider(color: AppConstants.textTertiary.withOpacity(0.3))),
+            Expanded(
+                child:
+                    Divider(color: AppConstants.textTertiary.withOpacity(0.3))),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
               child: Text(
                 'or',
                 style: AppTextStyles.caption.copyWith(
@@ -390,7 +395,9 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
               ),
             ),
-            Expanded(child: Divider(color: AppConstants.textTertiary.withOpacity(0.3))),
+            Expanded(
+                child:
+                    Divider(color: AppConstants.textTertiary.withOpacity(0.3))),
           ],
         ),
         const SizedBox(height: AppConstants.spacingS),
@@ -485,7 +492,8 @@ class _AuthScreenState extends State<AuthScreen> {
         TextButton(
           onPressed: _handleBackToOnboarding,
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
             minimumSize: const Size(0, 32),
           ),
           child: Text(
@@ -510,7 +518,8 @@ class _AuthScreenState extends State<AuthScreen> {
       if (!_acceptedTerms) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please accept terms and conditions to create an account.'),
+            content: Text(
+                'Please accept terms and conditions to create an account.'),
             backgroundColor: AppConstants.errorColor,
           ),
         );
@@ -539,7 +548,8 @@ class _AuthScreenState extends State<AuthScreen> {
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
-          _logger.i('AuthScreen - User data loaded after delay, navigating to home');
+          _logger.i(
+              'AuthScreen - User data loaded after delay, navigating to home');
           context.go('/home');
         }
       }
@@ -558,7 +568,8 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_isSignUp && !_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please accept terms and conditions to create an account.'),
+          content:
+              Text('Please accept terms and conditions to create an account.'),
           backgroundColor: AppConstants.errorColor,
         ),
       );
@@ -578,7 +589,8 @@ class _AuthScreenState extends State<AuthScreen> {
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
-          _logger.i('AuthScreen - User data loaded after delay, navigating to home');
+          _logger.i(
+              'AuthScreen - User data loaded after delay, navigating to home');
           context.go('/home');
         }
       }
@@ -596,7 +608,8 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_isSignUp && !_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please accept terms and conditions to create an account.'),
+          content:
+              Text('Please accept terms and conditions to create an account.'),
           backgroundColor: AppConstants.errorColor,
         ),
       );
@@ -616,7 +629,8 @@ class _AuthScreenState extends State<AuthScreen> {
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
-          _logger.i('AuthScreen - User data loaded after delay, navigating to home');
+          _logger.i(
+              'AuthScreen - User data loaded after delay, navigating to home');
           context.go('/home');
         }
       }
@@ -624,9 +638,10 @@ class _AuthScreenState extends State<AuthScreen> {
       // Show a more helpful error message for Apple Sign-In
       String errorMessage = authProvider.error!;
       if (errorMessage.contains('Apple sign in')) {
-        errorMessage = 'Apple Sign-In is not configured yet. Please use email/password or Google Sign-In for now.';
+        errorMessage =
+            'Apple Sign-In is not configured yet. Please use email/password or Google Sign-In for now.';
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
@@ -651,7 +666,8 @@ class _AuthScreenState extends State<AuthScreen> {
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
-          _logger.i('AuthScreen - User data loaded after delay, navigating to home');
+          _logger.i(
+              'AuthScreen - User data loaded after delay, navigating to home');
           context.go('/home');
         }
       }
@@ -720,4 +736,4 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
     );
   }
-} 
+}

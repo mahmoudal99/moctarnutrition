@@ -126,4 +126,4 @@ class MeasurementChart extends StatelessWidget {
       ),
     );
   }
-} 
+}

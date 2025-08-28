@@ -15,7 +15,7 @@ class RemindersToggle extends StatefulWidget {
 class _RemindersToggleState extends State<RemindersToggle> {
   static final _logger = AppLogger.instance;
   static const String _remindersPrefKey = 'reminders_enabled';
-  
+
   bool _remindersEnabled = false;
   bool _isInitialized = false;
 
@@ -30,7 +30,7 @@ class _RemindersToggleState extends State<RemindersToggle> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedValue = prefs.getBool(_remindersPrefKey) ?? false;
-      
+
       _logger.d('Loaded saved reminders preference: $savedValue');
       if (mounted) {
         setState(() {
@@ -63,7 +63,7 @@ class _RemindersToggleState extends State<RemindersToggle> {
   /// Handle reminder toggle changes
   Future<void> _handleReminderToggle(bool enabled) async {
     HapticFeedback.lightImpact();
-    
+
     try {
       if (enabled) {
         await _enableReminders();
@@ -83,11 +83,11 @@ class _RemindersToggleState extends State<RemindersToggle> {
   Future<void> _enableReminders() async {
     try {
       _logger.d('Checking notification permissions for reminders...');
-      
+
       // Check if notification permissions are granted first with retry logic
       bool hasPermission = await NotificationService.areNotificationsEnabled();
       _logger.d('Permission check result: $hasPermission');
-      
+
       // If permission check fails, try again after a short delay (permission_handler delay issue)
       if (!hasPermission) {
         _logger.d('First permission check failed, retrying after delay...');
@@ -95,9 +95,10 @@ class _RemindersToggleState extends State<RemindersToggle> {
         hasPermission = await NotificationService.areNotificationsEnabled();
         _logger.d('Permission check retry result: $hasPermission');
       }
-      
+
       if (!hasPermission) {
-        _logger.w('Cannot enable reminders: notification permission not granted');
+        _logger
+            .w('Cannot enable reminders: notification permission not granted');
         if (mounted) {
           setState(() => _remindersEnabled = false);
         }
@@ -108,12 +109,12 @@ class _RemindersToggleState extends State<RemindersToggle> {
       _logger.d('Permissions granted, scheduling weekly reminders...');
       // Schedule weekly reminders
       await NotificationService.scheduleWeeklyCheckinReminder();
-      
+
       if (mounted) {
         setState(() => _remindersEnabled = true);
       }
       await _savePreference(true);
-      
+
       _logger.i('Weekly check-in reminders enabled successfully');
     } catch (e) {
       _logger.e('Error enabling reminders: $e');
@@ -131,12 +132,12 @@ class _RemindersToggleState extends State<RemindersToggle> {
     try {
       // Cancel weekly reminders
       await NotificationService.cancelWeeklyCheckinReminder();
-      
+
       if (mounted) {
         setState(() => _remindersEnabled = false);
       }
       await _savePreference(false);
-      
+
       _logger.i('Weekly check-in reminders disabled');
     } catch (e) {
       _logger.e('Error disabling reminders: $e');
@@ -169,7 +170,9 @@ class _RemindersToggleState extends State<RemindersToggle> {
               onChanged: null, // Disabled until initialized
               activeColor: AppConstants.primaryColor,
             ),
-      onTap: _isInitialized ? () => _handleReminderToggle(!_remindersEnabled) : null,
+      onTap: _isInitialized
+          ? () => _handleReminderToggle(!_remindersEnabled)
+          : null,
     );
   }
 }

@@ -6,10 +6,11 @@ import '../services/exercise_local_storage_service.dart';
 
 class ExerciseProvider extends ChangeNotifier {
   static final _logger = Logger();
-  
+
   final FreeExerciseService _exerciseService = FreeExerciseService();
-  final ExerciseLocalStorageService _localStorage = ExerciseLocalStorageService();
-  
+  final ExerciseLocalStorageService _localStorage =
+      ExerciseLocalStorageService();
+
   List<Exercise> _availableExercises = [];
   List<Exercise> _filteredExercises = [];
   List<String> _availableMuscleGroups = [];
@@ -38,11 +39,11 @@ class ExerciseProvider extends ChangeNotifier {
 
     try {
       _logger.d('Loading exercises from local cache first');
-      
+
       // Try to load from cache first
       final cachedExercises = await _localStorage.loadExercises();
       final cachedMuscleGroups = await _localStorage.loadMuscleGroups();
-      
+
       if (cachedExercises.isNotEmpty && cachedMuscleGroups.isNotEmpty) {
         _availableExercises = cachedExercises;
         _availableMuscleGroups = cachedMuscleGroups;
@@ -70,15 +71,16 @@ class ExerciseProvider extends ChangeNotifier {
   Future<void> _loadFromApi() async {
     try {
       _logger.d('Loading exercises from Free Exercise API');
-      
+
       _availableExercises = await _exerciseService.getAllExercises();
-      _availableMuscleGroups = await _exerciseService.getPrimaryMuscles(); // Use primary muscles for cleaner filtering
+      _availableMuscleGroups = await _exerciseService
+          .getPrimaryMuscles(); // Use primary muscles for cleaner filtering
       _filteredExercises = _availableExercises;
-      
+
       // Cache the data
       await _localStorage.saveExercises(_availableExercises);
       await _localStorage.saveMuscleGroups(_availableMuscleGroups);
-      
+
       _logger.d('Loaded and cached ${_availableExercises.length} exercises');
     } catch (e) {
       _logger.e('Failed to load exercises from API: $e');
@@ -90,23 +92,25 @@ class ExerciseProvider extends ChangeNotifier {
   Future<void> _updateFromApiInBackground() async {
     try {
       _logger.d('Updating exercises from API in background');
-      
+
       final newExercises = await _exerciseService.getAllExercises();
-      final newMuscleGroups = await _exerciseService.getPrimaryMuscles(); // Use primary muscles for cleaner filtering
-      
+      final newMuscleGroups = await _exerciseService
+          .getPrimaryMuscles(); // Use primary muscles for cleaner filtering
+
       // Only update if we got new data
       if (newExercises.isNotEmpty && newMuscleGroups.isNotEmpty) {
         _availableExercises = newExercises;
         _availableMuscleGroups = newMuscleGroups;
-        
+
         // Re-apply current filters
         _filterExercises();
-        
+
         // Update cache
         await _localStorage.saveExercises(_availableExercises);
         await _localStorage.saveMuscleGroups(_availableMuscleGroups);
-        
-        _logger.d('Updated exercises in background: ${_availableExercises.length} exercises');
+
+        _logger.d(
+            'Updated exercises in background: ${_availableExercises.length} exercises');
         notifyListeners();
       }
     } catch (e) {
@@ -120,7 +124,7 @@ class ExerciseProvider extends ChangeNotifier {
     _logger.d('Refreshing exercises from API');
     _setLoading(true);
     _error = null;
-    
+
     try {
       // Clear cache to force fresh load
       await _localStorage.clearExercises();
@@ -165,42 +169,44 @@ class ExerciseProvider extends ChangeNotifier {
   /// Filter exercises based on current search query and muscle group
   void _filterExercises() {
     try {
-      _logger.d('Filtering exercises locally with query: "$_searchQuery", muscle group: "$_selectedMuscleGroup"');
+      _logger.d(
+          'Filtering exercises locally with query: "$_searchQuery", muscle group: "$_selectedMuscleGroup"');
       _logger.d('Total available exercises: ${_availableExercises.length}');
-      
+
       List<Exercise> filtered = _availableExercises;
-      
+
       // Filter by search query
       if (_searchQuery.isNotEmpty) {
         final lowercaseQuery = _searchQuery.toLowerCase();
         filtered = filtered.where((exercise) {
           return exercise.name.toLowerCase().contains(lowercaseQuery) ||
-                 exercise.description.toLowerCase().contains(lowercaseQuery);
+              exercise.description.toLowerCase().contains(lowercaseQuery);
         }).toList();
         _logger.d('After search filter: ${filtered.length} exercises');
       }
-      
+
       // Filter by muscle group - use exact match for cleaner results
       if (_selectedMuscleGroup != null && _selectedMuscleGroup!.isNotEmpty) {
         final lowercaseTarget = _selectedMuscleGroup!.toLowerCase();
         _logger.d('Filtering by muscle group: "$lowercaseTarget"');
-        
+
         filtered = filtered.where((exercise) {
           // Check if any muscle group exactly matches the selected target
-          final hasMatch = exercise.muscleGroups.any((muscle) => 
-            muscle.toLowerCase() == lowercaseTarget
-          );
+          final hasMatch = exercise.muscleGroups
+              .any((muscle) => muscle.toLowerCase() == lowercaseTarget);
           if (hasMatch) {
-            _logger.d('Exercise "${exercise.name}" matches muscle group "$lowercaseTarget"');
+            _logger.d(
+                'Exercise "${exercise.name}" matches muscle group "$lowercaseTarget"');
           }
           return hasMatch;
         }).toList();
-        
+
         _logger.d('After muscle group filter: ${filtered.length} exercises');
       }
-      
+
       _filteredExercises = filtered;
-      _logger.d('Final filtered result: ${_filteredExercises.length} exercises');
+      _logger
+          .d('Final filtered result: ${_filteredExercises.length} exercises');
       notifyListeners();
     } catch (e) {
       _logger.e('Error filtering exercises: $e');
@@ -228,17 +234,18 @@ class ExerciseProvider extends ChangeNotifier {
   Future<Map<String, dynamic>> getCacheStatus() async {
     final lastUpdated = await _localStorage.getLastUpdated();
     final isStale = await _localStorage.isCacheStale();
-    
+
     return {
       'hasCachedData': _availableExercises.isNotEmpty,
       'exerciseCount': _availableExercises.length,
       'muscleGroupCount': _availableMuscleGroups.length,
       'lastUpdated': lastUpdated?.toIso8601String(),
       'isStale': isStale,
-      'cacheAge': lastUpdated != null ? DateTime.now().difference(lastUpdated).inHours : null,
+      'cacheAge': lastUpdated != null
+          ? DateTime.now().difference(lastUpdated).inHours
+          : null,
     };
   }
-
 
   /// Check if exercises are loaded
   bool get hasExercises => _availableExercises.isNotEmpty;
@@ -256,4 +263,4 @@ class ExerciseProvider extends ChangeNotifier {
     _isLoading = loading;
     notifyListeners();
   }
-} 
+}

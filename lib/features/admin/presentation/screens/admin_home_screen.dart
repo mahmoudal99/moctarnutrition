@@ -14,7 +14,7 @@ class AdminHomeScreen extends StatefulWidget {
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   String selectedPeriod = 'This Month';
-  
+
   final List<String> timePeriods = [
     'Today',
     'This Week',
@@ -59,7 +59,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Welcome back, ${widget.adminName}!', style: AppTextStyles.heading3),
+              Text('Welcome back, ${widget.adminName}!',
+                  style: AppTextStyles.heading3),
               const SizedBox(height: 8),
               // Text('This is your admin dashboard.',
               //     style: AppTextStyles.bodyMedium
@@ -305,8 +306,6 @@ class _StatisticsCard extends StatelessWidget {
     required this.onPeriodChanged,
   });
 
-
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -335,11 +334,11 @@ class _StatisticsCard extends StatelessWidget {
                         child: Text(
                           period,
                           style: AppTextStyles.bodyMedium.copyWith(
-                            color: period == selectedPeriod 
-                                ? AppConstants.primaryColor 
+                            color: period == selectedPeriod
+                                ? AppConstants.primaryColor
                                 : AppConstants.textPrimary,
-                            fontWeight: period == selectedPeriod 
-                                ? FontWeight.w600 
+                            fontWeight: period == selectedPeriod
+                                ? FontWeight.w600
                                 : FontWeight.normal,
                           ),
                         ),

@@ -18,7 +18,7 @@ class ViewToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: isFloating 
+      margin: isFloating
           ? EdgeInsets.zero
           : const EdgeInsets.symmetric(
               horizontal: AppConstants.spacingM,
@@ -56,13 +56,12 @@ class ViewToggle extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
         padding: EdgeInsets.symmetric(
-          horizontal: isFloating ? AppConstants.spacingS : AppConstants.spacingM,
+          horizontal:
+              isFloating ? AppConstants.spacingS : AppConstants.spacingM,
           vertical: isFloating ? AppConstants.spacingXS : AppConstants.spacingS,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppConstants.primaryColor
-              : Colors.transparent,
+          color: isSelected ? AppConstants.primaryColor : Colors.transparent,
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
         ),
         child: Row(
@@ -75,10 +74,15 @@ class ViewToggle extends StatelessWidget {
                   ? AppConstants.surfaceColor
                   : AppConstants.textSecondary,
             ),
-            SizedBox(width: isFloating ? AppConstants.spacingXS : AppConstants.spacingXS),
+            SizedBox(
+                width: isFloating
+                    ? AppConstants.spacingXS
+                    : AppConstants.spacingXS),
             Text(
               label,
-              style: (isFloating ? AppTextStyles.caption : AppTextStyles.bodySmall).copyWith(
+              style:
+                  (isFloating ? AppTextStyles.caption : AppTextStyles.bodySmall)
+                      .copyWith(
                 color: isSelected
                     ? AppConstants.surfaceColor
                     : AppConstants.textSecondary,
@@ -90,4 +94,4 @@ class ViewToggle extends StatelessWidget {
       ),
     );
   }
-} 
+}

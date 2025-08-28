@@ -41,7 +41,7 @@ class AuthProvider extends ChangeNotifier {
     AuthService.authStateChanges.listen((User? user) async {
       _logger.i('AuthProvider - Auth state changed: ${user?.email ?? 'null'}');
       _firebaseUser = user;
-      
+
       if (user != null) {
         // User is signed in
         _logger.i('AuthProvider - Loading user model for: ${user.uid}');
@@ -52,17 +52,17 @@ class AuthProvider extends ChangeNotifier {
         _userModel = null;
         await _storageService.clearUser();
         await WorkoutPlanLocalStorageService.clearWorkoutPlan();
-        
+
         // Cancel workout notifications when user is signed out
         await NotificationService.cancelWorkoutNotifications();
-        
+
         // Clear profile photo provider
         if (_profilePhotoProvider != null) {
           _logger.i('AuthProvider - Clearing profile photo provider');
           _profilePhotoProvider!.clear();
         }
       }
-      
+
       _error = null;
       notifyListeners();
     });
@@ -85,7 +85,8 @@ class AuthProvider extends ChangeNotifier {
       final currentFirebaseUser = AuthService.currentUser;
       if (currentFirebaseUser != null) {
         _firebaseUser = currentFirebaseUser;
-        _logger.i('Firebase user still authenticated: ${currentFirebaseUser.email}');
+        _logger.i(
+            'Firebase user still authenticated: ${currentFirebaseUser.email}');
       } else {
         // Firebase user is not authenticated, clear cached data
         _userModel = null;
@@ -110,23 +111,26 @@ class AuthProvider extends ChangeNotifier {
 
       final userModel = await AuthService.getCurrentUserModel();
       if (userModel != null) {
-        _logger.i('AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
-        
+        _logger.i(
+            'AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
+
         // Check if this is a different user than the previously cached one
         final cachedUser = await _storageService.loadUser();
         final isDifferentUser = cachedUser?.id != userModel.id;
-        
+
         if (isDifferentUser) {
-          _logger.i('AuthProvider - Different user detected, clearing workout plan cache');
+          _logger.i(
+              'AuthProvider - Different user detected, clearing workout plan cache');
           await WorkoutPlanLocalStorageService.clearWorkoutPlan();
         }
-        
+
         _userModel = userModel;
         await _storageService.saveUser(userModel);
-        
+
         // Initialize profile photo provider if available
         if (_profilePhotoProvider != null) {
-          _logger.i('AuthProvider - Initializing profile photo provider for user: ${userModel.id}');
+          _logger.i(
+              'AuthProvider - Initializing profile photo provider for user: ${userModel.id}');
           await _profilePhotoProvider!.initialize(userModel.id);
         }
       } else {
@@ -209,10 +213,10 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       final userModel = await AuthService.signInWithGoogle();
-      
+
       _userModel = userModel;
       await _storageService.saveUser(userModel);
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -231,10 +235,10 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       final userModel = await AuthService.signInWithApple();
-      
+
       _userModel = userModel;
       await _storageService.saveUser(userModel);
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -253,10 +257,10 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       final userModel = await AuthService.signInAnonymously();
-      
+
       _userModel = userModel;
       await _storageService.saveUser(userModel);
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -276,15 +280,15 @@ class AuthProvider extends ChangeNotifier {
 
       // Cancel workout notifications before signing out
       await NotificationService.cancelWorkoutNotifications();
-      
+
       await AuthService.signOut();
-      
+
       _firebaseUser = null;
       _userModel = null;
-      
+
       // Reset onboarding state when user signs out
       await OnboardingService.resetOnboardingState();
-      
+
       // Clear workout plan cache when user signs out
       await WorkoutPlanLocalStorageService.clearWorkoutPlan();
     } catch (e) {
@@ -303,7 +307,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       await AuthService.resetPassword(email);
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -328,7 +332,7 @@ class AuthProvider extends ChangeNotifier {
         currentPassword: currentPassword,
         newPassword: newPassword,
       );
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -342,20 +346,21 @@ class AuthProvider extends ChangeNotifier {
   /// Update user profile
   Future<bool> updateUserProfile(UserModel userModel) async {
     try {
-      _logger.i('AuthProvider - Starting profile update for user: ${userModel.id}');
+      _logger.i(
+          'AuthProvider - Starting profile update for user: ${userModel.id}');
       _logger.d('AuthProvider - New name: "${userModel.name}"');
-      
+
       _isLoading = true;
       _error = null;
       notifyListeners();
 
       await AuthService.updateUserProfile(userModel);
       _logger.i('AuthProvider - AuthService update completed');
-      
+
       _userModel = userModel;
       await _storageService.saveUser(userModel);
       _logger.i('AuthProvider - Local storage update completed');
-      
+
       _logger.i('AuthProvider - Profile update successful');
       return true;
     } catch (e) {
@@ -377,19 +382,19 @@ class AuthProvider extends ChangeNotifier {
 
       // Cancel workout notifications before deleting account
       await NotificationService.cancelWorkoutNotifications();
-      
+
       await AuthService.deleteAccount();
-      
+
       // Clear local state
       _firebaseUser = null;
       _userModel = null;
-      
+
       // Reset onboarding state when user deletes account
       await OnboardingService.resetOnboardingState();
-      
+
       // Clear workout plan cache when user deletes account
       await WorkoutPlanLocalStorageService.clearWorkoutPlan();
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -417,4 +422,4 @@ class AuthProvider extends ChangeNotifier {
   Future<void> initializeUserData() async {
     await _loadCachedUserData();
   }
-} 
+}

@@ -61,7 +61,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
         _logger.d('  isAuthenticated: ${authProvider.isAuthenticated}');
         _logger.d('  isLoading: ${authProvider.isLoading}');
         _logger.d('  userModel: ${authProvider.userModel?.name ?? 'null'}');
-        _logger.d('  firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
+        _logger
+            .d('  firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
 
         // Show loading screen while AuthProvider is initializing
         if (authProvider.isLoading) {
@@ -70,7 +71,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
         // If user is not authenticated, show appropriate screen based on onboarding state
         if (!authProvider.isAuthenticated) {
-          _logger.d('AuthWrapper - User not authenticated, showing route: $_initialRoute');
+          _logger.d(
+              'AuthWrapper - User not authenticated, showing route: $_initialRoute');
           // Force navigation to get-started when user logs out
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted && _initialRoute != '/get-started') {
@@ -107,4 +109,3 @@ class AuthenticatedApp extends StatelessWidget {
     );
   }
 }
- 

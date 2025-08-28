@@ -83,7 +83,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 const ProfileSectionHeader(title: 'Support'),
                 ...support.map((item) => ProfileSettingsTile(item: item)),
-                
+
                 // Debug Settings (only visible in debug mode)
                 if (kDebugMode) ...[
                   const SizedBox(height: 24),
@@ -97,7 +97,8 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     title: const Text('Debug Settings'),
-                    subtitle: const Text('View pending notifications and debug info'),
+                    subtitle:
+                        const Text('View pending notifications and debug info'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       Navigator.push(
@@ -109,7 +110,7 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
                 ],
-                
+
                 const SizedBox(height: 32),
                 const ProfileLogoutButton(),
                 const SizedBox(height: 32),

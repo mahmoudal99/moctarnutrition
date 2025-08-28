@@ -70,10 +70,12 @@ class OnboardingBatchCookingStep extends StatefulWidget {
   });
 
   @override
-  State<OnboardingBatchCookingStep> createState() => _OnboardingBatchCookingStepState();
+  State<OnboardingBatchCookingStep> createState() =>
+      _OnboardingBatchCookingStepState();
 }
 
-class _OnboardingBatchCookingStepState extends State<OnboardingBatchCookingStep> {
+class _OnboardingBatchCookingStepState
+    extends State<OnboardingBatchCookingStep> {
   BatchCookingFrequency _selectedFrequency = BatchCookingFrequency.weekly;
   BatchSize _selectedBatchSize = BatchSize.threeMeals;
   bool _preferLeftovers = true;
@@ -86,7 +88,8 @@ class _OnboardingBatchCookingStepState extends State<OnboardingBatchCookingStep>
       _selectedFrequency = widget.selectedPreferences!.frequency;
       _selectedBatchSize = widget.selectedPreferences!.batchSize;
       _preferLeftovers = widget.selectedPreferences!.preferLeftovers;
-      _customNotesController.text = widget.selectedPreferences!.customNotes ?? '';
+      _customNotesController.text =
+          widget.selectedPreferences!.customNotes ?? '';
     }
   }
 
@@ -101,7 +104,9 @@ class _OnboardingBatchCookingStepState extends State<OnboardingBatchCookingStep>
       frequency: _selectedFrequency,
       batchSize: _selectedBatchSize,
       preferLeftovers: _preferLeftovers,
-      customNotes: _customNotesController.text.isNotEmpty ? _customNotesController.text : null,
+      customNotes: _customNotesController.text.isNotEmpty
+          ? _customNotesController.text
+          : null,
     ));
   }
 
@@ -123,19 +128,19 @@ class _OnboardingBatchCookingStepState extends State<OnboardingBatchCookingStep>
             ),
           ),
           const SizedBox(height: AppConstants.spacingL),
-          
+
           // Cooking Frequency Section
           _buildFrequencySection(),
           const SizedBox(height: AppConstants.spacingL),
-          
+
           // Batch Size Section
           _buildBatchSizeSection(),
           const SizedBox(height: AppConstants.spacingL),
-          
+
           // Leftovers Preference Section
           _buildLeftoversSection(),
           const SizedBox(height: AppConstants.spacingL),
-          
+
           // Custom Notes Section
           _buildCustomNotesSection(),
         ],
@@ -172,7 +177,8 @@ class _OnboardingBatchCookingStepState extends State<OnboardingBatchCookingStep>
             _FrequencyChip(
               label: 'Twice a week',
               value: BatchCookingFrequency.twiceAWeek,
-              isSelected: _selectedFrequency == BatchCookingFrequency.twiceAWeek,
+              isSelected:
+                  _selectedFrequency == BatchCookingFrequency.twiceAWeek,
               onTap: () {
                 setState(() {
                   _selectedFrequency = BatchCookingFrequency.twiceAWeek;
@@ -405,7 +411,8 @@ class _OnboardingBatchCookingStepState extends State<OnboardingBatchCookingStep>
             controller: _customNotesController,
             maxLines: 3,
             decoration: InputDecoration(
-              hintText: 'e.g., I prefer quick 15-minute recipes, I have limited kitchen space...',
+              hintText:
+                  'e.g., I prefer quick 15-minute recipes, I have limited kitchen space...',
               border: InputBorder.none,
               hintStyle: AppTextStyles.bodySmall.copyWith(
                 color: AppConstants.textTertiary,
@@ -443,9 +450,13 @@ class _FrequencyChip extends StatelessWidget {
           vertical: AppConstants.spacingS,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppConstants.primaryColor : AppConstants.surfaceColor,
+          color: isSelected
+              ? AppConstants.primaryColor
+              : AppConstants.surfaceColor,
           border: Border.all(
-            color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary.withOpacity(0.3),
+            color: isSelected
+                ? AppConstants.primaryColor
+                : AppConstants.textTertiary.withOpacity(0.3),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -453,7 +464,9 @@ class _FrequencyChip extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.bodySmall.copyWith(
-            color: isSelected ? AppConstants.surfaceColor : AppConstants.textPrimary,
+            color: isSelected
+                ? AppConstants.surfaceColor
+                : AppConstants.textPrimary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -485,9 +498,13 @@ class _BatchSizeChip extends StatelessWidget {
           vertical: AppConstants.spacingS,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppConstants.primaryColor : AppConstants.surfaceColor,
+          color: isSelected
+              ? AppConstants.primaryColor
+              : AppConstants.surfaceColor,
           border: Border.all(
-            color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary.withOpacity(0.3),
+            color: isSelected
+                ? AppConstants.primaryColor
+                : AppConstants.textTertiary.withOpacity(0.3),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -495,7 +512,9 @@ class _BatchSizeChip extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.bodySmall.copyWith(
-            color: isSelected ? AppConstants.surfaceColor : AppConstants.textPrimary,
+            color: isSelected
+                ? AppConstants.surfaceColor
+                : AppConstants.textPrimary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -525,9 +544,13 @@ class _LeftoverChip extends StatelessWidget {
           vertical: AppConstants.spacingS,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppConstants.primaryColor : AppConstants.surfaceColor,
+          color: isSelected
+              ? AppConstants.primaryColor
+              : AppConstants.surfaceColor,
           border: Border.all(
-            color: isSelected ? AppConstants.primaryColor : AppConstants.textTertiary.withOpacity(0.3),
+            color: isSelected
+                ? AppConstants.primaryColor
+                : AppConstants.textTertiary.withOpacity(0.3),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -535,7 +558,9 @@ class _LeftoverChip extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.bodySmall.copyWith(
-            color: isSelected ? AppConstants.surfaceColor : AppConstants.textPrimary,
+            color: isSelected
+                ? AppConstants.surfaceColor
+                : AppConstants.textPrimary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
           textAlign: TextAlign.center,
@@ -543,4 +568,4 @@ class _LeftoverChip extends StatelessWidget {
       ),
     );
   }
-} 
+}

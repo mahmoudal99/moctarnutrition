@@ -20,7 +20,8 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: () {},
-                    child: const Text('Skip', style: TextStyle(color: AppConstants.textSecondary)),
+                    child: const Text('Skip',
+                        style: TextStyle(color: AppConstants.textSecondary)),
                   ),
                 ],
               ),
@@ -39,13 +40,15 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Crush Your Goals, Together',
-                    style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTextStyles.heading3
+                        .copyWith(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Plan your workouts, sync with friends, and stay motivated.',
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(color: AppConstants.textSecondary),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -68,7 +71,9 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {},
-                  child: const Text('Continue', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: const Text('Continue',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -116,7 +121,8 @@ class _ActivityCardsStack extends StatelessWidget {
             top: 18.0 * i,
             left: 0,
             right: 0,
-            child: _ActivityCard(card: card, elevation: (cards.length - i) * 2.0),
+            child:
+                _ActivityCard(card: card, elevation: (cards.length - i) * 2.0),
           );
         }),
       ),
@@ -129,7 +135,11 @@ class _ActivityCardData {
   final String time;
   final Color color;
   final String emoji;
-  const _ActivityCardData({required this.title, required this.time, required this.color, required this.emoji});
+  const _ActivityCardData(
+      {required this.title,
+      required this.time,
+      required this.color,
+      required this.emoji});
 }
 
 class _ActivityCard extends StatelessWidget {
@@ -154,9 +164,13 @@ class _ActivityCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(card.title, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                  Text(card.title,
+                      style: AppTextStyles.bodyLarge
+                          .copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text(card.time, style: AppTextStyles.caption.copyWith(color: AppConstants.textSecondary)),
+                  Text(card.time,
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppConstants.textSecondary)),
                 ],
               ),
             ),
@@ -170,9 +184,14 @@ class _ActivityCard extends StatelessWidget {
 
 class _AvatarsRow extends StatelessWidget {
   final List<_AvatarData> avatars = const [
-    _AvatarData(name: 'You', imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg'),
-    _AvatarData(name: 'Lisa', imageUrl: 'https://randomuser.me/api/portraits/women/2.jpg'),
-    _AvatarData(name: 'Mike', imageUrl: 'https://randomuser.me/api/portraits/men/3.jpg'),
+    _AvatarData(
+        name: 'You', imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg'),
+    _AvatarData(
+        name: 'Lisa',
+        imageUrl: 'https://randomuser.me/api/portraits/women/2.jpg'),
+    _AvatarData(
+        name: 'Mike',
+        imageUrl: 'https://randomuser.me/api/portraits/men/3.jpg'),
   ];
 
   const _AvatarsRow();
@@ -193,7 +212,8 @@ class _AvatarsRow extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 avatar.name,
-                style: AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic),
+                style:
+                    AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic),
               ),
             ],
           ),
@@ -225,11 +245,13 @@ class _ProgressDots extends StatelessWidget {
           width: i == current ? 18 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: i == current ? AppConstants.primaryColor : AppConstants.textTertiary.withOpacity(0.2),
+            color: i == current
+                ? AppConstants.primaryColor
+                : AppConstants.textTertiary.withOpacity(0.2),
             borderRadius: BorderRadius.circular(6),
           ),
         );
       }),
     );
   }
-} 
+}

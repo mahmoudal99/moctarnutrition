@@ -28,7 +28,7 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final buttonWidget = _buildButtonWidget();
-    
+
     if (isFullWidth) {
       return SizedBox(
         width: double.infinity,
@@ -36,7 +36,7 @@ class CustomButton extends StatelessWidget {
         child: buttonWidget,
       );
     }
-    
+
     return SizedBox(
       width: width,
       height: height ?? 52,
@@ -64,7 +64,7 @@ class CustomButton extends StatelessWidget {
           ),
           child: _buildButtonContent(),
         );
-        
+
       case ButtonType.secondary:
         return ElevatedButton(
           onPressed: isLoading ? null : onPressed,
@@ -83,7 +83,7 @@ class CustomButton extends StatelessWidget {
           ),
           child: _buildButtonContent(),
         );
-        
+
       case ButtonType.outline:
         return OutlinedButton(
           onPressed: isLoading ? null : onPressed,
@@ -100,7 +100,7 @@ class CustomButton extends StatelessWidget {
           ),
           child: _buildButtonContent(),
         );
-        
+
       case ButtonType.text:
         return TextButton(
           onPressed: isLoading ? null : onPressed,
@@ -131,8 +131,8 @@ class CustomButton extends StatelessWidget {
       );
     }
 
-    final textColor = type == ButtonType.outline || type == ButtonType.text 
-        ? AppConstants.primaryColor 
+    final textColor = type == ButtonType.outline || type == ButtonType.text
+        ? AppConstants.primaryColor
         : AppConstants.surfaceColor;
 
     if (icon != null) {
@@ -239,4 +239,4 @@ class GradientButton extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -31,23 +31,33 @@ class DaySelector extends StatelessWidget {
         children: days.map((day) {
           final isSelected = _isSameDay(day, selectedDate);
           final isToday = _isSameDay(day, DateTime.now());
-          final isPast = day.isBefore(DateTime.now().subtract(const Duration(days: 1)));
-          final isFuture = day.isAfter(DateTime.now().add(const Duration(days: 1)));
-          
+          final isPast =
+              day.isBefore(DateTime.now().subtract(const Duration(days: 1)));
+          final isFuture =
+              day.isAfter(DateTime.now().add(const Duration(days: 1)));
+
           // Check if this day has consumption data
           final normalizedDay = DateTime(day.year, day.month, day.day);
-          final hasConsumptionData = dailyConsumptionData?.keys.any((key) => 
-            DateTime(key.year, key.month, key.day).isAtSameMomentAs(normalizedDay)) == true;
-          final dayConsumption = dailyConsumptionData?.entries.firstWhere(
-            (entry) => DateTime(entry.key.year, entry.key.month, entry.key.day).isAtSameMomentAs(normalizedDay),
-            orElse: () => MapEntry(day, <String, dynamic>{}),
-          ).value;
-          final hasConsumedCalories = dayConsumption?.containsKey('consumedCalories') == true && 
-                                     (dayConsumption!['consumedCalories'] as num) > 0;
-          
+          final hasConsumptionData = dailyConsumptionData?.keys.any((key) =>
+                  DateTime(key.year, key.month, key.day)
+                      .isAtSameMomentAs(normalizedDay)) ==
+              true;
+          final dayConsumption = dailyConsumptionData?.entries
+              .firstWhere(
+                (entry) =>
+                    DateTime(entry.key.year, entry.key.month, entry.key.day)
+                        .isAtSameMomentAs(normalizedDay),
+                orElse: () => MapEntry(day, <String, dynamic>{}),
+              )
+              .value;
+          final hasConsumedCalories =
+              dayConsumption?.containsKey('consumedCalories') == true &&
+                  (dayConsumption!['consumedCalories'] as num) > 0;
+
           // Debug logging for each day to see what data we're getting
-          print('DaySelector - Day: ${day.toIso8601String()}, normalized: ${normalizedDay.toIso8601String()}, hasConsumptionData: $hasConsumptionData, dayConsumption: $dayConsumption, hasConsumedCalories: $hasConsumedCalories');
-          
+          print(
+              'DaySelector - Day: ${day.toIso8601String()}, normalized: ${normalizedDay.toIso8601String()}, hasConsumptionData: $hasConsumptionData, dayConsumption: $dayConsumption, hasConsumedCalories: $hasConsumedCalories');
+
           return Expanded(
             child: GestureDetector(
               onTap: () => onDateSelected(day),
@@ -79,7 +89,7 @@ class DaySelector extends StatelessWidget {
                             ),
                           ),
                         // Dashed circle for days without consumption data (past days or today with no consumption)
-                        if ((isPast && !hasConsumedCalories) || 
+                        if ((isPast && !hasConsumedCalories) ||
                             (isToday && !hasConsumedCalories))
                           CustomPaint(
                             painter: DashedCirclePainter(
@@ -108,9 +118,13 @@ class DaySelector extends StatelessWidget {
                           _getDayAbbreviation(day),
                           style: AppTextStyles.caption.copyWith(
                             color: isSelected
-                                ? Colors.black 
-                                : (isPast && !hasConsumedCalories ? Colors.grey.shade400 : Colors.grey.shade600),
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ? Colors.black
+                                : (isPast && !hasConsumedCalories
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600),
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
                       ],
@@ -122,9 +136,12 @@ class DaySelector extends StatelessWidget {
                     day.day.toString(),
                     style: AppTextStyles.bodySmall.copyWith(
                       color: isSelected
-                          ? Colors.black 
-                          : (isPast && !hasConsumedCalories ? Colors.grey.shade400 : Colors.grey.shade600),
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ? Colors.black
+                          : (isPast && !hasConsumedCalories
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600),
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 ],
@@ -140,7 +157,7 @@ class DaySelector extends StatelessWidget {
     // Generate days: 5 previous days + current day (total 6 days)
     final now = DateTime.now();
     final startDate = now.subtract(const Duration(days: 5));
-    
+
     return List.generate(6, (index) {
       return startDate.add(Duration(days: index));
     });
@@ -169,8 +186,8 @@ class DaySelector extends StatelessWidget {
 
   bool _isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
-           date1.month == date2.month &&
-           date1.day == date2.day;
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   double _calculateCalorieProgressForDay(DateTime day) {
@@ -179,26 +196,34 @@ class DaySelector extends StatelessWidget {
     }
 
     final normalizedDay = DateTime(day.year, day.month, day.day);
-    print('DaySelector - _calculateCalorieProgressForDay called for: ${day.toIso8601String()}, normalized: ${normalizedDay.toIso8601String()}');
-    print('DaySelector - Available keys: ${dailyConsumptionData?.keys.map((k) => '${k.year}-${k.month}-${k.day}').toList()}');
-    
-    final dayConsumption = dailyConsumptionData?.entries.firstWhere(
-      (entry) => DateTime(entry.key.year, entry.key.month, entry.key.day).isAtSameMomentAs(normalizedDay),
-      orElse: () => MapEntry(day, <String, dynamic>{}),
-    ).value;
-    
+    print(
+        'DaySelector - _calculateCalorieProgressForDay called for: ${day.toIso8601String()}, normalized: ${normalizedDay.toIso8601String()}');
+    print(
+        'DaySelector - Available keys: ${dailyConsumptionData?.keys.map((k) => '${k.year}-${k.month}-${k.day}').toList()}');
+
+    final dayConsumption = dailyConsumptionData?.entries
+        .firstWhere(
+          (entry) => DateTime(entry.key.year, entry.key.month, entry.key.day)
+              .isAtSameMomentAs(normalizedDay),
+          orElse: () => MapEntry(day, <String, dynamic>{}),
+        )
+        .value;
+
     print('DaySelector - Found consumption data: $dayConsumption');
-    
-    if (dayConsumption == null || dayConsumption.containsKey('consumedCalories') == false) {
+
+    if (dayConsumption == null ||
+        dayConsumption.containsKey('consumedCalories') == false) {
       return 0.0;
     }
 
     final consumedCalories = dayConsumption['consumedCalories'] as num;
-    final progress = targetCalories! > 0 ? consumedCalories / targetCalories! : 0.0;
-    
+    final progress =
+        targetCalories! > 0 ? consumedCalories / targetCalories! : 0.0;
+
     // Debug logging to see what's happening
-    print('DaySelector - _calculateCalorieProgressForDay: ${day.toIso8601String()}, consumedCalories: $consumedCalories, targetCalories: $targetCalories, progress: $progress');
-    
+    print(
+        'DaySelector - _calculateCalorieProgressForDay: ${day.toIso8601String()}, consumedCalories: $consumedCalories, targetCalories: $targetCalories, progress: $progress');
+
     return progress;
   }
 

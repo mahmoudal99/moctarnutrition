@@ -34,7 +34,7 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
 
   Future<void> _loadMore() async {
     if (_isLoadingMore) return;
-    
+
     setState(() {
       _isLoadingMore = true;
     });
@@ -57,16 +57,17 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
         final notes = checkin.notes?.toLowerCase() ?? '';
         final mood = checkin.mood?.toLowerCase() ?? '';
         final searchLower = _searchQuery.toLowerCase();
-        
-        return notes.contains(searchLower) || 
-               mood.contains(searchLower) ||
-               checkin.weekStartDate.toString().contains(searchLower);
+
+        return notes.contains(searchLower) ||
+            mood.contains(searchLower) ||
+            checkin.weekStartDate.toString().contains(searchLower);
       }).toList();
     }
 
     // Apply status filter
     if (_statusFilter != null) {
-      filtered = filtered.where((checkin) => checkin.status == _statusFilter).toList();
+      filtered =
+          filtered.where((checkin) => checkin.status == _statusFilter).toList();
     }
 
     return filtered;
@@ -79,7 +80,8 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
       appBar: AppBar(
         title: Text(
           'Check-in History',
-          style: AppTextStyles.heading4.copyWith(color: AppConstants.textPrimary),
+          style:
+              AppTextStyles.heading4.copyWith(color: AppConstants.textPrimary),
         ),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
@@ -98,12 +100,13 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
         children: [
           // Search and filter section
           _buildSearchAndFilterSection(),
-          
+
           // Check-ins list
           Expanded(
             child: Consumer<CheckinProvider>(
               builder: (context, checkinProvider, child) {
-                if (checkinProvider.isLoading && checkinProvider.userCheckins.isEmpty) {
+                if (checkinProvider.isLoading &&
+                    checkinProvider.userCheckins.isEmpty) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
@@ -113,7 +116,8 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
                   return _buildErrorState(checkinProvider.error!);
                 }
 
-                final filteredCheckins = _getFilteredCheckins(checkinProvider.userCheckins);
+                final filteredCheckins =
+                    _getFilteredCheckins(checkinProvider.userCheckins);
 
                 if (filteredCheckins.isEmpty) {
                   return _buildEmptyState();
@@ -123,8 +127,10 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
                   onRefresh: _loadData,
                   child: CheckinHistoryList(
                     checkins: filteredCheckins,
-                    onCheckinTap: (checkin) => _viewCheckinDetails(context, checkin),
-                    showLoadMore: checkinProvider.hasMoreCheckins && !_isLoadingMore,
+                    onCheckinTap: (checkin) =>
+                        _viewCheckinDetails(context, checkin),
+                    showLoadMore:
+                        checkinProvider.hasMoreCheckins && !_isLoadingMore,
                     onLoadMore: _loadMore,
                   ),
                 );
@@ -191,9 +197,9 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
               fillColor: AppConstants.backgroundColor,
             ),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Status filter chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -216,7 +222,7 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
 
   Widget _buildFilterChip(String label, CheckinStatus? status) {
     final isSelected = _statusFilter == status;
-    
+
     return FilterChip(
       label: Text(label),
       selected: isSelected,
@@ -229,14 +235,15 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
       selectedColor: AppConstants.primaryColor.withOpacity(0.2),
       checkmarkColor: AppConstants.primaryColor,
       labelStyle: AppTextStyles.bodyMedium.copyWith(
-        color: isSelected ? AppConstants.primaryColor : AppConstants.textPrimary,
+        color:
+            isSelected ? AppConstants.primaryColor : AppConstants.textPrimary,
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected 
-              ? AppConstants.primaryColor 
+          color: isSelected
+              ? AppConstants.primaryColor
               : AppConstants.textTertiary.withOpacity(0.3),
         ),
       ),
@@ -275,7 +282,8 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppConstants.primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -325,7 +333,8 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppConstants.primaryColor,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -341,4 +350,4 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
   void _viewCheckinDetails(BuildContext context, CheckinModel checkin) {
     context.push('/checkin/details', extra: checkin);
   }
-} 
+}

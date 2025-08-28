@@ -32,4 +32,4 @@ class SettingsItem {
     this.trailing,
     this.onTap,
   });
-} 
+}

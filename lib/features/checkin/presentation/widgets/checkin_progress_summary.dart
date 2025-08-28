@@ -23,11 +23,10 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
             _buildHeader(),
             const SizedBox(height: 20),
             _buildStatsGrid(),
-            if (summary.averageWeight != null)
-              ...[
-                const SizedBox(height: 20),
-                _buildMetricsSection(),
-              ],
+            if (summary.averageWeight != null) ...[
+              const SizedBox(height: 20),
+              _buildMetricsSection(),
+            ],
           ],
         ),
       ),
@@ -203,7 +202,8 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
               ),
           ],
         ),
-        if (summary.averageEnergyLevel != null || summary.averageMotivationLevel != null) ...[
+        if (summary.averageEnergyLevel != null ||
+            summary.averageMotivationLevel != null) ...[
           const SizedBox(height: 12),
           Row(
             children: [
@@ -211,17 +211,20 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
                 Expanded(
                   child: _buildMetricItem(
                     label: 'Energy',
-                    value: '${summary.averageEnergyLevel!.toStringAsFixed(1)}/10',
+                    value:
+                        '${summary.averageEnergyLevel!.toStringAsFixed(1)}/10',
                     icon: Icons.flash_on,
                   ),
                 ),
-              if (summary.averageEnergyLevel != null && summary.averageMotivationLevel != null)
+              if (summary.averageEnergyLevel != null &&
+                  summary.averageMotivationLevel != null)
                 const SizedBox(width: 16),
               if (summary.averageMotivationLevel != null)
                 Expanded(
                   child: _buildMetricItem(
                     label: 'Motivation',
-                    value: '${summary.averageMotivationLevel!.toStringAsFixed(1)}/10',
+                    value:
+                        '${summary.averageMotivationLevel!.toStringAsFixed(1)}/10',
                     icon: Icons.psychology,
                   ),
                 ),
@@ -277,4 +280,4 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
       ),
     );
   }
-} 
+}

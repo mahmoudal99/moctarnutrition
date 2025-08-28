@@ -17,10 +17,10 @@ enum MealFrequency {
 enum FastingType {
   none,
   sixteenEight, // 16:8
-  eighteenSix,  // 18:6
-  twentyFour,   // 20:4
+  eighteenSix, // 18:6
+  twentyFour, // 20:4
   alternateDay, // Alternate day fasting
-  fiveTwo,      // 5:2 fasting
+  fiveTwo, // 5:2 fasting
   custom,
 }
 
@@ -47,10 +47,19 @@ class MealTimingPreferences {
     return {
       'mealFrequency': mealFrequency.toString().split('.').last,
       'fastingType': fastingType?.toString().split('.').last,
-      'breakfastTime': breakfastTime != null ? '${breakfastTime!.hour}:${breakfastTime!.minute.toString().padLeft(2, '0')}' : null,
-      'lunchTime': lunchTime != null ? '${lunchTime!.hour}:${lunchTime!.minute.toString().padLeft(2, '0')}' : null,
-      'dinnerTime': dinnerTime != null ? '${dinnerTime!.hour}:${dinnerTime!.minute.toString().padLeft(2, '0')}' : null,
-      'snackTimes': snackTimes?.map((time) => '${time.hour}:${time.minute.toString().padLeft(2, '0')}').toList(),
+      'breakfastTime': breakfastTime != null
+          ? '${breakfastTime!.hour}:${breakfastTime!.minute.toString().padLeft(2, '0')}'
+          : null,
+      'lunchTime': lunchTime != null
+          ? '${lunchTime!.hour}:${lunchTime!.minute.toString().padLeft(2, '0')}'
+          : null,
+      'dinnerTime': dinnerTime != null
+          ? '${dinnerTime!.hour}:${dinnerTime!.minute.toString().padLeft(2, '0')}'
+          : null,
+      'snackTimes': snackTimes
+          ?.map((time) =>
+              '${time.hour}:${time.minute.toString().padLeft(2, '0')}')
+          .toList(),
       'customNotes': customNotes,
     };
   }
@@ -70,9 +79,8 @@ class MealTimingPreferences {
       breakfastTime: json['breakfastTime'] != null
           ? _parseTimeOfDay(json['breakfastTime'])
           : null,
-      lunchTime: json['lunchTime'] != null
-          ? _parseTimeOfDay(json['lunchTime'])
-          : null,
+      lunchTime:
+          json['lunchTime'] != null ? _parseTimeOfDay(json['lunchTime']) : null,
       dinnerTime: json['dinnerTime'] != null
           ? _parseTimeOfDay(json['dinnerTime'])
           : null,
@@ -105,7 +113,8 @@ class OnboardingMealTimingStep extends StatefulWidget {
   });
 
   @override
-  State<OnboardingMealTimingStep> createState() => _OnboardingMealTimingStepState();
+  State<OnboardingMealTimingStep> createState() =>
+      _OnboardingMealTimingStepState();
 }
 
 class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
@@ -127,7 +136,8 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
       _lunchTime = widget.selectedPreferences!.lunchTime;
       _dinnerTime = widget.selectedPreferences!.dinnerTime;
       _snackTimes = widget.selectedPreferences!.snackTimes ?? [];
-      _customNotesController.text = widget.selectedPreferences!.customNotes ?? '';
+      _customNotesController.text =
+          widget.selectedPreferences!.customNotes ?? '';
     }
   }
 
@@ -155,21 +165,22 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
             ),
           ),
           const SizedBox(height: AppConstants.spacingL),
-          
+
           // Meal Frequency Section
           _buildMealFrequencySection(),
           const SizedBox(height: AppConstants.spacingL),
-          
+
           // Fasting Section
           _buildFastingSection(),
           const SizedBox(height: AppConstants.spacingL),
-          
+
           // Meal Timing Section (only show if not fasting)
-          if (_selectedFastingType == null || _selectedFastingType == FastingType.none) ...[
+          if (_selectedFastingType == null ||
+              _selectedFastingType == FastingType.none) ...[
             _buildMealTimingSection(),
             const SizedBox(height: AppConstants.spacingL),
           ],
-          
+
           // Custom Notes Section
           _buildCustomNotesSection(),
         ],
@@ -201,8 +212,10 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
             _MealFrequencyChip(
               label: '3 meals + 1 snack',
               value: MealFrequency.threeMealsOneSnack,
-              isSelected: _selectedMealFrequency == MealFrequency.threeMealsOneSnack,
-              onTap: () => _updateMealFrequency(MealFrequency.threeMealsOneSnack),
+              isSelected:
+                  _selectedMealFrequency == MealFrequency.threeMealsOneSnack,
+              onTap: () =>
+                  _updateMealFrequency(MealFrequency.threeMealsOneSnack),
             ),
             _MealFrequencyChip(
               label: '4 meals',
@@ -213,8 +226,10 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
             _MealFrequencyChip(
               label: '4 meals + 1 snack',
               value: MealFrequency.fourMealsOneSnack,
-              isSelected: _selectedMealFrequency == MealFrequency.fourMealsOneSnack,
-              onTap: () => _updateMealFrequency(MealFrequency.fourMealsOneSnack),
+              isSelected:
+                  _selectedMealFrequency == MealFrequency.fourMealsOneSnack,
+              onTap: () =>
+                  _updateMealFrequency(MealFrequency.fourMealsOneSnack),
             ),
             _MealFrequencyChip(
               label: '5 meals',
@@ -225,14 +240,18 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
             _MealFrequencyChip(
               label: '5 meals + 1 snack',
               value: MealFrequency.fiveMealsOneSnack,
-              isSelected: _selectedMealFrequency == MealFrequency.fiveMealsOneSnack,
-              onTap: () => _updateMealFrequency(MealFrequency.fiveMealsOneSnack),
+              isSelected:
+                  _selectedMealFrequency == MealFrequency.fiveMealsOneSnack,
+              onTap: () =>
+                  _updateMealFrequency(MealFrequency.fiveMealsOneSnack),
             ),
             _MealFrequencyChip(
               label: 'Intermittent Fasting',
               value: MealFrequency.intermittentFasting,
-              isSelected: _selectedMealFrequency == MealFrequency.intermittentFasting,
-              onTap: () => _updateMealFrequency(MealFrequency.intermittentFasting),
+              isSelected:
+                  _selectedMealFrequency == MealFrequency.intermittentFasting,
+              onTap: () =>
+                  _updateMealFrequency(MealFrequency.intermittentFasting),
             ),
             _MealFrequencyChip(
               label: 'Custom',
@@ -325,28 +344,28 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
           ),
         ),
         const SizedBox(height: AppConstants.spacingM),
-        
+
         // Breakfast
         _buildTimeSelector(
           'Breakfast',
           _breakfastTime,
           (time) => setState(() => _breakfastTime = time),
         ),
-        
+
         // Lunch
         _buildTimeSelector(
           'Lunch',
           _lunchTime,
           (time) => setState(() => _lunchTime = time),
         ),
-        
+
         // Dinner
         _buildTimeSelector(
           'Dinner',
           _dinnerTime,
           (time) => setState(() => _dinnerTime = time),
         ),
-        
+
         // Snack times (if applicable)
         if (_selectedMealFrequency == MealFrequency.threeMealsOneSnack ||
             _selectedMealFrequency == MealFrequency.fourMealsOneSnack ||
@@ -449,20 +468,26 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
             _SnackTimeChip(
               label: 'Morning (10 AM)',
               time: const TimeOfDay(hour: 10, minute: 0),
-              isSelected: _snackTimes.contains(const TimeOfDay(hour: 10, minute: 0)),
-              onTap: () => _toggleSnackTime(const TimeOfDay(hour: 10, minute: 0)),
+              isSelected:
+                  _snackTimes.contains(const TimeOfDay(hour: 10, minute: 0)),
+              onTap: () =>
+                  _toggleSnackTime(const TimeOfDay(hour: 10, minute: 0)),
             ),
             _SnackTimeChip(
               label: 'Afternoon (3 PM)',
               time: const TimeOfDay(hour: 15, minute: 0),
-              isSelected: _snackTimes.contains(const TimeOfDay(hour: 15, minute: 0)),
-              onTap: () => _toggleSnackTime(const TimeOfDay(hour: 15, minute: 0)),
+              isSelected:
+                  _snackTimes.contains(const TimeOfDay(hour: 15, minute: 0)),
+              onTap: () =>
+                  _toggleSnackTime(const TimeOfDay(hour: 15, minute: 0)),
             ),
             _SnackTimeChip(
               label: 'Evening (8 PM)',
               time: const TimeOfDay(hour: 20, minute: 0),
-              isSelected: _snackTimes.contains(const TimeOfDay(hour: 20, minute: 0)),
-              onTap: () => _toggleSnackTime(const TimeOfDay(hour: 20, minute: 0)),
+              isSelected:
+                  _snackTimes.contains(const TimeOfDay(hour: 20, minute: 0)),
+              onTap: () =>
+                  _toggleSnackTime(const TimeOfDay(hour: 20, minute: 0)),
             ),
           ],
         ),
@@ -696,4 +721,4 @@ class _SnackTimeChip extends StatelessWidget {
       ),
     );
   }
-} 
+}

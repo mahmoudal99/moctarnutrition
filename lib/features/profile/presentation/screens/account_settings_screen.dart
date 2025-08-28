@@ -22,7 +22,6 @@ class AccountSettingsScreen extends StatefulWidget {
 }
 
 class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -65,7 +64,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             padding: const EdgeInsets.all(20),
             children: [
               _PersonalInfoSection(
-                user: user, 
+                user: user,
                 authUser: authUser,
               ),
               const SizedBox(height: 24),
@@ -108,7 +107,8 @@ class _PersonalInfoSection extends StatelessWidget {
               leading: profilePhotoProvider.hasProfilePhoto
                   ? CircleAvatar(
                       radius: 24,
-                      backgroundImage: profilePhotoProvider.getProfilePhotoImage(),
+                      backgroundImage:
+                          profilePhotoProvider.getProfilePhotoImage(),
                     )
                   : AvatarUtils.buildAvatar(
                       photoUrl: user.photoUrl,
@@ -117,49 +117,52 @@ class _PersonalInfoSection extends StatelessWidget {
                       radius: 24,
                       fontSize: 14,
                     ),
-              onTap: () => _showChangePhotoDialog(context, profilePhotoProvider),
+              onTap: () =>
+                  _showChangePhotoDialog(context, profilePhotoProvider),
             ),
-        _InfoCard(
-          title: 'Full Name',
-          subtitle: user.name ?? 'Not set',
-          trailing: const Icon(Icons.edit, color: AppConstants.textTertiary),
-          onTap: () => _showEditNameDialog(context, user),
-        ),
-        _InfoCard(
-          title: 'Email',
-          subtitle: user.email,
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppConstants.successColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
+            _InfoCard(
+              title: 'Full Name',
+              subtitle: user.name ?? 'Not set',
+              trailing:
+                  const Icon(Icons.edit, color: AppConstants.textTertiary),
+              onTap: () => _showEditNameDialog(context, user),
             ),
-            child: Text(
-              'Verified',
-              style: AppTextStyles.caption.copyWith(
-                color: AppConstants.successColor,
-                fontWeight: FontWeight.bold,
+            _InfoCard(
+              title: 'Email',
+              subtitle: user.email,
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppConstants.successColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Verified',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.successColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        _InfoCard(
-          title: 'Age',
-          subtitle: '${user.preferences.age} years old',
-          onTap: () => _showEditAgeDialog(context, user),
-        ),
-        _InfoCard(
-          title: 'Gender',
-          subtitle: user.preferences.gender,
-          onTap: () => _showEditGenderDialog(context, user),
-        ),
-      ],
-    );
+            _InfoCard(
+              title: 'Age',
+              subtitle: '${user.preferences.age} years old',
+              onTap: () => _showEditAgeDialog(context, user),
+            ),
+            _InfoCard(
+              title: 'Gender',
+              subtitle: user.preferences.gender,
+              onTap: () => _showEditGenderDialog(context, user),
+            ),
+          ],
+        );
       },
     );
   }
 
-  void _showChangePhotoDialog(BuildContext context, ProfilePhotoProvider profilePhotoProvider) {
+  void _showChangePhotoDialog(
+      BuildContext context, ProfilePhotoProvider profilePhotoProvider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -200,10 +203,11 @@ class _PersonalInfoSection extends StatelessWidget {
     );
   }
 
-  Future<void> _pickImage(BuildContext context, ImageSource source, ProfilePhotoProvider profilePhotoProvider) async {
+  Future<void> _pickImage(BuildContext context, ImageSource source,
+      ProfilePhotoProvider profilePhotoProvider) async {
     try {
       Logger().d('Starting image picker for source: $source');
-      
+
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
         source: source,
@@ -213,7 +217,7 @@ class _PersonalInfoSection extends StatelessWidget {
       );
 
       Logger().d('Image picker result: ${image?.path}');
-      
+
       if (image != null) {
         Logger().d('Image selected, processing...');
         await profilePhotoProvider.updateProfilePhoto(image.path);
@@ -224,8 +228,6 @@ class _PersonalInfoSection extends StatelessWidget {
       Logger().e('Error in _pickImage: $e');
     }
   }
-
-
 
   void _showEditNameDialog(BuildContext context, UserModel user) {
     final nameController = TextEditingController(text: user.name ?? '');
@@ -833,7 +835,9 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                 hintText: 'Enter your current password',
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscureCurrentPassword ? Icons.visibility : Icons.visibility_off,
+                    _obscureCurrentPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
                   onPressed: () {
                     setState(() {
@@ -858,7 +862,9 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                 hintText: 'Enter your new password',
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscureNewPassword ? Icons.visibility : Icons.visibility_off,
+                    _obscureNewPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
                   onPressed: () {
                     setState(() {
@@ -886,7 +892,9 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                 hintText: 'Confirm your new password',
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                    _obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
                   onPressed: () {
                     setState(() {
@@ -937,7 +945,8 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
     });
 
     try {
-      final authProvider = Provider.of<app_auth.AuthProvider>(context, listen: false);
+      final authProvider =
+          Provider.of<app_auth.AuthProvider>(context, listen: false);
       final success = await authProvider.changePassword(
         currentPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,

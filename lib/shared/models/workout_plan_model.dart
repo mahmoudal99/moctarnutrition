@@ -1,6 +1,13 @@
 import 'workout_model.dart';
 
-enum WorkoutPlanType { strength, bodybuilding, cardio, hiit, running, ai_generated }
+enum WorkoutPlanType {
+  strength,
+  bodybuilding,
+  cardio,
+  hiit,
+  running,
+  ai_generated
+}
 
 class WorkoutPlanModel {
   final String id;
@@ -129,4 +136,4 @@ class DailyWorkout {
   }
 
   bool get isRestDay => restDay != null;
-} 
+}

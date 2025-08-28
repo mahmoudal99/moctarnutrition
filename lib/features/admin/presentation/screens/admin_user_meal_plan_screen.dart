@@ -700,14 +700,14 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   String _getDayName(int dayIndex) {
     final dayNames = [
       'Monday',
-      'Tuesday', 
+      'Tuesday',
       'Wednesday',
       'Thursday',
       'Friday',
       'Saturday',
       'Sunday'
     ];
-    
+
     // Handle cases where there might be more than 7 days
     if (dayIndex < dayNames.length) {
       return dayNames[dayIndex];

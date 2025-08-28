@@ -4,7 +4,7 @@ import '../services/version_tracking_service.dart';
 
 class WhatsNewModal extends StatelessWidget {
   final String currentVersion;
-  
+
   const WhatsNewModal({
     super.key,
     required this.currentVersion,
@@ -110,7 +110,7 @@ class WhatsNewModal extends StatelessWidget {
       final major = int.tryParse(parts[0]) ?? 1;
       final minor = int.tryParse(parts[1]) ?? 0;
       final patch = int.tryParse(parts[2]) ?? 0;
-      
+
       if (patch > 0) {
         return '$major.$minor.${patch - 1}';
       } else if (minor > 0) {
@@ -127,7 +127,8 @@ class WhatsNewModal extends StatelessWidget {
     return '1.0.0';
   }
 
-  Widget _buildVersionSection(String version, String title, List<String> features) {
+  Widget _buildVersionSection(
+      String version, String title, List<String> features) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,23 +159,23 @@ class WhatsNewModal extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ...features.map((feature) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  feature,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppConstants.textSecondary,
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      feature,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        )),
+            )),
       ],
     );
   }
-} 
+}

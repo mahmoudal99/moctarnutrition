@@ -17,6 +17,7 @@ import 'parser_service.dart' show ValidationException;
 
 class AIMealService {
   static final _logger = Logger();
+
   /// Generate a single day meal plan with context from previous days
   static Future<MealDay> _generateSingleDayWithContext(
     DietPlanPreferences preferences,
@@ -65,8 +66,8 @@ class AIMealService {
       try {
         // Parse the AI response (validation happens inside the parser)
         final mealDay = await ParserService.parseSingleDayFromAI(
-          content, 
-          preferences, 
+          content,
+          preferences,
           dayIndex,
         );
 
@@ -76,11 +77,12 @@ class AIMealService {
         return mealDay;
       } catch (e) {
         if (e is ValidationException) {
-          _logger.w('Day $dayIndex validation failed: ${e.message}. Regenerating...');
+          _logger.w(
+              'Day $dayIndex validation failed: ${e.message}. Regenerating...');
           return await _generateSingleDayWithContextRetry(
-            preferences, 
-            dayIndex, 
-            previousDays, 
+            preferences,
+            dayIndex,
+            previousDays,
             null,
             onDayProgress,
           );
@@ -154,8 +156,8 @@ Please regenerate the meal plan following the JSON schema exactly.
       try {
         // Parse the AI response (validation happens inside the parser)
         final mealDay = await ParserService.parseSingleDayFromAI(
-          content, 
-          preferences, 
+          content,
+          preferences,
           dayIndex,
         );
 
@@ -166,7 +168,8 @@ Please regenerate the meal plan following the JSON schema exactly.
       } catch (e) {
         if (e is ValidationException) {
           _logger.e('Day $dayIndex retry validation failed: ${e.message}');
-          throw Exception('AI validation failed for day $dayIndex: ${e.message}');
+          throw Exception(
+              'AI validation failed for day $dayIndex: ${e.message}');
         }
         rethrow;
       }
@@ -177,8 +180,6 @@ Please regenerate the meal plan following the JSON schema exactly.
           'API retry failed for day $dayIndex: ${response.statusCode}');
     }
   }
-
-
 
   /// Helper to determine required meal types based on meal frequency
   static List<MealType> _getRequiredMealTypes(String mealFrequency) {
@@ -196,7 +197,8 @@ Please regenerate the meal plan following the JSON schema exactly.
   }
 
   /// Helper to get expected calorie distribution for meal types
-  static Map<MealType, double> _getCalorieDistribution(String mealFrequency, int targetCalories) {
+  static Map<MealType, double> _getCalorieDistribution(
+      String mealFrequency, int targetCalories) {
     final distribution = <MealType, double>{};
     final hasSnacks = mealFrequency.toLowerCase().contains('snack') ||
         mealFrequency.contains('4') ||
@@ -251,7 +253,8 @@ Please regenerate the meal plan following the JSON schema exactly.
         if (cached != null) {
           _logger.i('Using cached meal plan for $days days');
           // Calculate total meals for cached plan
-          final totalMeals = cached.mealPlan.mealDays.fold<int>(0, (sum, day) => sum + day.meals.length);
+          final totalMeals = cached.mealPlan.mealDays
+              .fold<int>(0, (sum, day) => sum + day.meals.length);
           onProgress?.call(totalMeals, totalMeals); // Report full completion
           return cached.mealPlan;
         }
@@ -274,7 +277,8 @@ Please regenerate the meal plan following the JSON schema exactly.
       final optimalBatchSize = _calculateOptimalBatchSize(days);
       final List<MealDay> mealDays = [];
 
-      _logger.i('Processing $days days in batches of $optimalBatchSize (total meals: $totalMeals)');
+      _logger.i(
+          'Processing $days days in batches of $optimalBatchSize (total meals: $totalMeals)');
 
       // Process days in batches to avoid overwhelming the API
       for (int batchStart = 1;
@@ -289,8 +293,8 @@ Please regenerate the meal plan following the JSON schema exactly.
 
         for (int dayIndex = batchStart; dayIndex <= batchEnd; dayIndex++) {
           futures.add(_generateSingleDayWithContext(
-            preferences, 
-            dayIndex, 
+            preferences,
+            dayIndex,
             mealDays,
             (dayCompletedMeals) {
               // Update progress as meals are completed within each day
@@ -304,20 +308,20 @@ Please regenerate the meal plan following the JSON schema exactly.
         try {
           final batchResults = await Future.wait(futures);
           mealDays.addAll(batchResults);
-          
+
           // Update progress after batch completion
           _logger.i('Batch completed: ${mealDays.length}/$days days total');
         } catch (e) {
           _logger.e('Batch failed with error: $e');
 
           // If batch fails due to rate limits or validation errors, fall back to sequential processing
-          if (e.toString().contains('RateLimitException') || 
+          if (e.toString().contains('RateLimitException') ||
               e.toString().contains('ValidationException') ||
               e.toString().contains('JSON validation failed')) {
             _logger.w(
                 'Batch processing failed, falling back to sequential processing...');
-            await _generateSequentialFallback(
-                preferences, batchStart, batchEnd, mealDays, onProgress, totalMeals, completedMeals);
+            await _generateSequentialFallback(preferences, batchStart, batchEnd,
+                mealDays, onProgress, totalMeals, completedMeals);
           } else {
             // For other errors, throw exception for testing
             _logger.e(
@@ -328,7 +332,8 @@ Please regenerate the meal plan following the JSON schema exactly.
 
         // Small delay between batches to be respectful to the API
         if (batchEnd < days) {
-          await Future.delayed(Duration(milliseconds: 1000)); // Reduced for faster processing
+          await Future.delayed(
+              Duration(milliseconds: 1000)); // Reduced for faster processing
         }
       }
 
@@ -354,10 +359,13 @@ Please regenerate the meal plan following the JSON schema exactly.
       final caloriePercentDiff = (calorieDiff / targetTotalCalories) * 100;
 
       if (caloriePercentDiff > 5) {
-        _logger.w('⚠️ WARNING: Generated meal plan calories (${totalCalories.toStringAsFixed(0)}) differ by ${caloriePercentDiff.toStringAsFixed(1)}% from target (${targetTotalCalories.toStringAsFixed(0)})');
-        _logger.w('This exceeds the ±5% tolerance. Consider regenerating the meal plan.');
+        _logger.w(
+            '⚠️ WARNING: Generated meal plan calories (${totalCalories.toStringAsFixed(0)}) differ by ${caloriePercentDiff.toStringAsFixed(1)}% from target (${targetTotalCalories.toStringAsFixed(0)})');
+        _logger.w(
+            'This exceeds the ±5% tolerance. Consider regenerating the meal plan.');
       } else {
-        _logger.i('✅ Generated meal plan calories (${totalCalories.toStringAsFixed(0)}) are within ±5% of target (${targetTotalCalories.toStringAsFixed(0)})');
+        _logger.i(
+            '✅ Generated meal plan calories (${totalCalories.toStringAsFixed(0)}) are within ±5% of target (${targetTotalCalories.toStringAsFixed(0)})');
       }
 
       final mealPlan = MealPlanModel(
@@ -368,7 +376,8 @@ Please regenerate the meal plan following the JSON schema exactly.
         startDate: DateTime.now(),
         endDate: DateTime.now().add(Duration(days: days - 1)),
         mealDays: mealDays,
-        totalCalories: totalCalories, // Use actual calculated calories instead of target
+        totalCalories:
+            totalCalories, // Use actual calculated calories instead of target
         totalProtein: totalProtein,
         totalCarbs: totalCarbs,
         totalFat: totalFat,
@@ -383,7 +392,8 @@ Please regenerate the meal plan following the JSON schema exactly.
       }
 
       // Final progress update
-      _logger.i('Progress: $totalMeals/$totalMeals meals completed - Meal plan generation finished!');
+      _logger.i(
+          'Progress: $totalMeals/$totalMeals meals completed - Meal plan generation finished!');
       onProgress?.call(totalMeals, totalMeals);
 
       return mealPlan;
@@ -417,20 +427,21 @@ Please regenerate the meal plan following the JSON schema exactly.
           onProgress?.call(completedMeals, totalMeals);
         });
         mealDays.add(mealDay);
-        
+
         // Add delay between sequential calls to respect rate limits
         if (dayIndex < batchEnd) {
-          await Future.delayed(Duration(milliseconds: 1000)); // Reduced for faster processing
+          await Future.delayed(
+              Duration(milliseconds: 1000)); // Reduced for faster processing
         }
       } catch (e) {
         failedDays++;
         _logger.e('Sequential generation failed for day $dayIndex: $e');
-        
+
         // If all days in the batch failed, throw an exception
         if (failedDays >= totalDaysInBatch) {
           throw Exception('All days in batch $batchStart-$batchEnd failed: $e');
         }
-        
+
         // Otherwise, continue with the next day
         _logger.w('Continuing with remaining days in batch...');
       }

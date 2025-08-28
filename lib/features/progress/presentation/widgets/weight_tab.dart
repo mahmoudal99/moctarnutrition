@@ -91,4 +91,4 @@ class WeightTab extends StatelessWidget {
       },
     );
   }
-} 
+}

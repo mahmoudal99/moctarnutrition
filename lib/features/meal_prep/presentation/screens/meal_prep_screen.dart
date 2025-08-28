@@ -34,23 +34,27 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   Future<void> _loadMealPlanIfNeeded() async {
     // Prevent multiple simultaneous calls
     if (_isLoadingMealPlan) {
-      _logger.d('MealPrepScreen - Already loading meal plan, skipping duplicate call');
+      _logger.d(
+          'MealPrepScreen - Already loading meal plan, skipping duplicate call');
       return;
     }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
-    
+    final mealPlanProvider =
+        Provider.of<MealPlanProvider>(context, listen: false);
+
     _logger.d('MealPrepScreen - _loadMealPlanIfNeeded called');
-    _logger.d('MealPrepScreen - AuthProvider state: isLoading=${authProvider.isLoading}, isAuthenticated=${authProvider.isAuthenticated}, userModel=${authProvider.userModel?.name ?? 'null'}');
-    _logger.d('MealPrepScreen - MealPlanProvider state: isLoading=${mealPlanProvider.isLoading}, mealPlan=${mealPlanProvider.mealPlan?.title ?? 'null'}');
-    
+    _logger.d(
+        'MealPrepScreen - AuthProvider state: isLoading=${authProvider.isLoading}, isAuthenticated=${authProvider.isAuthenticated}, userModel=${authProvider.userModel?.name ?? 'null'}');
+    _logger.d(
+        'MealPrepScreen - MealPlanProvider state: isLoading=${mealPlanProvider.isLoading}, mealPlan=${mealPlanProvider.mealPlan?.title ?? 'null'}');
+
     // Set loading flag
     setState(() {
       _isLoadingMealPlan = true;
       _hasAttemptedLoad = true;
     });
-    
+
     try {
       // Check if AuthProvider is still loading user data
       if (authProvider.isLoading) {
@@ -65,10 +69,11 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         }
         return;
       }
-      
+
       // Check if user is authenticated
       if (!authProvider.isAuthenticated || authProvider.userModel == null) {
-        _logger.w('Cannot load meal plan: user not authenticated or userModel is null');
+        _logger.w(
+            'Cannot load meal plan: user not authenticated or userModel is null');
         return;
       }
 
@@ -76,12 +81,14 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       final currentMealPlan = mealPlanProvider.mealPlan;
       if (currentMealPlan != null) {
         if (currentMealPlan.userId == authProvider.userModel!.id) {
-          _logger.d('Meal plan already loaded for current user, skipping API call');
+          _logger.d(
+              'Meal plan already loaded for current user, skipping API call');
           // Load cheat day from diet preferences
           await _loadCheatDay(authProvider.userModel!.id);
           return;
         } else {
-          _logger.d('Meal plan belongs to different user, clearing and reloading');
+          _logger
+              .d('Meal plan belongs to different user, clearing and reloading');
           mealPlanProvider.clearMealPlan();
         }
       }
@@ -89,7 +96,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       // Load meal plan for current user
       _logger.d('Loading meal plan for user ${authProvider.userModel!.id}');
       await mealPlanProvider.loadMealPlan(authProvider.userModel!.id);
-      
+
       // Load cheat day from diet preferences
       await _loadCheatDay(authProvider.userModel!.id);
     } finally {
@@ -105,12 +112,14 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   /// Refresh meal plan (force refresh from server)
   Future<void> _refreshMealPlan() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
-    
+    final mealPlanProvider =
+        Provider.of<MealPlanProvider>(context, listen: false);
+
     if (authProvider.isAuthenticated && authProvider.userModel != null) {
-      _logger.d('Force refreshing meal plan for user ${authProvider.userModel!.id}');
+      _logger.d(
+          'Force refreshing meal plan for user ${authProvider.userModel!.id}');
       await mealPlanProvider.refreshMealPlan(authProvider.userModel!.id);
-      
+
       // Load cheat day from diet preferences
       await _loadCheatDay(authProvider.userModel!.id);
     }
@@ -119,7 +128,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   /// Load cheat day from diet preferences
   Future<void> _loadCheatDay(String userId) async {
     try {
-      final dietPreferences = await MealPlanStorageService.loadDietPreferences(userId);
+      final dietPreferences =
+          await MealPlanStorageService.loadDietPreferences(userId);
       if (dietPreferences != null) {
         setState(() {
           _cheatDay = dietPreferences.cheatDay;
@@ -175,7 +185,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
                 mealPlan: mealPlanProvider.mealPlan!,
                 user: authProvider.userModel,
                 cheatDay: _cheatDay,
-                selectedDate: DateTime.now(), // Pass current date for consumption tracking
+                selectedDate: DateTime
+                    .now(), // Pass current date for consumption tracking
               ),
             ),
           );

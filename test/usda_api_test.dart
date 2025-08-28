@@ -6,10 +6,10 @@ void main() {
   group('USDA API Service Tests', () {
     test('should search for food items', () async {
       final results = await USDAApiService.searchFood('chicken breast');
-      
+
       expect(results, isA<List<USDASearchResult>>());
       expect(results.isNotEmpty, isTrue);
-      
+
       if (results.isNotEmpty) {
         final firstResult = results.first;
         expect(firstResult.fdcId, isA<int>());
@@ -21,10 +21,11 @@ void main() {
     test('should get food details', () async {
       // First search for a food item
       final searchResults = await USDAApiService.searchFood('apple');
-      
+
       if (searchResults.isNotEmpty) {
-        final foodDetails = await USDAApiService.getFoodDetails(searchResults.first.fdcId);
-        
+        final foodDetails =
+            await USDAApiService.getFoodDetails(searchResults.first.fdcId);
+
         expect(foodDetails, isA<USDAFoodDetails>());
         expect(foodDetails!.fdcId, equals(searchResults.first.fdcId));
         expect(foodDetails.description.isNotEmpty, isTrue);
@@ -42,14 +43,14 @@ void main() {
         'sugar': 0.0,
         'sodium': 74.0,
       };
-      
+
       final result = await USDAApiService.verifyIngredientNutrition(
         'chicken breast, raw',
         100.0,
         'g',
         claimedNutrition,
       );
-      
+
       expect(result, isA<NutritionVerificationResult>());
       expect(result.isVerified, isA<bool>());
       expect(result.confidence, isA<double>());
@@ -59,19 +60,23 @@ void main() {
 
     test('should handle unit conversions correctly', () async {
       // Test gram conversion
-      final gramsResult = await UnitConverterService.convertToGrams(100, 'g', 'test ingredient', null);
+      final gramsResult = await UnitConverterService.convertToGrams(
+          100, 'g', 'test ingredient', null);
       expect(gramsResult, equals(100.0));
-      
+
       // Test cup conversion (approximate)
-      final cupResult = await UnitConverterService.convertToGrams(1, 'cup', 'water', null);
+      final cupResult =
+          await UnitConverterService.convertToGrams(1, 'cup', 'water', null);
       expect(cupResult, greaterThan(200.0)); // Should be around 240g
-      
+
       // Test tablespoon conversion (approximate)
-      final tbspResult = await UnitConverterService.convertToGrams(1, 'tbsp', 'water', null);
+      final tbspResult =
+          await UnitConverterService.convertToGrams(1, 'tbsp', 'water', null);
       expect(tbspResult, greaterThan(10.0)); // Should be around 15g
-      
+
       // Test teaspoon conversion (approximate)
-      final tspResult = await UnitConverterService.convertToGrams(1, 'tsp', 'water', null);
+      final tspResult =
+          await UnitConverterService.convertToGrams(1, 'tsp', 'water', null);
       expect(tspResult, greaterThan(3.0)); // Should be around 5g
     });
 
@@ -80,4 +85,4 @@ void main() {
       expect(isConnected, isA<bool>());
     });
   });
-} 
+}

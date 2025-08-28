@@ -93,7 +93,8 @@ class DayViewWidget extends StatelessWidget {
           slivers: [
             if (!workoutProvider.isEditMode)
               WorkoutAppHeader(
-                  message: WorkoutMessageGenerator.generateWorkoutMessage(todayWorkout)),
+                  message: WorkoutMessageGenerator.generateWorkoutMessage(
+                      todayWorkout)),
             SliverToBoxAdapter(
               child: Column(
                 children: [

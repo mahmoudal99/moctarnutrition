@@ -9,7 +9,7 @@ import 'json_validation_service.dart';
 class ValidationException implements Exception {
   final String message;
   ValidationException(this.message);
-  
+
   @override
   String toString() => 'ValidationException: $message';
 }
@@ -25,8 +25,9 @@ class ParserService {
     try {
       print('Parsing single day AI response for day $dayIndex...');
       print('AI Response length: ${aiResponse.length}');
-      print('AI Response preview: ${aiResponse.substring(0, aiResponse.length > 200 ? 200 : aiResponse.length)}...');
-      
+      print(
+          'AI Response preview: ${aiResponse.substring(0, aiResponse.length > 200 ? 200 : aiResponse.length)}...');
+
       // Debug: Print the full AI response for debugging
       print('FULL AI RESPONSE FOR DAY $dayIndex:');
       print(aiResponse);
@@ -39,13 +40,14 @@ class ParserService {
       );
 
       if (!validationResult['isValid']) {
-        throw ValidationException('JSON validation failed: ${validationResult['message']}');
+        throw ValidationException(
+            'JSON validation failed: ${validationResult['message']}');
       }
 
       // Use the validated data
       final data = validationResult['data'];
       final mealDayData = data['mealDay'];
-      
+
       // Debug: Check ingredients in parsed data
       if (mealDayData['meals'] != null) {
         final meals = mealDayData['meals'] as List;
@@ -58,7 +60,8 @@ class ParserService {
             print('    Ingredients:');
             for (int j = 0; j < ingredients.length; j++) {
               final ingredient = ingredients[j];
-              print('      ${j + 1}. ${ingredient['name']} - ${ingredient['amount']} ${ingredient['unit']}');
+              print(
+                  '      ${j + 1}. ${ingredient['name']} - ${ingredient['amount']} ${ingredient['unit']}');
             }
           }
         }
@@ -73,10 +76,10 @@ class ParserService {
           final mealMap = Map<String, dynamic>.from(mealData);
           // Generate unique ID for each meal
           mealMap['id'] = const Uuid().v4();
-          
+
           // Remove any model-provided meal nutrition (we'll calculate it ourselves)
           mealMap.remove('nutrition');
-          
+
           return mealMap;
         }).toList();
         mealDayData['meals'] = meals;
@@ -92,10 +95,10 @@ class ParserService {
       }
 
       final mealDay = MealDay.fromJson(mealDayData);
-      
+
       // Apply calculated nutrition to all meals and the meal day
       _applyCalculatedNutrition(mealDay);
-      
+
       return mealDay;
     } catch (e) {
       print('JSON parsing failed for day $dayIndex: $e');
@@ -112,7 +115,8 @@ class ParserService {
     try {
       print('Parsing AI response...');
       print('AI Response length: ${aiResponse.length}');
-      print('AI Response preview: ${aiResponse.substring(0, aiResponse.length > 200 ? 200 : aiResponse.length)}...');
+      print(
+          'AI Response preview: ${aiResponse.substring(0, aiResponse.length > 200 ? 200 : aiResponse.length)}...');
 
       // Clean and fix the JSON
       final cleanedJson = JsonUtils.cleanAndFixJson(aiResponse);
@@ -157,13 +161,16 @@ class ParserService {
           }
 
           // Update day totals if they're missing or 0
-          if (JsonUtils.safeToDouble(dayMap['totalProtein']) == 0 || dayMap['totalProtein'] == null) {
+          if (JsonUtils.safeToDouble(dayMap['totalProtein']) == 0 ||
+              dayMap['totalProtein'] == null) {
             dayMap['totalProtein'] = dayProtein;
           }
-          if (JsonUtils.safeToDouble(dayMap['totalCarbs']) == 0 || dayMap['totalCarbs'] == null) {
+          if (JsonUtils.safeToDouble(dayMap['totalCarbs']) == 0 ||
+              dayMap['totalCarbs'] == null) {
             dayMap['totalCarbs'] = dayCarbs;
           }
-          if (JsonUtils.safeToDouble(dayMap['totalFat']) == 0 || dayMap['totalFat'] == null) {
+          if (JsonUtils.safeToDouble(dayMap['totalFat']) == 0 ||
+              dayMap['totalFat'] == null) {
             dayMap['totalFat'] = dayFat;
           }
         }
@@ -212,16 +219,17 @@ class ParserService {
   ) {
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
     final presentMealTypes = meals.map((m) => m['type'] as String).toSet();
-    
+
     final missingMeals = <String>[];
     for (final requiredType in requiredMeals) {
       if (!presentMealTypes.contains(requiredType.name)) {
         missingMeals.add(requiredType.name);
       }
     }
-    
+
     if (missingMeals.isNotEmpty) {
-      print('⚠️ WARNING: Day $dayIndex is missing required meal types: ${missingMeals.join(', ')}');
+      print(
+          '⚠️ WARNING: Day $dayIndex is missing required meal types: ${missingMeals.join(', ')}');
       print('Present meals: ${presentMealTypes.join(', ')}');
       print('Required meals: ${requiredMeals.map((t) => t.name).join(', ')}');
     } else {
@@ -233,12 +241,14 @@ class ParserService {
   static List<MealType> _getRequiredMealTypes(String mealFrequency) {
     // Always require breakfast, lunch, and dinner as core meals
     final requiredMeals = [MealType.breakfast, MealType.lunch, MealType.dinner];
-    
+
     // Add snacks based on meal frequency string (case-insensitive)
-    if (mealFrequency.toLowerCase().contains('snack') || mealFrequency.contains('4') || mealFrequency.contains('5')) {
+    if (mealFrequency.toLowerCase().contains('snack') ||
+        mealFrequency.contains('4') ||
+        mealFrequency.contains('5')) {
       requiredMeals.add(MealType.snack);
     }
-    
+
     return requiredMeals;
   }
 
@@ -249,14 +259,14 @@ class ParserService {
       for (final meal in mealDay.meals) {
         NutritionCalculationService.applyCalculatedNutritionToMeal(meal);
       }
-      
+
       // Calculate nutrition for the meal day
       NutritionCalculationService.applyCalculatedNutritionToMealDay(mealDay);
-      
+
       print('✅ Applied calculated nutrition to meal day ${mealDay.date}');
     } catch (e) {
       print('❌ Error applying calculated nutrition: $e');
       // Continue without failing the entire parsing process
     }
   }
-} 
+}

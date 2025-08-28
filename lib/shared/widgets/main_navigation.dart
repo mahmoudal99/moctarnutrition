@@ -104,10 +104,10 @@ class _MainNavigationState extends State<MainNavigation> {
             GoRouter.of(context).routeInformationProvider.value.uri.toString();
         final idx = items.indexWhere((item) => location == item.route);
         final currentIndex = idx != -1 ? idx : _currentIndex;
-        
+
         // Only show bottom navigation bar for main tab routes
         final shouldShowBottomNav = idx != -1;
-        
+
         return Scaffold(
           body: widget.child,
           bottomNavigationBar: shouldShowBottomNav

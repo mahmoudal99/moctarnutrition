@@ -34,7 +34,6 @@ class _CheckinScreenState extends State<CheckinScreen> {
     await checkinProvider.refresh();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,9 +65,10 @@ class _CheckinScreenState extends State<CheckinScreen> {
       body: Consumer2<CheckinProvider, app_auth.AuthProvider>(
         builder: (context, checkinProvider, authProvider, child) {
           _logger.d('CheckinScreen - isLoading: ${checkinProvider.isLoading}');
-          _logger.d('CheckinScreen - userCheckins.length: ${checkinProvider.userCheckins.length}');
+          _logger.d(
+              'CheckinScreen - userCheckins.length: ${checkinProvider.userCheckins.length}');
           _logger.d('CheckinScreen - error: ${checkinProvider.error}');
-          
+
           if (checkinProvider.isLoading &&
               checkinProvider.userCheckins.isEmpty) {
             _logger.d('CheckinScreen - Showing loading indicator');
@@ -162,15 +162,18 @@ class _CheckinScreenState extends State<CheckinScreen> {
   }
 
   Widget _buildHistorySection(CheckinProvider checkinProvider) {
-    _logger.d('_buildHistorySection - userCheckins.length: ${checkinProvider.userCheckins.length}');
-    _logger.d('_buildHistorySection - isEmpty: ${checkinProvider.userCheckins.isEmpty}');
-    
+    _logger.d(
+        '_buildHistorySection - userCheckins.length: ${checkinProvider.userCheckins.length}');
+    _logger.d(
+        '_buildHistorySection - isEmpty: ${checkinProvider.userCheckins.isEmpty}');
+
     if (checkinProvider.userCheckins.isEmpty) {
       _logger.d('_buildHistorySection - Building empty history');
     } else {
-      _logger.d('_buildHistorySection - Building history list with ${checkinProvider.userCheckins.take(5).length} items');
+      _logger.d(
+          '_buildHistorySection - Building history list with ${checkinProvider.userCheckins.take(5).length} items');
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -265,7 +268,8 @@ class _CheckinScreenState extends State<CheckinScreen> {
     if (now.weekday != 7) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Check-ins can only be submitted on Sundays. Today is ${_getDayName(now.weekday)}.'),
+          content: Text(
+              'Check-ins can only be submitted on Sundays. Today is ${_getDayName(now.weekday)}.'),
           backgroundColor: AppConstants.errorColor,
         ),
       );
@@ -276,7 +280,13 @@ class _CheckinScreenState extends State<CheckinScreen> {
 
   String _getDayName(int weekday) {
     const days = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
     ];
     return days[weekday - 1];
   }

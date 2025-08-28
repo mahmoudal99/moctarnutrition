@@ -51,12 +51,16 @@ class EmailService {
       if (response.statusCode == 200) {
         _logger.i('Meal plan ready email sent successfully to: $userEmail');
         return true;
-      } else if (response.statusCode == 403 && response.body.contains('non-browser applications')) {
-        _logger.w('EmailJS API calls are disabled for non-browser applications. This is expected for mobile apps.');
-        _logger.i('Consider using a web proxy service or alternative email service for production.');
+      } else if (response.statusCode == 403 &&
+          response.body.contains('non-browser applications')) {
+        _logger.w(
+            'EmailJS API calls are disabled for non-browser applications. This is expected for mobile apps.');
+        _logger.i(
+            'Consider using a web proxy service or alternative email service for production.');
         return false;
       } else {
-        _logger.e('Failed to send meal plan ready email. Status: ${response.statusCode}, Body: ${response.body}');
+        _logger.e(
+            'Failed to send meal plan ready email. Status: ${response.statusCode}, Body: ${response.body}');
         return false;
       }
     } catch (e) {
@@ -109,11 +113,14 @@ class EmailService {
       if (response.statusCode == 200) {
         _logger.i('Notification email sent successfully to: $userEmail');
         return true;
-      } else if (response.statusCode == 403 && response.body.contains('non-browser applications')) {
-        _logger.w('EmailJS API calls are disabled for non-browser applications. This is expected for mobile apps.');
+      } else if (response.statusCode == 403 &&
+          response.body.contains('non-browser applications')) {
+        _logger.w(
+            'EmailJS API calls are disabled for non-browser applications. This is expected for mobile apps.');
         return false;
       } else {
-        _logger.e('Failed to send notification email. Status: ${response.statusCode}, Body: ${response.body}');
+        _logger.e(
+            'Failed to send notification email. Status: ${response.statusCode}, Body: ${response.body}');
         return false;
       }
     } catch (e) {
@@ -157,11 +164,14 @@ class EmailService {
       if (response.statusCode == 200) {
         _logger.i('EmailJS connection test successful');
         return true;
-      } else if (response.statusCode == 403 && response.body.contains('non-browser applications')) {
-        _logger.w('EmailJS API calls are disabled for non-browser applications. This is expected for mobile apps.');
+      } else if (response.statusCode == 403 &&
+          response.body.contains('non-browser applications')) {
+        _logger.w(
+            'EmailJS API calls are disabled for non-browser applications. This is expected for mobile apps.');
         return false;
       } else {
-        _logger.e('EmailJS connection test failed. Status: ${response.statusCode}, Body: ${response.body}');
+        _logger.e(
+            'EmailJS connection test failed. Status: ${response.statusCode}, Body: ${response.body}');
         return false;
       }
     } catch (e) {
@@ -197,7 +207,8 @@ class EmailService {
           'template_params': {
             'user_email': testEmail,
             'user_name': testName ?? testEmail.split('@').first,
-            'meal_plan_id': 'TEST_PLAN_${DateTime.now().millisecondsSinceEpoch}',
+            'meal_plan_id':
+                'TEST_PLAN_${DateTime.now().millisecondsSinceEpoch}',
             'plan_duration': '7',
             'fitness_goal': 'Weight Loss',
             'target_calories': '2000',
@@ -210,11 +221,14 @@ class EmailService {
       if (response.statusCode == 200) {
         _logger.i('✅ Test meal plan email sent successfully to: $testEmail');
         return true;
-      } else if (response.statusCode == 403 && response.body.contains('non-browser applications')) {
-        _logger.w('❌ EmailJS API calls are disabled for non-browser applications');
+      } else if (response.statusCode == 403 &&
+          response.body.contains('non-browser applications')) {
+        _logger
+            .w('❌ EmailJS API calls are disabled for non-browser applications');
         return false;
       } else {
-        _logger.e('❌ Failed to send test email. Status: ${response.statusCode}, Body: ${response.body}');
+        _logger.e(
+            '❌ Failed to send test email. Status: ${response.statusCode}, Body: ${response.body}');
         return false;
       }
     } catch (e) {
@@ -234,18 +248,19 @@ class EmailService {
   }) async {
     try {
       _logger.i('Attempting to send email via proxy to: $userEmail');
-      
+
       // This would require setting up a web proxy service
       // For now, we'll just log that this method is available
-      _logger.w('Proxy email service not implemented yet. Consider using a service like:');
+      _logger.w(
+          'Proxy email service not implemented yet. Consider using a service like:');
       _logger.w('- Firebase Functions with Nodemailer');
       _logger.w('- AWS Lambda with SES');
       _logger.w('- Google Cloud Functions with SendGrid');
-      
+
       return false;
     } catch (e) {
       _logger.e('Error sending email via proxy: $e');
       return false;
     }
   }
-} 
+}

@@ -24,7 +24,9 @@ class OnboardingNavigationButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Hide navigation buttons for workout notifications step and rating step since they have their own
-    if (currentPage == 16 || currentPage == 17 || currentPage == totalSteps - 1) {
+    if (currentPage == 16 ||
+        currentPage == 17 ||
+        currentPage == totalSteps - 1) {
       return const SizedBox.shrink();
     }
 

@@ -9,7 +9,8 @@ class CacheService {
   static final _logger = Logger();
   static final Map<String, CachedMealPlan> _cache = {};
   static const int _maxCacheSize = 50; // Maximum number of cached plans
-  static const Duration _cacheExpiry = Duration(hours: 24); // Cache for 24 hours
+  static const Duration _cacheExpiry =
+      Duration(hours: 24); // Cache for 24 hours
 
   /// Generate a unique cache key based on preferences and days
   static String _generateCacheKey(DietPlanPreferences preferences, int days) {
@@ -31,7 +32,8 @@ class CacheService {
       'nutritionGoal': preferences.nutritionGoal,
       'weeklyRotation': preferences.weeklyRotation,
       'remindersEnabled': preferences.remindersEnabled,
-      'allergies': preferences.allergies?.map((a) => a['name']).toList()?..sort(),
+      'allergies': preferences.allergies?.map((a) => a['name']).toList()
+        ?..sort(),
       'mealTiming': preferences.mealTimingPreferences,
       'batchCooking': preferences.batchCookingPreferences,
     };
@@ -43,7 +45,8 @@ class CacheService {
   }
 
   /// Check if a meal plan exists in cache
-  static CachedMealPlan? getCachedMealPlan(DietPlanPreferences preferences, int days) {
+  static CachedMealPlan? getCachedMealPlan(
+      DietPlanPreferences preferences, int days) {
     final cacheKey = _generateCacheKey(preferences, days);
     final cached = _cache[cacheKey];
 
@@ -53,7 +56,7 @@ class CacheService {
         _cache.remove(cacheKey);
         return null;
       }
-      
+
       _logger.i('Cache hit: Found meal plan for $days days');
       return cached;
     }
@@ -63,9 +66,10 @@ class CacheService {
   }
 
   /// Store a meal plan in cache
-  static void cacheMealPlan(DietPlanPreferences preferences, int days, MealPlanModel mealPlan) {
+  static void cacheMealPlan(
+      DietPlanPreferences preferences, int days, MealPlanModel mealPlan) {
     final cacheKey = _generateCacheKey(preferences, days);
-    
+
     // Remove oldest entries if cache is full
     if (_cache.length >= _maxCacheSize) {
       _cleanupCache();
@@ -100,7 +104,7 @@ class CacheService {
     if (_cache.length >= _maxCacheSize) {
       final sortedEntries = _cache.entries.toList()
         ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
-      
+
       final toRemove = sortedEntries.take(_cache.length - _maxCacheSize + 1);
       for (final entry in toRemove) {
         _cache.remove(entry.key);
@@ -156,4 +160,4 @@ class CachedMealPlan {
     required this.preferences,
     required this.days,
   });
-} 
+}

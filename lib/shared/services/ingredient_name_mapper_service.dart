@@ -10,16 +10,17 @@ class IngredientNameMapperService {
   static Future<String> mapToUSDASearchTerm(String aiGeneratedName) async {
     // Check cache first
     if (_nameMappingCache.containsKey(aiGeneratedName)) {
-      _logger.i('Using cached name mapping: $aiGeneratedName -> ${_nameMappingCache[aiGeneratedName]}');
+      _logger.i(
+          'Using cached name mapping: $aiGeneratedName -> ${_nameMappingCache[aiGeneratedName]}');
       return _nameMappingCache[aiGeneratedName]!;
     }
 
     // For now, just return the original name - USDA can handle most ingredient names
     final searchTerm = aiGeneratedName.trim();
-    
+
     // Cache the result
     _nameMappingCache[aiGeneratedName] = searchTerm;
-    
+
     _logger.i('Mapped $aiGeneratedName to USDA search term: $searchTerm');
     return searchTerm;
   }
@@ -37,4 +38,4 @@ class IngredientNameMapperService {
       'cachedMappings': _nameMappingCache.keys.toList(),
     };
   }
-} 
+}

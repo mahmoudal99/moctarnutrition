@@ -54,7 +54,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
     _logger.i('Initializing from client preferences');
     _logger.i('Client fitness goal: ${_userPreferences.fitnessGoal}');
     _logger.i('Client target calories: ${_userPreferences.targetCalories}');
-    
+
     // Pre-select fitness goal from client's onboarding choice
     if (_userPreferences.fitnessGoal != null) {
       _selectedFitnessGoal = _userPreferences.fitnessGoal!;
@@ -221,16 +221,20 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           final emailSent = await EmailService.sendMealPlanReadyEmail(
             userEmail: widget.userEmail!,
             userName: widget.userName ?? widget.userEmail!.split('@').first,
-            mealPlanId: mealPlan.id ?? 'demo_plan_${DateTime.now().millisecondsSinceEpoch}',
+            mealPlanId: mealPlan.id ??
+                'demo_plan_${DateTime.now().millisecondsSinceEpoch}',
             planDuration: _selectedDays,
-            fitnessGoal: _getFitnessGoalLabel(_selectedFitnessGoal ?? _userPreferences.fitnessGoal),
+            fitnessGoal: _getFitnessGoalLabel(
+                _selectedFitnessGoal ?? _userPreferences.fitnessGoal),
             targetCalories: _targetCalories,
           );
-          
+
           if (emailSent) {
-            _logger.i('Meal plan ready email sent successfully to: ${widget.userEmail}');
+            _logger.i(
+                'Meal plan ready email sent successfully to: ${widget.userEmail}');
           } else {
-            _logger.w('Failed to send meal plan ready email to: ${widget.userEmail}');
+            _logger.w(
+                'Failed to send meal plan ready email to: ${widget.userEmail}');
           }
         } catch (e) {
           _logger.e('Error sending meal plan ready email: $e');

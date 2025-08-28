@@ -41,20 +41,20 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
     final birthDate = DateTime(_selectedYear, _selectedMonth, _selectedDay);
     final now = DateTime.now();
     int age = now.year - birthDate.year;
-    
+
     // Adjust age if birthday hasn't occurred this year
-    if (now.month < birthDate.month || 
+    if (now.month < birthDate.month ||
         (now.month == birthDate.month && now.day < birthDate.day)) {
       age--;
     }
-    
+
     // Ensure age is within reasonable bounds (16-100)
     age = age.clamp(16, 100);
-    
+
     setState(() {
       _calculatedAge = age;
     });
-    
+
     widget.onAgeChanged(age);
   }
 
@@ -81,9 +81,9 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
                 ],
               ),
             ),
-            
+
             const SizedBox(width: AppConstants.spacingL),
-            
+
             // Month Picker
             Expanded(
               child: Column(
@@ -100,9 +100,9 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
                 ],
               ),
             ),
-            
+
             const SizedBox(width: AppConstants.spacingL),
-            
+
             // Year Picker
             Expanded(
               child: Column(
@@ -121,9 +121,9 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: AppConstants.spacingXL),
-        
+
         // Age Display
         Container(
           padding: const EdgeInsets.all(AppConstants.spacingL),
@@ -159,7 +159,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
 
   Widget _buildDayPicker() {
     final daysInMonth = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
-    
+
     return Container(
       height: 200,
       decoration: BoxDecoration(
@@ -223,7 +223,8 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
-            controller: FixedExtentScrollController(initialItem: _selectedDay - 1),
+            controller:
+                FixedExtentScrollController(initialItem: _selectedDay - 1),
             onSelectedItemChanged: (index) {
               HapticFeedback.lightImpact();
               setState(() {
@@ -240,12 +241,16 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
               final isSelected = _selectedDay == day;
               return Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     day.toString(),
                     style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? AppConstants.primaryColor : AppConstants.textSecondary,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? AppConstants.primaryColor
+                          : AppConstants.textSecondary,
                     ),
                   ),
                 ),
@@ -259,10 +264,20 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
 
   Widget _buildMonthPicker() {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
-    
+
     return Container(
       height: 200,
       decoration: BoxDecoration(
@@ -326,13 +341,15 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
-            controller: FixedExtentScrollController(initialItem: _selectedMonth - 1),
+            controller:
+                FixedExtentScrollController(initialItem: _selectedMonth - 1),
             onSelectedItemChanged: (index) {
               HapticFeedback.lightImpact();
               setState(() {
                 _selectedMonth = index + 1;
                 // Adjust day if it exceeds days in new month
-                final daysInNewMonth = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
+                final daysInNewMonth =
+                    DateTime(_selectedYear, _selectedMonth + 1, 0).day;
                 if (_selectedDay > daysInNewMonth) {
                   _selectedDay = daysInNewMonth;
                 }
@@ -344,12 +361,16 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
               final isSelected = _selectedMonth == month;
               return Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     months[index],
                     style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? AppConstants.primaryColor : AppConstants.textSecondary,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? AppConstants.primaryColor
+                          : AppConstants.textSecondary,
                     ),
                   ),
                 ),
@@ -365,7 +386,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
     final currentYear = DateTime.now().year;
     final startYear = currentYear - 100; // 100 years ago
     final endYear = currentYear - 16; // 16 years ago (minimum age)
-    
+
     return Container(
       height: 200,
       decoration: BoxDecoration(
@@ -429,13 +450,15 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
-            controller: FixedExtentScrollController(initialItem: endYear - _selectedYear),
+            controller: FixedExtentScrollController(
+                initialItem: endYear - _selectedYear),
             onSelectedItemChanged: (index) {
               HapticFeedback.lightImpact();
               setState(() {
                 _selectedYear = endYear - index;
                 // Adjust day if it exceeds days in month for new year
-                final daysInMonth = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
+                final daysInMonth =
+                    DateTime(_selectedYear, _selectedMonth + 1, 0).day;
                 if (_selectedDay > daysInMonth) {
                   _selectedDay = daysInMonth;
                 }
@@ -447,12 +470,16 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
               final isSelected = _selectedYear == year;
               return Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     year.toString(),
                     style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? AppConstants.primaryColor : AppConstants.textSecondary,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? AppConstants.primaryColor
+                          : AppConstants.textSecondary,
                     ),
                   ),
                 ),

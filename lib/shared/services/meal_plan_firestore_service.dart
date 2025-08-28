@@ -12,7 +12,7 @@ class MealPlanFirestoreService {
   static Future<MealPlanModel?> getMealPlan(String userId) async {
     try {
       _logger.d('Fetching meal plan for user: $userId');
-      
+
       // Add timeout to prevent hanging
       final querySnapshot = await _firestore
           .collection(_collectionName)
@@ -21,12 +21,13 @@ class MealPlanFirestoreService {
           .limit(1)
           .get(const GetOptions(source: Source.serverAndCache))
           .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              _logger.w('Firestore query timed out for user: $userId');
-              throw TimeoutException('Firestore query timed out', const Duration(seconds: 10));
-            },
-          );
+        const Duration(seconds: 10),
+        onTimeout: () {
+          _logger.w('Firestore query timed out for user: $userId');
+          throw TimeoutException(
+              'Firestore query timed out', const Duration(seconds: 10));
+        },
+      );
 
       if (querySnapshot.docs.isNotEmpty) {
         final doc = querySnapshot.docs.first;
@@ -40,7 +41,8 @@ class MealPlanFirestoreService {
     } on FirebaseException catch (e) {
       _logger.e('Firebase error fetching meal plan: ${e.code} - ${e.message}');
       if (e.code == 'failed-precondition') {
-        _logger.e('Firestore index error - missing composite index for userId + createdAt');
+        _logger.e(
+            'Firestore index error - missing composite index for userId + createdAt');
         throw Exception('Database index error. Please contact support.');
       }
       rethrow;
@@ -57,19 +59,20 @@ class MealPlanFirestoreService {
   static Future<MealPlanModel?> getMealPlanById(String mealPlanId) async {
     try {
       _logger.d('Fetching meal plan by ID: $mealPlanId');
-      
+
       // Add timeout to prevent hanging
       final doc = await _firestore
           .collection(_collectionName)
           .doc(mealPlanId)
           .get(const GetOptions(source: Source.serverAndCache))
           .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              _logger.w('Firestore query timed out for meal plan ID: $mealPlanId');
-              throw TimeoutException('Firestore query timed out', const Duration(seconds: 10));
-            },
-          );
+        const Duration(seconds: 10),
+        onTimeout: () {
+          _logger.w('Firestore query timed out for meal plan ID: $mealPlanId');
+          throw TimeoutException(
+              'Firestore query timed out', const Duration(seconds: 10));
+        },
+      );
 
       if (doc.exists) {
         final mealPlan = MealPlanModel.fromJson(doc.data()!);
@@ -89,12 +92,12 @@ class MealPlanFirestoreService {
   static Future<void> saveMealPlan(MealPlanModel mealPlan) async {
     try {
       _logger.d('Saving meal plan to Firestore: ${mealPlan.id}');
-      
+
       await _firestore
           .collection(_collectionName)
           .doc(mealPlan.id)
           .set(mealPlan.toJson());
-      
+
       _logger.i('Meal plan saved successfully: ${mealPlan.id}');
     } catch (e) {
       _logger.e('Failed to save meal plan: $e');
@@ -106,12 +109,12 @@ class MealPlanFirestoreService {
   static Future<void> updateMealPlan(MealPlanModel mealPlan) async {
     try {
       _logger.d('Updating meal plan in Firestore: ${mealPlan.id}');
-      
+
       await _firestore
           .collection(_collectionName)
           .doc(mealPlan.id)
           .update(mealPlan.toJson());
-      
+
       _logger.i('Meal plan updated successfully: ${mealPlan.id}');
     } catch (e) {
       _logger.e('Failed to update meal plan: $e');
@@ -123,12 +126,9 @@ class MealPlanFirestoreService {
   static Future<void> deleteMealPlan(String mealPlanId) async {
     try {
       _logger.d('Deleting meal plan from Firestore: $mealPlanId');
-      
-      await _firestore
-          .collection(_collectionName)
-          .doc(mealPlanId)
-          .delete();
-      
+
+      await _firestore.collection(_collectionName).doc(mealPlanId).delete();
+
       _logger.i('Meal plan deleted successfully: $mealPlanId');
     } catch (e) {
       _logger.e('Failed to delete meal plan: $e');
@@ -156,7 +156,7 @@ class MealPlanFirestoreService {
   static Future<List<MealPlanModel>> getMealPlanHistory(String userId) async {
     try {
       _logger.d('Fetching meal plan history for user: $userId');
-      
+
       final querySnapshot = await _firestore
           .collection(_collectionName)
           .where('userId', isEqualTo: userId)
@@ -166,7 +166,7 @@ class MealPlanFirestoreService {
       final mealPlans = querySnapshot.docs
           .map((doc) => MealPlanModel.fromJson(doc.data()))
           .toList();
-      
+
       _logger.i('Found ${mealPlans.length} meal plans in history');
       return mealPlans;
     } catch (e) {
@@ -179,7 +179,7 @@ class MealPlanFirestoreService {
   static Future<MealPlanModel?> getMealPlanFallback(String userId) async {
     try {
       _logger.d('Fetching meal plan for user (fallback): $userId');
-      
+
       // Simple query without ordering to avoid index requirements
       final querySnapshot = await _firestore
           .collection(_collectionName)
@@ -187,12 +187,13 @@ class MealPlanFirestoreService {
           .limit(1)
           .get(const GetOptions(source: Source.serverAndCache))
           .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              _logger.w('Firestore fallback query timed out for user: $userId');
-              throw TimeoutException('Firestore query timed out', const Duration(seconds: 10));
-            },
-          );
+        const Duration(seconds: 10),
+        onTimeout: () {
+          _logger.w('Firestore fallback query timed out for user: $userId');
+          throw TimeoutException(
+              'Firestore query timed out', const Duration(seconds: 10));
+        },
+      );
 
       if (querySnapshot.docs.isNotEmpty) {
         final doc = querySnapshot.docs.first;
@@ -208,4 +209,4 @@ class MealPlanFirestoreService {
       rethrow;
     }
   }
-} 
+}

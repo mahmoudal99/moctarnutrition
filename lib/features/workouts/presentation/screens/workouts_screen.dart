@@ -63,7 +63,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
           }
 
           if (workoutProvider.error != null) {
-            return WorkoutViewBuilder.buildErrorState(workoutProvider.error!, context);
+            return WorkoutViewBuilder.buildErrorState(
+                workoutProvider.error!, context);
           }
 
           if (workoutProvider.currentWorkoutPlan == null) {

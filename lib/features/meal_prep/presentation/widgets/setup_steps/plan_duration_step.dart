@@ -34,7 +34,8 @@ class PlanDurationStep extends StatelessWidget {
             children: [
               Expanded(
                 child: Card(
-                  color: weeklyRotation ? AppConstants.primaryColor : Colors.white,
+                  color:
+                      weeklyRotation ? AppConstants.primaryColor : Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppConstants.radiusM),
                     side: BorderSide(
@@ -79,7 +80,9 @@ class PlanDurationStep extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Card(
-                  color: !weeklyRotation ? AppConstants.primaryColor : Colors.white,
+                  color: !weeklyRotation
+                      ? AppConstants.primaryColor
+                      : Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppConstants.radiusM),
                     side: BorderSide(
@@ -143,4 +146,4 @@ class PlanDurationStep extends StatelessWidget {
       ),
     );
   }
-} 
+}

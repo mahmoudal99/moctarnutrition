@@ -112,7 +112,8 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 10),
                           child: SizedBox(
                             width: double.infinity,
                             height: 56,

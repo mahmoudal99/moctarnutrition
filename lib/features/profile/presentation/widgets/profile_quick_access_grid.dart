@@ -78,4 +78,4 @@ class QuickAccessItem {
     this.badge,
     this.onTap,
   });
-} 
+}

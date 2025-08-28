@@ -103,7 +103,7 @@ class _TrainerAvatarData {
 class _FunCalendar extends StatelessWidget {
   // July 2025 starts on a Tuesday and has 31 days
   final List<List<int?>> days = const [
-    [null, 1, 2, 3, 4, 5, 6],      // Mon-Sun
+    [null, 1, 2, 3, 4, 5, 6], // Mon-Sun
     [7, 8, 9, 10, 11, 12, 13],
     [14, 15, 16, 17, 18, 19, 20],
     [21, 22, 23, 24, 25, 26, 27],
@@ -185,4 +185,3 @@ class _ProgressDots extends StatelessWidget {
     );
   }
 }
- 

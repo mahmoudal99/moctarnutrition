@@ -13,16 +13,20 @@ class AvatarUtils {
       } else if (nameParts.length == 1) {
         // Return first two letters of single name, or first letter if only one character
         final name = nameParts.first;
-        return name.length >= 2 ? name.substring(0, 2).toUpperCase() : name[0].toUpperCase();
+        return name.length >= 2
+            ? name.substring(0, 2).toUpperCase()
+            : name[0].toUpperCase();
       }
     }
-    
+
     // Fallback to email
     if (email != null && email.trim().isNotEmpty) {
       final emailName = email.split('@').first;
-      return emailName.length >= 2 ? emailName.substring(0, 2).toUpperCase() : emailName[0].toUpperCase();
+      return emailName.length >= 2
+          ? emailName.substring(0, 2).toUpperCase()
+          : emailName[0].toUpperCase();
     }
-    
+
     // Default fallback
     return 'U';
   }
@@ -32,7 +36,7 @@ class AvatarUtils {
   static Color getAvatarBackgroundColor(String? name, String? email) {
     final String seed = name ?? email ?? 'default';
     final int hash = seed.hashCode;
-    
+
     // Use a predefined set of colors for consistency
     final List<Color> colors = [
       const Color(0xFF10B981), // Primary green
@@ -44,7 +48,7 @@ class AvatarUtils {
       const Color(0xFF84CC16), // Lime
       const Color(0xFFEC4899), // Pink
     ];
-    
+
     return colors[hash.abs() % colors.length];
   }
 
@@ -70,7 +74,7 @@ class AvatarUtils {
       final initials = getInitials(name, email);
       final backgroundColor = getAvatarBackgroundColor(name, email);
       final textColor = Colors.white;
-      
+
       return CircleAvatar(
         radius: radius,
         backgroundColor: backgroundColor,
@@ -85,4 +89,4 @@ class AvatarUtils {
       );
     }
   }
-} 
+}

@@ -48,7 +48,8 @@ class WeekViewWidget extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (todayWorkout != null && !workoutProvider.isEditMode) ...[
+                          if (todayWorkout != null &&
+                              !workoutProvider.isEditMode) ...[
                             Text(
                               "Today's Workout",
                               style: AppTextStyles.heading4,
@@ -80,8 +81,9 @@ class WeekViewWidget extends StatelessWidget {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final dailyWorkout = workoutPlan.dailyWorkouts[index];
-                      final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
-          
+                      final isToday =
+                          dailyWorkout.dayName == todayWorkout?.dayName;
+
                       return DroppableDayArea(
                         dayName: dailyWorkout.dayName,
                         dailyWorkout: dailyWorkout,
@@ -97,8 +99,9 @@ class WeekViewWidget extends StatelessWidget {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final dailyWorkout = workoutPlan.dailyWorkouts[index];
-                      final isToday = dailyWorkout.dayName == todayWorkout?.dayName;
-          
+                      final isToday =
+                          dailyWorkout.dayName == todayWorkout?.dayName;
+
                       return Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppConstants.spacingM,

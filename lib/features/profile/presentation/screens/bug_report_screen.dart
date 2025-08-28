@@ -203,8 +203,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           items: _priorities.map((String priority) {
             return DropdownMenuItem<String>(
@@ -253,8 +252,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -293,8 +291,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -333,8 +330,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
@@ -367,8 +363,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
@@ -401,8 +396,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],

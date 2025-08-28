@@ -115,7 +115,8 @@ class OnboardingStepsConfig {
   static OnboardingStep getBMIStep() {
     return OnboardingStep(
       title: 'Your BMI',
-      subtitle: 'Calculated from your height and weight to tailor your experience.',
+      subtitle:
+          'Calculated from your height and weight to tailor your experience.',
       icon: "heartbeat.json",
       color: AppConstants.warningColor,
     );

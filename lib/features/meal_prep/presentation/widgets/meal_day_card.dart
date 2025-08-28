@@ -42,4 +42,4 @@ class MealDayCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

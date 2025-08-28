@@ -1,4 +1,5 @@
 enum WorkoutDifficulty { beginner, intermediate, advanced }
+
 enum WorkoutCategory { strength, cardio, flexibility, hiit, yoga, pilates }
 
 class WorkoutModel {
@@ -215,4 +216,4 @@ class Exercise {
       'formCues': formCues,
     };
   }
-} 
+}

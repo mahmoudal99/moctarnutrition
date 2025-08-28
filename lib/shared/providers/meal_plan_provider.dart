@@ -10,7 +10,7 @@ import '../services/streak_service.dart';
 
 class MealPlanProvider with ChangeNotifier {
   static final _logger = Logger();
-  
+
   MealPlanModel? _mealPlan;
   bool _isLoading = false;
   String? _error;
@@ -46,11 +46,12 @@ class MealPlanProvider with ChangeNotifier {
 
     try {
       // First, try to load from local storage
-      final localMealPlan = await MealPlanLocalStorageService.loadMealPlan(userId);
-      
+      final localMealPlan =
+          await MealPlanLocalStorageService.loadMealPlan(userId);
+
       if (localMealPlan != null) {
         _mealPlan = localMealPlan;
-        
+
         // Check if the local plan is fresh (less than 24 hours old)
         final isFresh = await MealPlanLocalStorageService.isMealPlanFresh();
         if (isFresh) {
@@ -63,12 +64,13 @@ class MealPlanProvider with ChangeNotifier {
 
       // Try to load from Firestore (server-side storage)
       try {
-        final firestoreMealPlan = await MealPlanFirestoreService.getMealPlan(userId);
-        
+        final firestoreMealPlan =
+            await MealPlanFirestoreService.getMealPlan(userId);
+
         if (firestoreMealPlan != null) {
           _logger.d('Found meal plan in Firestore: ${firestoreMealPlan.title}');
           _mealPlan = firestoreMealPlan;
-          
+
           // Save to local storage for future use
           try {
             await MealPlanLocalStorageService.saveMealPlan(firestoreMealPlan);
@@ -76,28 +78,32 @@ class MealPlanProvider with ChangeNotifier {
           } catch (e) {
             _logger.w('Failed to save meal plan to local storage: $e');
           }
-          
+
           _setLoading(false);
           return;
         }
       } on FirebaseException catch (e) {
-        _logger.w('Firebase error loading from Firestore: ${e.code} - ${e.message}');
+        _logger.w(
+            'Firebase error loading from Firestore: ${e.code} - ${e.message}');
         if (e.code == 'failed-precondition') {
           _logger.i('Trying fallback query without ordering');
           try {
-            final fallbackMealPlan = await MealPlanFirestoreService.getMealPlanFallback(userId);
+            final fallbackMealPlan =
+                await MealPlanFirestoreService.getMealPlanFallback(userId);
             if (fallbackMealPlan != null) {
-              _logger.d('Found meal plan using fallback query: ${fallbackMealPlan.title}');
+              _logger.d(
+                  'Found meal plan using fallback query: ${fallbackMealPlan.title}');
               _mealPlan = fallbackMealPlan;
-              
+
               // Save to local storage for future use
               try {
-                await MealPlanLocalStorageService.saveMealPlan(fallbackMealPlan);
+                await MealPlanLocalStorageService.saveMealPlan(
+                    fallbackMealPlan);
                 _logger.d('Meal plan saved to local storage');
               } catch (e) {
                 _logger.w('Failed to save meal plan to local storage: $e');
               }
-              
+
               _setLoading(false);
               return;
             }
@@ -146,8 +152,9 @@ class MealPlanProvider with ChangeNotifier {
     _logger.d('Loading meal plan by ID: $mealPlanId');
 
     try {
-      final mealPlan = await MealPlanFirestoreService.getMealPlanById(mealPlanId);
-      
+      final mealPlan =
+          await MealPlanFirestoreService.getMealPlanById(mealPlanId);
+
       if (mealPlan != null) {
         _logger.d('Found meal plan: ${mealPlan.title}');
         _mealPlan = mealPlan;
@@ -155,7 +162,7 @@ class MealPlanProvider with ChangeNotifier {
         _logger.i('No meal plan found with ID: $mealPlanId');
         _mealPlan = null;
       }
-      
+
       _setLoading(false);
     } catch (e) {
       _logger.e('Error loading meal plan by ID: $e');
@@ -167,10 +174,10 @@ class MealPlanProvider with ChangeNotifier {
   /// Refresh meal plan from server (force refresh)
   Future<void> refreshMealPlan(String userId) async {
     _logger.d('Force refreshing meal plan for user: $userId');
-    
+
     // Clear local cache to force refresh
     await MealPlanLocalStorageService.clearMealPlan();
-    
+
     // Reload from server
     await loadMealPlan(userId);
   }
@@ -183,8 +190,10 @@ class MealPlanProvider with ChangeNotifier {
 
   /// Notify listeners when meal consumption changes
   void notifyMealConsumptionChanged() {
-    _logger.d('MealPlanProvider - Notifying listeners about meal consumption change');
-    _logger.d('MealPlanProvider - Current meal plan: ${_mealPlan?.title ?? 'null'}');
+    _logger.d(
+        'MealPlanProvider - Notifying listeners about meal consumption change');
+    _logger.d(
+        'MealPlanProvider - Current meal plan: ${_mealPlan?.title ?? 'null'}');
     notifyListeners();
     _logger.d('MealPlanProvider - Listeners notified');
   }
@@ -192,14 +201,16 @@ class MealPlanProvider with ChangeNotifier {
   /// Load consumption data for a specific date
   Future<Map<String, dynamic>?> loadConsumptionForDate(DateTime date) async {
     if (_mealPlan == null) return null;
-    
+
     try {
-      final consumptionData = await DailyConsumptionService.getDailyConsumptionSummary(
+      final consumptionData =
+          await DailyConsumptionService.getDailyConsumptionSummary(
         _mealPlan!.userId,
         date,
       );
-      
-      _logger.d('MealPlanProvider - Loaded consumption data for ${date.toIso8601String()}: ${consumptionData?['consumedCalories'] ?? 0} calories');
+
+      _logger.d(
+          'MealPlanProvider - Loaded consumption data for ${date.toIso8601String()}: ${consumptionData?['consumedCalories'] ?? 0} calories');
       return consumptionData;
     } catch (e) {
       _logger.e('MealPlanProvider - Error loading consumption data: $e');
@@ -208,15 +219,18 @@ class MealPlanProvider with ChangeNotifier {
   }
 
   /// Update meal consumption status and notify listeners
-  void updateMealConsumption(String mealId, bool isConsumed, DateTime? date) async {
+  void updateMealConsumption(
+      String mealId, bool isConsumed, DateTime? date) async {
     if (_mealPlan == null) return;
-    
-    _logger.d('MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed for date: ${date?.toIso8601String() ?? 'current'}');
-    print('MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed for date: ${date?.toIso8601String() ?? 'current'}');
-    
+
+    _logger.d(
+        'MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed for date: ${date?.toIso8601String() ?? 'current'}');
+    print(
+        'MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed for date: ${date?.toIso8601String() ?? 'current'}');
+
     // Use the current date if none provided
     final targetDate = date ?? DateTime.now();
-    
+
     try {
       // Update consumption in the daily consumption service
       await DailyConsumptionService.updateMealConsumption(
@@ -225,9 +239,10 @@ class MealPlanProvider with ChangeNotifier {
         mealId,
         isConsumed,
       );
-      
-      _logger.d('MealPlanProvider - Saved consumption for meal $mealId to DailyConsumptionService');
-      
+
+      _logger.d(
+          'MealPlanProvider - Saved consumption for meal $mealId to DailyConsumptionService');
+
       // Also update the in-memory meal plan for immediate UI updates
       // Find the meal and update its consumption status
       for (final mealDay in _mealPlan!.mealDays) {
@@ -235,15 +250,19 @@ class MealPlanProvider with ChangeNotifier {
           if (meal.id == mealId) {
             meal.isConsumed = isConsumed;
             mealDay.calculateConsumedNutrition();
-            _logger.d('MealPlanProvider - Updated meal consumption for: ${meal.name}');
-            _logger.d('MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
-            print('MealPlanProvider - Updated meal consumption for: ${meal.name}');
-            print('MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
+            _logger.d(
+                'MealPlanProvider - Updated meal consumption for: ${meal.name}');
+            _logger.d(
+                'MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
+            print(
+                'MealPlanProvider - Updated meal consumption for: ${meal.name}');
+            print(
+                'MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
             break;
           }
         }
       }
-      
+
       // Notify listeners about the change
       print('MealPlanProvider - About to call notifyListeners()');
       _logger.d('MealPlanProvider - About to call notifyListeners()');
@@ -256,8 +275,6 @@ class MealPlanProvider with ChangeNotifier {
     }
   }
 
-
-
   Future<void> replaceNonCompliantIngredient(
     String mealId,
     String oldIngredientName,
@@ -269,23 +286,19 @@ class MealPlanProvider with ChangeNotifier {
       (day) => day.meals.any((m) => m.id == mealId),
     );
     final meal = mealDay.meals.firstWhere((m) => m.id == mealId);
-    final ingredientIndex = meal.ingredients
-        .indexWhere((i) => i.name == oldIngredientName);
+    final ingredientIndex =
+        meal.ingredients.indexWhere((i) => i.name == oldIngredientName);
 
     if (ingredientIndex != -1) {
       meal.ingredients[ingredientIndex] = newIngredient;
-      
+
       // Recalculate meal nutrition using the new service
       NutritionCalculationService.applyCalculatedNutritionToMeal(meal);
-      
+
       // Recalculate meal day totals using the new service
       NutritionCalculationService.applyCalculatedNutritionToMealDay(mealDay);
-      
+
       notifyListeners();
     }
   }
-
-
-
-
-} 
+}

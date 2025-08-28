@@ -51,7 +51,9 @@ class AdminBottomNavigation extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: isSelected ? AppConstants.primaryColor.withOpacity(0.1) : Colors.transparent,
+            color: isSelected
+                ? AppConstants.primaryColor.withOpacity(0.1)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -66,4 +68,4 @@ class AdminBottomNavigation extends StatelessWidget {
       ),
     );
   }
-} 
+}

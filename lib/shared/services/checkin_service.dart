@@ -74,7 +74,7 @@ class CheckinService {
   }) async {
     try {
       print('Getting check-ins for user: $userId');
-      
+
       Query query = _checkinsCollection
           .where('userId', isEqualTo: userId)
           .orderBy('weekStartDate', descending: true)
@@ -91,12 +91,12 @@ class CheckinService {
         print('Processing document: ${doc.id}');
         final rawData = doc.data();
         print('Raw data: $rawData');
-        
-        final data = rawData != null 
+
+        final data = rawData != null
             ? Map<String, dynamic>.from(rawData as Map<String, dynamic>)
             : <String, dynamic>{};
         data['id'] = doc.id;
-        
+
         try {
           final checkin = CheckinModel.fromJson(data);
           print('Successfully created checkin: ${checkin.id}');
@@ -144,9 +144,7 @@ class CheckinService {
     try {
       final data = checkin.copyWith(updatedAt: DateTime.now()).toJson();
       data['updatedAt'] = FieldValue.serverTimestamp();
-      await _checkinsCollection
-          .doc(checkin.id)
-          .update(data);
+      await _checkinsCollection.doc(checkin.id).update(data);
     } catch (e) {
       _logger.e('Error updating check-in: $e');
       rethrow;
@@ -185,7 +183,8 @@ class CheckinService {
       CheckinModel? currentCheckin = await getCurrentWeekCheckin(userId);
 
       // Final validation: Check if there's already a completed check-in
-      if (currentCheckin != null && currentCheckin.status == CheckinStatus.completed) {
+      if (currentCheckin != null &&
+          currentCheckin.status == CheckinStatus.completed) {
         throw Exception('You have already submitted a check-in for this week');
       }
 
@@ -389,7 +388,7 @@ class CheckinService {
 
       // Get all existing check-ins for this user
       final existingCheckins = await getUserCheckins(userId, limit: 100);
-      
+
       // Get all pending check-ins that are overdue
       final querySnapshot = await _checkinsCollection
           .where('userId', isEqualTo: userId)
@@ -409,18 +408,19 @@ class CheckinService {
       }
 
       // Create missing weekly check-ins (going back 12 weeks)
-      final existingWeekStarts = existingCheckins.map((c) => c.weekStartDate).toSet();
+      final existingWeekStarts =
+          existingCheckins.map((c) => c.weekStartDate).toSet();
       final now = DateTime.now();
-      
+
       for (int i = 0; i < 12; i++) {
         final weekStart = currentWeekStart.subtract(Duration(days: 7 * i));
-        
+
         // Skip if we already have a check-in for this week
         if (existingWeekStarts.contains(weekStart)) continue;
-        
+
         // Skip future weeks
         if (weekStart.isAfter(now)) continue;
-        
+
         // Create pending check-in for this week
         final pendingCheckin = CheckinModel.createForWeek(userId, weekStart);
         final docRef = _checkinsCollection.doc();
@@ -428,7 +428,8 @@ class CheckinService {
       }
 
       await batch.commit();
-      _logger.i('Processed overdue check-ins and created missing weekly check-ins');
+      _logger.i(
+          'Processed overdue check-ins and created missing weekly check-ins');
     } catch (e) {
       _logger.e('Error marking overdue check-ins: $e');
       rethrow;
@@ -498,7 +499,7 @@ class CheckinService {
 
       return querySnapshot.docs.map((doc) {
         final rawData = doc.data();
-        final data = rawData != null 
+        final data = rawData != null
             ? Map<String, dynamic>.from(rawData as Map<String, dynamic>)
             : <String, dynamic>{};
         data['id'] = doc.id;

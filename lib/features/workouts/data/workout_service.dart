@@ -565,7 +565,8 @@ class WorkoutService {
   }
 
   // Get workout plan based on user's selected workout styles
-  WorkoutPlanModel? getWorkoutPlanForUser(String userId, List<String> workoutStyles) {
+  WorkoutPlanModel? getWorkoutPlanForUser(
+      String userId, List<String> workoutStyles) {
     if (workoutStyles.contains('Strength Training')) {
       return getStrengthTrainingPlan(userId);
     } else if (workoutStyles.contains('Body Building')) {
@@ -575,7 +576,8 @@ class WorkoutService {
   }
 
   // Generate AI workout plan for user
-  Future<WorkoutPlanModel> generateAIWorkoutPlan(UserModel user, String userId) async {
+  Future<WorkoutPlanModel> generateAIWorkoutPlan(
+      UserModel user, String userId) async {
     return await AIWorkoutService.generateWorkoutPlan(user, userId);
   }
-} 
+}

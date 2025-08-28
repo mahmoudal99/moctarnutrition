@@ -78,15 +78,18 @@ class PromptService {
   ) {
     final dayDate = DateTime.now().add(Duration(days: dayIndex - 1));
     final formattedDate = DateFormat('yyyy-MM-dd').format(dayDate);
-    final bmi = (preferences.weight / ((preferences.height / 100) * (preferences.height / 100))).toStringAsFixed(1);
+    final bmi = (preferences.weight /
+            ((preferences.height / 100) * (preferences.height / 100)))
+        .toStringAsFixed(1);
 
     // Determine required meal types based on meal frequency
     final requiredMeals = _getRequiredMealTypes(preferences.mealFrequency);
 
     // Check if this day is a cheat day
     final dayOfWeek = _getDayOfWeek(dayDate);
-    final isCheatDay = preferences.cheatDay != null && dayOfWeek == preferences.cheatDay;
-    final cheatDayInstructions = isCheatDay 
+    final isCheatDay =
+        preferences.cheatDay != null && dayOfWeek == preferences.cheatDay;
+    final cheatDayInstructions = isCheatDay
         ? 'CHEAT DAY: Allow slightly more indulgent meals while maintaining nutritional balance.'
         : '';
 
@@ -542,9 +545,10 @@ Respond with JSON only. No commentary.
       final previousMeals = previousDays
           .map((day) => day.meals.map((m) => m.name).join(', '))
           .join('; ');
-      context = '\n**Previous Days:** $previousMeals - Ensure variety in ingredients and cuisines.';
+      context =
+          '\n**Previous Days:** $previousMeals - Ensure variety in ingredients and cuisines.';
     }
-    
+
     return buildSingleDayPrompt(preferences, dayIndex) + context;
   }
 
@@ -553,8 +557,10 @@ Respond with JSON only. No commentary.
     DietPlanPreferences preferences,
     int days,
   ) {
-    final bmi = (preferences.weight / ((preferences.height / 100) * (preferences.height / 100))).toStringAsFixed(1);
-    
+    final bmi = (preferences.weight /
+            ((preferences.height / 100) * (preferences.height / 100)))
+        .toStringAsFixed(1);
+
     // Calculate proper dates
     final startDate = DateTime.now();
     final endDate = startDate.add(Duration(days: days - 1));
@@ -730,12 +736,14 @@ Respond with JSON only. No commentary.
   static List<MealType> _getRequiredMealTypes(String mealFrequency) {
     // Always require breakfast, lunch, and dinner as core meals
     final requiredMeals = [MealType.breakfast, MealType.lunch, MealType.dinner];
-    
+
     // Add snacks based on meal frequency string (case-insensitive)
-    if (mealFrequency.toLowerCase().contains('snack') || mealFrequency.contains('4') || mealFrequency.contains('5')) {
+    if (mealFrequency.toLowerCase().contains('snack') ||
+        mealFrequency.contains('4') ||
+        mealFrequency.contains('5')) {
       requiredMeals.add(MealType.snack);
     }
-    
+
     return requiredMeals;
   }
 
@@ -766,18 +774,19 @@ Respond with JSON only. No commentary.
     if (preferences.proteinTargets == null) {
       return 'Not specified';
     }
-    
-    final mealDistribution = preferences.proteinTargets!['mealDistribution'] as List<dynamic>?;
+
+    final mealDistribution =
+        preferences.proteinTargets!['mealDistribution'] as List<dynamic>?;
     if (mealDistribution == null || mealDistribution.isEmpty) {
       return 'Not specified';
     }
-    
+
     final distribution = mealDistribution.map((meal) {
       final name = meal['mealName'] ?? 'Unknown';
       final protein = meal['proteinGrams'] ?? 0;
       return '$name: ${protein}g';
     }).join(', ');
-    
+
     return distribution;
   }
 
@@ -786,20 +795,21 @@ Respond with JSON only. No commentary.
     if (preferences.calorieTargets == null) {
       return 'Not specified';
     }
-    
-    final macros = preferences.calorieTargets!['macros'] as Map<String, dynamic>?;
+
+    final macros =
+        preferences.calorieTargets!['macros'] as Map<String, dynamic>?;
     if (macros == null) {
       return 'Not specified';
     }
-    
+
     final protein = macros['protein'] as Map<String, dynamic>?;
     final carbs = macros['carbs'] as Map<String, dynamic>?;
     final fat = macros['fat'] as Map<String, dynamic>?;
-    
+
     if (protein == null || carbs == null || fat == null) {
       return 'Not specified';
     }
-    
+
     return 'Protein: ${protein['grams']}g (${protein['percentage']}%), Carbs: ${carbs['grams']}g (${carbs['percentage']}%), Fat: ${fat['grams']}g (${fat['percentage']}%)';
   }
 
@@ -808,19 +818,19 @@ Respond with JSON only. No commentary.
     if (preferences.allergies == null || preferences.allergies!.isEmpty) {
       return 'None specified';
     }
-    
+
     final allergyList = preferences.allergies!.map((allergy) {
       final name = allergy['name'] as String? ?? 'Unknown';
       final severity = allergy['severity'] as String? ?? 'mild';
       final notes = allergy['notes'] as String?;
-      
+
       String info = '$name ($severity)';
       if (notes != null && notes.isNotEmpty) {
         info += ' - $notes';
       }
       return info;
     }).join(', ');
-    
+
     return allergyList;
   }
 
@@ -829,7 +839,7 @@ Respond with JSON only. No commentary.
     if (preferences.mealTimingPreferences == null) {
       return 'Not specified';
     }
-    
+
     final timing = preferences.mealTimingPreferences!;
     final mealFrequency = timing['mealFrequency'] as String? ?? 'Not specified';
     final fastingType = timing['fastingType'] as String?;
@@ -838,14 +848,14 @@ Respond with JSON only. No commentary.
     final dinnerTime = timing['dinnerTime'] as String?;
     final snackTimes = timing['snackTimes'] as List<dynamic>?;
     final customNotes = timing['customNotes'] as String?;
-    
+
     final List<String> info = [];
     info.add('Frequency: $mealFrequency');
-    
+
     if (fastingType != null && fastingType != 'none') {
       info.add('Fasting: $fastingType');
     }
-    
+
     if (breakfastTime != null) {
       info.add('Breakfast: $breakfastTime');
     }
@@ -861,7 +871,7 @@ Respond with JSON only. No commentary.
     if (customNotes != null && customNotes.isNotEmpty) {
       info.add('Notes: $customNotes');
     }
-    
+
     return info.join(', ');
   }
 
@@ -870,22 +880,22 @@ Respond with JSON only. No commentary.
     if (preferences.batchCookingPreferences == null) {
       return 'Not specified';
     }
-    
+
     final batchCooking = preferences.batchCookingPreferences!;
     final frequency = batchCooking['frequency'] as String? ?? 'Not specified';
     final batchSize = batchCooking['batchSize'] as String? ?? 'Not specified';
     final preferLeftovers = batchCooking['preferLeftovers'] as bool? ?? true;
     final customNotes = batchCooking['customNotes'] as String?;
-    
+
     final List<String> info = [];
     info.add('Frequency: $frequency');
     info.add('Batch Size: $batchSize');
     info.add('Leftovers: ${preferLeftovers ? 'Yes' : 'No'}');
-    
+
     if (customNotes != null && customNotes.isNotEmpty) {
       info.add('Notes: $customNotes');
     }
-    
+
     return info.join(', ');
   }
-} 
+}

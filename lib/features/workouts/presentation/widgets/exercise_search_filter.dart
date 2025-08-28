@@ -68,7 +68,7 @@ class _ExerciseSearchFilterState extends State<ExerciseSearchFilter> {
                 ),
               ),
             ),
-            
+
             // Muscle group filter
             if (exerciseProvider.availableMuscleGroups.isNotEmpty) ...[
               Padding(
@@ -92,33 +92,41 @@ class _ExerciseSearchFilterState extends State<ExerciseSearchFilter> {
                           // All exercises filter
                           FilterChip(
                             label: const Text('All'),
-                            selected: exerciseProvider.selectedMuscleGroup == null,
+                            selected:
+                                exerciseProvider.selectedMuscleGroup == null,
                             onSelected: (selected) {
                               if (selected) {
                                 exerciseProvider.setSelectedMuscleGroup(null);
                               }
                             },
-                            selectedColor: AppConstants.primaryColor.withOpacity(0.2),
+                            selectedColor:
+                                AppConstants.primaryColor.withOpacity(0.2),
                             checkmarkColor: AppConstants.primaryColor,
                           ),
                           const SizedBox(width: AppConstants.spacingS),
                           // Individual muscle group filters
-                          ...exerciseProvider.availableMuscleGroups.map((muscleGroup) {
+                          ...exerciseProvider.availableMuscleGroups
+                              .map((muscleGroup) {
                             return Padding(
                               padding: const EdgeInsets.only(
                                 right: AppConstants.spacingS,
                               ),
                               child: FilterChip(
                                 label: Text(muscleGroup),
-                                selected: exerciseProvider.selectedMuscleGroup == muscleGroup,
+                                selected:
+                                    exerciseProvider.selectedMuscleGroup ==
+                                        muscleGroup,
                                 onSelected: (selected) {
                                   if (selected) {
-                                    exerciseProvider.setSelectedMuscleGroup(muscleGroup);
+                                    exerciseProvider
+                                        .setSelectedMuscleGroup(muscleGroup);
                                   } else {
-                                    exerciseProvider.setSelectedMuscleGroup(null);
+                                    exerciseProvider
+                                        .setSelectedMuscleGroup(null);
                                   }
                                 },
-                                selectedColor: AppConstants.primaryColor.withOpacity(0.2),
+                                selectedColor:
+                                    AppConstants.primaryColor.withOpacity(0.2),
                                 checkmarkColor: AppConstants.primaryColor,
                               ),
                             );
@@ -131,9 +139,9 @@ class _ExerciseSearchFilterState extends State<ExerciseSearchFilter> {
               ),
               const SizedBox(height: AppConstants.spacingM),
             ],
-            
+
             // Results count
-            if (exerciseProvider.searchQuery.isNotEmpty || 
+            if (exerciseProvider.searchQuery.isNotEmpty ||
                 exerciseProvider.selectedMuscleGroup != null) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -164,4 +172,4 @@ class _ExerciseSearchFilterState extends State<ExerciseSearchFilter> {
       },
     );
   }
-} 
+}

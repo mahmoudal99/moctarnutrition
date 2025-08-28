@@ -37,9 +37,12 @@ class CheatDayStep extends StatelessWidget {
         const SizedBox(height: AppConstants.spacingS),
         PersonalizedTitle(
           userName: userName,
-          title: 'Select one day per week where {name} can enjoy their favorite foods',
-          fallbackTitle: 'Select one day per week where you can enjoy your favorite foods',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppConstants.textSecondary),
+          title:
+              'Select one day per week where {name} can enjoy their favorite foods',
+          fallbackTitle:
+              'Select one day per week where you can enjoy your favorite foods',
+          style: AppTextStyles.bodyMedium
+              .copyWith(color: AppConstants.textSecondary),
         ),
         const SizedBox(height: AppConstants.spacingL),
         Expanded(
@@ -47,14 +50,15 @@ class CheatDayStep extends StatelessWidget {
             child: Column(
               children: [
                 ...daysOfWeek.map((day) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-                  child: _buildDayCard(
-                    context,
-                    day: day,
-                    isSelected: selectedDay == day,
-                    onTap: () => onSelect(day),
-                  ),
-                )),
+                      padding:
+                          const EdgeInsets.only(bottom: AppConstants.spacingM),
+                      child: _buildDayCard(
+                        context,
+                        day: day,
+                        isSelected: selectedDay == day,
+                        onTap: () => onSelect(day),
+                      ),
+                    )),
                 const SizedBox(height: AppConstants.spacingM),
                 _buildDayCard(
                   context,
@@ -118,4 +122,4 @@ class CheatDayStep extends StatelessWidget {
       ),
     );
   }
-} 
+}

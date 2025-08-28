@@ -11,10 +11,12 @@ class VersionTrackingService {
       final prefs = await SharedPreferences.getInstance();
       final viewedVersions = prefs.getStringList(_viewedVersionsKey) ?? [];
       final hasViewed = viewedVersions.contains(currentVersion);
-      
-      _logger.d('VersionTrackingService - Checking if version $currentVersion has been viewed: $hasViewed');
-      _logger.d('VersionTrackingService - Previously viewed versions: $viewedVersions');
-      
+
+      _logger.d(
+          'VersionTrackingService - Checking if version $currentVersion has been viewed: $hasViewed');
+      _logger.d(
+          'VersionTrackingService - Previously viewed versions: $viewedVersions');
+
       return hasViewed;
     } catch (e) {
       _logger.e('VersionTrackingService - Error checking viewed version: $e');
@@ -27,12 +29,14 @@ class VersionTrackingService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final viewedVersions = prefs.getStringList(_viewedVersionsKey) ?? [];
-      
+
       if (!viewedVersions.contains(currentVersion)) {
         viewedVersions.add(currentVersion);
         await prefs.setStringList(_viewedVersionsKey, viewedVersions);
-        _logger.i('VersionTrackingService - Marked version $currentVersion as viewed');
-        _logger.d('VersionTrackingService - All viewed versions: $viewedVersions');
+        _logger.i(
+            'VersionTrackingService - Marked version $currentVersion as viewed');
+        _logger
+            .d('VersionTrackingService - All viewed versions: $viewedVersions');
       }
     } catch (e) {
       _logger.e('VersionTrackingService - Error marking version as viewed: $e');
@@ -44,7 +48,8 @@ class VersionTrackingService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final viewedVersions = prefs.getStringList(_viewedVersionsKey) ?? [];
-      _logger.d('VersionTrackingService - Retrieved viewed versions: $viewedVersions');
+      _logger.d(
+          'VersionTrackingService - Retrieved viewed versions: $viewedVersions');
       return viewedVersions;
     } catch (e) {
       _logger.e('VersionTrackingService - Error getting viewed versions: $e');
@@ -62,4 +67,4 @@ class VersionTrackingService {
       _logger.e('VersionTrackingService - Error clearing viewed versions: $e');
     }
   }
-} 
+}

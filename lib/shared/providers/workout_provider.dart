@@ -10,11 +10,12 @@ import '../services/notification_service.dart';
 
 class WorkoutProvider extends ChangeNotifier {
   static final _logger = Logger();
-  
+
   final WorkoutService _workoutService = WorkoutService();
-  
+
   WorkoutPlanModel? _currentWorkoutPlan;
-  WorkoutPlanModel? _originalWorkoutPlan; // Store original plan for canceling edits
+  WorkoutPlanModel?
+      _originalWorkoutPlan; // Store original plan for canceling edits
   bool _isLoading = false;
   bool _isGenerating = false; // New flag to track generation vs loading
   bool _isEditMode = false; // New flag for edit mode
@@ -28,22 +29,27 @@ class WorkoutProvider extends ChangeNotifier {
   String? get error => _error;
 
   // Load workout plan based on user's selected workout styles
-  Future<void> loadWorkoutPlan(String userId, List<String> workoutStyles, UserModel? user) async {
+  Future<void> loadWorkoutPlan(
+      String userId, List<String> workoutStyles, UserModel? user) async {
     _error = null;
 
-    _logger.d('Loading workout plan for user $userId with styles: $workoutStyles');
+    _logger
+        .d('Loading workout plan for user $userId with styles: $workoutStyles');
 
     try {
       // First, try to load from local storage (this should be instant)
-      final localWorkoutPlan = await WorkoutPlanLocalStorageService.loadWorkoutPlan(userId);
-      
+      final localWorkoutPlan =
+          await WorkoutPlanLocalStorageService.loadWorkoutPlan(userId);
+
       if (localWorkoutPlan != null) {
-        _logger.d('Found workout plan in local storage: ${localWorkoutPlan.title}');
+        _logger.d(
+            'Found workout plan in local storage: ${localWorkoutPlan.title}');
         _currentWorkoutPlan = localWorkoutPlan;
         notifyListeners(); // Update UI immediately with local data
-        
+
         // Check if the local plan is fresh (less than 24 hours old)
-        final isFresh = await WorkoutPlanLocalStorageService.isWorkoutPlanFresh();
+        final isFresh =
+            await WorkoutPlanLocalStorageService.isWorkoutPlanFresh();
         if (isFresh) {
           _logger.d('Local workout plan is fresh, using cached data');
           // Schedule notifications for fresh local plan (non-blocking)
@@ -60,20 +66,22 @@ class WorkoutProvider extends ChangeNotifier {
       }
 
       // Try to load from Firestore (server-side storage)
-      final storedWorkoutPlan = await WorkoutPlanStorageService.getWorkoutPlan(userId);
-      
+      final storedWorkoutPlan =
+          await WorkoutPlanStorageService.getWorkoutPlan(userId);
+
       if (storedWorkoutPlan != null) {
         _logger.d('Found stored workout plan: ${storedWorkoutPlan.title}');
         _currentWorkoutPlan = storedWorkoutPlan;
-        
+
         // Save to local storage for future use
         try {
-          await WorkoutPlanLocalStorageService.saveWorkoutPlan(storedWorkoutPlan);
+          await WorkoutPlanLocalStorageService.saveWorkoutPlan(
+              storedWorkoutPlan);
           _logger.d('Workout plan saved to local storage');
         } catch (e) {
           _logger.w('Failed to save workout plan to local storage: $e');
         }
-        
+
         // Schedule notifications for stored workout plan
         if (user != null) {
           _scheduleWorkoutNotificationsInBackground(user);
@@ -82,62 +90,72 @@ class WorkoutProvider extends ChangeNotifier {
       }
 
       // If no stored plan, check for predefined plans
-      final predefinedWorkoutPlan = _workoutService.getWorkoutPlanForUser(userId, workoutStyles);
-      
+      final predefinedWorkoutPlan =
+          _workoutService.getWorkoutPlanForUser(userId, workoutStyles);
+
       if (predefinedWorkoutPlan != null) {
-        _logger.d('Using predefined workout plan: ${predefinedWorkoutPlan.title}');
+        _logger
+            .d('Using predefined workout plan: ${predefinedWorkoutPlan.title}');
         _currentWorkoutPlan = predefinedWorkoutPlan;
-        
+
         // Save predefined plan to both Firestore and local storage
         try {
-          await WorkoutPlanStorageService.saveWorkoutPlan(predefinedWorkoutPlan);
-          await WorkoutPlanLocalStorageService.saveWorkoutPlan(predefinedWorkoutPlan);
+          await WorkoutPlanStorageService.saveWorkoutPlan(
+              predefinedWorkoutPlan);
+          await WorkoutPlanLocalStorageService.saveWorkoutPlan(
+              predefinedWorkoutPlan);
           _logger.d('Predefined workout plan saved to both storage locations');
         } catch (e) {
           _logger.w('Failed to save predefined workout plan: $e');
           // Don't fail the operation if saving fails
         }
-        
+
         // Schedule notifications for predefined workout plan
         if (user != null) {
           _scheduleWorkoutNotificationsInBackground(user);
         }
       } else {
-        _logger.i('No predefined workout plan found for styles: $workoutStyles. Generating AI plan...');
-        
+        _logger.i(
+            'No predefined workout plan found for styles: $workoutStyles. Generating AI plan...');
+
         if (user != null) {
           try {
             _isGenerating = true; // Set generating flag
             notifyListeners();
-            
-            final aiWorkoutPlan = await _workoutService.generateAIWorkoutPlan(user, userId);
-            _logger.d('AI workout plan generated successfully: ${aiWorkoutPlan.title}');
-            
+
+            final aiWorkoutPlan =
+                await _workoutService.generateAIWorkoutPlan(user, userId);
+            _logger.d(
+                'AI workout plan generated successfully: ${aiWorkoutPlan.title}');
+
             // Save AI-generated plan to both Firestore and local storage
             try {
               await WorkoutPlanStorageService.saveWorkoutPlan(aiWorkoutPlan);
-              await WorkoutPlanLocalStorageService.saveWorkoutPlan(aiWorkoutPlan);
+              await WorkoutPlanLocalStorageService.saveWorkoutPlan(
+                  aiWorkoutPlan);
               _logger.d('AI workout plan saved to both storage locations');
             } catch (e) {
               _logger.w('Failed to save AI workout plan: $e');
               // Don't fail the operation if saving fails
             }
-            
+
             _currentWorkoutPlan = aiWorkoutPlan;
-            
+
             // Schedule notifications for AI-generated workout plan
             if (user != null) {
               _scheduleWorkoutNotificationsInBackground(user);
             }
           } catch (e) {
             _logger.e('Failed to generate AI workout plan: $e');
-            _error = 'Failed to generate personalized workout plan. Please try again later.';
+            _error =
+                'Failed to generate personalized workout plan. Please try again later.';
           } finally {
             _isGenerating = false; // Clear generating flag
             notifyListeners();
           }
         } else {
-          _error = 'Unable to generate personalized workout plan. Please update your profile preferences.';
+          _error =
+              'Unable to generate personalized workout plan. Please update your profile preferences.';
         }
       }
     } catch (e) {
@@ -151,14 +169,22 @@ class WorkoutProvider extends ChangeNotifier {
   // Get today's workout
   DailyWorkout? getTodayWorkout() {
     if (_currentWorkoutPlan == null) return null;
-    
+
     final today = DateTime.now();
     final dayOfWeek = today.weekday; // 1 = Monday, 7 = Sunday
-    
+
     // Map weekday to day name
-    final dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final dayNames = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
     final todayName = dayNames[dayOfWeek - 1];
-    
+
     return _currentWorkoutPlan!.dailyWorkouts.firstWhere(
       (day) => day.dayName == todayName,
       orElse: () => _currentWorkoutPlan!.dailyWorkouts.first,
@@ -168,7 +194,7 @@ class WorkoutProvider extends ChangeNotifier {
   // Get workout for specific day
   DailyWorkout? getWorkoutForDay(String dayName) {
     if (_currentWorkoutPlan == null) return null;
-    
+
     return _currentWorkoutPlan!.dailyWorkouts.firstWhere(
       (day) => day.dayName == dayName,
       orElse: () => _currentWorkoutPlan!.dailyWorkouts.first,
@@ -201,32 +227,33 @@ class WorkoutProvider extends ChangeNotifier {
   }
 
   // Regenerate workout plan (for when user changes preferences)
-  Future<void> regenerateWorkoutPlan(String userId, List<String> workoutStyles, UserModel user) async {
+  Future<void> regenerateWorkoutPlan(
+      String userId, List<String> workoutStyles, UserModel user) async {
     _logger.i('Regenerating workout plan for user: $userId');
-    
+
     try {
       // Deactivate current workout plans
       await WorkoutPlanStorageService.deactivateUserWorkoutPlans(userId);
-      
+
       // Clear local cache
       await clearLocalCache();
-      
+
       // Clear current plan
       _currentWorkoutPlan = null;
       notifyListeners();
-      
+
       // Set generating flag for regeneration
       _isGenerating = true;
       notifyListeners();
-      
+
       // Load new plan (this will generate new AI plan or use predefined)
       await loadWorkoutPlan(userId, workoutStyles, user);
-      
+
       // Schedule notifications for regenerated workout plan
       if (_currentWorkoutPlan != null && user != null) {
         await _scheduleWorkoutNotifications(user);
       }
-      
+
       _logger.i('Workout plan regenerated successfully');
     } catch (e) {
       _logger.e('Failed to regenerate workout plan: $e');
@@ -250,7 +277,8 @@ class WorkoutProvider extends ChangeNotifier {
         // Check if user has workout notifications enabled
         if (!user.preferences.workoutNotificationsEnabled ||
             user.preferences.workoutNotificationTime == null) {
-          _logger.d('Workout notifications not enabled or missing time preference');
+          _logger.d(
+              'Workout notifications not enabled or missing time preference');
           return;
         }
 
@@ -262,7 +290,8 @@ class WorkoutProvider extends ChangeNotifier {
 
         final notificationTime = user.preferences.workoutNotificationTime!;
 
-        _logger.d('Scheduling workout notifications in background for user ${user.id} at $notificationTime');
+        _logger.d(
+            'Scheduling workout notifications in background for user ${user.id} at $notificationTime');
 
         // Schedule notifications
         await NotificationService.scheduleWorkoutNotifications(
@@ -282,7 +311,8 @@ class WorkoutProvider extends ChangeNotifier {
       // Check if user has workout notifications enabled
       if (!user.preferences.workoutNotificationsEnabled ||
           user.preferences.workoutNotificationTime == null) {
-        _logger.d('Workout notifications not enabled or missing time preference');
+        _logger
+            .d('Workout notifications not enabled or missing time preference');
         return;
       }
 
@@ -294,7 +324,8 @@ class WorkoutProvider extends ChangeNotifier {
 
       final notificationTime = user.preferences.workoutNotificationTime!;
 
-      _logger.d('Scheduling workout notifications for user ${user.id} at $notificationTime');
+      _logger.d(
+          'Scheduling workout notifications for user ${user.id} at $notificationTime');
 
       // Schedule notifications
       await NotificationService.scheduleWorkoutNotifications(
@@ -318,7 +349,7 @@ class WorkoutProvider extends ChangeNotifier {
 
     try {
       _logger.d('Adding workout "${workout.title}" to $dayName');
-      
+
       // Find the day to update
       final dayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
         (day) => day.dayName == dayName,
@@ -331,11 +362,12 @@ class WorkoutProvider extends ChangeNotifier {
 
       // Create updated daily workout with new workout added
       final currentDay = _currentWorkoutPlan!.dailyWorkouts[dayIndex];
-      final updatedWorkouts = List<WorkoutModel>.from(currentDay.workouts)..add(workout);
-      
+      final updatedWorkouts = List<WorkoutModel>.from(currentDay.workouts)
+        ..add(workout);
+
       // Recalculate estimated duration
       final newDuration = updatedWorkouts.fold<int>(
-        0, 
+        0,
         (total, w) => total + w.estimatedDuration,
       );
 
@@ -350,7 +382,8 @@ class WorkoutProvider extends ChangeNotifier {
       );
 
       // Create updated workout plan
-      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      final updatedDailyWorkouts =
+          List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
       updatedDailyWorkouts[dayIndex] = updatedDay;
 
       final updatedWorkoutPlan = _currentWorkoutPlan!.copyWith(
@@ -363,7 +396,7 @@ class WorkoutProvider extends ChangeNotifier {
 
       // Save to storage
       await _saveUpdatedWorkoutPlan(updatedWorkoutPlan);
-      
+
       _logger.d('Successfully added workout to $dayName');
       notifyListeners();
     } catch (e) {
@@ -382,7 +415,7 @@ class WorkoutProvider extends ChangeNotifier {
 
     try {
       _logger.d('Removing workout $workoutId from $dayName');
-      
+
       // Find the day to update
       final dayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
         (day) => day.dayName == dayName,
@@ -395,11 +428,12 @@ class WorkoutProvider extends ChangeNotifier {
 
       // Create updated daily workout with workout removed
       final currentDay = _currentWorkoutPlan!.dailyWorkouts[dayIndex];
-      final updatedWorkouts = currentDay.workouts.where((w) => w.id != workoutId).toList();
-      
+      final updatedWorkouts =
+          currentDay.workouts.where((w) => w.id != workoutId).toList();
+
       // Recalculate estimated duration
       final newDuration = updatedWorkouts.fold<int>(
-        0, 
+        0,
         (total, w) => total + w.estimatedDuration,
       );
 
@@ -414,7 +448,8 @@ class WorkoutProvider extends ChangeNotifier {
       );
 
       // Create updated workout plan
-      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      final updatedDailyWorkouts =
+          List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
       updatedDailyWorkouts[dayIndex] = updatedDay;
 
       final updatedWorkoutPlan = _currentWorkoutPlan!.copyWith(
@@ -427,7 +462,7 @@ class WorkoutProvider extends ChangeNotifier {
 
       // Save to storage
       await _saveUpdatedWorkoutPlan(updatedWorkoutPlan);
-      
+
       _logger.d('Successfully removed workout from $dayName');
       notifyListeners();
     } catch (e) {
@@ -451,15 +486,17 @@ class WorkoutProvider extends ChangeNotifier {
   }
 
   // Add exercise to a specific workout in a specific day
-  Future<void> addExerciseToWorkout(String dayName, String workoutId, Exercise exercise) async {
+  Future<void> addExerciseToWorkout(
+      String dayName, String workoutId, Exercise exercise) async {
     if (_currentWorkoutPlan == null) {
       _logger.w('Cannot add exercise: no current workout plan');
       return;
     }
 
     try {
-      _logger.d('Adding exercise "${exercise.name}" to workout $workoutId on $dayName');
-      
+      _logger.d(
+          'Adding exercise "${exercise.name}" to workout $workoutId on $dayName');
+
       // Find the day to update
       final dayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
         (day) => day.dayName == dayName,
@@ -481,8 +518,9 @@ class WorkoutProvider extends ChangeNotifier {
 
       // Create updated workout with new exercise added
       final currentWorkout = day.workouts[workoutIndex];
-      final updatedExercises = List<Exercise>.from(currentWorkout.exercises)..add(exercise);
-      
+      final updatedExercises = List<Exercise>.from(currentWorkout.exercises)
+        ..add(exercise);
+
       // Recalculate estimated duration (rough estimate: 2 minutes per exercise)
       final newDuration = currentWorkout.estimatedDuration + 2;
 
@@ -502,12 +540,14 @@ class WorkoutProvider extends ChangeNotifier {
         title: day.title,
         description: day.description,
         workouts: updatedWorkouts,
-        estimatedDuration: updatedWorkouts.fold<int>(0, (total, w) => total + w.estimatedDuration),
+        estimatedDuration: updatedWorkouts.fold<int>(
+            0, (total, w) => total + w.estimatedDuration),
         restDay: day.restDay,
       );
 
       // Create updated workout plan
-      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      final updatedDailyWorkouts =
+          List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
       updatedDailyWorkouts[dayIndex] = updatedDay;
 
       final updatedWorkoutPlan = _currentWorkoutPlan!.copyWith(
@@ -520,7 +560,7 @@ class WorkoutProvider extends ChangeNotifier {
 
       // Save to storage
       await _saveUpdatedWorkoutPlan(updatedWorkoutPlan);
-      
+
       _logger.d('Successfully added exercise to workout on $dayName');
       notifyListeners();
     } catch (e) {
@@ -531,15 +571,17 @@ class WorkoutProvider extends ChangeNotifier {
   }
 
   // Remove exercise from a specific workout in a specific day
-  Future<void> removeExerciseFromWorkout(String dayName, String workoutId, String exerciseId) async {
+  Future<void> removeExerciseFromWorkout(
+      String dayName, String workoutId, String exerciseId) async {
     if (_currentWorkoutPlan == null) {
       _logger.w('Cannot remove exercise: no current workout plan');
       return;
     }
 
     try {
-      _logger.d('Removing exercise $exerciseId from workout $workoutId on $dayName');
-      
+      _logger.d(
+          'Removing exercise $exerciseId from workout $workoutId on $dayName');
+
       // Find the day to update
       final dayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
         (day) => day.dayName == dayName,
@@ -561,10 +603,12 @@ class WorkoutProvider extends ChangeNotifier {
 
       // Create updated workout with exercise removed
       final currentWorkout = day.workouts[workoutIndex];
-      final updatedExercises = currentWorkout.exercises.where((e) => e.id != exerciseId).toList();
-      
+      final updatedExercises =
+          currentWorkout.exercises.where((e) => e.id != exerciseId).toList();
+
       // Recalculate estimated duration
-      final newDuration = currentWorkout.estimatedDuration - 2; // Rough estimate
+      final newDuration =
+          currentWorkout.estimatedDuration - 2; // Rough estimate
 
       final updatedWorkout = currentWorkout.copyWith(
         exercises: updatedExercises,
@@ -582,12 +626,14 @@ class WorkoutProvider extends ChangeNotifier {
         title: day.title,
         description: day.description,
         workouts: updatedWorkouts,
-        estimatedDuration: updatedWorkouts.fold<int>(0, (total, w) => total + w.estimatedDuration),
+        estimatedDuration: updatedWorkouts.fold<int>(
+            0, (total, w) => total + w.estimatedDuration),
         restDay: day.restDay,
       );
 
       // Create updated workout plan
-      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      final updatedDailyWorkouts =
+          List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
       updatedDailyWorkouts[dayIndex] = updatedDay;
 
       final updatedWorkoutPlan = _currentWorkoutPlan!.copyWith(
@@ -600,7 +646,7 @@ class WorkoutProvider extends ChangeNotifier {
 
       // Save to storage
       await _saveUpdatedWorkoutPlan(updatedWorkoutPlan);
-      
+
       _logger.d('Successfully removed exercise from workout on $dayName');
       notifyListeners();
     } catch (e) {
@@ -646,7 +692,7 @@ class WorkoutProvider extends ChangeNotifier {
 
     try {
       _logger.d('Swapping workouts between $fromDayName and $toDayName');
-      
+
       // Find source day
       final fromDayIndex = _currentWorkoutPlan!.dailyWorkouts.indexWhere(
         (day) => day.dayName == fromDayName,
@@ -687,7 +733,8 @@ class WorkoutProvider extends ChangeNotifier {
       );
 
       // Update workout plan
-      final updatedDailyWorkouts = List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
+      final updatedDailyWorkouts =
+          List<DailyWorkout>.from(_currentWorkoutPlan!.dailyWorkouts);
       updatedDailyWorkouts[fromDayIndex] = swappedFromDay;
       updatedDailyWorkouts[toDayIndex] = swappedToDay;
 
@@ -696,7 +743,8 @@ class WorkoutProvider extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
-      _logger.d('Successfully swapped workouts between $fromDayName and $toDayName');
+      _logger.d(
+          'Successfully swapped workouts between $fromDayName and $toDayName');
       notifyListeners();
     } catch (e) {
       _logger.e('Failed to swap workouts: $e');
@@ -714,14 +762,15 @@ class WorkoutProvider extends ChangeNotifier {
 
     try {
       _logger.d('Saving edit mode changes');
-      
+
       // Save to both Firestore and local storage
       await WorkoutPlanStorageService.saveWorkoutPlan(_currentWorkoutPlan!);
-      await WorkoutPlanLocalStorageService.saveWorkoutPlan(_currentWorkoutPlan!);
-      
+      await WorkoutPlanLocalStorageService.saveWorkoutPlan(
+          _currentWorkoutPlan!);
+
       _isEditMode = false;
       _originalWorkoutPlan = null;
-      
+
       _logger.d('Successfully saved edit mode changes');
       notifyListeners();
     } catch (e) {
@@ -730,4 +779,4 @@ class WorkoutProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-} 
+}

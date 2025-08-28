@@ -142,4 +142,4 @@ class MeasurementCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

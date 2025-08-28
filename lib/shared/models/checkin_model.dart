@@ -55,15 +55,15 @@ class CheckinModel {
         (e) => e.toString() == 'CheckinStatus.${json['status']}',
         orElse: () => CheckinStatus.pending,
       ),
-      submittedAt: json['submittedAt'] != null 
-          ? (json['submittedAt'] as Timestamp).toDate() 
+      submittedAt: json['submittedAt'] != null
+          ? (json['submittedAt'] as Timestamp).toDate()
           : null,
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: (json['updatedAt'] as Timestamp).toDate(),
       weight: (json['weight'] as num?)?.toDouble(),
       bodyFatPercentage: (json['bodyFatPercentage'] as num?)?.toDouble(),
       muscleMass: (json['muscleMass'] as num?)?.toDouble(),
-      measurements: json['measurements'] != null 
+      measurements: json['measurements'] != null
           ? Map<String, double>.from(json['measurements'])
           : null,
       mood: json['mood'] as String?,
@@ -81,7 +81,8 @@ class CheckinModel {
       'photoThumbnailUrl': photoThumbnailUrl,
       'notes': notes,
       'status': status.toString().split('.').last,
-      'submittedAt': submittedAt != null ? Timestamp.fromDate(submittedAt!) : null,
+      'submittedAt':
+          submittedAt != null ? Timestamp.fromDate(submittedAt!) : null,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'weight': weight,
@@ -146,7 +147,7 @@ class CheckinModel {
     final endDate = weekStartDate.add(const Duration(days: 6));
     final startMonth = _getMonthAbbreviation(weekStartDate.month);
     final endMonth = _getMonthAbbreviation(endDate.month);
-    
+
     if (startMonth == endMonth) {
       return '$startMonth ${weekStartDate.day}-${endDate.day}';
     } else {
@@ -159,7 +160,7 @@ class CheckinModel {
     final endDate = weekStartDate.add(const Duration(days: 6));
     final startMonth = _getMonthAbbreviation(weekStartDate.month);
     final endMonth = _getMonthAbbreviation(endDate.month);
-    
+
     if (startMonth == endMonth) {
       return '$startMonth ${weekStartDate.day}-${endDate.day}, ${weekStartDate.year}';
     } else {
@@ -169,8 +170,18 @@ class CheckinModel {
 
   String _getMonthAbbreviation(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return months[month - 1];
   }
@@ -213,7 +224,7 @@ class CheckinModel {
   static CheckinModel createForCurrentWeek(String userId) {
     final now = DateTime.now();
     final weekStart = _getWeekStart(now);
-    
+
     return CheckinModel(
       id: '', // Will be set by Firestore
       userId: userId,
@@ -227,7 +238,7 @@ class CheckinModel {
   /// Create a check-in for a specific week
   static CheckinModel createForWeek(String userId, DateTime weekStart) {
     final now = DateTime.now();
-    
+
     return CheckinModel(
       id: '', // Will be set by Firestore
       userId: userId,
@@ -265,10 +276,11 @@ class CheckinProgressSummary {
     this.averageMotivationLevel,
   });
 
-  double get completionRate => totalCheckins > 0 ? completedCheckins / totalCheckins : 0.0;
+  double get completionRate =>
+      totalCheckins > 0 ? completedCheckins / totalCheckins : 0.0;
   bool get isOnTrack => currentStreak > 0;
   int get daysUntilNextCheckin {
     if (nextCheckinDate == null) return 0;
     return nextCheckinDate!.difference(DateTime.now()).inDays;
   }
-} 
+}

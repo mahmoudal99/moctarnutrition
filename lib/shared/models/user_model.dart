@@ -1,6 +1,15 @@
 enum UserRole { user, trainer, admin }
+
 enum FitnessGoal { weightLoss, muscleGain, maintenance, endurance, strength }
-enum ActivityLevel { sedentary, lightlyActive, moderatelyActive, veryActive, extremelyActive }
+
+enum ActivityLevel {
+  sedentary,
+  lightlyActive,
+  moderatelyActive,
+  veryActive,
+  extremelyActive
+}
+
 enum SubscriptionStatus { free, basic, premium, cancelled }
 
 class UserModel {
@@ -50,16 +59,19 @@ class UserModel {
         orElse: () => UserRole.user,
       ),
       subscriptionStatus: SubscriptionStatus.values.firstWhere(
-        (e) => e.toString() == 'SubscriptionStatus.${json['subscriptionStatus']}',
+        (e) =>
+            e.toString() == 'SubscriptionStatus.${json['subscriptionStatus']}',
         orElse: () => SubscriptionStatus.free,
       ),
       subscriptionExpiry: json['subscriptionExpiry'] != null
           ? DateTime.parse(json['subscriptionExpiry'] as String)
           : null,
-      preferences: UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>),
+      preferences:
+          UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>),
       selectedTrainerId: json['selectedTrainerId'] as String?,
       mealPlanId: json['mealPlanId'] as String?,
-      hasSeenSubscriptionScreen: json['hasSeenSubscriptionScreen'] as bool? ?? false,
+      hasSeenSubscriptionScreen:
+          json['hasSeenSubscriptionScreen'] as bool? ?? false,
       hasSeenOnboarding: json['hasSeenOnboarding'] as bool? ?? false,
       hasSeenGetStarted: json['hasSeenGetStarted'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -115,7 +127,8 @@ class UserModel {
       preferences: preferences ?? this.preferences,
       selectedTrainerId: selectedTrainerId ?? this.selectedTrainerId,
       mealPlanId: mealPlanId ?? this.mealPlanId,
-      hasSeenSubscriptionScreen: hasSeenSubscriptionScreen ?? this.hasSeenSubscriptionScreen,
+      hasSeenSubscriptionScreen:
+          hasSeenSubscriptionScreen ?? this.hasSeenSubscriptionScreen,
       hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
       hasSeenGetStarted: hasSeenGetStarted ?? this.hasSeenGetStarted,
       createdAt: createdAt ?? this.createdAt,
@@ -136,31 +149,31 @@ class UserPreferences {
   final int weeklyWorkoutDays;
   final List<int>? specificWorkoutDays; // 1 = Monday, 7 = Sunday
   final String? timezone;
-  
+
   // Personal metrics
   final int age;
   final double weight; // in kg
   final double height; // in cm
   final double desiredWeight; // in kg
   final String gender;
-  
+
   // Food preferences
   final List<String> preferredCuisines;
   final List<String> foodsToAvoid;
   final List<String> favoriteFoods;
-  
+
   // Allergies & Intolerances
   final List<Map<String, dynamic>> allergies;
-  
+
   // Meal Timing Preferences
   final Map<String, dynamic>? mealTimingPreferences;
-  
+
   // Batch Cooking Preferences
   final Map<String, dynamic>? batchCookingPreferences;
-  
+
   // Protein Targets
   final Map<String, dynamic>? proteinTargets;
-  
+
   // Calorie Targets
   final Map<String, dynamic>? calorieTargets;
 
@@ -202,10 +215,12 @@ class UserPreferences {
         orElse: () => ActivityLevel.moderatelyActive,
       ),
       dietaryRestrictions: List<String>.from(json['dietaryRestrictions'] ?? []),
-      preferredWorkoutStyles: List<String>.from(json['preferredWorkoutStyles'] ?? []),
+      preferredWorkoutStyles:
+          List<String>.from(json['preferredWorkoutStyles'] ?? []),
       targetCalories: json['targetCalories'] as int? ?? 2000,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
-      workoutNotificationsEnabled: json['workoutNotificationsEnabled'] as bool? ?? false,
+      workoutNotificationsEnabled:
+          json['workoutNotificationsEnabled'] as bool? ?? false,
       workoutNotificationTime: json['workoutNotificationTime'] as String?,
       weeklyWorkoutDays: json['weeklyWorkoutDays'] as int? ?? 3,
       specificWorkoutDays: json['specificWorkoutDays'] != null
@@ -221,8 +236,10 @@ class UserPreferences {
       foodsToAvoid: List<String>.from(json['foodsToAvoid'] ?? []),
       favoriteFoods: List<String>.from(json['favoriteFoods'] ?? []),
       allergies: List<Map<String, dynamic>>.from(json['allergies'] ?? []),
-      mealTimingPreferences: json['mealTimingPreferences'] as Map<String, dynamic>?,
-      batchCookingPreferences: json['batchCookingPreferences'] as Map<String, dynamic>?,
+      mealTimingPreferences:
+          json['mealTimingPreferences'] as Map<String, dynamic>?,
+      batchCookingPreferences:
+          json['batchCookingPreferences'] as Map<String, dynamic>?,
       proteinTargets: json['proteinTargets'] as Map<String, dynamic>?,
       calorieTargets: json['calorieTargets'] as Map<String, dynamic>?,
     );
@@ -287,11 +304,14 @@ class UserPreferences {
       fitnessGoal: fitnessGoal ?? this.fitnessGoal,
       activityLevel: activityLevel ?? this.activityLevel,
       dietaryRestrictions: dietaryRestrictions ?? this.dietaryRestrictions,
-      preferredWorkoutStyles: preferredWorkoutStyles ?? this.preferredWorkoutStyles,
+      preferredWorkoutStyles:
+          preferredWorkoutStyles ?? this.preferredWorkoutStyles,
       targetCalories: targetCalories ?? this.targetCalories,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      workoutNotificationsEnabled: workoutNotificationsEnabled ?? this.workoutNotificationsEnabled,
-      workoutNotificationTime: workoutNotificationTime ?? this.workoutNotificationTime,
+      workoutNotificationsEnabled:
+          workoutNotificationsEnabled ?? this.workoutNotificationsEnabled,
+      workoutNotificationTime:
+          workoutNotificationTime ?? this.workoutNotificationTime,
       weeklyWorkoutDays: weeklyWorkoutDays ?? this.weeklyWorkoutDays,
       specificWorkoutDays: specificWorkoutDays ?? this.specificWorkoutDays,
       timezone: timezone ?? this.timezone,
@@ -304,8 +324,10 @@ class UserPreferences {
       foodsToAvoid: foodsToAvoid ?? this.foodsToAvoid,
       favoriteFoods: favoriteFoods ?? this.favoriteFoods,
       allergies: allergies ?? this.allergies,
-      mealTimingPreferences: mealTimingPreferences ?? this.mealTimingPreferences,
-      batchCookingPreferences: batchCookingPreferences ?? this.batchCookingPreferences,
+      mealTimingPreferences:
+          mealTimingPreferences ?? this.mealTimingPreferences,
+      batchCookingPreferences:
+          batchCookingPreferences ?? this.batchCookingPreferences,
       proteinTargets: proteinTargets ?? this.proteinTargets,
       calorieTargets: calorieTargets ?? this.calorieTargets,
     );
@@ -337,7 +359,7 @@ class UserPreferences {
       calorieTargets: null,
     );
   }
-} 
+}
 
 class DietPlanPreferences {
   // Onboarding info
@@ -357,7 +379,8 @@ class DietPlanPreferences {
   final List<String> favoriteFoods;
 
   // Meal prep preferences
-  final String mealFrequency; // e.g. "3 meals", "3 meals + 2 snacks", "16:8 fasting"
+  final String
+      mealFrequency; // e.g. "3 meals", "3 meals + 2 snacks", "16:8 fasting"
   final String? cheatDay; // e.g. "Monday", "Saturday", null for no cheat day
   final bool weeklyRotation;
   final bool remindersEnabled;
@@ -371,7 +394,8 @@ class DietPlanPreferences {
   // Additional onboarding data
   final List<Map<String, dynamic>>? allergies; // Allergies & intolerances
   final Map<String, dynamic>? mealTimingPreferences; // Meal timing & frequency
-  final Map<String, dynamic>? batchCookingPreferences; // Batch cooking preferences
+  final Map<String, dynamic>?
+      batchCookingPreferences; // Batch cooking preferences
 
   DietPlanPreferences({
     required this.age,
@@ -398,4 +422,4 @@ class DietPlanPreferences {
     this.mealTimingPreferences,
     this.batchCookingPreferences,
   });
-} 
+}

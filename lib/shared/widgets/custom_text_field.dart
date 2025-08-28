@@ -89,7 +89,9 @@ class CustomTextField extends StatelessWidget {
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: enabled ? AppConstants.surfaceColor : AppConstants.backgroundColor,
+            fillColor: enabled
+                ? AppConstants.surfaceColor
+                : AppConstants.backgroundColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
               borderSide: const BorderSide(color: AppConstants.textTertiary),
@@ -100,7 +102,8 @@ class CustomTextField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              borderSide: const BorderSide(color: AppConstants.primaryColor, width: 2),
+              borderSide:
+                  const BorderSide(color: AppConstants.primaryColor, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -108,7 +111,8 @@ class CustomTextField extends StatelessWidget {
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              borderSide: const BorderSide(color: AppConstants.errorColor, width: 2),
+              borderSide:
+                  const BorderSide(color: AppConstants.errorColor, width: 2),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -248,4 +252,4 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
       ),
     );
   }
-} 
+}

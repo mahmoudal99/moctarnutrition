@@ -12,7 +12,8 @@ class MealPlanLoadingState extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -57,4 +58,4 @@ class MealPlanLoadingState extends StatelessWidget {
       ),
     );
   }
-} 
+}

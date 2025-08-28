@@ -21,13 +21,13 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
   final _weightController = TextEditingController();
-  
+
   String? _selectedPhotoPath;
   String? _selectedMood;
   int? _selectedEnergyLevel;
   int? _selectedMotivationLevel;
   Map<String, double> _measurements = {};
-  
+
   bool _isSubmitting = false;
   int _currentStep = 0;
   final int _totalSteps = 3;
@@ -46,7 +46,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       appBar: AppBar(
         title: Text(
           'Weekly Check-in',
-          style: AppTextStyles.heading4.copyWith(color: AppConstants.textPrimary),
+          style:
+              AppTextStyles.heading4.copyWith(color: AppConstants.textPrimary),
         ),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
@@ -91,19 +92,20 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
             children: List.generate(_totalSteps, (index) {
               final isCompleted = index < _currentStep;
               final isCurrent = index == _currentStep;
-              
+
               return Expanded(
                 child: Container(
-                  margin: EdgeInsets.only(right: index < _totalSteps - 1 ? 8 : 0),
+                  margin:
+                      EdgeInsets.only(right: index < _totalSteps - 1 ? 8 : 0),
                   child: Column(
                     children: [
                       Container(
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: isCompleted 
+                          color: isCompleted
                               ? AppConstants.successColor
-                              : isCurrent 
+                              : isCurrent
                                   ? AppConstants.primaryColor
                                   : AppConstants.textTertiary.withOpacity(0.3),
                           shape: BoxShape.circle,
@@ -118,10 +120,11 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                       Text(
                         _getStepTitle(index),
                         style: AppTextStyles.caption.copyWith(
-                          color: isCurrent 
+                          color: isCurrent
                               ? AppConstants.primaryColor
                               : AppConstants.textSecondary,
-                          fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight:
+                              isCurrent ? FontWeight.w600 : FontWeight.normal,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -167,7 +170,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          
           PhotoCaptureWidget(
             selectedPhotoPath: _selectedPhotoPath,
             onPhotoSelected: (path) {
@@ -176,13 +178,9 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
               });
             },
           ),
-          
           const SizedBox(height: 24),
-          
           _buildPhotoTips(),
-          
           const SizedBox(height: 32),
-          
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -226,7 +224,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            
             ProgressMetricsForm(
               weightController: _weightController,
               measurements: _measurements,
@@ -236,9 +233,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                 });
               },
             ),
-            
             const SizedBox(height: 24),
-            
             Text(
               'Notes (Optional)',
               style: AppTextStyles.bodyMedium.copyWith(
@@ -250,7 +245,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
               controller: _notesController,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: 'How are you feeling about your progress? Any challenges or achievements?',
+                hintText:
+                    'How are you feeling about your progress? Any challenges or achievements?',
                 hintStyle: AppTextStyles.bodyMedium.copyWith(
                   color: AppConstants.textTertiary,
                 ),
@@ -275,9 +271,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                 contentPadding: const EdgeInsets.all(16),
               ),
             ),
-            
             const SizedBox(height: 32),
-            
             Row(
               children: [
                 Expanded(
@@ -343,7 +337,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          
           MoodEnergyForm(
             selectedMood: _selectedMood,
             selectedEnergyLevel: _selectedEnergyLevel,
@@ -364,9 +357,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
               });
             },
           ),
-          
           const SizedBox(height: 32),
-          
           Row(
             children: [
               Expanded(
@@ -406,7 +397,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : Text(
@@ -532,7 +524,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
     if (now.weekday != 7) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Check-ins can only be submitted on Sundays. Today is ${_getDayName(now.weekday)}.'),
+          content: Text(
+              'Check-ins can only be submitted on Sundays. Today is ${_getDayName(now.weekday)}.'),
           backgroundColor: AppConstants.errorColor,
         ),
       );
@@ -540,10 +533,12 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
     }
 
     // Check if there's already a check-in for this week
-    final checkinProvider = Provider.of<CheckinProvider>(context, listen: false);
+    final checkinProvider =
+        Provider.of<CheckinProvider>(context, listen: false);
     final currentWeekCheckin = checkinProvider.currentWeekCheckin;
-    
-    if (currentWeekCheckin != null && currentWeekCheckin.status == CheckinStatus.completed) {
+
+    if (currentWeekCheckin != null &&
+        currentWeekCheckin.status == CheckinStatus.completed) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('You have already submitted a check-in for this week.'),
@@ -560,8 +555,12 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
     try {
       final success = await checkinProvider.submitCheckin(
         photoPath: _selectedPhotoPath!,
-        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-        weight: _weightController.text.isNotEmpty ? double.tryParse(_weightController.text) : null,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        weight: _weightController.text.isNotEmpty
+            ? double.tryParse(_weightController.text)
+            : null,
         measurements: _measurements.isNotEmpty ? _measurements : null,
         mood: _selectedMood,
         energyLevel: _selectedEnergyLevel,
@@ -571,7 +570,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Check-in submitted successfully! Your photo is being uploaded in the background.'),
+            content: Text(
+                'Check-in submitted successfully! Your photo is being uploaded in the background.'),
             backgroundColor: AppConstants.successColor,
             duration: Duration(seconds: 4),
           ),
@@ -605,7 +605,13 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
 
   String _getDayName(int weekday) {
     const days = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
     ];
     return days[weekday - 1];
   }
@@ -615,7 +621,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Exit Check-in'),
-        content: const Text('Are you sure you want to exit? Your progress will be lost.'),
+        content: const Text(
+            'Are you sure you want to exit? Your progress will be lost.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -632,4 +639,4 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       ),
     );
   }
-} 
+}
