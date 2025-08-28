@@ -12,12 +12,9 @@ class MealPlanStorageService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final mealPlanJson = jsonEncode(mealPlan.toJson());
-      final key = '${_mealPlanKeyPrefix}${mealPlan.userId}';
+      final key = '$_mealPlanKeyPrefix${mealPlan.userId}';
       await prefs.setString(key, mealPlanJson);
-      print(
-          'Meal plan saved to shared preferences for user ${mealPlan.userId}');
     } catch (e) {
-      print('Error saving meal plan to shared preferences: $e');
       throw Exception('Failed to save meal plan: $e');
     }
   }
@@ -26,16 +23,14 @@ class MealPlanStorageService {
   static Future<MealPlanModel?> loadMealPlan(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_mealPlanKeyPrefix}$userId';
+      final key = '$_mealPlanKeyPrefix$userId';
       final mealPlanJson = prefs.getString(key);
       if (mealPlanJson == null) return null;
 
       final Map<String, dynamic> map = jsonDecode(mealPlanJson);
       final mealPlan = MealPlanModel.fromJson(map);
-      print('Meal plan loaded from shared preferences for user $userId');
       return mealPlan;
     } catch (e) {
-      print('Error loading meal plan from shared preferences: $e');
       return null;
     }
   }
@@ -46,11 +41,9 @@ class MealPlanStorageService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final preferencesJson = jsonEncode(_dietPreferencesToJson(preferences));
-      final key = '${_dietPreferencesKeyPrefix}$userId';
+      final key = '$_dietPreferencesKeyPrefix$userId';
       await prefs.setString(key, preferencesJson);
-      print('Diet preferences saved to shared preferences for user $userId');
     } catch (e) {
-      print('Error saving diet preferences to shared preferences: $e');
       throw Exception('Failed to save diet preferences: $e');
     }
   }
@@ -59,16 +52,14 @@ class MealPlanStorageService {
   static Future<DietPlanPreferences?> loadDietPreferences(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_dietPreferencesKeyPrefix}$userId';
+      final key = '$_dietPreferencesKeyPrefix$userId';
       final preferencesJson = prefs.getString(key);
       if (preferencesJson == null) return null;
 
       final Map<String, dynamic> map = jsonDecode(preferencesJson);
       final preferences = _dietPreferencesFromJson(map);
-      print('Diet preferences loaded from shared preferences for user $userId');
       return preferences;
     } catch (e) {
-      print('Error loading diet preferences from shared preferences: $e');
       return null;
     }
   }
@@ -77,13 +68,11 @@ class MealPlanStorageService {
   static Future<void> clearMealPlanData(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final mealPlanKey = '${_mealPlanKeyPrefix}$userId';
-      final dietPreferencesKey = '${_dietPreferencesKeyPrefix}$userId';
+      final mealPlanKey = '$_mealPlanKeyPrefix$userId';
+      final dietPreferencesKey = '$_dietPreferencesKeyPrefix$userId';
       await prefs.remove(mealPlanKey);
       await prefs.remove(dietPreferencesKey);
-      print('Meal plan data cleared from shared preferences for user $userId');
     } catch (e) {
-      print('Error clearing meal plan data: $e');
     }
   }
 
@@ -91,10 +80,9 @@ class MealPlanStorageService {
   static Future<bool> hasMealPlan(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_mealPlanKeyPrefix}$userId';
+      final key = '$_mealPlanKeyPrefix$userId';
       return prefs.containsKey(key);
     } catch (e) {
-      print('Error checking meal plan existence: $e');
       return false;
     }
   }

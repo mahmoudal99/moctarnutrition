@@ -358,7 +358,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                           Expanded(
                             child: _buildNutritionCard(
                               'Protein',
-                              '${meal.nutrition.protein.toStringAsFixed(1)}',
+                              meal.nutrition.protein.toStringAsFixed(1),
                               'g',
                               AppConstants.successColor,
                             ),
@@ -371,7 +371,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                           Expanded(
                             child: _buildNutritionCard(
                               'Carbs',
-                              '${meal.nutrition.carbs.toStringAsFixed(1)}',
+                              meal.nutrition.carbs.toStringAsFixed(1),
                               'g',
                               AppConstants.warningColor,
                             ),
@@ -380,7 +380,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                           Expanded(
                             child: _buildNutritionCard(
                               'Fat',
-                              '${meal.nutrition.fat.toStringAsFixed(1)}',
+                              meal.nutrition.fat.toStringAsFixed(1),
                               'g',
                               AppConstants.errorColor,
                             ),
@@ -393,7 +393,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                           Expanded(
                             child: _buildNutritionCard(
                               'Fiber',
-                              '${widget.meal.nutrition.fiber.toStringAsFixed(1)}',
+                              widget.meal.nutrition.fiber.toStringAsFixed(1),
                               'g',
                               AppConstants.secondaryColor,
                             ),
@@ -402,7 +402,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                           Expanded(
                             child: _buildNutritionCard(
                               'Sugar',
-                              '${widget.meal.nutrition.sugar.toStringAsFixed(1)}',
+                              widget.meal.nutrition.sugar.toStringAsFixed(1),
                               'g',
                               AppConstants.primaryColor,
                             ),

@@ -225,8 +225,6 @@ class MealPlanProvider with ChangeNotifier {
 
     _logger.d(
         'MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed for date: ${date?.toIso8601String() ?? 'current'}');
-    print(
-        'MealPlanProvider - Updating meal consumption: $mealId -> $isConsumed for date: ${date?.toIso8601String() ?? 'current'}');
 
     // Use the current date if none provided
     final targetDate = date ?? DateTime.now();
@@ -254,24 +252,17 @@ class MealPlanProvider with ChangeNotifier {
                 'MealPlanProvider - Updated meal consumption for: ${meal.name}');
             _logger.d(
                 'MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
-            print(
-                'MealPlanProvider - Updated meal consumption for: ${meal.name}');
-            print(
-                'MealPlanProvider - Day consumed calories: ${mealDay.consumedCalories}');
             break;
           }
         }
       }
 
       // Notify listeners about the change
-      print('MealPlanProvider - About to call notifyListeners()');
       _logger.d('MealPlanProvider - About to call notifyListeners()');
       notifyListeners();
-      print('MealPlanProvider - notifyListeners() called');
       _logger.d('MealPlanProvider - notifyListeners() called');
     } catch (e) {
       _logger.e('MealPlanProvider - Error updating meal consumption: $e');
-      print('MealPlanProvider - Error updating meal consumption: $e');
     }
   }
 

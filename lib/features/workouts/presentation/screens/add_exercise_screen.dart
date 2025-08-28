@@ -132,7 +132,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
             return Column(
               children: [
                 // Search and filter section
-                ExerciseSearchFilter(),
+                const ExerciseSearchFilter(),
 
                 // Exercises list
                 Expanded(
@@ -157,7 +157,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 64,
               color: AppConstants.errorColor,
@@ -198,7 +198,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.search_off,
                 size: 64,
                 color: AppConstants.textTertiary,

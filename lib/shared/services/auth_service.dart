@@ -68,9 +68,7 @@ class AuthService {
             updatedPreferences = updatedPreferences.copyWith(
               proteinTargets: proteinTargets,
             );
-            print('SignUp: Added calculated protein targets');
           } catch (e) {
-            print('SignUp: Error parsing protein targets: $e');
           }
         }
 
@@ -82,9 +80,7 @@ class AuthService {
               targetCalories: calorieTargets['dailyTarget'] ??
                   updatedPreferences.targetCalories,
             );
-            print('SignUp: Added calculated calorie targets');
           } catch (e) {
-            print('SignUp: Error parsing calorie targets: $e');
           }
         }
 
@@ -98,15 +94,6 @@ class AuthService {
           preferences: updatedPreferences,
           updatedAt: DateTime.now(),
         );
-        print('SignUp: Using onboarding data from SharedPreferences:');
-        print(
-            '  dietaryRestrictions: ${userModel.preferences.dietaryRestrictions}');
-        print(
-            '  workoutStyles: ${userModel.preferences.preferredWorkoutStyles}');
-        print(
-            '  proteinTargets: ${userModel.preferences.proteinTargets != null ? 'Available' : 'Not available'}');
-        print(
-            '  calorieTargets: ${userModel.preferences.calorieTargets != null ? 'Available' : 'Not available'}');
 
         // Clear temporary nutrition targets
         await prefs.remove('temp_protein_targets');
@@ -124,7 +111,6 @@ class AuthService {
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        print('SignUp: No onboarding data found, using default preferences.');
       }
       await _createUserDocument(userModel);
 
@@ -160,12 +146,6 @@ class AuthService {
       if (userModel == null) {
         // Migration: Try to load from SharedPreferences and upload to Firestore
         final localUser = await _storageService.loadUser();
-        print(
-            'AuthService migration: Loaded localUser from SharedPreferences:');
-        print(
-            '  dietaryRestrictions:  [32m${localUser?.preferences.dietaryRestrictions} [0m');
-        print(
-            '  workoutStyles:  [34m${localUser?.preferences.preferredWorkoutStyles} [0m');
         if (localUser != null) {
           final migratedUser = localUser.copyWith(
             id: user.uid,
@@ -177,11 +157,6 @@ class AuthService {
             preferences: localUser.preferences,
             updatedAt: DateTime.now(),
           );
-          print('AuthService migration: Migrated user to Firestore:');
-          print(
-              '  dietaryRestrictions:  [32m${migratedUser.preferences.dietaryRestrictions} [0m');
-          print(
-              '  workoutStyles:  [34m${migratedUser.preferences.preferredWorkoutStyles} [0m');
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
           await _storageService.clearUser(); // Clear local user after migration
@@ -241,9 +216,7 @@ class AuthService {
               updatedPreferences = updatedPreferences.copyWith(
                 proteinTargets: proteinTargets,
               );
-              print('Google SignIn: Added calculated protein targets');
             } catch (e) {
-              print('Google SignIn: Error parsing protein targets: $e');
             }
           }
 
@@ -255,9 +228,7 @@ class AuthService {
                 targetCalories: calorieTargets['dailyTarget'] ??
                     updatedPreferences.targetCalories,
               );
-              print('Google SignIn: Added calculated calorie targets');
             } catch (e) {
-              print('Google SignIn: Error parsing calorie targets: $e');
             }
           }
 
@@ -366,9 +337,7 @@ class AuthService {
               updatedPreferences = updatedPreferences.copyWith(
                 proteinTargets: proteinTargets,
               );
-              print('Apple SignIn: Added calculated protein targets');
             } catch (e) {
-              print('Apple SignIn: Error parsing protein targets: $e');
             }
           }
 
@@ -380,9 +349,7 @@ class AuthService {
                 targetCalories: calorieTargets['dailyTarget'] ??
                     updatedPreferences.targetCalories,
               );
-              print('Apple SignIn: Added calculated calorie targets');
             } catch (e) {
-              print('Apple SignIn: Error parsing calorie targets: $e');
             }
           }
 
@@ -480,9 +447,7 @@ class AuthService {
               updatedPreferences = updatedPreferences.copyWith(
                 proteinTargets: proteinTargets,
               );
-              print('Anonymous SignIn: Added calculated protein targets');
             } catch (e) {
-              print('Anonymous SignIn: Error parsing protein targets: $e');
             }
           }
 
@@ -494,9 +459,7 @@ class AuthService {
                 targetCalories: calorieTargets['dailyTarget'] ??
                     updatedPreferences.targetCalories,
               );
-              print('Anonymous SignIn: Added calculated calorie targets');
             } catch (e) {
-              print('Anonymous SignIn: Error parsing calorie targets: $e');
             }
           }
 

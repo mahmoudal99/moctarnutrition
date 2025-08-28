@@ -226,7 +226,7 @@ Please regenerate the meal plan following the JSON schema exactly.
     final estimatedTokensNeeded = days * 1400;
 
     // Get remaining free tokens (2.5M for GPT-4o-mini)
-    final remainingFreeTokens = 2500000; // TODO: Get actual remaining tokens
+    const remainingFreeTokens = 2500000; // TODO: Get actual remaining tokens
 
     final hasEnough = remainingFreeTokens >= estimatedTokensNeeded;
 
@@ -262,8 +262,6 @@ Please regenerate the meal plan following the JSON schema exactly.
 
       // Check if we have enough free tokens remaining
       if (!_hasEnoughFreeTokens(days)) {
-        print(
-            'Insufficient free tokens remaining - throwing exception for testing');
         throw Exception(
             'Insufficient free tokens remaining for $days-day meal plan');
       }
@@ -333,7 +331,7 @@ Please regenerate the meal plan following the JSON schema exactly.
         // Small delay between batches to be respectful to the API
         if (batchEnd < days) {
           await Future.delayed(
-              Duration(milliseconds: 1000)); // Reduced for faster processing
+              const Duration(milliseconds: 1000)); // Reduced for faster processing
         }
       }
 
@@ -431,7 +429,7 @@ Please regenerate the meal plan following the JSON schema exactly.
         // Add delay between sequential calls to respect rate limits
         if (dayIndex < batchEnd) {
           await Future.delayed(
-              Duration(milliseconds: 1000)); // Reduced for faster processing
+              const Duration(milliseconds: 1000)); // Reduced for faster processing
         }
       } catch (e) {
         failedDays++;

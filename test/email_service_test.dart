@@ -11,9 +11,7 @@ void main() {
       expect(result, isA<bool>());
 
       if (result) {
-        print('✅ EmailJS connection test successful!');
       } else {
-        print('❌ EmailJS connection test failed');
       }
     });
 
@@ -30,9 +28,7 @@ void main() {
       expect(result, isA<bool>());
 
       if (result) {
-        print('✅ Meal plan email test successful! Check your inbox.');
       } else {
-        print('❌ Meal plan email test failed');
       }
     });
 
@@ -48,21 +44,15 @@ void main() {
       expect(result, isA<bool>());
 
       if (result) {
-        print('✅ Notification email test successful! Check your inbox.');
       } else {
-        print('❌ Notification email test failed');
       }
     });
 
     test('Run all email tests with delays', () async {
-      print('🚀 Starting EmailJS integration tests...');
 
       // Test 1: Connection
       final connectionResult = await EmailService.testConnection();
       expect(connectionResult, isA<bool>());
-      print(connectionResult
-          ? '✅ Connection test passed'
-          : '❌ Connection test failed');
 
       // Wait between tests to respect rate limits
       await Future.delayed(const Duration(seconds: 2));
@@ -76,9 +66,6 @@ void main() {
             'This is a test email to verify that the EmailJS integration is working properly.',
       );
       expect(notificationResult, isA<bool>());
-      print(notificationResult
-          ? '✅ Notification test passed'
-          : '❌ Notification test failed');
 
       // Wait between tests to respect rate limits
       await Future.delayed(const Duration(seconds: 2));
@@ -93,11 +80,7 @@ void main() {
         targetCalories: 2000,
       );
       expect(mealPlanResult, isA<bool>());
-      print(mealPlanResult
-          ? '✅ Meal plan test passed'
-          : '❌ Meal plan test failed');
 
-      print('🏁 EmailJS integration tests completed!');
     });
   });
 }

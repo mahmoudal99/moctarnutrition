@@ -28,10 +28,10 @@ class WelcomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             // Stacked activity cards
-            _ActivityCardsStack(),
+            const _ActivityCardsStack(),
             const SizedBox(height: 24),
             // Avatars row
-            _AvatarsRow(),
+            const _AvatarsRow(),
             const SizedBox(height: 28),
             // Motivational text
             Padding(
@@ -56,7 +56,7 @@ class WelcomeScreen extends StatelessWidget {
             ),
             const Spacer(),
             // Progress dots
-            _ProgressDots(current: 0, total: 3),
+            const _ProgressDots(current: 0, total: 3),
             const SizedBox(height: 24),
             // Continue button
             Padding(

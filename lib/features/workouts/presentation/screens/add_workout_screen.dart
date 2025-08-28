@@ -448,7 +448,7 @@ class _ExerciseCard extends StatelessWidget {
       child: Row(
         children: [
           // Drag handle
-          Icon(
+          const Icon(
             Icons.drag_handle,
             color: AppConstants.textTertiary,
             size: 20,

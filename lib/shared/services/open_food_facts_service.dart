@@ -11,7 +11,6 @@ class OpenFoodFactsService {
   static Future<OpenFoodFactsResult?> searchAndNormalize(
       String ingredientName) async {
     try {
-      print('🔍 Open Food Facts: Searching for "$ingredientName"');
 
       final response = await http.get(
         Uri.parse(
@@ -23,11 +22,9 @@ class OpenFoodFactsService {
         final data = json.decode(response.body);
         return _parseSearchResults(data, ingredientName);
       } else {
-        print('❌ Open Food Facts API error: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('❌ Open Food Facts search error: $e');
       return null;
     }
   }
@@ -37,12 +34,9 @@ class OpenFoodFactsService {
       Map<String, dynamic> data, String originalQuery) {
     final products = data['products'] as List?;
     if (products == null || products.isEmpty) {
-      print('⚠️ Open Food Facts: No products found for "$originalQuery"');
       return null;
     }
 
-    print(
-        '📋 Open Food Facts: Found ${products.length} products for "$originalQuery"');
 
     // Find best match based on relevance and data quality
     OpenFoodFactsProduct? bestMatch;
@@ -57,8 +51,6 @@ class OpenFoodFactsService {
     }
 
     if (bestMatch != null) {
-      print(
-          '🎯 Open Food Facts: Best match for "$originalQuery" -> "${bestMatch.productName}" (score: $bestScore)');
 
       return OpenFoodFactsResult(
         originalQuery: originalQuery,

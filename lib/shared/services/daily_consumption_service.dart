@@ -19,7 +19,7 @@ class DailyConsumptionService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final dateKey = _getDateKey(date);
-      final key = '${_consumptionKeyPrefix}${userId}_$dateKey';
+      final key = '$_consumptionKeyPrefix${userId}_$dateKey';
 
       final consumptionData = {
         'date': date.toIso8601String(),
@@ -48,7 +48,7 @@ class DailyConsumptionService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final dateKey = _getDateKey(date);
-      final key = '${_consumptionKeyPrefix}${userId}_$dateKey';
+      final key = '$_consumptionKeyPrefix${userId}_$dateKey';
 
       final jsonData = prefs.getString(key);
       if (jsonData == null) return null;
@@ -220,7 +220,7 @@ class DailyConsumptionService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final dateKey = _getDateKey(date);
-      final key = '${_consumptionKeyPrefix}${userId}_$dateKey';
+      final key = '$_consumptionKeyPrefix${userId}_$dateKey';
 
       await prefs.remove(key);
       _logger.d('Cleared consumption data for $dateKey');

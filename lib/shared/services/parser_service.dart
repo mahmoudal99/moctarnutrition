@@ -23,14 +23,8 @@ class ParserService {
     int dayIndex,
   ) async {
     try {
-      print('Parsing single day AI response for day $dayIndex...');
-      print('AI Response length: ${aiResponse.length}');
-      print(
-          'AI Response preview: ${aiResponse.substring(0, aiResponse.length > 200 ? 200 : aiResponse.length)}...');
 
       // Debug: Print the full AI response for debugging
-      print('FULL AI RESPONSE FOR DAY $dayIndex:');
-      print(aiResponse);
 
       // Validate the JSON response first
       final validationResult = JSONValidationService.validateSingleDayResponse(
@@ -51,17 +45,12 @@ class ParserService {
       // Debug: Check ingredients in parsed data
       if (mealDayData['meals'] != null) {
         final meals = mealDayData['meals'] as List;
-        print('PARSED MEALS FOR DAY $dayIndex:');
         for (int i = 0; i < meals.length; i++) {
           final meal = meals[i];
-          print('  Meal ${i + 1}: ${meal['name']} (${meal['type']})');
           if (meal['ingredients'] != null) {
             final ingredients = meal['ingredients'] as List;
-            print('    Ingredients:');
             for (int j = 0; j < ingredients.length; j++) {
               final ingredient = ingredients[j];
-              print(
-                  '      ${j + 1}. ${ingredient['name']} - ${ingredient['amount']} ${ingredient['unit']}');
             }
           }
         }
@@ -101,7 +90,6 @@ class ParserService {
 
       return mealDay;
     } catch (e) {
-      print('JSON parsing failed for day $dayIndex: $e');
       throw Exception('Failed to parse AI response for day $dayIndex: $e');
     }
   }
@@ -113,10 +101,6 @@ class ParserService {
     int days,
   ) {
     try {
-      print('Parsing AI response...');
-      print('AI Response length: ${aiResponse.length}');
-      print(
-          'AI Response preview: ${aiResponse.substring(0, aiResponse.length > 200 ? 200 : aiResponse.length)}...');
 
       // Clean and fix the JSON
       final cleanedJson = JsonUtils.cleanAndFixJson(aiResponse);
@@ -206,7 +190,6 @@ class ParserService {
         updatedAt: DateTime.now(),
       );
     } catch (e) {
-      print('JSON parsing failed: $e');
       throw Exception('Failed to parse AI response: $e');
     }
   }
@@ -228,12 +211,7 @@ class ParserService {
     }
 
     if (missingMeals.isNotEmpty) {
-      print(
-          '⚠️ WARNING: Day $dayIndex is missing required meal types: ${missingMeals.join(', ')}');
-      print('Present meals: ${presentMealTypes.join(', ')}');
-      print('Required meals: ${requiredMeals.map((t) => t.name).join(', ')}');
     } else {
-      print('✅ Day $dayIndex validation passed - all required meals present');
     }
   }
 
@@ -263,9 +241,7 @@ class ParserService {
       // Calculate nutrition for the meal day
       NutritionCalculationService.applyCalculatedNutritionToMealDay(mealDay);
 
-      print('✅ Applied calculated nutrition to meal day ${mealDay.date}');
     } catch (e) {
-      print('❌ Error applying calculated nutrition: $e');
       // Continue without failing the entire parsing process
     }
   }

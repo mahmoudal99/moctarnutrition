@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 /// Animated counter widget that smoothly animates between different values
 class AnimatedCounter extends StatefulWidget {

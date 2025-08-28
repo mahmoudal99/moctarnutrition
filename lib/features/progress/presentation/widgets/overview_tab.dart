@@ -382,7 +382,7 @@ class WeightProgressCard extends StatelessWidget {
                     LinearProgressIndicator(
                       value: (progressPercentage / 100).clamp(0.0, 1.0),
                       backgroundColor: AppConstants.borderColor,
-                      valueColor: AlwaysStoppedAnimation<Color>(
+                      valueColor: const AlwaysStoppedAnimation<Color>(
                           AppConstants.primaryColor),
                     ),
                     const SizedBox(height: AppConstants.spacingS),
@@ -643,7 +643,7 @@ class BMIWidget extends StatelessWidget {
                       color: AppConstants.textPrimary,
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.help_outline,
                     color: AppConstants.textSecondary,
                     size: 20,
@@ -786,7 +786,7 @@ class BMIScale extends StatelessWidget {
 class BMILegend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         LegendItem(label: 'Underweight', color: Colors.blue),
@@ -861,18 +861,6 @@ class TotalCaloriesCard extends StatelessWidget {
 
         final data = snapshot.data ?? OverviewData.empty();
         final dailyCalories = data.dailyCalories;
-
-        // DEBUG: Log what data we're getting
-        print('=== OVERVIEW TAB DEBUG ===');
-        print('Daily calories data length: ${dailyCalories.dailyData.length}');
-        print('Weekly total: ${dailyCalories.weeklyTotal}');
-        print('Weekly average: ${dailyCalories.weeklyAverage}');
-        for (final dayData in dailyCalories.dailyData) {
-          print(
-              'Date: ${dayData.date.toIso8601String()}, Weekday: ${dayData.date.weekday}, Calories: ${dayData.totalCalories}');
-        }
-        print('========================');
-
         if (dailyCalories.dailyData.isEmpty) {
           return Container(
             width: double.infinity,
@@ -1154,8 +1142,6 @@ class CaloriesChart extends StatelessWidget {
                       _getDayAbbreviation(dayData.date.weekday);
 
                   // DEBUG: Log the date matching
-                  print(
-                      'Chart - Index $index (${dayAbbreviation}): Date ${dayData.date.toIso8601String()}, Calories: ${dayData.totalCalories}');
 
                   if (dayData.totalCalories == 0) {
                     return SizedBox(
@@ -1218,9 +1204,9 @@ class CaloriesChart extends StatelessWidget {
                                     child: Container(
                                       width: 20,
                                       height: proteinHeight.clamp(0, 200),
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: AppConstants.proteinColor,
-                                        borderRadius: const BorderRadius.only(
+                                        borderRadius: BorderRadius.only(
                                           bottomLeft: Radius.circular(2),
                                           bottomRight: Radius.circular(2),
                                         ),
@@ -1235,7 +1221,7 @@ class CaloriesChart extends StatelessWidget {
                                     child: Container(
                                       width: 20,
                                       height: carbsHeight.clamp(0, 200),
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: AppConstants.carbsColor,
                                       ),
                                     ),
@@ -1249,9 +1235,9 @@ class CaloriesChart extends StatelessWidget {
                                     child: Container(
                                       width: 20,
                                       height: fatsHeight.clamp(0, 200),
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: AppConstants.fatColor,
-                                        borderRadius: const BorderRadius.only(
+                                        borderRadius: BorderRadius.only(
                                           topLeft: Radius.circular(2),
                                           topRight: Radius.circular(2),
                                         ),
@@ -1306,11 +1292,11 @@ class CaloriesChart extends StatelessWidget {
 class CaloriesLegend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         LegendItem(label: 'Protein', color: AppConstants.proteinColor),
-        LegendItem(label: 'Carbs', color: AppConstants.carbsColor),
+        const LegendItem(label: 'Carbs', color: AppConstants.carbsColor),
         LegendItem(label: 'Fats', color: AppConstants.fatColor),
       ],
     );

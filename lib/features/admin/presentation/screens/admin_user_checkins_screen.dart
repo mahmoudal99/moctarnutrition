@@ -142,7 +142,6 @@ class AdminUserCheckinsScreen extends StatelessWidget {
             try {
               return CheckinModel.fromJson(doc.data());
             } catch (e) {
-              print('Error processing checkin doc ${doc.id}: $e');
               return null;
             }
           })
@@ -159,7 +158,6 @@ class AdminUserCheckinsScreen extends StatelessWidget {
 
       return checkins;
     } catch (e) {
-      print('Error fetching checkins: $e');
       return [];
     }
   }
@@ -477,7 +475,7 @@ class AdminUserCheckinsScreen extends StatelessWidget {
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
                     color: AppConstants.textTertiary.withOpacity(0.1),
-                    child: Icon(
+                    child: const Icon(
                       Icons.camera_alt_outlined,
                       color: AppConstants.textTertiary,
                       size: 24,
@@ -485,7 +483,7 @@ class AdminUserCheckinsScreen extends StatelessWidget {
                   ),
                   errorWidget: (context, url, error) => Container(
                     color: AppConstants.textTertiary.withOpacity(0.1),
-                    child: Icon(
+                    child: const Icon(
                       Icons.error_outline,
                       color: AppConstants.errorColor,
                       size: 24,

@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
-import '../models/user_model.dart';
 import '../providers/auth_provider.dart';
 import '../services/onboarding_service.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
-import '../../features/auth/presentation/screens/auth_screen.dart';
 import '../../features/onboarding/presentation/screens/get_started_screen.dart';
-import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
-import '../../features/subscription/presentation/screens/subscription_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});

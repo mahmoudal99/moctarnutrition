@@ -199,8 +199,8 @@ class _SalesCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: LineChart(
                 LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(show: false),
+                  gridData: const FlGridData(show: false),
+                  titlesData: const FlTitlesData(show: false),
                   borderData: FlBorderData(show: false),
                   minX: 0,
                   maxX: 6,
@@ -209,18 +209,18 @@ class _SalesCard extends StatelessWidget {
                   lineBarsData: [
                     LineChartBarData(
                       spots: [
-                        FlSpot(0, 1),
-                        FlSpot(1, 7.5),
-                        FlSpot(2, 2),
-                        FlSpot(3, 8),
-                        FlSpot(4, 6.5),
-                        FlSpot(5, 9),
-                        FlSpot(6, 1),
+                        const FlSpot(0, 1),
+                        const FlSpot(1, 7.5),
+                        const FlSpot(2, 2),
+                        const FlSpot(3, 8),
+                        const FlSpot(4, 6.5),
+                        const FlSpot(5, 9),
+                        const FlSpot(6, 1),
                       ],
                       isCurved: true,
                       color: const Color(0xFF4F8DFD),
                       barWidth: 3,
-                      dotData: FlDotData(show: false),
+                      dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(show: false),
                     ),
                   ],

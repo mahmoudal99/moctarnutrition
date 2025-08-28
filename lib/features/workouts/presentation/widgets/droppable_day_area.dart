@@ -96,7 +96,7 @@ class _DroppableDayAreaState extends State<DroppableDayArea> {
       ),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.add_circle_outline,
             size: 32,
             color: AppConstants.textTertiary,

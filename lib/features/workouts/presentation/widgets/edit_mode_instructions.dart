@@ -31,7 +31,7 @@ class _EditModeInstructionsState extends State<EditModeInstructions> {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.info_outline,
                 color: AppConstants.primaryColor,
                 size: 20,

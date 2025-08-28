@@ -346,16 +346,16 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         // Show appropriate message based on whether it was a fallback plan
         if (isFallbackPlan) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text(
                   'Meal plan generated using backup recipes due to high demand. All required meals are included!'),
               backgroundColor: AppConstants.warningColor ?? Colors.orange,
-              duration: const Duration(seconds: 4),
+              duration: Duration(seconds: 4),
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('Meal plan generated successfully!'),
               backgroundColor: AppConstants.successColor ?? Colors.green,
             ),
@@ -645,7 +645,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.info_outline,
                                 size: 16,
                                 color:
@@ -676,7 +676,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           padding: const EdgeInsets.all(16.0),
           child: _buildNavigationButtons(),
         ),
-        SizedBox(
+        const SizedBox(
           height: 24,
         )
       ],

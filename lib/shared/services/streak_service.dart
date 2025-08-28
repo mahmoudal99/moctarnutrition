@@ -12,7 +12,7 @@ class StreakService {
   static Future<int> getCurrentStreak(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_streakKeyPrefix}${userId}';
+      final key = '$_streakKeyPrefix$userId';
 
       final streakData = prefs.getString(key);
       if (streakData == null) return 0;
@@ -48,7 +48,7 @@ class StreakService {
   static Future<int> updateStreak(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_streakKeyPrefix}${userId}';
+      final key = '$_streakKeyPrefix$userId';
 
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -113,7 +113,7 @@ class StreakService {
   static Future<void> resetStreak(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_streakKeyPrefix}${userId}';
+      final key = '$_streakKeyPrefix$userId';
       await prefs.remove(key);
       _logger.d('Reset streak for user $userId');
     } catch (e) {
@@ -126,7 +126,7 @@ class StreakService {
     try {
       final currentStreak = await getCurrentStreak(userId);
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_streakKeyPrefix}${userId}';
+      final key = '$_streakKeyPrefix$userId';
 
       final streakData = prefs.getString(key);
       DateTime? lastCompletedDate;
@@ -155,7 +155,7 @@ class StreakService {
   static Future<int> incrementStreak(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_streakKeyPrefix}${userId}';
+      final key = '$_streakKeyPrefix$userId';
 
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);

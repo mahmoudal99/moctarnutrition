@@ -9,7 +9,6 @@ class MockDataService {
     DietPlanPreferences preferences,
     int days,
   ) {
-    print('Generating mock meal plan as fallback');
     final mealDays = List.generate(days, (index) {
       final date = DateTime.now().add(Duration(days: index));
       // Use different seed for each day to get varied meals
@@ -50,8 +49,6 @@ class MockDataService {
     int dayIndex,
     List<MealType> requiredMealTypes,
   ) {
-    print(
-        'Generating mock meal day for day $dayIndex with required meals: ${requiredMealTypes.map((t) => t.name).join(', ')}');
 
     final date = DateTime.now().add(Duration(days: dayIndex - 1));
     final daySeed = DateTime.now().millisecondsSinceEpoch + dayIndex;

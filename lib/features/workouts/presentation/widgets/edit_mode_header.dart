@@ -28,7 +28,7 @@ class EditModeHeader extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.edit,
                   color: AppConstants.primaryColor,
                   size: 20,

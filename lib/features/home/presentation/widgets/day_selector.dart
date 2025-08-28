@@ -55,8 +55,6 @@ class DaySelector extends StatelessWidget {
                   (dayConsumption!['consumedCalories'] as num) > 0;
 
           // Debug logging for each day to see what data we're getting
-          print(
-              'DaySelector - Day: ${day.toIso8601String()}, normalized: ${normalizedDay.toIso8601String()}, hasConsumptionData: $hasConsumptionData, dayConsumption: $dayConsumption, hasConsumedCalories: $hasConsumedCalories');
 
           return Expanded(
             child: GestureDetector(
@@ -196,10 +194,6 @@ class DaySelector extends StatelessWidget {
     }
 
     final normalizedDay = DateTime(day.year, day.month, day.day);
-    print(
-        'DaySelector - _calculateCalorieProgressForDay called for: ${day.toIso8601String()}, normalized: ${normalizedDay.toIso8601String()}');
-    print(
-        'DaySelector - Available keys: ${dailyConsumptionData?.keys.map((k) => '${k.year}-${k.month}-${k.day}').toList()}');
 
     final dayConsumption = dailyConsumptionData?.entries
         .firstWhere(
@@ -209,7 +203,6 @@ class DaySelector extends StatelessWidget {
         )
         .value;
 
-    print('DaySelector - Found consumption data: $dayConsumption');
 
     if (dayConsumption == null ||
         dayConsumption.containsKey('consumedCalories') == false) {
@@ -221,8 +214,6 @@ class DaySelector extends StatelessWidget {
         targetCalories! > 0 ? consumedCalories / targetCalories! : 0.0;
 
     // Debug logging to see what's happening
-    print(
-        'DaySelector - _calculateCalorieProgressForDay: ${day.toIso8601String()}, consumedCalories: $consumedCalories, targetCalories: $targetCalories, progress: $progress');
 
     return progress;
   }

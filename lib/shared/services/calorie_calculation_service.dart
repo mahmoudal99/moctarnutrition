@@ -128,9 +128,9 @@ class CalorieCalculationService {
     final proteinCalories = proteinGrams * 4; // 4 kcal per gram
 
     // Calculate fat (minimum 20% of calories, maximum 35%)
-    final minFatPercentage = 0.20;
-    final maxFatPercentage = 0.35;
-    final targetFatPercentage = 0.25; // Default to 25% (middle of range)
+    const minFatPercentage = 0.20;
+    const maxFatPercentage = 0.35;
+    const targetFatPercentage = 0.25; // Default to 25% (middle of range)
 
     final minFatCalories = dailyCalories * minFatPercentage;
     final maxFatCalories = dailyCalories * maxFatPercentage;
@@ -151,9 +151,10 @@ class CalorieCalculationService {
     final carbCalories = carbGrams * 4;
 
     // Ensure minimum carb intake (130g for brain function)
-    final minCarbGrams = 130.0;
+    const minCarbGrams = 130.0;
     if (carbGrams < minCarbGrams) {
       // Adjust fat down to accommodate minimum carbs
+      // ignore: prefer_const_declarations
       final adjustedCarbGrams = minCarbGrams;
       final adjustedCarbCalories = adjustedCarbGrams * 4;
       final adjustedFatCalories =

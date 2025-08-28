@@ -39,7 +39,7 @@ class CheckinHistoryList extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: onLoadMore,
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppConstants.primaryColor),
+                  side: const BorderSide(color: AppConstants.primaryColor),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -125,7 +125,7 @@ class _CheckinHistoryItem extends StatelessWidget {
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: AppConstants.textTertiary.withOpacity(0.1),
-                        child: Icon(
+                        child: const Icon(
                           Icons.camera_alt_outlined,
                           color: AppConstants.textTertiary,
                           size: 24,
@@ -133,7 +133,7 @@ class _CheckinHistoryItem extends StatelessWidget {
                       ),
                       errorWidget: (context, url, error) => Container(
                         color: AppConstants.textTertiary.withOpacity(0.1),
-                        child: Icon(
+                        child: const Icon(
                           Icons.error_outline,
                           color: AppConstants.errorColor,
                           size: 24,
@@ -143,7 +143,7 @@ class _CheckinHistoryItem extends StatelessWidget {
                   }
                   return Container(
                     color: AppConstants.textTertiary.withOpacity(0.1),
-                    child: Icon(
+                    child: const Icon(
                       Icons.camera_alt_outlined,
                       color: AppConstants.textTertiary,
                       size: 24,
@@ -160,7 +160,7 @@ class _CheckinHistoryItem extends StatelessWidget {
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
                   color: AppConstants.textTertiary.withOpacity(0.1),
-                  child: Icon(
+                  child: const Icon(
                     Icons.camera_alt_outlined,
                     color: AppConstants.textTertiary,
                     size: 24,
@@ -168,7 +168,7 @@ class _CheckinHistoryItem extends StatelessWidget {
                 ),
                 errorWidget: (context, url, error) => Container(
                   color: AppConstants.textTertiary.withOpacity(0.1),
-                  child: Icon(
+                  child: const Icon(
                     Icons.error_outline,
                     color: AppConstants.errorColor,
                     size: 24,
@@ -180,7 +180,7 @@ class _CheckinHistoryItem extends StatelessWidget {
             // Last resort: No photo available
             return Container(
               color: AppConstants.textTertiary.withOpacity(0.1),
-              child: Icon(
+              child: const Icon(
                 Icons.camera_alt_outlined,
                 color: AppConstants.textTertiary,
                 size: 24,
@@ -237,7 +237,7 @@ class _CheckinHistoryItem extends StatelessWidget {
         ],
         Row(
           children: [
-            Icon(
+            const Icon(
               Icons.schedule,
               size: 14,
               color: AppConstants.textTertiary,
@@ -251,7 +251,7 @@ class _CheckinHistoryItem extends StatelessWidget {
             ),
             if (checkin.energyLevel != null) ...[
               const SizedBox(width: 16),
-              Icon(
+              const Icon(
                 Icons.flash_on,
                 size: 14,
                 color: AppConstants.textTertiary,

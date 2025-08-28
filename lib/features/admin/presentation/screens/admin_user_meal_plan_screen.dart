@@ -598,11 +598,11 @@ class AdminUserMealPlanScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Row(
+          title: const Row(
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.orange),
-              const SizedBox(width: 8),
-              const Text('Delete Meal Plan'),
+              SizedBox(width: 8),
+              Text('Delete Meal Plan'),
             ],
           ),
           content: Column(
@@ -619,10 +619,10 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
                     Icon(Icons.bug_report, size: 16, color: Colors.orange),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Text(
                       'DEBUG ACTION',
                       style: TextStyle(

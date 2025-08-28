@@ -10,10 +10,10 @@ class AdminCreateMealPlanCard extends StatelessWidget {
   final VoidCallback? onMealPlanCreated;
 
   const AdminCreateMealPlanCard({
-    Key? key,
+    super.key,
     required this.user,
     this.onMealPlanCreated,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

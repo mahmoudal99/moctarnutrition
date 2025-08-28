@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import '../models/workout_plan_model.dart';
-import '../models/user_model.dart';
 
 class WorkoutPlanStorageService {
   static final _logger = Logger();

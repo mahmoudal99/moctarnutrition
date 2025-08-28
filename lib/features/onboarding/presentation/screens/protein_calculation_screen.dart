@@ -92,7 +92,6 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
     try {
       await Future.any([calculationFuture, calculationTimeout]);
     } catch (e) {
-      print('Calculation timeout or error: $e');
       if (mounted) {
         setState(() {
           _isCalculating = false;
@@ -104,7 +103,6 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
 
   Future<void> _performCalculations() async {
     try {
-      print('Starting protein calculation with onboarding data...');
 
       // Get onboarding data from the onboarding service
       final onboardingData = await _getOnboardingData();
@@ -112,13 +110,9 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
       if (onboardingData != null) {
         final proteinTargets =
             ProteinCalculationService.calculateProteinTargets(onboardingData);
-        print('Protein calculation completed: ${proteinTargets.dailyTarget}g');
 
-        print('Starting calorie calculation...');
         final calorieTargets =
             CalorieCalculationService.calculateCalorieTargets(onboardingData);
-        print(
-            'Calorie calculation completed: ${calorieTargets.dailyTarget} calories');
 
         // Store the calculated targets for later use when user signs up
         await _storeCalculatedTargets(proteinTargets, calorieTargets);
@@ -129,7 +123,6 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
             _calorieTargets = calorieTargets;
             _isCalculating = false;
           });
-          print('State updated: _isCalculating = false');
 
           // Show results after a brief pause
           await Future.delayed(const Duration(milliseconds: 500));
@@ -137,11 +130,9 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
             setState(() {
               _showResults = true;
             });
-            print('Results shown: _showResults = true');
           }
         }
       } else {
-        print('No onboarding data available');
         if (mounted) {
           setState(() {
             _isCalculating = false;
@@ -150,8 +141,6 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
         }
       }
     } catch (e, stackTrace) {
-      print('Error during calculation: $e');
-      print('Stack trace: $stackTrace');
 
       // Even if there's an error, we should still show something
       if (mounted) {
@@ -170,22 +159,11 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
       final user = await userLocalStorageService.loadUser();
 
       if (user != null) {
-        print('Found onboarding user data:');
-        print('  Fitness Goal: ${user.preferences.fitnessGoal}');
-        print('  Weight: ${user.preferences.weight}kg');
-        print('  Height: ${user.preferences.height}cm');
-        print('  Age: ${user.preferences.age}');
-        print('  Gender: ${user.preferences.gender}');
-        print(
-            '  Dietary Restrictions: ${user.preferences.dietaryRestrictions}');
-        print('  Workout Styles: ${user.preferences.preferredWorkoutStyles}');
         return user;
       } else {
-        print('No onboarding user data found');
         return null;
       }
     } catch (e) {
-      print('Error getting onboarding data: $e');
       return null;
     }
   }
@@ -198,7 +176,6 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
         'temp_protein_targets', jsonEncode(proteinTargets.toJson()));
     await prefs.setString(
         'temp_calorie_targets', jsonEncode(calorieTargets.toJson()));
-    print('Calculated targets stored for later use');
   }
 
   @override

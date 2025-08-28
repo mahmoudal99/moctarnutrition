@@ -145,7 +145,7 @@ class ProteinCalculationService {
     // Use goal weight or LBM if overweight
     if (bodyFatPercentage > 25) {
       // Estimate goal weight (assuming 15% body fat for men, 25% for women)
-      final targetBodyFat = 20.0; // Average target
+      const targetBodyFat = 20.0; // Average target
       final goalWeight = leanBodyMass / (1 - targetBodyFat / 100);
       proteinPerKg = isVegan ? 2.5 : 2.2;
       weightBase = 'goal weight';

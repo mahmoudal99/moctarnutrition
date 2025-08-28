@@ -73,7 +73,6 @@ class CheckinService {
     DocumentSnapshot? lastDocument,
   }) async {
     try {
-      print('Getting check-ins for user: $userId');
 
       Query query = _checkinsCollection
           .where('userId', isEqualTo: userId)
@@ -85,12 +84,9 @@ class CheckinService {
       }
 
       final querySnapshot = await query.get();
-      print('Query returned ${querySnapshot.docs.length} documents');
 
       final checkins = querySnapshot.docs.map((doc) {
-        print('Processing document: ${doc.id}');
         final rawData = doc.data();
-        print('Raw data: $rawData');
 
         final data = rawData != null
             ? Map<String, dynamic>.from(rawData as Map<String, dynamic>)
@@ -99,19 +95,14 @@ class CheckinService {
 
         try {
           final checkin = CheckinModel.fromJson(data);
-          print('Successfully created checkin: ${checkin.id}');
           return checkin;
         } catch (e) {
-          print('Error creating checkin from data: $e');
-          print('Data: $data');
           rethrow;
         }
       }).toList();
 
-      print('Returning ${checkins.length} check-ins');
       return checkins;
     } catch (e) {
-      print('Error in getUserCheckins: $e');
       _logger.e('Error getting user check-ins: $e');
       rethrow;
     }
