@@ -27,7 +27,6 @@ class MealCard extends StatefulWidget {
 }
 
 class _MealCardState extends State<MealCard> {
-  final Logger _logger = Logger();
 
   @override
   Widget build(BuildContext context) {
@@ -38,127 +37,122 @@ class _MealCardState extends State<MealCard> {
             _navigateToMealDetail(context);
           },
       borderRadius: BorderRadius.circular(AppConstants.radiusS),
-      child: Container(
-        margin: const EdgeInsets.all(AppConstants.spacingS),
-        padding: const EdgeInsets.all(AppConstants.spacingS),
-        decoration: BoxDecoration(
-          color: widget.meal.isConsumed
-              ? AppConstants.primaryColor.withOpacity(0.05)
-              : AppConstants.backgroundColor,
-          borderRadius: BorderRadius.circular(AppConstants.radiusS),
-          border: Border.all(
-            color: widget.meal.isConsumed
-                ? AppConstants.primaryColor.withOpacity(0.3)
-                : AppConstants.textTertiary.withOpacity(0.2),
-            width: widget.meal.isConsumed ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const SizedBox(width: AppConstants.spacingS),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      child: Card(
+        elevation: 8,
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.spacingS),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const SizedBox(width: AppConstants.spacingS),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.meal.name,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                            decoration: widget.meal.isConsumed
+                                ? TextDecoration.lineThrough
+                                : null,
+                            color: widget.meal.isConsumed
+                                ? AppConstants.textSecondary
+                                : AppConstants.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: AppConstants.spacingS,
+                        ),
+                        Text(
+                          widget.meal.description,
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppConstants.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        widget.meal.name,
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        '${widget.meal.nutrition.calories} cal',
+                        style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w600,
-                          decoration: widget.meal.isConsumed
-                              ? TextDecoration.lineThrough
-                              : null,
                           color: widget.meal.isConsumed
-                              ? AppConstants.textSecondary
-                              : AppConstants.textPrimary,
+                              ? AppConstants.primaryColor
+                              : AppConstants.accentColor,
                         ),
                       ),
-                      Text(
-                        widget.meal.description,
-                        style: AppTextStyles.caption.copyWith(
+                      if (widget.meal.isConsumed)
+                        Text(
+                          '✓ Consumed',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppConstants.primaryColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingS),
+              Row(
+                children: [
+                  const SizedBox(width: AppConstants.spacingS),
+                  _buildNutritionChip('P',
+                      '${widget.meal.nutrition.protein.toStringAsFixed(0)}g'),
+                  const SizedBox(width: AppConstants.spacingS),
+                  _buildNutritionChip('C',
+                      '${widget.meal.nutrition.carbs.toStringAsFixed(0)}g'),
+                  const SizedBox(width: AppConstants.spacingS),
+                  _buildNutritionChip(
+                      'F', '${widget.meal.nutrition.fat.toStringAsFixed(0)}g'),
+                  const Spacer(),
+                  // Mark as Consumed Button - Removed, now handled at section level
+                  const SizedBox(width: AppConstants.spacingS),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppConstants.textSecondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppConstants.textSecondary.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.visibility,
+                          size: 12,
                           color: AppConstants.textSecondary,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '${widget.meal.nutrition.calories} cal',
-                      style: AppTextStyles.caption.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: widget.meal.isConsumed
-                            ? AppConstants.primaryColor
-                            : AppConstants.accentColor,
-                      ),
-                    ),
-                    if (widget.meal.isConsumed)
-                      Text(
-                        '✓ Consumed',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppConstants.primaryColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 10,
+                        const SizedBox(width: 4),
+                        Text(
+                          'View',
+                          style: AppTextStyles.caption.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
+                            color: AppConstants.textSecondary,
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: AppConstants.spacingS),
-            Row(
-              children: [
-                _buildNutritionChip('P',
-                    '${widget.meal.nutrition.protein.toStringAsFixed(0)}g'),
-                const SizedBox(width: AppConstants.spacingS),
-                _buildNutritionChip(
-                    'C', '${widget.meal.nutrition.carbs.toStringAsFixed(0)}g'),
-                const SizedBox(width: AppConstants.spacingS),
-                _buildNutritionChip(
-                    'F', '${widget.meal.nutrition.fat.toStringAsFixed(0)}g'),
-                const Spacer(),
-                // Mark as Consumed Button - Removed, now handled at section level
-                const SizedBox(width: AppConstants.spacingS),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppConstants.primaryColor.withOpacity(0.3),
-                      width: 1,
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.visibility,
-                        size: 12,
-                        color: AppConstants.primaryColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'View Recipe',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppConstants.primaryColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

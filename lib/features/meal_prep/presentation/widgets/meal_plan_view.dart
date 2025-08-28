@@ -196,7 +196,7 @@ class _MealPlanViewState extends State<MealPlanView>
                       opacity: _nutritionOpacityAnimation.value,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: AppConstants.spacingL,
+                            horizontal: AppConstants.spacingS,
                             vertical: AppConstants.spacingS),
                         child: NutritionSummaryCard(
                           mealDay: widget.mealPlan.mealDays[_currentDayIndex],
@@ -503,18 +503,10 @@ class _MealPlanViewState extends State<MealPlanView>
       ),
       child: Row(
         children: [
-          SvgPicture.asset(
-            "assets/images/${_getMealTypeIcon(mealType)}",
-            colorFilter:
-                ColorFilter.mode(_getMealTypeColor(mealType), BlendMode.srcIn),
-            height: 20,
-          ),
-          const SizedBox(width: AppConstants.spacingS),
           Text(
             _getMealTypeTitle(mealType),
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.heading5.copyWith(
               fontWeight: FontWeight.w600,
-              color: AppConstants.textPrimary,
             ),
           ),
           const Spacer(),

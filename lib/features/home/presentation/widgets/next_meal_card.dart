@@ -113,83 +113,6 @@ class NextMealCard extends StatelessWidget {
     }
   }
 
-  String _getMealTimingText(MealType type) {
-    switch (type) {
-      case MealType.breakfast:
-        return '6:00 AM - 10:00 AM';
-      case MealType.lunch:
-        return '12:00 PM - 2:00 PM';
-      case MealType.dinner:
-        return '6:00 PM - 8:00 PM';
-      case MealType.snack:
-        return '3:00 PM - 4:00 PM';
-    }
-  }
-
-  String _getTimeUntilNextMeal(MealType type) {
-    final now = DateTime.now();
-    final currentTime = now.hour * 60 + now.minute;
-
-    int targetTime;
-    switch (type) {
-      case MealType.breakfast:
-        targetTime = 6 * 60; // 6:00 AM
-        break;
-      case MealType.lunch:
-        targetTime = 12 * 60; // 12:00 PM
-        break;
-      case MealType.dinner:
-        targetTime = 18 * 60; // 6:00 PM
-        break;
-      case MealType.snack:
-        targetTime = 15 * 60; // 3:00 PM
-        break;
-    }
-
-    // If the target time has passed today, calculate for tomorrow
-    if (currentTime >= targetTime) {
-      targetTime += 24 * 60; // Add 24 hours
-    }
-
-    final minutesUntil = targetTime - currentTime;
-    final hours = minutesUntil ~/ 60;
-    final minutes = minutesUntil % 60;
-
-    if (hours > 0) {
-      return 'in ${hours}h ${minutes}m';
-    } else {
-      return 'in ${minutes}m';
-    }
-  }
-
-  String _getMealContextText(MealType type) {
-    final now = DateTime.now();
-    final currentTime = now.hour * 60 + now.minute;
-
-    int targetTime;
-    switch (type) {
-      case MealType.breakfast:
-        targetTime = 6 * 60; // 6:00 AM
-        break;
-      case MealType.lunch:
-        targetTime = 12 * 60; // 12:00 PM
-        break;
-      case MealType.dinner:
-        targetTime = 18 * 60; // 6:00 PM
-        break;
-      case MealType.snack:
-        targetTime = 15 * 60; // 3:00 PM
-        break;
-    }
-
-    // If the target time has passed today, this is for tomorrow
-    if (currentTime >= targetTime) {
-      return 'Tomorrow';
-    } else {
-      return 'Today';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final nextMeal = _getNextMeal();
@@ -245,7 +168,7 @@ class NextMealCard extends StatelessWidget {
         const SizedBox(height: AppConstants.spacingM),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(24),
+          padding:  EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: AppConstants.spacingM),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -260,26 +183,6 @@ class NextMealCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppConstants.textSecondary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      _getMealTypeText(nextMeal.type),
-                      style: AppTextStyles.caption.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppConstants.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
               Text(
                 nextMeal.name,
                 style: AppTextStyles.heading5.copyWith(
@@ -301,7 +204,25 @@ class NextMealCard extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  // Calories
+                  Container(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppConstants.textSecondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _getMealTypeText(nextMeal.type),
+                      style: AppTextStyles.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: AppConstants.spacingS,
+                  ),
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -313,48 +234,9 @@ class NextMealCard extends StatelessWidget {
                       '${nextMeal.nutrition.calories.round()} cal',
                       style: AppTextStyles.caption.copyWith(
                         fontWeight: FontWeight.w600,
+                        fontSize: 10,
                         color: AppConstants.primaryColor,
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Prep time
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppConstants.warningColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.timer_outlined,
-                          size: 14,
-                          color: AppConstants.warningColor,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${nextMeal.prepTime + nextMeal.cookTime} min',
-                          style: AppTextStyles.caption.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppConstants.warningColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  // Meal status indicator
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: nextMeal.isConsumed
-                          ? AppConstants.successColor
-                          : AppConstants.primaryColor,
-                      shape: BoxShape.circle,
                     ),
                   ),
                 ],
