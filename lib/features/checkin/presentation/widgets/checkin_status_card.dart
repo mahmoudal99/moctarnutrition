@@ -207,23 +207,19 @@ class CheckinStatusCard extends StatelessWidget {
         ? 'Check-in today'
         : 'Next check-in: ${daysUntilSunday}d';
     if (!isSunday) {
-      return Positioned(
-        bottom: 0,
-        left: 0,
-        right: 0,
-        child: Container(
-          height: 40, // Fixed height for the grey section
-          decoration: BoxDecoration(
-            color: AppConstants.borderColor.withOpacity(0.3),
-            borderRadius:
-                const BorderRadius.all(Radius.circular(AppConstants.radiusL)),
-          ),
-          child: Center(
-            child: Text(
-              nextCheckinText,
-              style: AppTextStyles.body2.copyWith(
-                color: Colors.white,
-              ),
+      return Container(
+        width: double.infinity,
+        height: 40, // Fixed height for the grey section
+        decoration: BoxDecoration(
+          color: AppConstants.borderColor.withOpacity(0.3),
+          borderRadius:
+              const BorderRadius.all(Radius.circular(AppConstants.radiusL)),
+        ),
+        child: Center(
+          child: Text(
+            nextCheckinText,
+            style: AppTextStyles.body2.copyWith(
+              color: Colors.white,
             ),
           ),
         ),

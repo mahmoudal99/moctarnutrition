@@ -132,7 +132,7 @@ class _MealCardState extends State<MealCard> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.visibility,
                           size: 12,
                           color: AppConstants.textSecondary,
