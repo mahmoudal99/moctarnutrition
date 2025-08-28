@@ -60,28 +60,6 @@ class DailyWorkoutCard extends StatelessWidget {
                                       : AppConstants.textPrimary,
                                 ),
                               ),
-                              if (isToday) ...[
-                                const SizedBox(width: AppConstants.spacingS),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppConstants.spacingS,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppConstants.primaryColor,
-                                    borderRadius: BorderRadius.circular(
-                                        AppConstants.radiusXS),
-                                  ),
-                                  child: Text(
-                                    'TODAY',
-                                    style: AppTextStyles.caption.copyWith(
-                                      color: AppConstants.surfaceColor,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ],
                           ),
                           const SizedBox(height: AppConstants.spacingXS),
@@ -94,11 +72,6 @@ class DailyWorkoutCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: AppConstants.textTertiary,
-                      size: 20,
                     ),
                   ],
                 ),

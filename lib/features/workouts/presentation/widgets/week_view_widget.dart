@@ -52,7 +52,9 @@ class WeekViewWidget extends StatelessWidget {
                               !workoutProvider.isEditMode) ...[
                             Text(
                               "Today's Workout",
-                              style: AppTextStyles.heading4,
+                              style: AppTextStyles.heading5.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const SizedBox(height: AppConstants.spacingM),
                             DailyWorkoutCard(
@@ -64,7 +66,9 @@ class WeekViewWidget extends StatelessWidget {
                           if (!workoutProvider.isEditMode) ...[
                             Text(
                               'Weekly Plan',
-                              style: AppTextStyles.heading4,
+                              style: AppTextStyles.heading5.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ],

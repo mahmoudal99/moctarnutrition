@@ -168,7 +168,9 @@ class NextMealCard extends StatelessWidget {
         const SizedBox(height: AppConstants.spacingM),
         Container(
           width: double.infinity,
-          padding:  EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: AppConstants.spacingM),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingM,
+              vertical: AppConstants.spacingM),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -185,7 +187,7 @@ class NextMealCard extends StatelessWidget {
             children: [
               Text(
                 nextMeal.name,
-                style: AppTextStyles.heading5.copyWith(
+                style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
                 maxLines: 2,
@@ -206,7 +208,7 @@ class NextMealCard extends StatelessWidget {
                 children: [
                   Container(
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppConstants.textSecondary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
