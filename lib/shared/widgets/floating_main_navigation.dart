@@ -75,7 +75,6 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
       builder: (context, authProvider, child) {
         final user = authProvider.userModel;
         final items = _buildNavItems(user);
-        // Find the current index based on the current route
         final location =
             GoRouter.of(context).routeInformationProvider.value.uri.toString();
         final idx = items.indexWhere((item) => location == item.route);
