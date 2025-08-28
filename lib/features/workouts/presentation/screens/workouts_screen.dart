@@ -1,5 +1,6 @@
 import 'package:champions_gym_app/features/workouts/presentation/widgets/view_toggle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -109,8 +110,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
               ],
             ),
           ),
-          // Floating toggle (only show when not in edit mode)
-          if (!workoutProvider.isEditMode)
+          // Floating toggle (only show when not in edit mode and in week view)
+          if (!workoutProvider.isEditMode && _selectedView == WorkoutViewType.week)
             FloatingToggleWidget(
               selectedView: _selectedView,
               onViewChanged: _onViewChanged,
@@ -123,6 +124,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
   }
 
   void _onViewChanged(WorkoutViewType viewType) {
+    HapticFeedback.lightImpact();
     setState(() {
       _selectedView = viewType;
     });

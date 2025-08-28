@@ -88,27 +88,18 @@ class DayViewWidget extends StatelessWidget {
   Widget _buildWorkoutState() {
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, child) {
-        return CustomScrollView(
-          controller: scrollController,
-          slivers: [
-            if (!workoutProvider.isEditMode)
-              WorkoutAppHeader(
-                  message: WorkoutMessageGenerator.generateWorkoutMessage(
-                      todayWorkout)),
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  if (!workoutProvider.isEditMode) ...[
-                    ViewToggle(
-                      selectedView: selectedView,
-                      onViewChanged: onViewChanged,
-                    ),
-                    DayView(dailyWorkout: todayWorkout!),
-                  ],
-                ],
-              ),
-            ),
-          ],
+        return SafeArea(
+          child: Column(
+            children: [
+              if (!workoutProvider.isEditMode) ...[
+                ViewToggle(
+                  selectedView: selectedView,
+                  onViewChanged: onViewChanged,
+                ),
+                DayView(dailyWorkout: todayWorkout!),
+              ],
+            ],
+          ),
         );
       },
     );

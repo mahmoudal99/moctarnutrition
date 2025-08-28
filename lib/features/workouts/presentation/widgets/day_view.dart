@@ -16,7 +16,6 @@ class DayView extends StatelessWidget {
     return Column(
       children: [
         _buildDayHeader(),
-        const SizedBox(height: AppConstants.spacingL),
         if (dailyWorkout.isRestDay)
           _buildRestDayContent()
         else
@@ -39,15 +38,9 @@ class DayView extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.calendar_today,
-                color: AppConstants.primaryColor,
-                size: 20,
-              ),
-              const SizedBox(width: AppConstants.spacingS),
               Text(
                 dailyWorkout.dayName,
-                style: AppTextStyles.heading4.copyWith(
+                style: AppTextStyles.heading5.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -140,8 +133,17 @@ class DayView extends StatelessWidget {
             children: [
               _buildWorkoutHeader(workout),
               if (workout.exercises.isNotEmpty) ...[
-                const Divider(height: 1),
+                const Divider(
+                  height: 1,
+                  color: AppConstants.textTertiary,
+                ),
+                const SizedBox(
+                  height: AppConstants.spacingS,
+                ),
                 _buildExercisesList(workout),
+                const SizedBox(
+                  height: AppConstants.spacingS,
+                ),
               ],
             ],
           ),

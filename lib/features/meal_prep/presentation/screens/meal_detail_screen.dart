@@ -128,13 +128,13 @@ class _MealDetailScreenState extends State<MealDetailScreen>
             backgroundColor: AppConstants.backgroundColor,
             elevation: 0,
             leading: IconButton(
-              icon:
-                  const Icon(Icons.arrow_back, color: AppConstants.textPrimary),
+              icon: const Icon(Icons.arrow_back_ios,
+                  color: AppConstants.textPrimary),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
               currentMeal.name,
-              style: AppTextStyles.heading4.copyWith(
+              style: AppTextStyles.heading5.copyWith(
                 color: AppConstants.textPrimary,
               ),
             ),
@@ -149,13 +149,13 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildMealHeader(currentMeal),
-                    const SizedBox(height: AppConstants.spacingL),
+                    const SizedBox(height: AppConstants.spacingM),
                     _buildNutritionOverview(currentMeal),
-                    const SizedBox(height: AppConstants.spacingL),
+                    const SizedBox(height: AppConstants.spacingM),
                     _buildIngredientsSection(currentMeal),
-                    const SizedBox(height: AppConstants.spacingL),
+                    const SizedBox(height: AppConstants.spacingM),
                     _buildInstructionsSection(currentMeal),
-                    const SizedBox(height: AppConstants.spacingL),
+                    const SizedBox(height: AppConstants.spacingM),
                     _buildMealInfo(currentMeal),
                     const SizedBox(height: 128),
                   ],
@@ -279,18 +279,18 @@ class _MealDetailScreenState extends State<MealDetailScreen>
               children: [
                 Text(
                   meal.name,
-                  style: AppTextStyles.heading4.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: AppTextStyles.heading5.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: AppConstants.spacingXS),
+                const SizedBox(height: AppConstants.spacingS),
                 Text(
                   meal.description,
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: AppConstants.textSecondary,
                   ),
                 ),
-                const SizedBox(height: AppConstants.spacingXS),
+                const SizedBox(height: AppConstants.spacingS),
                 Row(
                   children: [
                     const Icon(
@@ -320,7 +320,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
       animation: _nutritionAnimationController,
       builder: (context, child) {
         return Transform.scale(
-          scale: 1.0 - (_nutritionScaleAnimation.value * 0.1),
+          scale: 1.0,
           child: Opacity(
             opacity: _nutritionOpacityAnimation.value,
             child: Column(
@@ -328,8 +328,8 @@ class _MealDetailScreenState extends State<MealDetailScreen>
               children: [
                 Text(
                   'Nutrition Overview',
-                  style: AppTextStyles.heading4.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: AppTextStyles.heading5.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingM),
@@ -466,7 +466,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
       children: [
         Text(
           'Ingredients',
-          style: AppTextStyles.heading4.copyWith(
+          style: AppTextStyles.heading5.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -589,7 +589,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
       children: [
         Text(
           'Instructions',
-          style: AppTextStyles.heading4.copyWith(
+          style: AppTextStyles.heading5.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -633,7 +633,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                     Expanded(
                       child: Text(
                         instruction,
-                        style: AppTextStyles.bodyMedium,
+                        style: AppTextStyles.bodySmall,
                       ),
                     ),
                   ],
@@ -661,7 +661,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
         children: [
           Text(
             'Meal Information',
-            style: AppTextStyles.heading4.copyWith(
+            style: AppTextStyles.heading5.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -694,10 +694,13 @@ class _MealDetailScreenState extends State<MealDetailScreen>
               fontWeight: FontWeight.w500,
             ),
           ),
+          const SizedBox(
+            width: AppConstants.spacingS,
+          ),
           Expanded(
             child: Text(
               value,
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: AppTextStyles.bodySmall.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),

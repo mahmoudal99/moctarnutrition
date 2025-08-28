@@ -27,7 +27,6 @@ class MealCard extends StatefulWidget {
 }
 
 class _MealCardState extends State<MealCard> {
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
