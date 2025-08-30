@@ -10,6 +10,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../widgets/meal_plan_view.dart';
 import '../widgets/waiting_for_meal_plan.dart';
 import '../widgets/meal_plan_loading_state.dart';
+import '../../../food_search/presentation/screens/food_search_screen.dart';
 
 class MealPrepScreen extends StatefulWidget {
   const MealPrepScreen({super.key});
@@ -178,6 +179,20 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
           return Scaffold(
             appBar: AppBar(
               title: const Text('Meal Plan'),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FoodSearchScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.search),
+                  tooltip: 'Search & Add Foods',
+                ),
+              ],
             ),
             body: RefreshIndicator(
               onRefresh: _refreshMealPlan,

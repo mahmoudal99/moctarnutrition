@@ -77,6 +77,9 @@ dependencies:
   http: ^1.1.2
   dio: ^5.4.0
   
+  # Food & Nutrition
+  openfoodfacts: ^3.24.0
+  
   # Logging
   logger: ^2.0.2+1
   

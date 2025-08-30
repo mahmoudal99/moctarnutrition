@@ -70,8 +70,9 @@ class DailyConsumptionService {
     String userId,
     DateTime date,
     String mealId,
-    bool isConsumed,
-  ) async {
+    bool isConsumed, {
+    NutritionInfo? nutritionInfo, // Add optional nutrition info for new meals
+  }) async {
     try {
       // Load existing consumption data
       final existingData = await loadDailyConsumption(userId, date);
@@ -95,9 +96,17 @@ class DailyConsumptionService {
           mealId.split('_').first; // Remove date suffix if present
       mealConsumption[originalMealId] = isConsumed;
 
-      // Recalculate nutrition data based on current meal consumption
-      nutritionData =
-          await _recalculateNutritionData(userId, date, mealConsumption);
+      // If we have nutrition info for a new meal, add it directly
+      if (nutritionInfo != null && isConsumed) {
+        nutritionData['consumedCalories'] = (nutritionData['consumedCalories'] ?? 0.0) + nutritionInfo.calories;
+        nutritionData['consumedProtein'] = (nutritionData['consumedProtein'] ?? 0.0) + nutritionInfo.protein;
+        nutritionData['consumedCarbs'] = (nutritionData['consumedCarbs'] ?? 0.0) + nutritionInfo.carbs;
+        nutritionData['consumedFat'] = (nutritionData['consumedFat'] ?? 0.0) + nutritionInfo.fat;
+      } else {
+        // Recalculate nutrition data based on current meal consumption
+        nutritionData =
+            await _recalculateNutritionData(userId, date, mealConsumption);
+      }
 
       // Save updated data
       await saveDailyConsumption(userId, date, mealConsumption, nutritionData);
@@ -163,8 +172,9 @@ class DailyConsumptionService {
   /// Get user's meal plan (placeholder - implement based on your structure)
   static Future<dynamic> _getUserMealPlan(String userId) async {
     try {
-      // Import and implement based on your meal plan service
-      // For now, return null to use fallback approach
+      // Import the meal plan provider to get the current meal plan
+      // Since this is a static method, we'll need to access it through the provider
+      // For now, we'll use a different approach by getting the meal plan from storage
       return null;
     } catch (e) {
       _logger.w('Could not load meal plan for user $userId: $e');

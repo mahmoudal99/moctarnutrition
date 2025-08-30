@@ -150,9 +150,6 @@ class _MealPlanViewState extends State<MealPlanView>
 
           // Trigger rebuild
           setState(() {});
-
-          print(
-              'MealPlanView - Applied consumption data for ${widget.selectedDate!.toIso8601String()}: $mealConsumption');
         }
       }
     } catch (e) {
@@ -234,7 +231,7 @@ class _MealPlanViewState extends State<MealPlanView>
               ),
 
               // Add bottom padding for scroll space
-              const SizedBox(height: 100),
+              const SizedBox(height: 128),
             ],
           ),
         ),

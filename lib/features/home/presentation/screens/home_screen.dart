@@ -13,6 +13,7 @@ import '../widgets/day_selector.dart';
 import '../widgets/calorie_summary_card.dart';
 import '../widgets/nutrition_goals_card.dart';
 import '../widgets/next_meal_card.dart';
+import '../../../food_search/presentation/screens/food_search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -545,6 +546,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(width: 10), // Space between streak and search icon
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FoodSearchScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.search, color: Colors.black),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
           ],
         ),
