@@ -344,14 +344,6 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
 
       if (mounted) {
         Navigator.of(context).pop(true); // Return true to indicate success
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                '${widget.food.name} added to ${_selectedMealType.name} and logged as consumed!'),
-            backgroundColor: AppConstants.primaryColor,
-            duration: const Duration(seconds: 3),
-          ),
-        );
       }
     } catch (e) {
       if (mounted) {
