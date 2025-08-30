@@ -343,7 +343,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
       // Since this is a dialog, we'll just close it and let the parent screen refresh
 
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true); // Return true to indicate success
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

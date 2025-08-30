@@ -15,105 +15,105 @@ class DailyWorkoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
-      elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-      ),
-      color: isToday
-          ? AppConstants.primaryColor.withOpacity(0.10)
-          : AppConstants.surfaceColor,
-      child: InkWell(
-        onTap: () {
-          _showWorkoutDetails(context);
-        },
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        child: Container(
-          padding: const EdgeInsets.all(AppConstants.spacingM),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          dailyWorkout.dayName,
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+            color:
+                isToday ? AppConstants.primaryColor : AppConstants.textPrimary,
+          ),
+        ),
+        const SizedBox(height: AppConstants.spacingM),
+        Card(
+          margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.radiusM),
+          ),
+          color: isToday
+              ? AppConstants.primaryColor.withOpacity(0.10)
+              : AppConstants.surfaceColor,
+          child: InkWell(
+            onTap: () {
+              _showWorkoutDetails(context);
+            },
+            borderRadius: BorderRadius.circular(AppConstants.radiusM),
+            child: Container(
+              padding: const EdgeInsets.all(AppConstants.spacingM),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              dailyWorkout.dayName,
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: isToday
-                                    ? AppConstants.primaryColor
-                                    : AppConstants.textPrimary,
+                              dailyWorkout.title,
+                              style: AppTextStyles.heading5.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: AppConstants.textPrimary,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppConstants.spacingXS),
-                        Text(
-                          dailyWorkout.title,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: AppConstants.textPrimary,
-                          ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 0),
+                  if (dailyWorkout.isRestDay) ...[
+                    Text(
+                      dailyWorkout.restDay ?? 'Time to rest and recover!',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    Row(
+                      children: [
+                        _buildWorkoutInfo(
+                          Icons.bedtime,
+                          'Rest Day',
+                        ),
+                        const SizedBox(width: AppConstants.spacingM),
+                        _buildWorkoutInfo(
+                          Icons.healing,
+                          'Recovery',
                         ),
                       ],
                     ),
-                  ),
+                  ] else ...[
+                    Text(
+                      dailyWorkout.description,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    Row(
+                      children: [
+                        _buildWorkoutInfo(
+                          Icons.fitness_center,
+                          '${dailyWorkout.workouts.length} workout${dailyWorkout.workouts.length != 1 ? 's' : ''}',
+                        ),
+                        const SizedBox(width: AppConstants.spacingM),
+                        _buildWorkoutInfo(
+                          Icons.timer,
+                          '${dailyWorkout.estimatedDuration} min',
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 0),
-              if (dailyWorkout.isRestDay) ...[
-                Text(
-                  dailyWorkout.restDay ?? 'Time to rest and recover!',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppConstants.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingS),
-                Row(
-                  children: [
-                    _buildWorkoutInfo(
-                      Icons.bedtime,
-                      'Rest Day',
-                    ),
-                    const SizedBox(width: AppConstants.spacingM),
-                    _buildWorkoutInfo(
-                      Icons.healing,
-                      'Recovery',
-                    ),
-                  ],
-                ),
-              ] else ...[
-                Text(
-                  dailyWorkout.description,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppConstants.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingS),
-                Row(
-                  children: [
-                    _buildWorkoutInfo(
-                      Icons.fitness_center,
-                      '${dailyWorkout.workouts.length} workout${dailyWorkout.workouts.length != 1 ? 's' : ''}',
-                    ),
-                    const SizedBox(width: AppConstants.spacingM),
-                    _buildWorkoutInfo(
-                      Icons.timer,
-                      '${dailyWorkout.estimatedDuration} min',
-                    ),
-                  ],
-                ),
-              ],
-            ],
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 

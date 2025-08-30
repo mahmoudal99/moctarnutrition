@@ -549,13 +549,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(width: 10), // Space between streak and search icon
             IconButton(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const FoodSearchScreen(),
                   ),
                 );
+                
+                // If food was added, refresh the data
+                if (result == true) {
+                  _loadCurrentDayMeals();
+                  _loadMultiDayConsumptionData();
+                }
               },
               icon: const Icon(Icons.search, color: Colors.black),
               padding: EdgeInsets.zero,

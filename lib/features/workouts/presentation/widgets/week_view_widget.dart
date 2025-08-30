@@ -59,15 +59,21 @@ class WeekViewWidget extends StatelessWidget {
                               dailyWorkout: todayWorkout!,
                               isToday: true,
                             ),
-                            const SizedBox(height: AppConstants.spacingL),
+                            const SizedBox(
+                              height: AppConstants.spacingM,
+                            ),
+                            Divider(
+                              color: AppConstants.textTertiary,
+                            )
+                            // const SizedBox(height: AppConstants.spacingL),
                           ],
                           if (!workoutProvider.isEditMode) ...[
-                            Text(
-                              'Weekly Plan',
-                              style: AppTextStyles.heading5.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            // Text(
+                            //   'Weekly Plan',
+                            //   style: AppTextStyles.heading5.copyWith(
+                            //     fontWeight: FontWeight.w600,
+                            //   ),
+                            // ),
                           ],
                         ],
                       ),

@@ -65,11 +65,16 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     }
   }
 
-  void _onFoodSelected(FoodProduct food) {
-    showDialog(
+  void _onFoodSelected(FoodProduct food) async {
+    final result = await showDialog(
       context: context,
       builder: (context) => AddFoodDialog(food: food),
     );
+    
+    // If food was added successfully, return true to the home screen
+    if (result == true) {
+      Navigator.of(context).pop(true);
+    }
   }
 
   @override
