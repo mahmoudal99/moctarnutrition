@@ -204,12 +204,9 @@ class _MealPlanViewState extends State<MealPlanView>
                   );
                 },
               ),
-
-              // Swipeable day content
               Container(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height *
-                      1, // Use 60% of screen height
+                  maxHeight: MediaQuery.of(context).size.height * 1.2,
                 ),
                 child: PageView.builder(
                   controller: _pageController,

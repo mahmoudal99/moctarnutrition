@@ -68,6 +68,7 @@ class _MealCardState extends State<MealCard> {
                         ),
                         Text(
                           widget.meal.description,
+                          maxLines: 4,
                           style: AppTextStyles.caption.copyWith(
                             color: AppConstants.textSecondary,
                           ),
