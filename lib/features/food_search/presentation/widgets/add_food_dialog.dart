@@ -338,10 +338,6 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
         nutritionInfo: adjustedNutrition, // Pass the nutrition info
       );
 
-      // Update the meal plan provider to trigger UI refresh
-      // We need to trigger a rebuild by calling setState or using a different approach
-      // Since this is a dialog, we'll just close it and let the parent screen refresh
-
       if (mounted) {
         Navigator.of(context).pop(true); // Return true to indicate success
       }
