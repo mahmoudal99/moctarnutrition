@@ -12,9 +12,6 @@ import 'config_service.dart';
 import 'cache_service.dart';
 import 'rate_limit_service.dart';
 
-// Import ValidationException from parser service
-import 'parser_service.dart' show ValidationException;
-
 class AIMealService {
   static final _logger = Logger();
 

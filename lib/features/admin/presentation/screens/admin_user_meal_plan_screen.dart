@@ -13,11 +13,11 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   final VoidCallback? onMealPlanCreated;
 
   const AdminUserMealPlanScreen({
-    Key? key,
+    super.key,
     required this.user,
     this.mealPlanId,
     this.onMealPlanCreated,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +270,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   }
 
   Widget _buildMealPlanOverviewCard(MealPlanModel mealPlan) {
-    final totalCalories = mealPlan.mealDays.fold<double>(
+    mealPlan.mealDays.fold<double>(
       0,
       (sum, day) => sum + day.totalCalories,
     );
@@ -678,7 +678,6 @@ class AdminUserMealPlanScreen extends StatelessWidget {
 
                   onMealPlanCreated?.call(); // Refresh the screen
                 } catch (e) {
-                  print('Error deleting meal plan: $e');
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

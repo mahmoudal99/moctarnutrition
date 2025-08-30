@@ -80,7 +80,7 @@ class MoodChart extends StatelessWidget {
                       Container(
                         width: 12,
                         height: 12,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppConstants.primaryColor,
                           shape: BoxShape.circle,
                         ),
@@ -96,7 +96,7 @@ class MoodChart extends StatelessWidget {
                       Container(
                         width: 12,
                         height: 12,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppConstants.accentColor,
                           shape: BoxShape.circle,
                         ),

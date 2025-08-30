@@ -141,21 +141,21 @@ class _BugReportScreenState extends State<BugReportScreen> {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedCategory,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           items: _categories.map((String category) {
             return DropdownMenuItem<String>(

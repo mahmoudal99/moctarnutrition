@@ -9,7 +9,6 @@ import '../../../../shared/services/daily_consumption_service.dart';
 import '../../../../shared/services/streak_service.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/models/user_model.dart';
-import '../../../../shared/services/progress_service.dart';
 import '../widgets/weight_tab.dart';
 import '../widgets/mood_tab.dart';
 import '../widgets/measurements_tab.dart';
@@ -253,20 +252,6 @@ class _ProgressScreenState extends State<ProgressScreen>
       );
     } catch (e) {
       return OverviewData.empty();
-    }
-  }
-
-  /// Refresh the overview data specifically
-  void _refreshOverviewData() {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final userId = authProvider.userModel?.id;
-    final userModel = authProvider.userModel;
-
-    if (userId != null) {
-      setState(() {
-        _overviewDataFuture =
-            ProgressService.getOverviewData(userId, userModel: userModel);
-      });
     }
   }
 

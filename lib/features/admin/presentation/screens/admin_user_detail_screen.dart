@@ -10,7 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AdminUserDetailScreen extends StatefulWidget {
   final UserModel user;
 
-  const AdminUserDetailScreen({Key? key, required this.user}) : super(key: key);
+  const AdminUserDetailScreen({super.key, required this.user});
 
   @override
   State<AdminUserDetailScreen> createState() => _AdminUserDetailScreenState();

@@ -14,56 +14,11 @@ class GetStartedScreen extends StatefulWidget {
 
 class _GetStartedScreenState extends State<GetStartedScreen> {
   final PageController _pageController = PageController();
-  int _currentPage = 0;
-
-  final List<FeatureCard> _features = [
-    FeatureCard(
-      title: 'Training',
-      description: 'Access personalized workout plans and track your progress',
-      icon: "weights.png",
-      color: const Color(0xFF2196F3),
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF2196F3), Color(0xFF42A5F5)],
-      ),
-    ),
-    FeatureCard(
-      title: 'Meal Prepping',
-      description:
-          'Plan and prepare your meals for optimal nutrition and convenience',
-      icon: "calendar.png",
-      color: const Color(0xFF4CAF50),
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-      ),
-    ),
-    FeatureCard(
-      title: 'Fitness',
-      description:
-          'Monitor your overall fitness journey and achieve your goals',
-      icon: "treadmill.png",
-      color: const Color(0xFFFF9800),
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFFFF9800), Color(0xFFFFB74D)],
-      ),
-    ),
-  ];
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  void _onPageChanged(int page) {
-    setState(() {
-      _currentPage = page;
-    });
   }
 
   @override

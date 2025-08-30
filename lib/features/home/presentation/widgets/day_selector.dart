@@ -32,15 +32,10 @@ class DaySelector extends StatelessWidget {
           final isToday = _isSameDay(day, DateTime.now());
           final isPast =
               day.isBefore(DateTime.now().subtract(const Duration(days: 1)));
-          final isFuture =
-              day.isAfter(DateTime.now().add(const Duration(days: 1)));
+          day.isAfter(DateTime.now().add(const Duration(days: 1)));
 
           // Check if this day has consumption data
           final normalizedDay = DateTime(day.year, day.month, day.day);
-          final hasConsumptionData = dailyConsumptionData?.keys.any((key) =>
-                  DateTime(key.year, key.month, key.day)
-                      .isAtSameMomentAs(normalizedDay)) ==
-              true;
           final dayConsumption = dailyConsumptionData?.entries
               .firstWhere(
                 (entry) =>

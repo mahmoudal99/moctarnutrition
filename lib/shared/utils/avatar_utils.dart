@@ -73,7 +73,7 @@ class AvatarUtils {
     } else {
       final initials = getInitials(name, email);
       final backgroundColor = getAvatarBackgroundColor(name, email);
-      final textColor = Colors.white;
+      const textColor = Colors.white;
 
       return CircleAvatar(
         radius: radius,

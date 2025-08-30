@@ -17,7 +17,7 @@ class WorkoutMessageGenerator {
       final workout = todayWorkout.workouts.first;
       return _getCategorySpecificMessage(workout.category);
     } else if (workoutCount > 1) {
-      return 'Ready for your ${workoutCount}-workout session?';
+      return 'Ready for your $workoutCount-workout session?';
     } else {
       return 'Ready for your workout?';
     }

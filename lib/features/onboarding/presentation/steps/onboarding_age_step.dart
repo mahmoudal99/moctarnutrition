@@ -137,7 +137,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.cake,
                 color: AppConstants.primaryColor,
                 size: 24,

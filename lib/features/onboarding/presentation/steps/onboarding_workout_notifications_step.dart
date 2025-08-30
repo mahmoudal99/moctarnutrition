@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../shared/services/notification_service.dart';
 import '../../../../shared/widgets/custom_button.dart';
 
 class OnboardingWorkoutNotificationsStep extends StatefulWidget {
@@ -224,52 +221,7 @@ class _OnboardingWorkoutNotificationsStepState
     }
   }
 
-  Future<void> _handleEnableNotifications() async {
-    HapticFeedback.lightImpact();
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final permissionResult =
-          await NotificationService.requestNotificationPermission();
-
-      if (permissionResult.isGranted) {
-        setState(() {
-          _notificationsEnabled = true;
-        });
-        widget.onNotificationsChanged(true);
-
-        // Show a test notification to confirm it's working
-        await NotificationService.showTestNotification();
-      } else {
-        // Keep notifications disabled if permission denied
-        setState(() {
-          _notificationsEnabled = false;
-        });
-        widget.onNotificationsChanged(false);
-      }
-    } catch (e) {
-      // Handle error - keep notifications disabled
-      setState(() {
-        _notificationsEnabled = false;
-      });
-      widget.onNotificationsChanged(false);
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _handleSkipNotifications() {
-    HapticFeedback.lightImpact();
-    setState(() {
-      _notificationsEnabled = false;
-    });
-    widget.onNotificationsChanged(false);
-  }
 }
 
 // Extension to add bottom action buttons

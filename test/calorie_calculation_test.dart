@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/shared/models/user_model.dart';
-import '../lib/shared/services/calorie_calculation_service.dart';
+import 'package:champions_gym_app/shared/models/user_model.dart';
+import 'package:champions_gym_app/shared/services/calorie_calculation_service.dart';
 
 void main() {
   group('CalorieCalculationService Tests', () {

@@ -165,7 +165,7 @@ class _RemindersToggleState extends State<RemindersToggle> {
               onChanged: _handleReminderToggle,
               activeColor: AppConstants.primaryColor,
             )
-          : Switch(
+          : const Switch(
               value: false, // Show as off by default
               onChanged: null, // Disabled until initialized
               activeColor: AppConstants.primaryColor,

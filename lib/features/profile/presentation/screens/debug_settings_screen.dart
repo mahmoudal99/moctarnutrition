@@ -502,7 +502,7 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen> {
                               leading: CircleAvatar(
                                 backgroundColor:
                                     AppConstants.primaryColor.withOpacity(0.1),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.notifications,
                                   color: AppConstants.primaryColor,
                                 ),
@@ -559,7 +559,7 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen> {
                               ),
                             ),
                           ))
-                      .toList(),
+                      ,
                 ] else ...[
                   // Empty State
                   Card(

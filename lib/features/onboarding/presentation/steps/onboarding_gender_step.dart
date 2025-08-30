@@ -81,7 +81,7 @@ class OnboardingGenderStep extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(
+              const Icon(
                 Icons.check_circle,
                 color: AppConstants.primaryColor,
                 size: 24,

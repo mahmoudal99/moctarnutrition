@@ -62,7 +62,7 @@ class OverviewTab extends StatelessWidget {
               const SizedBox(height: AppConstants.spacingM),
 
               // Goal Progress Line Graph - EXACTLY as shown
-              GoalProgressGraph(),
+              const GoalProgressGraph(),
               const SizedBox(height: AppConstants.spacingM),
 
               // BMI Widget - EXACTLY as shown
@@ -466,6 +466,8 @@ class WeightProgressCard extends StatelessWidget {
 
 // Goal Progress Line Graph - EXACTLY as shown in screenshot
 class GoalProgressGraph extends StatelessWidget {
+  const GoalProgressGraph({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -507,7 +509,7 @@ class GoalProgressGraph extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppConstants.spacingL),
-          SizedBox(
+          const SizedBox(
             height: 200,
             child: WeightChart(),
           ),
@@ -520,6 +522,8 @@ class GoalProgressGraph extends StatelessWidget {
 
 // Weight chart - EXACTLY as shown in screenshot
 class WeightChart extends StatelessWidget {
+  const WeightChart({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -544,7 +548,7 @@ class WeightChart extends StatelessWidget {
           const SizedBox(width: AppConstants.spacingS),
           // Chart area
           Expanded(
-            child: Container(
+            child: SizedBox(
               height: 200,
               child: CustomPaint(
                 size: Size.infinite,
@@ -760,7 +764,7 @@ class BMIScale extends StatelessWidget {
         ),
         const SizedBox(height: AppConstants.spacingS),
         // Legend below
-        BMILegend(),
+        const BMILegend(),
       ],
     );
   }
@@ -784,6 +788,8 @@ class BMIScale extends StatelessWidget {
 }
 
 class BMILegend extends StatelessWidget {
+  const BMILegend({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const Row(
@@ -1072,7 +1078,7 @@ class CaloriesCard extends StatelessWidget {
             child: CaloriesChart(dailyData: dailyCalories.dailyData),
           ),
           const SizedBox(height: AppConstants.spacingM),
-          CaloriesLegend(),
+          const CaloriesLegend(),
         ],
       ),
     );
@@ -1151,7 +1157,7 @@ class CaloriesChart extends StatelessWidget {
                         children: [
                           // Empty bar area (just a line)
                           Expanded(
-                            child: Container(
+                            child: SizedBox(
                               width: 20,
                               child: Center(
                                 child: Container(
@@ -1192,7 +1198,7 @@ class CaloriesChart extends StatelessWidget {
                       children: [
                         // Stacked nutrition bars using real consumption data with clear divisions
                         Expanded(
-                          child: Container(
+                          child: SizedBox(
                             width: 20,
                             child: Stack(
                               children: [
@@ -1290,13 +1296,15 @@ class CaloriesChart extends StatelessWidget {
 }
 
 class CaloriesLegend extends StatelessWidget {
+  const CaloriesLegend({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         LegendItem(label: 'Protein', color: AppConstants.proteinColor),
-        const LegendItem(label: 'Carbs', color: AppConstants.carbsColor),
+        LegendItem(label: 'Carbs', color: AppConstants.carbsColor),
         LegendItem(label: 'Fats', color: AppConstants.fatColor),
       ],
     );

@@ -50,7 +50,7 @@ class MeasurementCard extends StatelessWidget {
             color: AppConstants.primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.straighten,
             color: AppConstants.primaryColor,
             size: 20,

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import '../services/profile_photo_service.dart';
 
 class ProfilePhotoProvider extends ChangeNotifier {

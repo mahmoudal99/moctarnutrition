@@ -90,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
                   ListTile(
                     leading: CircleAvatar(
                       backgroundColor: AppConstants.errorColor.withOpacity(0.1),
-                      child: Icon(
+                      child: const Icon(
                         Icons.bug_report,
                         color: AppConstants.errorColor,
                       ),

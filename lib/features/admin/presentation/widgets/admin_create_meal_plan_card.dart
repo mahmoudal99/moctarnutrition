@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_meal_plan_setup_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminCreateMealPlanCard extends StatelessWidget {
   final UserModel user;
@@ -26,10 +25,6 @@ class AdminCreateMealPlanCard extends StatelessWidget {
           ),
         );
         if (result == true) {
-          final userDoc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.id)
-              .get();
           onMealPlanCreated?.call();
         }
       },

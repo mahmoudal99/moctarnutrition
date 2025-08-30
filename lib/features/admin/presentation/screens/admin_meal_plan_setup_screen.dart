@@ -51,12 +51,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         .i('Client target calories: ${widget.user.preferences.targetCalories}');
 
     // Pre-select fitness goal from client's onboarding choice
-    if (widget.user.preferences.fitnessGoal != null) {
-      _selectedFitnessGoal = widget.user.preferences.fitnessGoal!;
-      _logger.i('Pre-selected fitness goal: $_selectedFitnessGoal');
-    } else {
-      _logger.w('No fitness goal found in client preferences');
-    }
+    _selectedFitnessGoal = widget.user.preferences.fitnessGoal;
+    _logger.i('Pre-selected fitness goal: $_selectedFitnessGoal');
 
     // Pre-populate calories from client's calculated target
     if (widget.user.preferences.targetCalories > 0) {
@@ -349,7 +345,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
             const SnackBar(
               content: Text(
                   'Meal plan generated using backup recipes due to high demand. All required meals are included!'),
-              backgroundColor: AppConstants.warningColor ?? Colors.orange,
+              backgroundColor: AppConstants.warningColor,
               duration: Duration(seconds: 4),
             ),
           );
@@ -357,7 +353,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Meal plan generated successfully!'),
-              backgroundColor: AppConstants.successColor ?? Colors.green,
+              backgroundColor: AppConstants.successColor,
             ),
           );
         }
@@ -580,7 +576,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                     // Current step shows warning color if invalid, or its own color if valid
                     color = _isCurrentStepValid()
                         ? stepColors[i]
-                        : (AppConstants.warningColor ?? Colors.orange);
+                        : (AppConstants.warningColor);
                   } else {
                     // Future steps show gray
                     color = AppConstants.textTertiary.withOpacity(0.2);
@@ -633,14 +629,12 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                           padding: const EdgeInsets.all(AppConstants.spacingM),
                           decoration: BoxDecoration(
                             color:
-                                AppConstants.warningColor?.withOpacity(0.1) ??
-                                    Colors.orange.withOpacity(0.1),
+                                AppConstants.warningColor.withOpacity(0.1),
                             borderRadius:
                                 BorderRadius.circular(AppConstants.radiusS),
                             border: Border.all(
                               color:
-                                  AppConstants.warningColor?.withOpacity(0.3) ??
-                                      Colors.orange.withOpacity(0.3),
+                                  AppConstants.warningColor.withOpacity(0.3),
                             ),
                           ),
                           child: Row(
@@ -649,15 +643,14 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                                 Icons.info_outline,
                                 size: 16,
                                 color:
-                                    AppConstants.warningColor ?? Colors.orange,
+                                    AppConstants.warningColor,
                               ),
                               const SizedBox(width: AppConstants.spacingS),
                               Expanded(
                                 child: Text(
                                   _getValidationMessage(),
                                   style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppConstants.warningColor ??
-                                        Colors.orange,
+                                    color: AppConstants.warningColor,
                                   ),
                                 ),
                               ),

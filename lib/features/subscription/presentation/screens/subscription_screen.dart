@@ -435,9 +435,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   Widget _buildComparisonHeader(List<PricingTier> pricingTiers) {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppConstants.backgroundColor,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(AppConstants.radiusL),
           topRight: Radius.circular(AppConstants.radiusL),
         ),

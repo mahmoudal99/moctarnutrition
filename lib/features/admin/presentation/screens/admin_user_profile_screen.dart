@@ -179,7 +179,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                       ),
                       AdminInfoRow(
                         label: 'Preferred Workouts',
-                        value: (user.preferences.preferredWorkoutStyles ?? [])
+                        value: (user.preferences.preferredWorkoutStyles)
                                 .isEmpty
                             ? 'None'
                             : user.preferences.preferredWorkoutStyles

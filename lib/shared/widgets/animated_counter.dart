@@ -58,8 +58,6 @@ class _AnimatedCounterState extends State<AnimatedCounter>
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.value != widget.value) {
-      print(
-          'AnimatedCounter - Value changed from $_previousValue to ${widget.value}');
       _previousValue = _currentValue;
       _currentValue = widget.value;
 

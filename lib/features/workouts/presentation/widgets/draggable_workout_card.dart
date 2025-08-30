@@ -52,7 +52,7 @@ class DraggableWorkoutCard extends StatelessWidget {
                           borderRadius:
                               BorderRadius.circular(AppConstants.radiusXS),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.drag_handle,
                           size: 16,
                           color: AppConstants.primaryColor,

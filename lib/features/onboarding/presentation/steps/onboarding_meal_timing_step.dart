@@ -1,7 +1,6 @@
 import 'package:champions_gym_app/shared/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../shared/widgets/custom_button.dart';
 
 enum MealFrequency {
   threeMeals,
@@ -410,7 +409,7 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.access_time,
                   color: AppConstants.primaryColor,
                   size: 20,

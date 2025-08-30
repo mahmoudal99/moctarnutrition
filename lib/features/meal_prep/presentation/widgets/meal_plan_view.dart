@@ -151,8 +151,7 @@ class _MealPlanViewState extends State<MealPlanView>
           setState(() {});
         }
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   void _onScroll() {
@@ -535,18 +534,14 @@ class _MealPlanViewState extends State<MealPlanView>
 
             if (userId != null) {
               // Use the selected date if available, otherwise use current date
-              final targetDate = widget.selectedDate ?? DateTime.now();
               await StreakService.incrementStreak(userId);
 
-              // Log the streak increment
-              final currentStreak =
-                  await StreakService.getCurrentStreak(userId);
+              await StreakService.getCurrentStreak(userId);
 
               // Refresh consumption data to update the UI
               await _loadConsumptionData();
             }
-          } catch (e) {
-          }
+          } catch (e) {}
         }
       },
       child: Container(

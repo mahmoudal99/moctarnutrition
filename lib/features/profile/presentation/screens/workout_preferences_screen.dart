@@ -281,7 +281,7 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
             isMultiSelect: true,
             onTap: () => _toggleWorkoutStyle(style),
           );
-        }).toList(),
+        }),
 
         const SizedBox(height: AppConstants.spacingM),
 

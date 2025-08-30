@@ -56,12 +56,8 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
     _logger.i('Client target calories: ${_userPreferences.targetCalories}');
 
     // Pre-select fitness goal from client's onboarding choice
-    if (_userPreferences.fitnessGoal != null) {
-      _selectedFitnessGoal = _userPreferences.fitnessGoal!;
-      _logger.i('Pre-selected fitness goal: $_selectedFitnessGoal');
-    } else {
-      _logger.w('No fitness goal found in client preferences');
-    }
+    _selectedFitnessGoal = _userPreferences.fitnessGoal;
+    _logger.i('Pre-selected fitness goal: $_selectedFitnessGoal');
 
     // Pre-populate calories from client's calculated target
     if (_userPreferences.targetCalories > 0) {

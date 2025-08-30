@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/models/user_model.dart';
-import '../../../../shared/services/auth_service.dart';
 
 class NutritionPreferencesScreen extends StatefulWidget {
   const NutritionPreferencesScreen({super.key});

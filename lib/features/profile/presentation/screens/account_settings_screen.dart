@@ -261,9 +261,6 @@ class _PersonalInfoSection extends StatelessWidget {
     );
   }
 
-  void _resendVerificationEmail(BuildContext context) {
-    // TODO: Implement email verification resend
-  }
 
   void _showEditAgeDialog(BuildContext context, UserModel user) {
     final ageController =
@@ -384,7 +381,7 @@ class _SubscriptionSection extends StatelessWidget {
               : null,
         ),
         if (!isFree) ...[
-          _InfoCard(
+          const _InfoCard(
             title: 'Billing Cycle',
             subtitle: 'Monthly', // TODO: Get from subscription data
           ),
@@ -658,26 +655,26 @@ class _DangerZoneSection extends StatelessWidget {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Delete Account'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Are you sure you want to delete your account?',
               style: TextStyle(fontSize: 16),
             ),
-            const SizedBox(height: 12),
-            const Text(
+            SizedBox(height: 12),
+            Text(
               'This action cannot be undone. All your data including:',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8),
+            Text(
               '• Profile information\n• Workout plans\n• Progress data\n• Meal preferences\n• Check-in history',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            const SizedBox(height: 12),
-            const Text(
+            SizedBox(height: 12),
+            Text(
               'will be permanently deleted.',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),

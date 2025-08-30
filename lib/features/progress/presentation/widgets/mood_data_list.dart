@@ -41,7 +41,7 @@ class MoodDataList extends StatelessWidget {
                   color: AppConstants.accentColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.mood,
                   color: AppConstants.accentColor,
                   size: 20,
