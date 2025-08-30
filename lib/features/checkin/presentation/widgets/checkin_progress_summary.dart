@@ -42,7 +42,7 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
             color: AppConstants.primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.trending_up,
             color: AppConstants.primaryColor,
             size: 20,

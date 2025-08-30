@@ -4,14 +4,6 @@ import '../../../../shared/models/user_model.dart';
 import '../widgets/profile_quick_access_grid.dart';
 import '../widgets/profile_settings_tile.dart';
 import '../widgets/profile_delete_account_dialog.dart';
-import '../screens/nutrition_preferences_screen.dart';
-import '../screens/workout_preferences_screen.dart';
-import '../screens/help_center_screen.dart';
-import '../screens/account_settings_screen.dart';
-import '../screens/bug_report_screen.dart';
-import '../screens/feedback_screen.dart';
-import '../screens/privacy_policy_screen.dart';
-import '../screens/workout_notification_settings_screen.dart';
 
 class ProfileDataProvider {
   static List<QuickAccessItem> getQuickAccessItems(BuildContext context) {

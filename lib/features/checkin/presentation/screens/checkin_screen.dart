@@ -9,7 +9,6 @@ import '../../../../shared/models/checkin_model.dart';
 import '../widgets/checkin_status_card.dart';
 import '../widgets/checkin_progress_summary.dart';
 import '../widgets/checkin_history_list.dart';
-import 'checkin_form_screen.dart';
 
 class CheckinScreen extends StatefulWidget {
   const CheckinScreen({super.key});
@@ -223,7 +222,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
       ),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.camera_alt_outlined,
             size: 48,
             color: AppConstants.textTertiary,

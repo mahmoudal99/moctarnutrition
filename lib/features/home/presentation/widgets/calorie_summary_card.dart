@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/calorie_calculation_service.dart';
 import '../../../../shared/models/meal_model.dart';
-import '../../../../shared/services/nutrition_calculation_service.dart';
 import '../../../../shared/widgets/animated_counter.dart';
 import 'activity_ring.dart';
 

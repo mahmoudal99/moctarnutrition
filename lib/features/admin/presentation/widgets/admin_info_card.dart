@@ -7,11 +7,11 @@ class AdminInfoCard extends StatelessWidget {
   final List<Widget> children;
 
   const AdminInfoCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.children,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -69,11 +69,11 @@ class AdminInfoRow extends StatelessWidget {
   final Color? valueColor;
 
   const AdminInfoRow({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     this.valueColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

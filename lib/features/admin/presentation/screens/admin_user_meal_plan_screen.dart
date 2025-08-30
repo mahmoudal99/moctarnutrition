@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/shared/models/meal_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
-import 'package:champions_gym_app/features/admin/presentation/widgets/admin_create_meal_plan_card.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_app_bar.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_meal_plan_setup_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -266,7 +265,6 @@ class AdminUserMealPlanScreen extends StatelessWidget {
       }
       return null;
     } catch (e) {
-      print('Error fetching meal plan: $e');
       return null;
     }
   }

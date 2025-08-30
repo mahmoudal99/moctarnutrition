@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
-import 'package:champions_gym_app/features/admin/presentation/widgets/admin_bottom_navigation.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/floating_admin_screen_wrapper.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_profile_screen.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_checkins_screen.dart';

@@ -184,7 +184,6 @@ class RateLimitService {
       final usageHeader = response.headers['x-usage'];
       if (usageHeader != null) {
         final usage = jsonDecode(usageHeader);
-        final promptTokens = usage['prompt_tokens'] ?? 0;
         final completionTokens = usage['completion_tokens'] ?? 0;
         final totalTokens = usage['total_tokens'] ?? 0;
 

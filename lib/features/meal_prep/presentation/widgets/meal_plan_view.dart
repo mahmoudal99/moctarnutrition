@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/models/user_model.dart';
@@ -153,7 +152,6 @@ class _MealPlanViewState extends State<MealPlanView>
         }
       }
     } catch (e) {
-      print('MealPlanView - Error loading consumption data: $e');
     }
   }
 
@@ -543,14 +541,11 @@ class _MealPlanViewState extends State<MealPlanView>
               // Log the streak increment
               final currentStreak =
                   await StreakService.getCurrentStreak(userId);
-              print(
-                  'MealPlanView - Streak incremented to $currentStreak for date: ${targetDate.toIso8601String()}');
 
               // Refresh consumption data to update the UI
               await _loadConsumptionData();
             }
           } catch (e) {
-            print('MealPlanView - Error incrementing streak: $e');
           }
         }
       },
@@ -684,7 +679,7 @@ class _MealPlanViewState extends State<MealPlanView>
             width: 1,
           ),
         ),
-        child: Icon(
+        child: const Icon(
           Icons.celebration,
           size: 16,
           color: AppConstants.warningColor,

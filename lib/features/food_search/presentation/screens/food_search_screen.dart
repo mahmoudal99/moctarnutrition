@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/food_search_service.dart';
 import '../widgets/food_search_bar.dart';
 import '../widgets/food_product_card.dart';

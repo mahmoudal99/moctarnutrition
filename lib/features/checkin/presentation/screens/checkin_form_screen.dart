@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/checkin_provider.dart';
 import '../../../../shared/models/checkin_model.dart';
@@ -264,7 +262,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
+                  borderSide: const BorderSide(
                     color: AppConstants.primaryColor,
                   ),
                 ),
@@ -278,7 +276,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                   child: OutlinedButton(
                     onPressed: _previousStep,
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: AppConstants.primaryColor),
+                      side: const BorderSide(color: AppConstants.primaryColor),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -364,7 +362,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                 child: OutlinedButton(
                   onPressed: _previousStep,
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppConstants.primaryColor),
+                    side: const BorderSide(color: AppConstants.primaryColor),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -429,7 +427,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.lightbulb_outline,
                 color: AppConstants.primaryColor,
                 size: 20,

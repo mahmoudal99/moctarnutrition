@@ -71,7 +71,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: DecoratedBox(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage(
                   "assets/images/latest.jpg",

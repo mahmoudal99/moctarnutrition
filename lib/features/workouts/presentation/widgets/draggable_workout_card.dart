@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/workout_plan_model.dart';
-import '../screens/workout_details_screen.dart';
 
 class DraggableWorkoutCard extends StatelessWidget {
   final DailyWorkout dailyWorkout;

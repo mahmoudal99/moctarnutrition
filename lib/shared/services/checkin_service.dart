@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:logger/logger.dart';
 import '../models/checkin_model.dart';
 import 'background_upload_service.dart';
@@ -26,7 +24,7 @@ class CheckinService {
         final doc = querySnapshot.docs.first;
         final rawData = doc.data();
         final data = rawData != null
-            ? Map<String, dynamic>.from(rawData as Map<String, dynamic>)
+            ? Map<String, dynamic>.from(rawData)
             : <String, dynamic>{};
         data['id'] = doc.id;
         return CheckinModel.fromJson(data);
@@ -53,7 +51,7 @@ class CheckinService {
         final doc = querySnapshot.docs.first;
         final rawData = doc.data();
         final data = rawData != null
-            ? Map<String, dynamic>.from(rawData as Map<String, dynamic>)
+            ? Map<String, dynamic>.from(rawData)
             : <String, dynamic>{};
         data['id'] = doc.id;
         return CheckinModel.fromJson(data);

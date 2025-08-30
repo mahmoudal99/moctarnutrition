@@ -83,7 +83,7 @@ class PhotoCaptureWidget extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.check_circle,
                       color: AppConstants.successColor,
                       size: 16,
@@ -220,7 +220,7 @@ class PhotoCaptureWidget extends StatelessWidget {
               icon: const Icon(Icons.camera_alt),
               label: const Text('Retake'),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppConstants.primaryColor),
+                side: const BorderSide(color: AppConstants.primaryColor),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -235,7 +235,7 @@ class PhotoCaptureWidget extends StatelessWidget {
               icon: const Icon(Icons.photo_library),
               label: const Text('Choose Different'),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppConstants.primaryColor),
+                side: const BorderSide(color: AppConstants.primaryColor),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

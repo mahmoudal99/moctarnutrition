@@ -157,7 +157,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.privacy_tip,
+                const Icon(Icons.privacy_tip,
                     color: AppConstants.primaryColor, size: 24),
                 const SizedBox(width: 8),
                 Text(
@@ -218,7 +218,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                         margin: const EdgeInsets.only(top: 6, right: 8),
                         width: 4,
                         height: 4,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppConstants.primaryColor,
                           shape: BoxShape.circle,
                         ),

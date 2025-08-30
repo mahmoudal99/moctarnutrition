@@ -43,7 +43,7 @@ class CaloriesStep extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.calculate,
                   color: AppConstants.successColor,
                   size: 20,
@@ -91,7 +91,7 @@ class CaloriesStep extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.edit,
                   color: AppConstants.warningColor,
                   size: 20,

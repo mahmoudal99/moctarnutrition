@@ -1,13 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import '../models/checkin_model.dart';
-import '../models/meal_model.dart';
 import '../models/user_model.dart';
 import 'streak_service.dart';
 import 'daily_consumption_service.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import '../providers/auth_provider.dart';
 
 class ProgressService {
   static final _firestore = FirebaseFirestore.instance;

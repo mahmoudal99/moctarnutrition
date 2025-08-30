@@ -10,7 +10,6 @@ import '../../../../shared/services/streak_service.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/services/progress_service.dart';
-import '../widgets/progress_summary_card.dart';
 import '../widgets/weight_tab.dart';
 import '../widgets/mood_tab.dart';
 import '../widgets/measurements_tab.dart';

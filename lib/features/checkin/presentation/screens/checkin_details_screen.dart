@@ -244,7 +244,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.camera_alt_outlined,
             color: AppConstants.textTertiary,
             size: 48,
@@ -607,7 +607,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       ),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.flash_on,
             color: AppConstants.warningColor,
             size: 32,
@@ -643,7 +643,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.psychology,
             color: AppConstants.successColor,
             size: 24,

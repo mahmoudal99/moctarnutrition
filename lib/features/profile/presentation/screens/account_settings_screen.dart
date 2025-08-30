@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +9,6 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/providers/profile_photo_provider.dart';
 import '../../../../shared/models/user_model.dart';
-import '../../../../shared/models/subscription_model.dart';
 import '../../../../shared/utils/avatar_utils.dart';
 
 class AccountSettingsScreen extends StatefulWidget {

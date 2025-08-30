@@ -41,7 +41,7 @@ class FoodProductCard extends StatelessWidget {
                           food.imageUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return Icon(
+                            return const Icon(
                               Icons.fastfood,
                               color: AppConstants.textTertiary,
                               size: 24,
@@ -49,7 +49,7 @@ class FoodProductCard extends StatelessWidget {
                           },
                         ),
                       )
-                    : Icon(
+                    : const Icon(
                         Icons.fastfood,
                         color: AppConstants.textTertiary,
                         size: 24,
@@ -130,7 +130,7 @@ class FoodProductCard extends StatelessWidget {
                   
                   // Add Icon
                   const SizedBox(height: AppConstants.spacingXS),
-                  Icon(
+                  const Icon(
                     Icons.add_circle_outline,
                     color: AppConstants.primaryColor,
                     size: 20,

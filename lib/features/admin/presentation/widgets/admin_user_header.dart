@@ -6,7 +6,7 @@ import 'package:champions_gym_app/shared/utils/avatar_utils.dart';
 class AdminUserHeader extends StatelessWidget {
   final UserModel user;
 
-  const AdminUserHeader({Key? key, required this.user}) : super(key: key);
+  const AdminUserHeader({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {

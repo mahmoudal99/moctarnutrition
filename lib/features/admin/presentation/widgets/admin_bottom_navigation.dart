@@ -7,10 +7,10 @@ class AdminBottomNavigation extends StatelessWidget {
   final Function(int) onIndexChanged;
 
   const AdminBottomNavigation({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onIndexChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

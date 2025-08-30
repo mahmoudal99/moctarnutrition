@@ -5,7 +5,6 @@ import '../../../../shared/models/workout_plan_model.dart';
 import '../widgets/workout_app_header.dart';
 import '../widgets/view_toggle.dart';
 import '../widgets/day_view.dart';
-import '../utils/workout_message_generator.dart';
 import '../../../../shared/providers/workout_provider.dart';
 
 class DayViewWidget extends StatelessWidget {

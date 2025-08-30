@@ -6,7 +6,6 @@ import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/providers/auth_provider.dart';
-import '../../../../shared/providers/user_provider.dart';
 import '../../../profile/presentation/screens/privacy_policy_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -241,11 +240,11 @@ class _AuthScreenState extends State<AuthScreen> {
             horizontal: AppConstants.spacingM,
             vertical: AppConstants.spacingS,
           ),
-          labelStyle: TextStyle(
+          labelStyle: const TextStyle(
             color: AppConstants.textSecondary,
             fontSize: 14,
           ),
-          floatingLabelStyle: TextStyle(
+          floatingLabelStyle: const TextStyle(
             color: AppConstants.primaryColor,
             fontSize: 12,
           ),

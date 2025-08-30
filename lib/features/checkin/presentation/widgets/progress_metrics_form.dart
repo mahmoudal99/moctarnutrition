@@ -236,7 +236,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: AppConstants.primaryColor,
               ),
             ),
@@ -296,7 +296,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: AppConstants.primaryColor,
                 ),
               ),

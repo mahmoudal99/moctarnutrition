@@ -127,16 +127,16 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
           return null;
         },
         style: AppTextStyles.bodyMedium,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           labelText: 'Email',
-          prefixIcon: const Icon(Icons.email,
+          prefixIcon: Icon(Icons.email,
               color: AppConstants.primaryColor, size: 20),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: AppConstants.spacingM,
             vertical: AppConstants.spacingS,
           ),
-          labelStyle: TextStyle(
+          labelStyle: const TextStyle(
             color: AppConstants.textSecondary,
             fontSize: 14,
           ),
@@ -200,7 +200,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
             color: AppConstants.successColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(60),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.check_circle,
             size: 60,
             color: AppConstants.successColor,
@@ -234,7 +234,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
             children: [
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.info_outline,
                     color: AppConstants.primaryColor,
                     size: 20,

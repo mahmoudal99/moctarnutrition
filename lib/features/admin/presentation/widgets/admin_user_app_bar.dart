@@ -9,12 +9,12 @@ class AdminUserAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
 
   const AdminUserAppBar({
-    Key? key,
+    super.key,
     required this.user,
     required this.title,
     this.onBackPressed,
     this.actions,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

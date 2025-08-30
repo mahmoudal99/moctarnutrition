@@ -94,7 +94,7 @@ class OnboardingStepBuilder {
       case 8:
         return OnboardingDietaryRestrictionsStep(
           selectedDietaryRestrictions: data.selectedDietaryRestrictions,
-          restrictions: [
+          restrictions: const [
             'Vegetarian',
             'Vegan',
             'Gluten-Free',
@@ -109,7 +109,7 @@ class OnboardingStepBuilder {
       case 9:
         return OnboardingWorkoutStylesStep(
           selectedWorkoutStyles: data.selectedWorkoutStyles,
-          styles: [
+          styles: const [
             'Strength Training',
             'Cardio',
             'HIIT',

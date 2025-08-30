@@ -103,7 +103,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.feedback,
+                const Icon(Icons.feedback,
                     color: AppConstants.primaryColor, size: 24),
                 const SizedBox(width: 8),
                 Text(
@@ -138,21 +138,21 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedCategory,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           items: _categories.map((String category) {
             return DropdownMenuItem<String>(
@@ -187,21 +187,21 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedRating,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           items: _ratings.map((String rating) {
             return DropdownMenuItem<String>(
@@ -236,22 +236,22 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         const SizedBox(height: 8),
         TextFormField(
           controller: _titleController,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Brief summary of your feedback',
-            border: const OutlineInputBorder(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -276,22 +276,22 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         TextFormField(
           controller: _descriptionController,
           maxLines: 4,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Please describe your feedback in detail...',
-            border: const OutlineInputBorder(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -316,22 +316,22 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         TextFormField(
           controller: _suggestionsController,
           maxLines: 3,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Any suggestions for new features or improvements?',
-            border: const OutlineInputBorder(
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.borderColor),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],

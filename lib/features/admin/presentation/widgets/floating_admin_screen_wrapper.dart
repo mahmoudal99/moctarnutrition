@@ -10,11 +10,11 @@ class FloatingAdminScreenWrapper extends StatefulWidget {
   final Function(int) onIndexChanged;
 
   const FloatingAdminScreenWrapper({
-    Key? key,
+    super.key,
     required this.child,
     required this.currentIndex,
     required this.onIndexChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<FloatingAdminScreenWrapper> createState() =>

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
 import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/providers/meal_plan_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../widgets/meal_plan_view.dart';
 import '../widgets/waiting_for_meal_plan.dart';

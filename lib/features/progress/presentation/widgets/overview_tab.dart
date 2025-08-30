@@ -1314,7 +1314,7 @@ class WeightChartPainter extends CustomPainter {
 
     final width = size.width;
     final height = size.height;
-    final padding = 20.0;
+    const padding = 20.0;
 
     // Draw horizontal grid lines
     for (int i = 0; i < 6; i++) {

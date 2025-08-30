@@ -189,7 +189,7 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: AppConstants.primaryColor,
                 ),
               ),
@@ -257,7 +257,7 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 64,
               color: AppConstants.errorColor,
@@ -303,7 +303,7 @@ class _CheckinHistoryScreenState extends State<CheckinHistoryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.history,
               size: 64,
               color: AppConstants.textTertiary,

@@ -90,7 +90,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.psychology,
                       color: AppConstants.primaryColor,
                       size: 24,
@@ -131,7 +131,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.emoji_events,
                   size: 32,
                   color: AppConstants.primaryColor,

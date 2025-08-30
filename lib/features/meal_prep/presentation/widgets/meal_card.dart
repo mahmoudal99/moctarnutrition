@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
-import '../../../../shared/services/meal_logging_service.dart';
-import '../../../../shared/providers/meal_plan_provider.dart';
 import '../screens/meal_detail_screen.dart';
-import 'package:logger/logger.dart';
 
 class MealCard extends StatefulWidget {
   final Meal meal;

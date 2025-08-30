@@ -4,7 +4,6 @@ import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_header.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_info_card.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_create_meal_plan_card.dart';
-import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_app_bar.dart';
 
 class AdminUserProfileScreen extends StatelessWidget {
   final UserModel user;
@@ -716,7 +715,7 @@ class AdminUserProfileScreen extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.fitness_center,
                 color: AppConstants.successColor,
                 size: 20,
@@ -881,7 +880,7 @@ class AdminUserProfileScreen extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.local_fire_department,
                 color: AppConstants.accentColor,
                 size: 20,

@@ -85,7 +85,7 @@ class GoalSelectionStep extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.check_circle,
                   color: AppConstants.primaryColor,
                   size: 20,
@@ -128,7 +128,7 @@ class GoalSelectionStep extends StatelessWidget {
                   Text(_getFitnessGoalTitle(goal)),
                   if (isClientChoice && selected == null) ...[
                     const SizedBox(width: 4),
-                    Icon(
+                    const Icon(
                       Icons.check_circle,
                       size: 14,
                       color: AppConstants.primaryColor,

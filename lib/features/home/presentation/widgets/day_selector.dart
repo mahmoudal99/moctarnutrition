@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
-import '../../../../shared/services/daily_consumption_service.dart';
 import 'dashed_circle_painter.dart';
 
 class DaySelector extends StatelessWidget {

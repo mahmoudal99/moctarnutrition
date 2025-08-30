@@ -218,15 +218,15 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
 
   Widget _buildWaitingStateDemo() {
     return Column(
-      children: [
-        const Padding(
+      children: const [
+        Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
             'Waiting State Demo',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        const Expanded(
+        Expanded(
           child: WaitingForMealPlan(),
         ),
       ],
@@ -261,8 +261,8 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
           const SizedBox(height: 16),
 
           // NutritionChip demo
-          Row(
-            children: const [
+          const Row(
+            children: [
               NutritionChip(label: 'P', value: '25g', color: Colors.blue),
               SizedBox(width: 8),
               NutritionChip(label: 'C', value: '45g', color: Colors.green),
@@ -274,7 +274,7 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
           const SizedBox(height: 20),
 
           // MealPrepProgressIndicator demo
-          MealPrepProgressIndicator(
+          const MealPrepProgressIndicator(
             progress: 0.75,
             message: 'Generating your meal plan...',
             showPercentage: true,

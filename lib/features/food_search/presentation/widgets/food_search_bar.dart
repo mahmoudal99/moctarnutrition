@@ -54,17 +54,17 @@ class _FoodSearchBarState extends State<FoodSearchBar> {
         onChanged: _onSearchChanged,
         decoration: InputDecoration(
           hintText: 'Search for foods...',
-          hintStyle: TextStyle(
+          hintStyle: const TextStyle(
             color: AppConstants.textTertiary,
             fontFamily: 'Inter',
           ),
-          prefixIcon: Icon(
+          prefixIcon: const Icon(
             Icons.search,
             color: AppConstants.textSecondary,
           ),
           suffixIcon: widget.controller.text.isNotEmpty
               ? IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.clear,
                     color: AppConstants.textSecondary,
                   ),
@@ -80,7 +80,7 @@ class _FoodSearchBarState extends State<FoodSearchBar> {
             vertical: AppConstants.spacingM,
           ),
         ),
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: 'Inter',
           fontSize: 16,
         ),

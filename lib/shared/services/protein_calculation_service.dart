@@ -14,7 +14,6 @@ class ProteinCalculationService {
     final dietaryRestrictions = preferences.dietaryRestrictions;
     final workoutStyles = preferences.preferredWorkoutStyles;
     final mealTiming = preferences.mealTimingPreferences;
-    final batchCooking = preferences.batchCookingPreferences;
 
     // Calculate body fat percentage (rough estimate using BMI)
     final bmi = weight / ((height / 100) * (height / 100));
@@ -446,7 +445,6 @@ class ProteinCalculationService {
       ProteinTargets targets, UserPreferences preferences) {
     final dailyProtein = targets.dailyTarget;
     final mealTiming = preferences.mealTimingPreferences;
-    final batchCooking = preferences.batchCookingPreferences;
 
     // Determine number of meals based on meal timing preferences
     int numberOfMeals = 4; // Default

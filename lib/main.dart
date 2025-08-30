@@ -354,7 +354,7 @@ class TrainersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Trainers')),
+      appBar: AppBar(title: const Text('Trainers')),
       body: const Center(
         child: Text('Trainers Screen - Coming Soon'),
       ),
@@ -368,7 +368,7 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Admin Dashboard')),
+      appBar: AppBar(title: const Text('Admin Dashboard')),
       body: const Center(
         child: Text('Admin Dashboard Screen - Coming Soon'),
       ),
