@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/progress_service.dart';
 
@@ -62,7 +63,7 @@ class OverviewTab extends StatelessWidget {
               const SizedBox(height: AppConstants.spacingM),
 
               // Goal Progress Line Graph - EXACTLY as shown
-              const GoalProgressGraph(),
+              GoalProgressGraph(dataFuture: dataFuture),
               const SizedBox(height: AppConstants.spacingM),
 
               // BMI Widget - EXACTLY as shown
@@ -466,100 +467,226 @@ class WeightProgressCard extends StatelessWidget {
 
 // Goal Progress Line Graph - EXACTLY as shown in screenshot
 class GoalProgressGraph extends StatelessWidget {
-  const GoalProgressGraph({super.key});
+  final Future<OverviewData>? dataFuture;
+
+  const GoalProgressGraph({super.key, this.dataFuture});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        boxShadow: AppConstants.shadowM,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return FutureBuilder<OverviewData>(
+      future: dataFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            width: double.infinity,
+            height: 200,
+            padding: const EdgeInsets.all(AppConstants.spacingL),
+            decoration: BoxDecoration(
+              color: AppConstants.surfaceColor,
+              borderRadius: BorderRadius.circular(AppConstants.radiusL),
+              boxShadow: AppConstants.shadowM,
+            ),
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final data = snapshot.data ?? OverviewData.empty();
+        final weightProgress = data.weightProgress;
+        final progressPercentage = weightProgress?.progressPercentage ?? 0.0;
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          decoration: BoxDecoration(
+            color: AppConstants.surfaceColor,
+            borderRadius: BorderRadius.circular(AppConstants.radiusL),
+            boxShadow: AppConstants.shadowM,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Goal Progress',
-                style: AppTextStyles.body1.copyWith(
-                  color: AppConstants.textPrimary,
-                ),
-              ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(
-                    Icons.flag,
-                    size: 16,
-                    color: AppConstants.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
                   Text(
-                    '0% of goal', // EXACTLY as shown
-                    style: AppTextStyles.body2.copyWith(
-                      color: AppConstants.textSecondary,
+                    'Goal Progress',
+                    style: AppTextStyles.body1.copyWith(
+                      color: AppConstants.textPrimary,
                     ),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.flag,
+                        size: 16,
+                        color: AppConstants.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${progressPercentage.toStringAsFixed(0)}% of goal',
+                        style: AppTextStyles.body2.copyWith(
+                          color: AppConstants.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+              const SizedBox(height: AppConstants.spacingL),
+              SizedBox(
+                height: 200,
+                child: WeightChart(weightProgress: weightProgress),
+              ),
+              const SizedBox(height: AppConstants.spacingM),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingL),
-          const SizedBox(
-            height: 200,
-            child: WeightChart(),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-// Weight chart - EXACTLY as shown in screenshot
+// Weight chart using fl_chart for better visualization
 class WeightChart extends StatelessWidget {
-  const WeightChart({super.key});
+  final WeightProgressData? weightProgress;
+
+  const WeightChart({super.key, this.weightProgress});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      child: Row(
-        children: [
-          // Y-axis labels
-          SizedBox(
-            width: 40,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('78', style: AppTextStyles.caption),
-                Text('76', style: AppTextStyles.caption),
-                Text('74', style: AppTextStyles.caption),
-                Text('72', style: AppTextStyles.caption),
-                Text('70', style: AppTextStyles.caption),
-                Text('68', style: AppTextStyles.caption),
-              ],
+    if (weightProgress == null || weightProgress!.dataPoints.isEmpty) {
+      return SizedBox(
+        height: 200,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'No weight data available',
+                style: AppTextStyles.body2.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingS),
+              Text(
+                'Complete your first check-in to see progress',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textTertiary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final dataPoints = weightProgress!.dataPoints;
+    
+    // Sort data points by date to ensure proper chronological order
+    final sortedDataPoints = List<WeightDataPoint>.from(dataPoints)
+      ..sort((a, b) => a.date.compareTo(b.date));
+    
+    if (sortedDataPoints.isEmpty) {
+      return SizedBox(
+        height: 200,
+        child: Center(
+          child: Text(
+            'No weight data available',
+            style: AppTextStyles.body2.copyWith(
+              color: AppConstants.textSecondary,
             ),
           ),
-          const SizedBox(width: AppConstants.spacingS),
-          // Chart area
-          Expanded(
-            child: SizedBox(
-              height: 200,
-              child: CustomPaint(
-                size: Size.infinite,
-                painter: WeightChartPainter(),
+        ),
+      );
+    }
+
+    // Prepare chart data
+    final spots = sortedDataPoints.asMap().entries.map((entry) {
+      final index = entry.key;
+      final point = entry.value;
+      return FlSpot(index.toDouble(), point.weight);
+    }).toList();
+
+    // Calculate weight range for Y-axis
+    final weights = sortedDataPoints.map((dp) => dp.weight).toList();
+    final minWeight = weights.reduce((a, b) => a < b ? a : b);
+    final maxWeight = weights.reduce((a, b) => a > b ? a : b);
+    final weightRange = maxWeight - minWeight;
+    
+    // Add padding to make chart more readable
+    final yMin = weightRange == 0 ? minWeight - 1 : minWeight - (weightRange * 0.1);
+    final yMax = weightRange == 0 ? maxWeight + 1 : maxWeight + (weightRange * 0.1);
+
+    return SizedBox(
+      height: 200,
+      child: LineChart(
+        LineChartData(
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: (yMax - yMin) / 5,
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: AppConstants.borderColor.withOpacity(0.3),
+                strokeWidth: 1,
+              );
+            },
+          ),
+          titlesData: FlTitlesData(
+            show: true,
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                interval: (yMax - yMin) / 5,
+                reservedSize: 40,
+                getTitlesWidget: (value, meta) {
+                  return Text(
+                    value.toStringAsFixed(1),
+                    style: AppTextStyles.caption,
+                  );
+                },
               ),
             ),
           ),
-        ],
+          borderData: FlBorderData(show: false),
+          minX: 0,
+          maxX: (sortedDataPoints.length - 1).toDouble(),
+          minY: yMin,
+          maxY: yMax,
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              color: AppConstants.primaryColor,
+              barWidth: 3,
+              isStrokeCapRound: true,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: 4,
+                    color: AppConstants.primaryColor,
+                    strokeWidth: 2,
+                    strokeColor: AppConstants.surfaceColor,
+                  );
+                },
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                color: AppConstants.primaryColor.withOpacity(0.1),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+
 }
 
 // BMI Widget - EXACTLY as shown in screenshot
@@ -1311,44 +1438,4 @@ class CaloriesLegend extends StatelessWidget {
   }
 }
 
-// Weight chart painter - EXACTLY as shown in screenshot
-class WeightChartPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppConstants.borderColor.withOpacity(0.3)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
 
-    final width = size.width;
-    final height = size.height;
-    const padding = 20.0;
-
-    // Draw horizontal grid lines
-    for (int i = 0; i < 6; i++) {
-      final y = padding + (i / 5) * (height - 2 * padding);
-      canvas.drawLine(
-        Offset(padding, y),
-        Offset(width - padding, y),
-        paint,
-      );
-    }
-
-    // Draw current weight line at 73 (between 72 and 74)
-    final currentPaint = Paint()
-      ..color = AppConstants.textPrimary
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-
-    final currentY =
-        padding + (2.5 / 5) * (height - 2 * padding); // Between 72 and 74
-    canvas.drawLine(
-      Offset(padding, currentY),
-      Offset(width - padding, currentY),
-      currentPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
