@@ -62,7 +62,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
             // Action Button
             _buildActionButton(),
             
-            const SizedBox(height: AppConstants.spacingL),
+            const SizedBox(height: 148),
           ],
         ),
       ),
