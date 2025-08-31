@@ -582,11 +582,11 @@ class WeightChart extends StatelessWidget {
     }
 
     final dataPoints = weightProgress!.dataPoints;
-    
+
     // Sort data points by date to ensure proper chronological order
     final sortedDataPoints = List<WeightDataPoint>.from(dataPoints)
       ..sort((a, b) => a.date.compareTo(b.date));
-    
+
     if (sortedDataPoints.isEmpty) {
       return SizedBox(
         height: 200,
@@ -613,10 +613,12 @@ class WeightChart extends StatelessWidget {
     final minWeight = weights.reduce((a, b) => a < b ? a : b);
     final maxWeight = weights.reduce((a, b) => a > b ? a : b);
     final weightRange = maxWeight - minWeight;
-    
+
     // Add padding to make chart more readable
-    final yMin = weightRange == 0 ? minWeight - 1 : minWeight - (weightRange * 0.1);
-    final yMax = weightRange == 0 ? maxWeight + 1 : maxWeight + (weightRange * 0.1);
+    final yMin =
+        weightRange == 0 ? minWeight - 1 : minWeight - (weightRange * 0.1);
+    final yMax =
+        weightRange == 0 ? maxWeight + 1 : maxWeight + (weightRange * 0.1);
 
     return SizedBox(
       height: 200,
@@ -685,8 +687,6 @@ class WeightChart extends StatelessWidget {
       ),
     );
   }
-
-
 }
 
 // BMI Widget - EXACTLY as shown in screenshot
@@ -1437,5 +1437,3 @@ class CaloriesLegend extends StatelessWidget {
     );
   }
 }
-
-
