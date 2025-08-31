@@ -21,6 +21,11 @@ class FoodSearchService {
   /// Search for foods by name
   static Future<List<FoodProduct>> searchFoods(String query) async {
     try {
+      // Ensure the service is initialized
+      if (OpenFoodAPIConfiguration.userAgent == null) {
+        initialize();
+      }
+      
       _logger.i('Searching for foods with query: $query');
 
       final configuration = ProductSearchQueryConfiguration(
@@ -66,6 +71,11 @@ class FoodSearchService {
   /// Get product by barcode
   static Future<FoodProduct?> getProductByBarcode(String barcode) async {
     try {
+      // Ensure the service is initialized
+      if (OpenFoodAPIConfiguration.userAgent == null) {
+        initialize();
+      }
+      
       _logger.i('Getting product by barcode: $barcode');
 
       final configuration = ProductQueryConfiguration(
@@ -86,18 +96,26 @@ class FoodSearchService {
         version: ProductQueryVersion.v3,
       );
 
+      _logger.i('API configuration created for barcode: $barcode');
+      
       final productResult = await OpenFoodAPIClient.getProductV3(configuration);
+      _logger.i('API response received: ${productResult.status}');
+      
       final product = productResult.product;
 
       if (product == null) {
         _logger.w('No product found for barcode: $barcode');
+        _logger.w('API status: ${productResult.status}');
         return null;
       }
 
       _logger.i('Found product: ${product.productName}');
+      _logger.i('Product barcode: ${product.barcode}');
+      _logger.i('Product brand: ${product.brands}');
       return _convertToFoodProduct(product);
-    } catch (e) {
+    } catch (e, stackTrace) {
       _logger.e('Error getting product by barcode: $e');
+      _logger.e('Stack trace: $stackTrace');
       return null;
     }
   }

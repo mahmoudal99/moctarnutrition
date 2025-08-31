@@ -14,6 +14,7 @@ import '../widgets/calorie_summary_card.dart';
 import '../widgets/nutrition_goals_card.dart';
 import '../widgets/next_meal_card.dart';
 import '../../../food_search/presentation/screens/food_search_screen.dart';
+import '../../../food_search/presentation/screens/barcode_scanner_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -564,6 +565,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
               icon: const Icon(Icons.search, color: Colors.black),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+            const SizedBox(width: 8), // Space between search and barcode scanner
+            IconButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BarcodeScannerScreen(),
+                  ),
+                );
+                
+                // If food was added, refresh the data
+                if (result == true) {
+                  _loadCurrentDayMeals();
+                  _loadMultiDayConsumptionData();
+                }
+              },
+              icon: const Icon(Icons.qr_code_scanner, color: Colors.black),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),

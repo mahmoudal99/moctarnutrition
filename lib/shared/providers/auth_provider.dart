@@ -15,6 +15,7 @@ class AuthProvider extends ChangeNotifier {
   UserModel? _userModel;
   bool _isLoading = false;
   String? _error;
+  bool _initialized = false;
   final UserLocalStorageService _storageService = UserLocalStorageService();
   ProfilePhotoProvider? _profilePhotoProvider;
 
@@ -40,6 +41,13 @@ class AuthProvider extends ChangeNotifier {
   void _initializeAuthState() {
     AuthService.authStateChanges.listen((User? user) async {
       _logger.i('AuthProvider - Auth state changed: ${user?.email ?? 'null'}');
+      
+      // Skip if this is the initial state and we're already handling it
+      if (!_initialized && user != null) {
+        _logger.i('AuthProvider - Initial auth state detected, letting _checkInitialAuthState handle it');
+        return;
+      }
+      
       _firebaseUser = user;
 
       if (user != null) {
@@ -50,6 +58,7 @@ class AuthProvider extends ChangeNotifier {
         // User is signed out
         _logger.i('AuthProvider - User signed out, clearing data');
         _userModel = null;
+        _initialized = false; // Reset initialization state
         await _storageService.clearUser();
         await WorkoutPlanLocalStorageService.clearWorkoutPlan();
 
@@ -72,6 +81,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> _checkInitialAuthState() async {
+    if (_initialized) {
+      _logger.i('AuthProvider - Already initialized, skipping initial auth state check');
+      return;
+    }
+    
     try {
       _logger.i('AuthProvider - Starting initial auth state check');
       _isLoading = true;
@@ -107,6 +121,7 @@ class AuthProvider extends ChangeNotifier {
         }
       }
       
+      _initialized = true;
       _logger.i('AuthProvider - Initial auth state check completed');
       logAuthState();
     } catch (e) {
@@ -432,6 +447,7 @@ class AuthProvider extends ChangeNotifier {
   void logAuthState() {
     _logger.i('AuthProvider - Current state:');
     _logger.i('  - isLoading: $_isLoading');
+    _logger.i('  - initialized: $_initialized');
     _logger.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
     _logger.i('  - userModel: ${_userModel?.name ?? 'null'}');
     _logger.i('  - isAuthenticated: $isAuthenticated');

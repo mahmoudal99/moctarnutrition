@@ -4,6 +4,7 @@ import '../../../../shared/services/food_search_service.dart';
 import '../widgets/food_search_bar.dart';
 import '../widgets/food_product_card.dart';
 import '../widgets/add_food_dialog.dart';
+import 'barcode_scanner_screen.dart';
 
 class FoodSearchScreen extends StatefulWidget {
   const FoodSearchScreen({super.key});
@@ -84,6 +85,19 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         title: const Text('Food Search'),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const BarcodeScannerScreen(),
+                ),
+              );
+            },
+            tooltip: 'Scan Barcode',
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -147,6 +161,19 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                           ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const BarcodeScannerScreen(),
+            ),
+          );
+        },
+        backgroundColor: AppConstants.primaryColor,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.qr_code_scanner),
+        label: const Text('Scan Barcode'),
       ),
     );
   }
