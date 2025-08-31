@@ -32,6 +32,21 @@ class NextMealCard extends StatelessWidget {
     final snackMeals =
         availableMeals.where((m) => m.type == MealType.snack).toList();
 
+    // Debug logging
+    print('NextMealCard Debug:');
+    print('  Current time: ${now.hour}:${now.minute.toString().padLeft(2, '0')} (${currentTime} minutes)');
+    print('  Available meals: ${availableMeals.length}');
+    print('  Breakfast meals: ${breakfastMeals.length}');
+    print('  Lunch meals: ${lunchMeals.length}');
+    print('  Dinner meals: ${dinnerMeals.length}');
+    print('  Snack meals: ${snackMeals.length}');
+    
+    // Debug: Show all meals with their types
+    for (int i = 0; i < availableMeals.length; i++) {
+      final meal = availableMeals[i];
+      print('  Meal $i: ${meal.name} (${meal.type.name})');
+    }
+
     // Define meal time windows (in minutes since midnight)
     const breakfastWindow = 6 * 60; // 6:00 AM
     const lunchWindow = 12 * 60; // 12:00 PM (noon)
@@ -43,6 +58,7 @@ class NextMealCard extends StatelessWidget {
 
     if (currentTime < breakfastWindow) {
       // Before 6 AM - next meal is breakfast
+      print('  Time window: Before 6 AM - showing breakfast');
       if (breakfastMeals.isNotEmpty) {
         nextMeal = breakfastMeals.first;
       } else if (lunchMeals.isNotEmpty) {
@@ -50,17 +66,19 @@ class NextMealCard extends StatelessWidget {
       } else {
         nextMeal = availableMeals.first;
       }
-    } else if (currentTime <= breakfastWindow + 4 * 60) {
-      // Between 6 AM and 10 AM - still breakfast time, next meal is lunch
-      if (lunchMeals.isNotEmpty) {
+    } else if (currentTime < breakfastWindow + 4 * 60) {
+      // Between 6 AM and 10 AM - still breakfast time, next meal is breakfast
+      print('  Time window: 6 AM - 10 AM - showing breakfast');
+      if (breakfastMeals.isNotEmpty) {
+        nextMeal = breakfastMeals.first;
+      } else if (lunchMeals.isNotEmpty) {
         nextMeal = lunchMeals.first;
-      } else if (dinnerMeals.isNotEmpty) {
-        nextMeal = dinnerMeals.first;
       } else {
         nextMeal = availableMeals.first;
       }
     } else if (currentTime < lunchWindow) {
       // Between 10 AM and 12 PM - next meal is lunch
+      print('  Time window: 10 AM - 12 PM - showing lunch');
       if (lunchMeals.isNotEmpty) {
         nextMeal = lunchMeals.first;
       } else if (dinnerMeals.isNotEmpty) {
@@ -70,6 +88,7 @@ class NextMealCard extends StatelessWidget {
       }
     } else if (currentTime < snackWindow) {
       // Between 12 PM and 3 PM - next meal is snack or dinner
+      print('  Time window: 12 PM - 3 PM - showing snack/dinner');
       if (snackMeals.isNotEmpty) {
         nextMeal = snackMeals.first;
       } else if (dinnerMeals.isNotEmpty) {
@@ -79,6 +98,7 @@ class NextMealCard extends StatelessWidget {
       }
     } else if (currentTime < dinnerWindow) {
       // Between 3 PM and 6 PM - next meal is dinner
+      print('  Time window: 3 PM - 6 PM - showing dinner');
       if (dinnerMeals.isNotEmpty) {
         nextMeal = dinnerMeals.first;
       } else {
@@ -86,6 +106,7 @@ class NextMealCard extends StatelessWidget {
       }
     } else {
       // After 6 PM - next meal is tomorrow's breakfast, but for now show first meal
+      print('  Time window: After 6 PM - showing breakfast');
       if (breakfastMeals.isNotEmpty) {
         nextMeal = breakfastMeals.first;
       } else {
@@ -95,8 +116,11 @@ class NextMealCard extends StatelessWidget {
 
     // Special case: if it's very late (after 10 PM), show tomorrow's breakfast
     if (currentTime >= 22 * 60 && breakfastMeals.isNotEmpty) {
+      print('  Special case: After 10 PM - showing breakfast');
       nextMeal = breakfastMeals.first;
     }
+    
+    print('  Selected meal: ${nextMeal?.name} (${nextMeal?.type.name})');
     return nextMeal;
   }
 
