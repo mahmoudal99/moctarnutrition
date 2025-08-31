@@ -91,34 +91,24 @@ class _SplashScreenState extends State<SplashScreen>
         
         if (authProvider.isLoading && _authCheckAttempts < _maxAuthCheckAttempts) {
           // Still loading, wait a bit more
-          print('SplashScreen - Auth still loading, attempt $_authCheckAttempts/$_maxAuthCheckAttempts, waiting...');
           _navigateBasedOnAuthState();
           return;
         }
         
         // Either auth is ready or we've waited long enough
         if (_authCheckAttempts >= _maxAuthCheckAttempts) {
-          print('SplashScreen - Max auth check attempts reached, proceeding with current state');
         }
         
-        print('SplashScreen - Auth state determined:');
-        print('  - isLoading: ${authProvider.isLoading}');
-        print('  - isAuthenticated: ${authProvider.isAuthenticated}');
-        print('  - firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
-        print('  - userModel: ${authProvider.userModel?.name ?? 'null'}');
-        
+
         if (authProvider.isAuthenticated) {
           // User is authenticated, navigate to home
           if (authProvider.userModel?.role == UserRole.admin) {
-            print('SplashScreen - Navigating authenticated admin to /admin-home');
             context.go('/admin-home');
           } else {
-            print('SplashScreen - Navigating authenticated user to /home');
             context.go('/home');
           }
         } else {
           // User is not authenticated, navigate to get-started
-          print('SplashScreen - Navigating unauthenticated user to /get-started');
           context.go('/get-started');
         }
       }

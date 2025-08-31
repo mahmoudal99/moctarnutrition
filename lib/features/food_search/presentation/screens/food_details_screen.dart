@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../shared/models/meal_model.dart';
-import '../../../../shared/services/meal_logging_service.dart';
-import '../../../../shared/providers/auth_provider.dart';
-import '../../../../shared/providers/meal_plan_provider.dart';
-import '../../../../shared/services/daily_consumption_service.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/food_search_service.dart';
 import '../widgets/add_food_dialog.dart';
@@ -214,7 +208,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     Expanded(
                       child: _buildNutritionItem(
                         'Calories',
-                        '${widget.food.nutrition.calories.toStringAsFixed(0)}',
+                        widget.food.nutrition.calories.toStringAsFixed(0),
                         'cal',
                         AppConstants.primaryColor,
                       ),
@@ -222,7 +216,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     Expanded(
                       child: _buildNutritionItem(
                         'Protein',
-                        '${widget.food.nutrition.protein.toStringAsFixed(1)}',
+                        widget.food.nutrition.protein.toStringAsFixed(1),
                         'g',
                         Colors.green,
                       ),
@@ -237,7 +231,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     Expanded(
                       child: _buildNutritionItem(
                         'Carbs',
-                        '${widget.food.nutrition.carbs.toStringAsFixed(1)}',
+                        widget.food.nutrition.carbs.toStringAsFixed(1),
                         'g',
                         Colors.orange,
                       ),
@@ -245,7 +239,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     Expanded(
                       child: _buildNutritionItem(
                         'Fat',
-                        '${widget.food.nutrition.fat.toStringAsFixed(1)}',
+                        widget.food.nutrition.fat.toStringAsFixed(1),
                         'g',
                         Colors.red,
                       ),
@@ -260,7 +254,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     Expanded(
                       child: _buildNutritionItem(
                         'Fiber',
-                        '${widget.food.nutrition.fiber.toStringAsFixed(1)}',
+                        widget.food.nutrition.fiber.toStringAsFixed(1),
                         'g',
                         Colors.brown,
                       ),
@@ -268,7 +262,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     Expanded(
                       child: _buildNutritionItem(
                         'Sugar',
-                        '${widget.food.nutrition.sugar.toStringAsFixed(1)}',
+                        widget.food.nutrition.sugar.toStringAsFixed(1),
                         'g',
                         Colors.pink,
                       ),
@@ -283,7 +277,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     Expanded(
                       child: _buildNutritionItem(
                         'Sodium',
-                        '${widget.food.nutrition.sodium.toStringAsFixed(0)}',
+                        widget.food.nutrition.sodium.toStringAsFixed(0),
                         'mg',
                         Colors.blue,
                       ),
