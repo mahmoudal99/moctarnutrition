@@ -61,16 +61,26 @@ GoRouter createRouter(AuthProvider authProvider) {
         builder: (context, state) {
           final authProvider =
               Provider.of<AuthProvider>(context, listen: false);
+          
+          // Show splash screen while determining auth state
           if (authProvider.isLoading) {
             return const SplashScreen();
           }
+          
+          // If we have a Firebase user but no user model, still loading
+          if (authProvider.firebaseUser != null && authProvider.userModel == null) {
+            return const SplashScreen();
+          }
+          
           if (!authProvider.isAuthenticated) {
             return const GetStartedScreen();
           }
+          
           if (authProvider.userModel?.role == UserRole.admin) {
             // The redirect will handle navigation, just show a placeholder
             return const SizedBox.shrink();
           }
+          
           return const FloatingMainNavigation(child: HomeScreen());
         },
       ),

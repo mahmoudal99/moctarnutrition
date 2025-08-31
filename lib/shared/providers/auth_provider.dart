@@ -33,7 +33,7 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider() {
     _initializeAuthState();
-    _loadCachedUserData();
+    // Don't call _loadCachedUserData() here - let the auth state listener handle it
   }
 
   /// Initialize authentication state listener
@@ -66,41 +66,58 @@ class AuthProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
     });
+    
+    // Check initial state after listener is set up
+    _checkInitialAuthState();
   }
 
-  /// Load cached user data on app startup
-  Future<void> _loadCachedUserData() async {
+  Future<void> _checkInitialAuthState() async {
     try {
+      _logger.i('AuthProvider - Starting initial auth state check');
       _isLoading = true;
       notifyListeners();
 
-      // Load cached user data
-      final cachedUser = await _storageService.loadUser();
-      if (cachedUser != null) {
-        _userModel = cachedUser;
-        _logger.i('Loaded cached user: ${cachedUser.name}');
-      }
-
-      // Check if Firebase user is still authenticated
+      // Wait a bit for Firebase to be fully ready
+      await Future.delayed(const Duration(milliseconds: 100));
+      
       final currentFirebaseUser = AuthService.currentUser;
+      _logger.i('AuthProvider - Firebase currentUser check result: ${currentFirebaseUser?.email ?? 'null'}');
+      
       if (currentFirebaseUser != null) {
         _firebaseUser = currentFirebaseUser;
-        _logger.i(
-            'Firebase user still authenticated: ${currentFirebaseUser.email}');
+        _logger.i('Initial Firebase user found: ${currentFirebaseUser.email}');
+        
+        // Load cached user data if Firebase user exists
+        final cachedUser = await _storageService.loadUser();
+        if (cachedUser != null) {
+          _userModel = cachedUser;
+          _logger.i('Loaded cached user: ${cachedUser.name}');
+        }
+        
+        // Load fresh user model from Firestore
+        await _loadUserModel(currentFirebaseUser.uid);
       } else {
-        // Firebase user is not authenticated, clear cached data
-        _userModel = null;
-        await _storageService.clearUser();
-        _logger.i('Firebase user not authenticated, cleared cached data');
+        // No Firebase user, check if we have cached data
+        final cachedUser = await _storageService.loadUser();
+        if (cachedUser != null) {
+          _logger.i('No Firebase user but cached user exists, clearing cache');
+          await _storageService.clearUser();
+        } else {
+          _logger.i('No Firebase user and no cached user data');
+        }
       }
+      
+      _logger.i('AuthProvider - Initial auth state check completed');
+      logAuthState();
     } catch (e) {
-      _logger.e('Error loading cached user data: $e');
-      _error = 'Failed to load cached user data: $e';
+      _logger.e('Error checking initial auth state: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
+
+
 
   /// Load user model from Firestore
   Future<void> _loadUserModel(String userId) async {
@@ -411,6 +428,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Debug method to log current auth state
+  void logAuthState() {
+    _logger.i('AuthProvider - Current state:');
+    _logger.i('  - isLoading: $_isLoading');
+    _logger.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
+    _logger.i('  - userModel: ${_userModel?.name ?? 'null'}');
+    _logger.i('  - isAuthenticated: $isAuthenticated');
+    _logger.i('  - error: $_error');
+  }
+
   /// Refresh user data
   Future<void> refreshUser() async {
     if (_firebaseUser != null) {
@@ -420,6 +447,7 @@ class AuthProvider extends ChangeNotifier {
 
   /// Initialize user data (call this when app starts)
   Future<void> initializeUserData() async {
-    await _loadCachedUserData();
+    // This method is now handled by _checkInitialAuthState() in the constructor
+    // No need to call it manually as the auth state listener handles initialization
   }
 }
