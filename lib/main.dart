@@ -290,7 +290,6 @@ void main() async {
     _logger.w('Warning: Could not load .env file: $e');
     _logger.w(
         'Please ensure you have copied .env.example to .env and configured your API key');
-    // Continue with default configuration
   }
 
   // Validate environment configuration
