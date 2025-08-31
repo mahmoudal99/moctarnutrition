@@ -29,7 +29,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
         decoration: const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage(
-                  "assets/images/latest.jpg",
+                  "assets/images/get_started_background.jpg",
                 ),
                 fit: BoxFit.cover)),
         child: Stack(
@@ -60,15 +60,15 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                         Text(
                           'ACHIEVE YOUR FITNESS\nGOALS, YOUR WAY',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.leagueSpartan(
-                            fontSize: 26,
+                          style: GoogleFonts.aBeeZee(
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 10),
+                              horizontal: 24, vertical: 12),
                           child: SizedBox(
                             width: double.infinity,
                             height: 56,

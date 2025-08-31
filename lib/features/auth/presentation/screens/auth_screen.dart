@@ -50,18 +50,17 @@ class _AuthScreenState extends State<AuthScreen> {
               const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
           child: Column(
             children: [
-              const SizedBox(height: AppConstants.spacingXL),
-              _buildHeader(),
-              const SizedBox(height: AppConstants.spacingL),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    _buildHeader(),
+                    const SizedBox(height: AppConstants.spacingL),
                     _buildAuthForm(),
                     const SizedBox(height: AppConstants.spacingM),
                     _buildSocialAuth(),
                     const SizedBox(height: AppConstants.spacingM),
-                    _buildGuestOption(),
+                    _buildOnboardingOption(),
                   ],
                 ),
               ),
@@ -76,21 +75,6 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildHeader() {
     return Column(
       children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            gradient: AppConstants.primaryGradient,
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
-            boxShadow: AppConstants.shadowM,
-          ),
-          child: const Icon(
-            Icons.fitness_center,
-            size: 40,
-            color: AppConstants.surfaceColor,
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingM),
         Text(
           _isSignUp ? 'Create Account' : 'Welcome Back!',
           style: AppTextStyles.heading3,
@@ -200,7 +184,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ],
           const SizedBox(height: AppConstants.spacingM),
           _buildAuthButton(),
-          const SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: AppConstants.spacingM),
           _buildToggleAuth(),
         ],
       ),
@@ -464,30 +448,9 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Widget _buildGuestOption() {
+  Widget _buildOnboardingOption() {
     return Column(
       children: [
-        // Text(
-        //   'Want to try first?',
-        //   style: AppTextStyles.caption.copyWith(
-        //     color: AppConstants.textSecondary,
-        //   ),
-        // ),
-        // TextButton(
-        //   onPressed: _handleGuestAccess,
-        //   style: TextButton.styleFrom(
-        //     padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
-        //     minimumSize: const Size(0, 32),
-        //   ),
-        //   child: Text(
-        //     'Continue as Guest',
-        //     style: AppTextStyles.caption.copyWith(
-        //       color: AppConstants.primaryColor,
-        //       fontWeight: FontWeight.w600,
-        //     ),
-        //   ),
-        // ),
-        // const SizedBox(height: AppConstants.spacingS),
         TextButton(
           onPressed: _handleBackToOnboarding,
           style: TextButton.styleFrom(
@@ -702,8 +665,7 @@ class _AuthScreenState extends State<AuthScreen> {
         content: SingleChildScrollView(
           child: Text(
             'By using Moctar Nutrition, you agree to:\n\n'
-            '• Use the app responsibly and in accordance with applicable laws\n'
-            '• Provide accurate and truthful information\n'
+            '• Provide accurate information\n'
             '• Not share your account credentials with others\n'
             '• Respect the privacy and rights of other users\n'
             '• Follow our community guidelines\n\n'
