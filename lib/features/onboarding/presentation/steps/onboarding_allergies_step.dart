@@ -166,7 +166,7 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
           const SizedBox(height: AppConstants.spacingM),
           CustomTextField(
             controller: _allergyController,
-            hint: 'e.g., Kiwi, Aspirin, Nickel',
+            hint: 'e.g., Nuts',
             label: 'Allergy/Intolerance Name',
           ),
           const SizedBox(height: AppConstants.spacingM),

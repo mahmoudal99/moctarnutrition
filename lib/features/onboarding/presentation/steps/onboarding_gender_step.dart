@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_constants.dart';
 
-class OnboardingGenderStep extends StatelessWidget {
+class OnboardingGenderStep extends StatefulWidget {
   final String? selectedGender;
   final ValueChanged<String> onSelect;
 
@@ -13,19 +13,30 @@ class OnboardingGenderStep extends StatelessWidget {
   });
 
   @override
+  State<OnboardingGenderStep> createState() => _OnboardingGenderStepState();
+}
+
+class _OnboardingGenderStepState extends State<OnboardingGenderStep> {
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildGenderOption('Male', Icons.male, selectedGender == 'Male', () {
-          HapticFeedback.lightImpact();
-          onSelect('Male');
-        }),
-        const SizedBox(height: AppConstants.spacingM),
-        _buildGenderOption('Female', Icons.female, selectedGender == 'Female',
+        _buildGenderOption('Male', Icons.male, widget.selectedGender == 'Male',
             () {
           HapticFeedback.lightImpact();
-          onSelect('Female');
+          setState(() {
+            widget.onSelect('Male');
+          });
+        }),
+        const SizedBox(height: AppConstants.spacingM),
+        _buildGenderOption(
+            'Female', Icons.female, widget.selectedGender == 'Female', () {
+          HapticFeedback.lightImpact();
+          setState(() {
+            widget.onSelect('Female');
+          });
         }),
       ],
     );
@@ -37,7 +48,7 @@ class OnboardingGenderStep extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(AppConstants.spacingL),
+        padding: const EdgeInsets.all(AppConstants.spacingM),
         decoration: BoxDecoration(
           color: isSelected
               ? AppConstants.primaryColor.withOpacity(0.1)

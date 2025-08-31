@@ -68,7 +68,7 @@ class OnboardingActivityLevelStep extends StatelessWidget {
       case ActivityLevel.moderatelyActive:
         return Icons.directions_run;
       case ActivityLevel.veryActive:
-        return Icons.sports_soccer;
+        return Icons.trending_up_outlined;
       case ActivityLevel.extremelyActive:
         return Icons.fitness_center;
     }

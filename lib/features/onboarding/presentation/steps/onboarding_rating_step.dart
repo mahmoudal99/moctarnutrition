@@ -86,17 +86,6 @@ class OnboardingRatingStep extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Main Title
-        Text(
-          'Give us a rating',
-          style: AppTextStyles.heading2.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: AppConstants.spacingXL),
-
         // App Rating Card
         Container(
           padding: const EdgeInsets.all(AppConstants.spacingL),
@@ -145,13 +134,6 @@ class OnboardingRatingStep extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppConstants.spacingXS),
-                  Text(
-                    '100K+ App Ratings',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppConstants.textSecondary,
-                    ),
-                  ),
                 ],
               ),
 
@@ -168,30 +150,6 @@ class OnboardingRatingStep extends StatelessWidget {
         ),
 
         const SizedBox(height: AppConstants.spacingXL),
-
-        // User-centric message
-        Text(
-          'Cal AI was made for\npeople like you',
-          style: AppTextStyles.heading3.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: AppConstants.spacingL),
-
-        // User avatars
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildUserAvatar('assets/images/user1.jpg', 0),
-            _buildUserAvatar('assets/images/user2.jpg', -10),
-            _buildUserAvatar('assets/images/user3.jpg', -20),
-          ],
-        ),
-
-        const SizedBox(height: AppConstants.spacingS),
-
         Text(
           '5M+ Cal AI Users',
           style: AppTextStyles.bodyMedium.copyWith(

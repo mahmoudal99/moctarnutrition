@@ -10,11 +10,8 @@ class OnboardingWelcomeStep extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Stacked activity cards
         _ActivityCardsStack(),
         SizedBox(height: 24),
-        // Avatars row
-        // _AvatarsRow(),
       ],
     );
   }
@@ -115,7 +112,7 @@ class _ActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: card.color,
+      color: Colors.white,
       elevation: elevation,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
@@ -127,7 +124,7 @@ class _ActivityCard extends StatelessWidget {
               // Left accent bar
               Container(
                 width: 8,
-                height: 90,
+                height: 130,
                 margin: const EdgeInsets.only(
                     left: 0, top: 0, bottom: 0, right: 12),
                 decoration: BoxDecoration(
@@ -151,16 +148,13 @@ class _ActivityCard extends StatelessWidget {
                             child: Text(
                               card.title,
                               style: AppTextStyles.bodyLarge.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: card.titleColor,
-                              ),
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          Text(card.emoji,
-                              style: const TextStyle(fontSize: 18)),
+                          const SizedBox(width: 6)
                         ],
                       ),
                       const SizedBox(height: 6),

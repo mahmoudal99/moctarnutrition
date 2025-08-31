@@ -47,10 +47,10 @@ class OnboardingStepHeader extends StatelessWidget {
                         : AppConstants.spacingM),
                 Text(
                   step.title,
-                  style: AppTextStyles.heading3,
+                  style: AppTextStyles.heading4,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppConstants.spacingXS),
+                const SizedBox(height: AppConstants.spacingS),
                 Text(
                   step.subtitle,
                   style: AppTextStyles.bodyMedium.copyWith(
@@ -58,6 +58,7 @@ class OnboardingStepHeader extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: AppConstants.spacingS),
               ],
             ),
           ),

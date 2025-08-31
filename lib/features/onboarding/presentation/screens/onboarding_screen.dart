@@ -33,7 +33,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void initState() {
     super.initState();
     _steps = OnboardingStepsConfig.getSteps();
-    // Insert BMI step after desired weight (index 5)
     _steps.insert(5, OnboardingStepsConfig.getBMIStep());
   }
 

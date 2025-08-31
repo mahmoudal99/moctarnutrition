@@ -49,7 +49,7 @@ class OnboardingProgressIndicator extends StatelessWidget {
               '${currentPage + 1} of ${steps.length}',
               key: ValueKey(currentPage),
               style: AppTextStyles.caption.copyWith(
-                fontSize: 11,
+                fontSize: 12,
                 color: AppConstants.textTertiary,
               ),
             ),
