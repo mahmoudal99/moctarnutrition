@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../shared/providers/auth_provider.dart';
+import '../../../../shared/models/user_model.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,6 +20,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   late Animation<Offset> _textSlideAnimation;
   late Animation<double> _fadeAnimation;
+  
+  int _authCheckAttempts = 0;
+  static const int _maxAuthCheckAttempts = 10; // Max 2 seconds of waiting
 
   @override
   void initState() {
@@ -68,11 +74,55 @@ class _SplashScreenState extends State<SplashScreen>
       _fadeController.forward();
     }
 
-    // Navigate to get-started after animations complete
+    // Wait for animations to complete, then check auth state and navigate
     await Future.delayed(const Duration(milliseconds: 1000));
     if (mounted) {
-      context.go('/get-started');
+      _navigateBasedOnAuthState();
     }
+  }
+
+  void _navigateBasedOnAuthState() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // Wait a bit more for auth state to be fully determined
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        _authCheckAttempts++;
+        
+        if (authProvider.isLoading && _authCheckAttempts < _maxAuthCheckAttempts) {
+          // Still loading, wait a bit more
+          print('SplashScreen - Auth still loading, attempt $_authCheckAttempts/$_maxAuthCheckAttempts, waiting...');
+          _navigateBasedOnAuthState();
+          return;
+        }
+        
+        // Either auth is ready or we've waited long enough
+        if (_authCheckAttempts >= _maxAuthCheckAttempts) {
+          print('SplashScreen - Max auth check attempts reached, proceeding with current state');
+        }
+        
+        print('SplashScreen - Auth state determined:');
+        print('  - isLoading: ${authProvider.isLoading}');
+        print('  - isAuthenticated: ${authProvider.isAuthenticated}');
+        print('  - firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
+        print('  - userModel: ${authProvider.userModel?.name ?? 'null'}');
+        
+        if (authProvider.isAuthenticated) {
+          // User is authenticated, navigate to home
+          if (authProvider.userModel?.role == UserRole.admin) {
+            print('SplashScreen - Navigating authenticated admin to /admin-home');
+            context.go('/admin-home');
+          } else {
+            print('SplashScreen - Navigating authenticated user to /home');
+            context.go('/home');
+          }
+        } else {
+          // User is not authenticated, navigate to get-started
+          print('SplashScreen - Navigating unauthenticated user to /get-started');
+          context.go('/get-started');
+        }
+      }
+    });
   }
 
   @override

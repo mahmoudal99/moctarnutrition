@@ -65,7 +65,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           // Loading indicator
           if (_isLoading)
             Container(
-              color: Colors.black54,
+              color: Colors.transparent,
               child: const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -80,7 +80,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   Widget _buildScanOverlay() {
     return CustomPaint(
       painter: ScannerOverlayPainter(),
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
         height: double.infinity,
         child: Column(
@@ -89,7 +89,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(25),
               ),
               child: const Text(
