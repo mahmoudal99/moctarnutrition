@@ -204,13 +204,29 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
   }
 
   Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      child: Text(
-        title,
-        style: AppTextStyles.heading5.copyWith(
-          color: AppConstants.textPrimary,
-        ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingL),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: AppTextStyles.caption.copyWith(
+              color: AppConstants.primaryColor,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingXS),
+          Container(
+            width: 32,
+            height: 2,
+            decoration: BoxDecoration(
+              color: AppConstants.primaryColor,
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -249,24 +265,71 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
     return Column(
       children: [
         // Add custom workout style
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _workoutStyleController,
-                decoration: const InputDecoration(
-                  hintText: 'Add a custom workout style',
-                  border: OutlineInputBorder(),
+        Container(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          decoration: BoxDecoration(
+            color: AppConstants.surfaceColor,
+            borderRadius: BorderRadius.circular(AppConstants.radiusL),
+            border: Border.all(
+              color: AppConstants.textTertiary.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Add Custom Style',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppConstants.textPrimary,
                 ),
-                onSubmitted: (_) => _addCustomWorkoutStyle(),
               ),
-            ),
-            const SizedBox(width: AppConstants.spacingS),
-            ElevatedButton(
-              onPressed: _addCustomWorkoutStyle,
-              child: const Text('Add'),
-            ),
-          ],
+              const SizedBox(height: AppConstants.spacingS),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _workoutStyleController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter workout style name',
+                        hintStyle: AppTextStyles.bodyMedium.copyWith(
+                          color: AppConstants.textTertiary,
+                        ),
+                        filled: true,
+                        fillColor: AppConstants.backgroundColor,
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusM),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppConstants.spacingM,
+                          vertical: AppConstants.spacingM,
+                        ),
+                      ),
+                      onSubmitted: (_) => _addCustomWorkoutStyle(),
+                    ),
+                  ),
+                  const SizedBox(width: AppConstants.spacingM),
+                  ElevatedButton(
+                    onPressed: _addCustomWorkoutStyle,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppConstants.spacingL,
+                        vertical: AppConstants.spacingM,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusM),
+                      ),
+                    ),
+                    child: const Text('Add'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: AppConstants.spacingM),
 
@@ -281,39 +344,89 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
             isMultiSelect: true,
             onTap: () => _toggleWorkoutStyle(style),
           );
-        }),
+        }).toList(),
 
         const SizedBox(height: AppConstants.spacingM),
 
         // Custom workout styles
         if (_selectedWorkoutStyles
             .any((style) => !_workoutStyles.contains(style)))
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Custom Workout Styles',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppConstants.textSecondary,
+          Container(
+            padding: const EdgeInsets.all(AppConstants.spacingL),
+            decoration: BoxDecoration(
+              color: AppConstants.surfaceColor,
+              borderRadius: BorderRadius.circular(AppConstants.radiusL),
+              border: Border.all(
+                color: AppConstants.textTertiary.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Custom Workout Styles',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppConstants.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppConstants.spacingS),
-              Wrap(
-                spacing: AppConstants.spacingS,
-                runSpacing: AppConstants.spacingS,
-                children: _selectedWorkoutStyles
-                    .where((style) => !_workoutStyles.contains(style))
-                    .map((style) {
-                  return Chip(
-                    label: Text(style),
-                    onDeleted: () => _removeWorkoutStyle(style),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    backgroundColor: AppConstants.primaryColor.withOpacity(0.1),
-                  );
-                }).toList(),
-              ),
-            ],
+                const SizedBox(height: AppConstants.spacingM),
+                Wrap(
+                  spacing: AppConstants.spacingS,
+                  runSpacing: AppConstants.spacingS,
+                  children: _selectedWorkoutStyles
+                      .where((style) => !_workoutStyles.contains(style))
+                      .map((style) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppConstants.spacingM,
+                        vertical: AppConstants.spacingS,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppConstants.primaryColor.withOpacity(0.05),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusM),
+                        border: Border.all(
+                          color: AppConstants.primaryColor.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            style,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppConstants.primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: AppConstants.spacingS),
+                          InkWell(
+                            onTap: () => _removeWorkoutStyle(style),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppConstants.primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                size: 16,
+                                color: AppConstants.primaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
       ],
     );
@@ -328,44 +441,47 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
       child: Material(
         color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppConstants.radiusL),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+          borderRadius: BorderRadius.circular(AppConstants.radiusL),
           child: Container(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingL,
+              vertical: AppConstants.spacingM,
+            ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppConstants.primaryColor.withOpacity(0.08)
+                  ? AppConstants.primaryColor.withOpacity(0.05)
                   : AppConstants.surfaceColor,
               border: Border.all(
                 color: isSelected
-                    ? AppConstants.primaryColor.withOpacity(0.3)
-                    : AppConstants.textTertiary.withOpacity(0.2),
-                width: isSelected ? 1.5 : 1,
+                    ? AppConstants.primaryColor
+                    : AppConstants.textTertiary.withOpacity(0.1),
+                width: isSelected ? 2 : 1,
               ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              boxShadow: isSelected ? AppConstants.shadowS : null,
+              borderRadius: BorderRadius.circular(AppConstants.radiusL),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppConstants.primaryColor
-                        : AppConstants.textTertiary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                        : AppConstants.primaryColor.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(AppConstants.radiusL),
                   ),
                   child: Icon(
                     icon,
                     color: isSelected
                         ? AppConstants.surfaceColor
-                        : AppConstants.textSecondary,
-                    size: 20,
+                        : AppConstants.primaryColor,
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: AppConstants.spacingM),
@@ -532,20 +648,10 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
         return Icons.timer;
       case 'Running':
         return Icons.directions_run;
-      case 'Yoga':
-        return Icons.self_improvement;
-      case 'Pilates':
-        return Icons.accessibility_new;
       case 'CrossFit':
         return Icons.sports_martial_arts;
       case 'Swimming':
         return Icons.pool;
-      case 'Cycling':
-        return Icons.directions_bike;
-      case 'Boxing':
-        return Icons.sports_kabaddi;
-      case 'Martial Arts':
-        return Icons.sports_kabaddi;
       default:
         return Icons.fitness_center;
     }
