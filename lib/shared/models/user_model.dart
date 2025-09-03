@@ -1,3 +1,5 @@
+import 'package:champions_gym_app/shared/services/calorie_calculation_service.dart';
+
 enum UserRole { user, trainer, admin }
 
 enum FitnessGoal { weightLoss, muscleGain, maintenance, endurance, strength }
@@ -142,7 +144,8 @@ class UserPreferences {
   final ActivityLevel activityLevel;
   final List<String> dietaryRestrictions;
   final List<String> preferredWorkoutStyles;
-  final int targetCalories;
+  final int targetCalories; // User-set target calories
+  final CalorieTargets? calculatedCalorieTargets; // Calculated using scientific formulas
   final bool notificationsEnabled;
   final bool workoutNotificationsEnabled;
   final String? workoutNotificationTime; // Format: "HH:mm"
@@ -183,6 +186,7 @@ class UserPreferences {
     required this.dietaryRestrictions,
     required this.preferredWorkoutStyles,
     required this.targetCalories,
+    this.calculatedCalorieTargets,
     this.notificationsEnabled = true,
     this.workoutNotificationsEnabled = false,
     this.workoutNotificationTime,
@@ -218,6 +222,9 @@ class UserPreferences {
       preferredWorkoutStyles:
           List<String>.from(json['preferredWorkoutStyles'] ?? []),
       targetCalories: json['targetCalories'] as int? ?? 2000,
+      calculatedCalorieTargets: json['calculatedCalorieTargets'] != null
+          ? CalorieTargets.fromJson(json['calculatedCalorieTargets'] as Map<String, dynamic>)
+          : null,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
       workoutNotificationsEnabled:
           json['workoutNotificationsEnabled'] as bool? ?? false,
@@ -252,6 +259,7 @@ class UserPreferences {
       'dietaryRestrictions': dietaryRestrictions,
       'preferredWorkoutStyles': preferredWorkoutStyles,
       'targetCalories': targetCalories,
+      'calculatedCalorieTargets': calculatedCalorieTargets?.toJson(),
       'notificationsEnabled': notificationsEnabled,
       'workoutNotificationsEnabled': workoutNotificationsEnabled,
       'workoutNotificationTime': workoutNotificationTime,
@@ -280,6 +288,7 @@ class UserPreferences {
     List<String>? dietaryRestrictions,
     List<String>? preferredWorkoutStyles,
     int? targetCalories,
+    CalorieTargets? calculatedCalorieTargets,
     bool? notificationsEnabled,
     bool? workoutNotificationsEnabled,
     String? workoutNotificationTime,
@@ -307,6 +316,7 @@ class UserPreferences {
       preferredWorkoutStyles:
           preferredWorkoutStyles ?? this.preferredWorkoutStyles,
       targetCalories: targetCalories ?? this.targetCalories,
+      calculatedCalorieTargets: calculatedCalorieTargets ?? this.calculatedCalorieTargets,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       workoutNotificationsEnabled:
           workoutNotificationsEnabled ?? this.workoutNotificationsEnabled,

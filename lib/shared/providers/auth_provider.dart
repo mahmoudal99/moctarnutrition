@@ -21,10 +21,15 @@ class AuthProvider extends ChangeNotifier {
 
   // Getters
   User? get firebaseUser => _firebaseUser;
+
   UserModel? get userModel => _userModel;
+
   bool get isLoading => _isLoading;
+
   String? get error => _error;
+
   bool get isAuthenticated => _firebaseUser != null && _userModel != null;
+
   bool get isGuest => _firebaseUser?.isAnonymous ?? false;
 
   /// Set the profile photo provider reference
@@ -34,38 +39,36 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider() {
     _initializeAuthState();
-    // Don't call _loadCachedUserData() here - let the auth state listener handle it
+  }
+
+  // Initialize the provider
+  Future<void> initialize() async {
+    if (_initialized) return;
+    await _checkInitialAuthState();
   }
 
   /// Initialize authentication state listener
   void _initializeAuthState() {
+    _logger.i('AuthProvider - Starting auth state initialization');
+    
+    // Set up listener for auth state changes
     AuthService.authStateChanges.listen((User? user) async {
       _logger.i('AuthProvider - Auth state changed: ${user?.email ?? 'null'}');
-      
-      // Skip if this is the initial state and we're already handling it
-      if (!_initialized && user != null) {
-        _logger.i('AuthProvider - Initial auth state detected, letting _checkInitialAuthState handle it');
-        return;
-      }
-      
+
       _firebaseUser = user;
+      _isLoading = true;
+      notifyListeners();
 
       if (user != null) {
-        // User is signed in
         _logger.i('AuthProvider - Loading user model for: ${user.uid}');
         await _loadUserModel(user.uid);
       } else {
-        // User is signed out
         _logger.i('AuthProvider - User signed out, clearing data');
         _userModel = null;
-        _initialized = false; // Reset initialization state
         await _storageService.clearUser();
         await WorkoutPlanLocalStorageService.clearWorkoutPlan();
-
-        // Cancel workout notifications when user is signed out
         await NotificationService.cancelWorkoutNotifications();
 
-        // Clear profile photo provider
         if (_profilePhotoProvider != null) {
           _logger.i('AuthProvider - Clearing profile photo provider');
           _profilePhotoProvider!.clear();
@@ -73,41 +76,40 @@ class AuthProvider extends ChangeNotifier {
       }
 
       _error = null;
+      _isLoading = false;
       notifyListeners();
     });
-    
-    // Check initial state after listener is set up
-    _checkInitialAuthState();
   }
 
   Future<void> _checkInitialAuthState() async {
-    if (_initialized) {
-      _logger.i('AuthProvider - Already initialized, skipping initial auth state check');
-      return;
-    }
-    
     try {
       _logger.i('AuthProvider - Starting initial auth state check');
       _isLoading = true;
       notifyListeners();
 
+      _logger.i('AuthProvider - Current state before initialization:');
+      _logger.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
+      _logger.i('  - userModel: ${_userModel?.name ?? 'null'}');
+      _logger.i('  - initialized: $_initialized');
+
       // Wait a bit for Firebase to be fully ready
       await Future.delayed(const Duration(milliseconds: 100));
-      
+
       final currentFirebaseUser = AuthService.currentUser;
-      _logger.i('AuthProvider - Firebase currentUser check result: ${currentFirebaseUser?.email ?? 'null'}');
-      
+      _logger.i(
+          'AuthProvider - Firebase currentUser check result: ${currentFirebaseUser?.email ?? 'null'}');
+
       if (currentFirebaseUser != null) {
         _firebaseUser = currentFirebaseUser;
         _logger.i('Initial Firebase user found: ${currentFirebaseUser.email}');
-        
+
         // Load cached user data if Firebase user exists
         final cachedUser = await _storageService.loadUser();
         if (cachedUser != null) {
           _userModel = cachedUser;
           _logger.i('Loaded cached user: ${cachedUser.name}');
         }
-        
+
         // Load fresh user model from Firestore
         await _loadUserModel(currentFirebaseUser.uid);
       } else {
@@ -120,19 +122,19 @@ class AuthProvider extends ChangeNotifier {
           _logger.i('No Firebase user and no cached user data');
         }
       }
-      
+
       _initialized = true;
+      _isLoading = false;
+      notifyListeners();
       _logger.i('AuthProvider - Initial auth state check completed');
       logAuthState();
     } catch (e) {
       _logger.e('Error checking initial auth state: $e');
-    } finally {
+      _initialized = true;
       _isLoading = false;
       notifyListeners();
     }
   }
-
-
 
   /// Load user model from Firestore
   Future<void> _loadUserModel(String userId) async {
@@ -240,6 +242,12 @@ class AuthProvider extends ChangeNotifier {
   /// Sign in with Google
   Future<bool> signInWithGoogle() async {
     try {
+      _logger.i('AuthProvider - Starting Google sign in (current state:)');
+      _logger.i('  - isLoading: $_isLoading');
+      _logger.i('  - initialized: $_initialized');
+      _logger.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
+      _logger.i('  - userModel: ${_userModel?.name ?? 'null'}');
+
       _isLoading = true;
       _error = null;
       notifyListeners();

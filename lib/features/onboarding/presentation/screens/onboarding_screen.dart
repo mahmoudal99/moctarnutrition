@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/services/calorie_calculation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -278,12 +279,64 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final mealTimingJson = _data.mealTimingPreferences?.toJson();
     final batchCookingJson = _data.batchCookingPreferences?.toJson();
 
+    // Calculate initial BMR using Mifflin-St Jeor equation
+    double bmr;
+    if (_data.gender.toLowerCase() == 'male') {
+      bmr = 10 * _data.weight + 6.25 * _data.height - 5 * _data.age + 5;
+    } else {
+      bmr = 10 * _data.weight + 6.25 * _data.height - 5 * _data.age - 161;
+    }
+
+    // Calculate initial TDEE
+    double activityMultiplier;
+    switch (_data.selectedActivityLevel) {
+      case ActivityLevel.sedentary:
+        activityMultiplier = 1.2;
+        break;
+      case ActivityLevel.lightlyActive:
+        activityMultiplier = 1.35;
+        break;
+      case ActivityLevel.moderatelyActive:
+        activityMultiplier = 1.55;
+        break;
+      case ActivityLevel.veryActive:
+        activityMultiplier = 1.725;
+        break;
+      case ActivityLevel.extremelyActive:
+        activityMultiplier = 1.9;
+        break;
+    }
+    
+    final initialTdee = bmr * activityMultiplier;
+
+    // Calculate calorie targets using the service
+    final calculatedTargets = CalorieCalculationService.calculateCalorieTargets(
+      UserModel(
+        id: 'temp',
+        email: 'temp@example.com',
+        preferences: UserPreferences(
+          fitnessGoal: _data.selectedFitnessGoal,
+          activityLevel: _data.selectedActivityLevel,
+          dietaryRestrictions: [],
+          preferredWorkoutStyles: [],
+          targetCalories: initialTdee.round(),
+          age: _data.age,
+          weight: _data.weight,
+          height: _data.height,
+          gender: _data.gender,
+        ),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+    );
+
     final preferences = UserPreferences(
       fitnessGoal: _data.selectedFitnessGoal,
       activityLevel: _data.selectedActivityLevel,
       dietaryRestrictions: List<String>.from(_data.selectedDietaryRestrictions),
       preferredWorkoutStyles: List<String>.from(_data.selectedWorkoutStyles),
-      targetCalories: _calculateTargetCalories(),
+      targetCalories: calculatedTargets.dailyTarget, // Use calculated target as initial value
+      calculatedCalorieTargets: calculatedTargets, // Store the full calculation
       workoutNotificationsEnabled: _data.workoutNotificationsEnabled,
       workoutNotificationTime:
           '${_data.workoutNotificationTime.hour.toString().padLeft(2, '0')}:${_data.workoutNotificationTime.minute.toString().padLeft(2, '0')}',

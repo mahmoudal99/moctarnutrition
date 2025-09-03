@@ -330,6 +330,8 @@ class _NutritionPreferencesScreenState
   }
 
   Widget _buildTargetCaloriesSection() {
+    final calculatedTargets = _preferences.calculatedCalorieTargets;
+    
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
@@ -347,14 +349,37 @@ class _NutritionPreferencesScreenState
             ),
           ),
           const SizedBox(height: AppConstants.spacingS),
+          if (calculatedTargets != null) ...[
+            Text(
+              'Calculated Target: ${calculatedTargets.dailyTarget} calories',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppConstants.textSecondary,
+              ),
+            ),
+            Text(
+              'Based on your metrics (BMR: ${calculatedTargets.rmr}, TDEE: ${calculatedTargets.tdee})',
+              style: AppTextStyles.caption.copyWith(
+                color: AppConstants.textTertiary,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingM),
+          ],
           TextField(
             controller: _targetCaloriesController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              hintText: 'Enter target calories (1000-5000)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: calculatedTargets != null 
+                ? 'Override calculated target (1000-5000)'
+                : 'Enter target calories (1000-5000)',
+              border: const OutlineInputBorder(),
+              helperText: 'Leave empty to use calculated target',
             ),
-            onChanged: (value) => _markAsChanged(),
+            onChanged: (value) {
+              if (value.isEmpty && calculatedTargets != null) {
+                _targetCaloriesController.text = calculatedTargets.dailyTarget.toString();
+              }
+              _markAsChanged();
+            },
           ),
         ],
       ),

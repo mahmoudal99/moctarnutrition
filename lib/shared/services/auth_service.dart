@@ -181,6 +181,13 @@ class AuthService {
   static Future<UserModel> signInWithGoogle() async {
     try {
       _logger.i('Attempting Google sign in');
+      
+      // Check if Google Play Services are available (Android only)
+      _logger.i('Checking Google Sign In configuration');
+      if (!await _googleSignIn.isSignedIn()) {
+        _logger.i('User is not signed in with Google, showing sign-in UI');
+      }
+      
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw Exception('Google sign in was cancelled');

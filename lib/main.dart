@@ -9,7 +9,7 @@ import 'features/profile/presentation/screens/account_settings_screen.dart';
 import 'features/profile/presentation/screens/bug_report_screen.dart';
 import 'features/profile/presentation/screens/feedback_screen.dart';
 import 'features/profile/presentation/screens/help_center_screen.dart';
-import 'features/splash/presentation/screens/splash_screen.dart';
+
 import 'features/auth/presentation/screens/auth_screen.dart';
 import 'features/auth/presentation/screens/password_reset_screen.dart';
 import 'features/onboarding/presentation/screens/get_started_screen.dart';
@@ -62,14 +62,16 @@ GoRouter createRouter(AuthProvider authProvider) {
           final authProvider =
               Provider.of<AuthProvider>(context, listen: false);
           
-          // Show splash screen while determining auth state
-          if (authProvider.isLoading) {
-            return const SplashScreen();
-          }
-          
-          // If we have a Firebase user but no user model, still loading
-          if (authProvider.firebaseUser != null && authProvider.userModel == null) {
-            return const SplashScreen();
+          // Show loading indicator while determining auth state
+          if (authProvider.isLoading || (authProvider.firebaseUser != null && authProvider.userModel == null)) {
+            return const Scaffold(
+              backgroundColor: Colors.white,
+              body: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black54),
+                ),
+              ),
+            );
           }
           
           if (!authProvider.isAuthenticated) {
@@ -325,6 +327,9 @@ void main() async {
 
   // Connect auth provider with profile photo provider
   authProvider.setProfilePhotoProvider(profilePhotoProvider);
+
+  // Initialize auth provider
+  await authProvider.initialize();
 
   _router = createRouter(authProvider);
 

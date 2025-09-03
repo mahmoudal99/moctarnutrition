@@ -71,13 +71,27 @@ class _HomeScreenState extends State<HomeScreen> {
         _logger.d(
             'HomeScreen - User preferences: age=${user.preferences.age}, weight=${user.preferences.weight}, height=${user.preferences.height}');
 
+        // Use stored calculated targets if available, otherwise calculate new ones
         try {
-          _calorieTargets =
-              CalorieCalculationService.calculateCalorieTargets(user);
-          _logger.d(
-              'HomeScreen - Calorie targets calculated: ${_calorieTargets?.dailyTarget}');
+          if (user.preferences.calculatedCalorieTargets != null) {
+            _calorieTargets = user.preferences.calculatedCalorieTargets;
+            _logger.d('HomeScreen - Using stored calorie targets: ${_calorieTargets?.dailyTarget}');
+          } else {
+            _calorieTargets = CalorieCalculationService.calculateCalorieTargets(user);
+            _logger.d('HomeScreen - Calorie targets calculated: ${_calorieTargets?.dailyTarget}');
+            
+            // Update user preferences with new calculations
+            final updatedPreferences = user.preferences.copyWith(
+              calculatedCalorieTargets: _calorieTargets,
+            );
+            final updatedUser = user.copyWith(
+              preferences: updatedPreferences,
+              updatedAt: DateTime.now(),
+            );
+            await authProvider.updateUserProfile(updatedUser);
+          }
         } catch (e) {
-          _logger.e('HomeScreen - Error calculating calorie targets: $e');
+          _logger.e('HomeScreen - Error handling calorie targets: $e');
         }
 
         // Load meal plan if needed

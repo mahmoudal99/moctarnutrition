@@ -144,6 +144,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, MealPlanProvider>(
       builder: (context, authProvider, mealPlanProvider, child) {
+        // Get the appropriate calorie target
+        final user = authProvider.userModel;
+        final targetCalories = user?.preferences.targetCalories ?? 
+            user?.preferences.calculatedCalorieTargets?.dailyTarget ?? 2000;
         // Handle AuthProvider loading state
         if (authProvider.isLoading) {
           return const MealPlanLoadingState();

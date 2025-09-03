@@ -29,6 +29,7 @@
 			<string>com.googleusercontent.apps.792889242433-1no74ifl2t2f18q7bsbh1n8igjcnni6f</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>com.nutrition.muktar</string>
 				<string>com.googleusercontent.apps.792889242433-1no74ifl2t2f18q7bsbh1n8igjcnni6f</string>
 			</array>
 		</dict>
