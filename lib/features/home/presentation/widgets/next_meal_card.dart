@@ -144,7 +144,7 @@ class NextMealCard extends StatelessWidget {
           children: [
             Icon(
               Icons.restaurant_outlined,
-              size: 48,
+              size: 24,
               color: Colors.grey[400],
             ),
             const SizedBox(height: 16),
@@ -155,7 +155,7 @@ class NextMealCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Complete your meal plan to see upcoming meals',
+              'Your next meal will show here when your meal plan is ready!',
               style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
