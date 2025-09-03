@@ -135,7 +135,7 @@ class MealPrepProgressIndicator extends StatelessWidget {
         LinearProgressIndicator(
           value: progress,
           backgroundColor: AppConstants.textTertiary.withOpacity(0.2),
-          valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
+          valueColor: const AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
           minHeight: 8,
         ),
         const SizedBox(height: AppConstants.spacingS),

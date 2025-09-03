@@ -230,7 +230,7 @@ class NextMealCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: AppConstants.spacingS,
                   ),
                   Container(

@@ -217,8 +217,8 @@ class _MealPrepDemoState extends State<MealPrepDemo> {
   }
 
   Widget _buildWaitingStateDemo() {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(

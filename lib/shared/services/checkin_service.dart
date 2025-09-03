@@ -244,7 +244,7 @@ class CheckinService {
       int currentStreak = 0;
       int longestStreak = 0;
       int tempStreak = 0;
-      DateTime? lastWeek = null;
+      DateTime? lastWeek;
 
       for (final checkin in sortedCheckins) {
         if (lastWeek == null) {

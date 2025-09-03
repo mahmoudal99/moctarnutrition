@@ -162,11 +162,6 @@ class _SalesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Dummy data
     final totalBalance = '€25,640.00';
-    final stats = [
-      _SalesStat('Total Earnings', '€12,235.99', '+20.46%', true),
-      _SalesStat('Number of Sales', '€31,890.00', '-3.46%', false),
-      _SalesStat('Product Views', ' 129,781', '+8.30%', true),
-    ];
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

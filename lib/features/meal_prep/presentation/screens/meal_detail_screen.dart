@@ -138,7 +138,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                 color: AppConstants.textPrimary,
               ),
             ),
-            actions: [],
+            actions: const [],
           ),
           body: Stack(
             children: [

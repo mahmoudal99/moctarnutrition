@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
-import 'dart:ui';
 
 class OnboardingScheduleStep extends StatelessWidget {
   const OnboardingScheduleStep({super.key});
