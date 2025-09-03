@@ -19,8 +19,52 @@ class _NutritionPreferencesScreenState
   late UserPreferences _preferences;
 
   // Controllers for text fields
-  final TextEditingController _targetCaloriesController =
-      TextEditingController();
+  Widget _buildMetricCard({
+    required String label,
+    required String value,
+    required String unit,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      decoration: BoxDecoration(
+        color: AppConstants.backgroundColor,
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: AppConstants.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingXS),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppConstants.textPrimary,
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacingXS),
+              Text(
+                unit,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
   final TextEditingController _cuisineController = TextEditingController();
   final TextEditingController _avoidController = TextEditingController();
   final TextEditingController _favoriteController = TextEditingController();
@@ -75,9 +119,6 @@ class _NutritionPreferencesScreenState
     _user = authProvider.userModel!;
     _preferences = _user.preferences;
 
-    // Initialize controllers
-    _targetCaloriesController.text = _preferences.targetCalories.toString();
-
     // Initialize lists
     _selectedDietaryRestrictions = List.from(_preferences.dietaryRestrictions);
     _preferredCuisines = List.from(_preferences.preferredCuisines);
@@ -87,7 +128,6 @@ class _NutritionPreferencesScreenState
 
   @override
   void dispose() {
-    _targetCaloriesController.dispose();
     _cuisineController.dispose();
     _avoidController.dispose();
     _favoriteController.dispose();
@@ -181,18 +221,9 @@ class _NutritionPreferencesScreenState
     setState(() => _isLoading = true);
 
     try {
-      // Validate target calories
-      final targetCalories = int.tryParse(_targetCaloriesController.text);
-      if (targetCalories == null ||
-          targetCalories < 1000 ||
-          targetCalories > 5000) {
-        throw Exception('Target calories must be between 1000 and 5000');
-      }
-
       // Create updated preferences
       final updatedPreferences = _preferences.copyWith(
         dietaryRestrictions: _selectedDietaryRestrictions,
-        targetCalories: targetCalories,
         preferredCuisines: _preferredCuisines,
         foodsToAvoid: _foodsToAvoid,
         favoriteFoods: _favoriteFoods,
@@ -303,13 +334,29 @@ class _NutritionPreferencesScreenState
   }
 
   Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      child: Text(
-        title,
-        style: AppTextStyles.heading5.copyWith(
-          color: AppConstants.textPrimary,
-        ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingL),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: AppTextStyles.caption.copyWith(
+              color: AppConstants.primaryColor,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingXS),
+          Container(
+            width: 32,
+            height: 2,
+            decoration: BoxDecoration(
+              color: AppConstants.primaryColor,
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -333,54 +380,76 @@ class _NutritionPreferencesScreenState
     final calculatedTargets = _preferences.calculatedCalorieTargets;
     
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: const EdgeInsets.all(AppConstants.spacingL),
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(color: AppConstants.borderColor),
+        borderRadius: BorderRadius.circular(AppConstants.radiusL),
+        border: Border.all(
+          color: AppConstants.textTertiary.withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Daily Target Calories',
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Daily Target Calories',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppConstants.textPrimary,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingM,
+                  vertical: AppConstants.spacingS,
+                ),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                ),
+                child: Text(
+                  '${calculatedTargets?.dailyTarget ?? "Calculating..."} cal',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppConstants.primaryColor,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: AppConstants.spacingM),
           if (calculatedTargets != null) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMetricCard(
+                    label: 'BMR',
+                    value: '${calculatedTargets.rmr}',
+                    unit: 'cal',
+                  ),
+                ),
+                const SizedBox(width: AppConstants.spacingM),
+                Expanded(
+                  child: _buildMetricCard(
+                    label: 'TDEE',
+                    value: '${calculatedTargets.tdee}',
+                    unit: 'cal',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppConstants.spacingM),
             Text(
-              'Calculated Target: ${calculatedTargets.dailyTarget} calories',
+              'Your daily calorie target is automatically calculated based on your metrics, activity level, and fitness goals.',
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppConstants.textSecondary,
               ),
             ),
-            Text(
-              'Based on your metrics (BMR: ${calculatedTargets.rmr}, TDEE: ${calculatedTargets.tdee})',
-              style: AppTextStyles.caption.copyWith(
-                color: AppConstants.textTertiary,
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingM),
           ],
-          TextField(
-            controller: _targetCaloriesController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: calculatedTargets != null 
-                ? 'Override calculated target (1000-5000)'
-                : 'Enter target calories (1000-5000)',
-              border: const OutlineInputBorder(),
-              helperText: 'Leave empty to use calculated target',
-            ),
-            onChanged: (value) {
-              if (value.isEmpty && calculatedTargets != null) {
-                _targetCaloriesController.text = calculatedTargets.dailyTarget.toString();
-              }
-              _markAsChanged();
-            },
-          ),
         ],
       ),
     );
@@ -390,24 +459,69 @@ class _NutritionPreferencesScreenState
     return Column(
       children: [
         // Add new cuisine
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _cuisineController,
-                decoration: const InputDecoration(
-                  hintText: 'Add a cuisine',
-                  border: OutlineInputBorder(),
+        Container(
+          padding: const EdgeInsets.all(AppConstants.spacingL),
+          decoration: BoxDecoration(
+            color: AppConstants.surfaceColor,
+            borderRadius: BorderRadius.circular(AppConstants.radiusL),
+            border: Border.all(
+              color: AppConstants.textTertiary.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Add Cuisine',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppConstants.textPrimary,
                 ),
-                onSubmitted: (_) => _addCuisine(),
               ),
-            ),
-            const SizedBox(width: AppConstants.spacingS),
-            ElevatedButton(
-              onPressed: _addCuisine,
-              child: const Text('Add'),
-            ),
-          ],
+              const SizedBox(height: AppConstants.spacingS),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _cuisineController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter cuisine name',
+                        hintStyle: AppTextStyles.bodyMedium.copyWith(
+                          color: AppConstants.textTertiary,
+                        ),
+                        filled: true,
+                        fillColor: AppConstants.backgroundColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppConstants.spacingM,
+                          vertical: AppConstants.spacingM,
+                        ),
+                      ),
+                      onSubmitted: (_) => _addCuisine(),
+                    ),
+                  ),
+                  const SizedBox(width: AppConstants.spacingM),
+                  ElevatedButton(
+                    onPressed: _addCuisine,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppConstants.spacingL,
+                        vertical: AppConstants.spacingM,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                      ),
+                    ),
+                    child: const Text('Add'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: AppConstants.spacingM),
         // Selected cuisines
@@ -416,10 +530,48 @@ class _NutritionPreferencesScreenState
             spacing: AppConstants.spacingS,
             runSpacing: AppConstants.spacingS,
             children: _preferredCuisines.map((cuisine) {
-              return Chip(
-                label: Text(cuisine),
-                onDeleted: () => _removeCuisine(cuisine),
-                deleteIcon: const Icon(Icons.close, size: 18),
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingM,
+                  vertical: AppConstants.spacingS,
+                ),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                  border: Border.all(
+                    color: AppConstants.primaryColor.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      cuisine,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppConstants.primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: AppConstants.spacingS),
+                    InkWell(
+                      onTap: () => _removeCuisine(cuisine),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: AppConstants.primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          size: 16,
+                          color: AppConstants.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               );
             }).toList(),
           ),
@@ -443,10 +595,22 @@ class _NutritionPreferencesScreenState
             Expanded(
               child: TextField(
                 controller: _avoidController,
-                decoration: const InputDecoration(
-                  hintText: 'Add a food to avoid',
-                  border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                hintText: 'Enter food to avoid',
+                hintStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppConstants.textTertiary,
                 ),
+                filled: true,
+                fillColor: AppConstants.backgroundColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingM,
+                  vertical: AppConstants.spacingM,
+                ),
+              ),
                 onSubmitted: (_) => _addFoodToAvoid(),
               ),
             ),
@@ -492,10 +656,22 @@ class _NutritionPreferencesScreenState
             Expanded(
               child: TextField(
                 controller: _favoriteController,
-                decoration: const InputDecoration(
-                  hintText: 'Add a favorite food',
-                  border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                hintText: 'Enter favorite food',
+                hintStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppConstants.textTertiary,
                 ),
+                filled: true,
+                fillColor: AppConstants.backgroundColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingM,
+                  vertical: AppConstants.spacingM,
+                ),
+              ),
                 onSubmitted: (_) => _addFavoriteFood(),
               ),
             ),
@@ -540,44 +716,47 @@ class _NutritionPreferencesScreenState
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
       child: Material(
         color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppConstants.radiusL),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+          borderRadius: BorderRadius.circular(AppConstants.radiusL),
           child: Container(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingL,
+              vertical: AppConstants.spacingM,
+            ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppConstants.primaryColor.withOpacity(0.08)
+                  ? AppConstants.primaryColor.withOpacity(0.05)
                   : AppConstants.surfaceColor,
               border: Border.all(
                 color: isSelected
-                    ? AppConstants.primaryColor.withOpacity(0.3)
-                    : AppConstants.textTertiary.withOpacity(0.2),
-                width: isSelected ? 1.5 : 1,
+                    ? AppConstants.primaryColor
+                    : AppConstants.textTertiary.withOpacity(0.1),
+                width: isSelected ? 2 : 1,
               ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              boxShadow: isSelected ? AppConstants.shadowS : null,
+              borderRadius: BorderRadius.circular(AppConstants.radiusL),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppConstants.primaryColor
-                        : AppConstants.textTertiary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                        : AppConstants.primaryColor.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(AppConstants.radiusL),
                   ),
                   child: Icon(
                     icon,
                     color: isSelected
                         ? AppConstants.surfaceColor
-                        : AppConstants.textSecondary,
-                    size: 20,
+                        : AppConstants.primaryColor,
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: AppConstants.spacingM),
