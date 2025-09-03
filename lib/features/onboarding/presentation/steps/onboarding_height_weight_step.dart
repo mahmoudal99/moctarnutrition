@@ -283,6 +283,10 @@ class _OnboardingHeightWeightStepState
                 ListWheelScrollView(
                   itemExtent: 40,
                   diameterRatio: 1.5,
+                  physics: const FixedExtentScrollPhysics(),
+                  magnification: 1.3,
+                  useMagnifier: true,
+                  overAndUnderCenterOpacity: 0.5,
                   controller:
                       FixedExtentScrollController(initialItem: _feet - 2),
                   onSelectedItemChanged: (index) {
@@ -386,6 +390,10 @@ class _OnboardingHeightWeightStepState
                 ListWheelScrollView(
                   itemExtent: 40,
                   diameterRatio: 1.5,
+                  physics: const FixedExtentScrollPhysics(),
+                  magnification: 1.3,
+                  useMagnifier: true,
+                  overAndUnderCenterOpacity: 0.5,
                   controller:
                       FixedExtentScrollController(initialItem: _inches - 3),
                   onSelectedItemChanged: (index) {
@@ -489,6 +497,10 @@ class _OnboardingHeightWeightStepState
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
+            physics: const FixedExtentScrollPhysics(),
+            magnification: 1.3,
+            useMagnifier: true,
+            overAndUnderCenterOpacity: 0.5,
             controller: FixedExtentScrollController(
                 initialItem: (_centimeters - 120).round()),
             onSelectedItemChanged: (index) {
@@ -588,6 +600,10 @@ class _OnboardingHeightWeightStepState
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
+            physics: const FixedExtentScrollPhysics(),
+            magnification: 1.3,
+            useMagnifier: true,
+            overAndUnderCenterOpacity: 0.5,
             controller: FixedExtentScrollController(initialItem: _pounds - 80),
             onSelectedItemChanged: (index) {
               HapticFeedback.lightImpact();
@@ -686,6 +702,10 @@ class _OnboardingHeightWeightStepState
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
+            physics: const FixedExtentScrollPhysics(),
+            magnification: 1.3,
+            useMagnifier: true,
+            overAndUnderCenterOpacity: 0.5,
             controller: FixedExtentScrollController(
                 initialItem: ((_kilograms - 36.0) / 0.5).round()),
             onSelectedItemChanged: (index) {

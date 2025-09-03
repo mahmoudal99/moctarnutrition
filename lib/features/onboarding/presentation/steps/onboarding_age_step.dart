@@ -123,36 +123,6 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
         ),
 
         const SizedBox(height: AppConstants.spacingXL),
-
-        // Age Display
-        Container(
-          padding: const EdgeInsets.all(AppConstants.spacingL),
-          decoration: BoxDecoration(
-            color: AppConstants.primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: AppConstants.primaryColor.withOpacity(0.3),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.cake,
-                color: AppConstants.primaryColor,
-                size: 24,
-              ),
-              const SizedBox(width: AppConstants.spacingS),
-              Text(
-                '$_calculatedAge years old',
-                style: AppTextStyles.heading4.copyWith(
-                  color: AppConstants.primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -223,6 +193,10 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
+            physics: const FixedExtentScrollPhysics(),
+            magnification: 1.3,
+            useMagnifier: true,
+            overAndUnderCenterOpacity: 0.5,
             controller:
                 FixedExtentScrollController(initialItem: _selectedDay - 1),
             onSelectedItemChanged: (index) {
@@ -341,6 +315,10 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
+            physics: const FixedExtentScrollPhysics(),
+            magnification: 1.3,
+            useMagnifier: true,
+            overAndUnderCenterOpacity: 0.5,
             controller:
                 FixedExtentScrollController(initialItem: _selectedMonth - 1),
             onSelectedItemChanged: (index) {
@@ -450,6 +428,10 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
           ListWheelScrollView(
             itemExtent: 40,
             diameterRatio: 1.5,
+            physics: const FixedExtentScrollPhysics(),
+            magnification: 1.3,
+            useMagnifier: true,
+            overAndUnderCenterOpacity: 0.5,
             controller: FixedExtentScrollController(
                 initialItem: endYear - _selectedYear),
             onSelectedItemChanged: (index) {

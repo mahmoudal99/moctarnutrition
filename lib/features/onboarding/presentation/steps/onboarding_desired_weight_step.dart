@@ -107,27 +107,18 @@ class _OnboardingDesiredWeightStepState
                   }
                   return false;
                 },
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  controller: _weightController,
-                  itemCount: 130, // (100.5-36)*2 + 1
-                  itemBuilder: (context, index) {
-                    double weight = 36.0 + (index * 0.5);
-                    bool isSelected = (weight == _currentWeight);
-
-                    return Container(
-                      width: 60,
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${weight.toStringAsFixed(1)}',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: isSelected
-                              ? AppConstants.textPrimary
-                              : AppConstants.textSecondary.withOpacity(0.4),
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      controller: _weightController,
+                      padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth / 2 - 30), // Half container width minus half item width
+                      itemCount: 130, // (100.5-36)*2 + 1
+                      itemBuilder: (context, index) {
+                        double weight = 36.0 + (index * 0.5);
+                        bool isSelected = (weight == _currentWeight);
+                        return _buildWeightItem(weight, isSelected);
+                      },
                     );
                   },
                 ),
@@ -161,6 +152,22 @@ class _OnboardingDesiredWeightStepState
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildWeightItem(double weight, bool isSelected) {
+    return Container(
+      width: 60,
+      alignment: Alignment.center,
+      child: Text(
+        '${weight.toStringAsFixed(1)}',
+        style: AppTextStyles.bodyLarge.copyWith(
+          color: isSelected
+              ? AppConstants.textPrimary
+              : AppConstants.textSecondary.withOpacity(0.4),
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
     );
   }
 }

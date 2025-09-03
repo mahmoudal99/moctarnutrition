@@ -17,26 +17,45 @@ class OnboardingGenderStep extends StatefulWidget {
 }
 
 class _OnboardingGenderStepState extends State<OnboardingGenderStep> {
+  String? _selectedGender;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedGender = widget.selectedGender;
+  }
+
+  @override
+  void didUpdateWidget(OnboardingGenderStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedGender != widget.selectedGender) {
+      _selectedGender = widget.selectedGender;
+    }
+  }
+
+  void _handleGenderSelection(String gender) {
+    setState(() {
+      _selectedGender = gender;
+    });
+    widget.onSelect(gender);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildGenderOption('Male', Icons.male, widget.selectedGender == 'Male',
+        _buildGenderOption('Male', Icons.male, _selectedGender == 'Male',
             () {
           HapticFeedback.lightImpact();
-          setState(() {
-            widget.onSelect('Male');
-          });
+          _handleGenderSelection('Male');
         }),
         const SizedBox(height: AppConstants.spacingM),
         _buildGenderOption(
-            'Female', Icons.female, widget.selectedGender == 'Female', () {
+            'Female', Icons.female, _selectedGender == 'Female', () {
           HapticFeedback.lightImpact();
-          setState(() {
-            widget.onSelect('Female');
-          });
+          _handleGenderSelection('Female');
         }),
       ],
     );
