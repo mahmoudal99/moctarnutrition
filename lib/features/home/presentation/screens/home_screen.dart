@@ -480,6 +480,48 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showMealPlanRequiredMessage() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.restaurant_menu,
+              size: 48,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Meal Plan Required',
+              style: AppTextStyles.heading5,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'You can log food once your meal plan is ready.',
+              style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Got it'),
+              ),
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+    );
+  }
+
   Widget _buildNoDataCard(String title, String message) {
     return Container(
       width: double.infinity,
@@ -565,6 +607,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 10), // Space between streak and search icon
             IconButton(
               onPressed: () async {
+                final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+                if (mealPlanProvider.mealPlan == null) {
+                  _showMealPlanRequiredMessage();
+                  return;
+                }
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -585,6 +632,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 8), // Space between search and barcode scanner
             IconButton(
               onPressed: () async {
+                final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+                if (mealPlanProvider.mealPlan == null) {
+                  _showMealPlanRequiredMessage();
+                  return;
+                }
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
