@@ -24,8 +24,8 @@ class OnboardingStepHeader extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  width: step.icon.contains("arrow") ? 100 : 64,
-                  height: step.icon.contains("arrow") ? 100 : 64,
+                  width: step.icon.contains("arrow") ? 80 : 48,
+                  height: step.icon.contains("arrow") ? 80 : 48,
                   decoration: const BoxDecoration(),
                   child: Lottie.asset(
                     "assets/animations/${step.icon}",
@@ -44,21 +44,20 @@ class OnboardingStepHeader extends StatelessWidget {
                 SizedBox(
                     height: step.icon.contains("arrow")
                         ? 0
-                        : AppConstants.spacingM),
+                        : AppConstants.spacingS),
                 Text(
                   step.title,
-                  style: AppTextStyles.heading4,
+                  style: AppTextStyles.heading5,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppConstants.spacingS),
+                const SizedBox(height: AppConstants.spacingXS),
                 Text(
                   step.subtitle,
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: AppConstants.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppConstants.spacingS),
               ],
             ),
           ),

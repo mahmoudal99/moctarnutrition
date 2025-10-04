@@ -18,7 +18,10 @@ class OnboardingStepPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingL,
+        vertical: AppConstants.spacingM,
+      ),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),
         transitionBuilder: (Widget child, Animation<double> animation) {
@@ -40,7 +43,7 @@ class OnboardingStepPage extends StatelessWidget {
           key: ValueKey(stepIndex),
           children: [
             OnboardingStepHeader(step: step),
-            const SizedBox(height: AppConstants.spacingXL),
+            const SizedBox(height: AppConstants.spacingM),
             content,
             const SizedBox(height: AppConstants.spacingL),
           ],

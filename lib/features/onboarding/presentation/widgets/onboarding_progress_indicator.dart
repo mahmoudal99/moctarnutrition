@@ -17,7 +17,7 @@ class OnboardingProgressIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingL,
-        vertical: AppConstants.spacingM,
+        vertical: AppConstants.spacingS,
       ),
       child: Column(
         children: [
@@ -42,14 +42,14 @@ class OnboardingProgressIndicator extends StatelessWidget {
               );
             }),
           ),
-          const SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: AppConstants.spacingXS),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: Text(
               '${currentPage + 1} of ${steps.length}',
               key: ValueKey(currentPage),
               style: AppTextStyles.caption.copyWith(
-                fontSize: 12,
+                fontSize: 11,
                 color: AppConstants.textTertiary,
               ),
             ),

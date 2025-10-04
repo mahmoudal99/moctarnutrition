@@ -6,78 +6,144 @@ class OnboardingWelcomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return const Padding(
+      padding: EdgeInsets.only(top: 40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ActivityCardsStack(),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivityCardsStack extends StatefulWidget {
+  const _ActivityCardsStack();
+
+  @override
+  State<_ActivityCardsStack> createState() => _ActivityCardsStackState();
+}
+
+class _ActivityCardsStackState extends State<_ActivityCardsStack> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  final List<String> _images = [
+    'assets/images/moc_one.jpg',
+    'assets/images/moc_two.jpg',
+    'assets/images/moc_three.jpg',
+  ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       children: [
-        _ActivityCardsStack(),
-        SizedBox(height: 24),
+        SizedBox(
+          height: 370,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _images.length,
+            onPageChanged: (page) {
+              setState(() {
+                _currentPage = page;
+              });
+            },
+            itemBuilder: (context, index) {
+              final isActive = index == _currentPage;
+              final offset = (index - _currentPage).toDouble();
+              final rotation = offset * 0.05;
+
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.1,
+                  vertical: 15,
+                ),
+                child: Transform.rotate(
+                  angle: rotation,
+                  child: _ImageCard(
+                    imagePath: _images[index],
+                    isActive: isActive,
+                    elevation: isActive ? 8 : 4 - offset.abs(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        _PageIndicator(
+          currentPage: _currentPage,
+          pageCount: _images.length,
+        ),
       ],
     );
   }
 }
 
-class _ActivityCardsStack extends StatelessWidget {
-  final List<_ActivityCardData> cards = const [
-    _ActivityCardData(
-      title: 'Work mode',
-      time: '10:00am - 11:00am',
-      color: Color(0xFFFFF4D6),
-      accent: Color(0xFFFFB74D),
-      titleColor: Color(0xFFE65100),
-      emoji: '💻',
-      avatars: [
-        'https://randomuser.me/api/portraits/men/11.jpg',
-        'https://randomuser.me/api/portraits/women/12.jpg',
-      ],
-    ),
-    _ActivityCardData(
-      title: 'Gym with Mike',
-      time: '10:00am - 11:00am',
-      color: Color(0xFFFFE0E6),
-      accent: Color(0xFFFF80AB),
-      titleColor: Color(0xFFD81B60),
-      emoji: '💪',
-      avatars: [
-        'https://randomuser.me/api/portraits/men/13.jpg',
-        'https://randomuser.me/api/portraits/women/14.jpg',
-      ],
-    ),
-    _ActivityCardData(
-      title: 'Chest & Biceps',
-      time: '10:00am - 11:00am',
-      color: Color(0xFFD6F5FF),
-      accent: Color(0xFF4FC3F7),
-      titleColor: Color(0xFF0277BD),
-      emoji: '💪',
-      avatars: [
-        'https://randomuser.me/api/portraits/men/2.jpg',
-      ],
-    ),
-  ];
+class _PageIndicator extends StatelessWidget {
+  final int currentPage;
+  final int pageCount;
 
-  const _ActivityCardsStack();
+  const _PageIndicator({
+    required this.currentPage,
+    required this.pageCount,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final List<double> angles = [-0.08, 0.0, 0.08];
-    return SizedBox(
-      height: 200,
-      child: Stack(
-        alignment: Alignment.center,
-        children: List.generate(cards.length, (i) {
-          final card = cards[i];
-          return Positioned(
-            top: 28.0 * i,
-            left: 0,
-            right: 0,
-            child: Transform.rotate(
-              angle: angles[i],
-              child: _ActivityCard(
-                  card: card, elevation: (cards.length - i) * 2.0),
-            ),
-          );
-        }),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(pageCount, (index) {
+        final isActive = index == currentPage;
+        return Container(
+          width: isActive ? 12 : 8,
+          height: isActive ? 12 : 8,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isActive
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).primaryColor.withOpacity(0.3),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _ImageCard extends StatelessWidget {
+  final String imagePath;
+  final bool isActive;
+  final double elevation;
+
+  const _ImageCard({
+    required this.imagePath,
+    required this.isActive,
+    required this.elevation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: elevation,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          height: 250,
+        ),
       ),
     );
   }

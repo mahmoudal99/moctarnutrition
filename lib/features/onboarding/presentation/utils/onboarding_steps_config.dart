@@ -6,8 +6,8 @@ class OnboardingStepsConfig {
   static List<OnboardingStep> getSteps() {
     return [
       OnboardingStep(
-        title: 'KICKSTART YOUR FITNESS JOURNEY',
-        subtitle: 'Your journey to a healthier lifestyle starts here',
+        title: 'WELCOME TO MOCTAR NUTRITION',
+        subtitle: 'Your body. Your pace. Your results.',
         icon: "arrow.json",
         showIconColor: false,
         color: AppConstants.primaryColor,
@@ -20,7 +20,7 @@ class OnboardingStepsConfig {
         showIconColor: false,
       ),
       OnboardingStep(
-        title: 'Height & weight',
+        title: 'Height & Weight',
         subtitle: 'Your height and weight help us tailor your progress plan.',
         icon: "weight.json",
         color: AppConstants.accentColor,
