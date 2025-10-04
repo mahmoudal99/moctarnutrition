@@ -37,11 +37,12 @@ class MealPlanProvider with ChangeNotifier {
   }
 
   /// Load meal plan with caching strategy
-  Future<void> loadMealPlan(String userId) async {
+  Future<void> loadMealPlan(String userId, {String? mealPlanId}) async {
     _setLoading(true);
     _error = null;
 
-    _logger.d('Loading meal plan for user: $userId');
+    _logger.d('Loading meal plan for user: $userId${mealPlanId != null ? ' with mealPlanId: $mealPlanId' : ' (no mealPlanId provided)'}');
+    _logger.d('MealPlanProvider - Current meal plan: ${_mealPlan?.id ?? 'null'}');
 
     try {
       // First, try to load from local storage
@@ -49,22 +50,38 @@ class MealPlanProvider with ChangeNotifier {
           await MealPlanLocalStorageService.loadMealPlan(userId);
 
       if (localMealPlan != null) {
-        _mealPlan = localMealPlan;
-
-        // Check if the local plan is fresh (less than 24 hours old)
-        final isFresh = await MealPlanLocalStorageService.isMealPlanFresh();
-        if (isFresh) {
-          _setLoading(false);
-          return;
+        // If we have a specific mealPlanId, check if the local plan matches
+        if (mealPlanId != null && localMealPlan.id != mealPlanId) {
+          _logger.d('Local meal plan ID does not match requested ID, loading from server');
         } else {
-          _logger.d('Local meal plan is stale, refreshing from server');
+          _mealPlan = localMealPlan;
+
+          // Check if the local plan is fresh (less than 24 hours old)
+          final isFresh = await MealPlanLocalStorageService.isMealPlanFresh();
+          if (isFresh) {
+            _setLoading(false);
+            return;
+          } else {
+            _logger.d('Local meal plan is stale, refreshing from server');
+          }
         }
       }
 
       // Try to load from Firestore (server-side storage)
       try {
-        final firestoreMealPlan =
-            await MealPlanFirestoreService.getMealPlan(userId);
+        MealPlanModel? firestoreMealPlan;
+        
+        if (mealPlanId != null) {
+          // Load by specific meal plan ID first
+          _logger.d('Loading meal plan by ID: $mealPlanId');
+          firestoreMealPlan = await MealPlanFirestoreService.getMealPlanById(mealPlanId);
+        }
+        
+        // If loading by ID failed or no ID provided, fallback to userId search
+        if (firestoreMealPlan == null) {
+          _logger.d('Loading meal plan by userId: $userId');
+          firestoreMealPlan = await MealPlanFirestoreService.getMealPlan(userId);
+        }
 
         if (firestoreMealPlan != null) {
           _logger.d('Found meal plan in Firestore: ${firestoreMealPlan.title}');
@@ -171,14 +188,14 @@ class MealPlanProvider with ChangeNotifier {
   }
 
   /// Refresh meal plan from server (force refresh)
-  Future<void> refreshMealPlan(String userId) async {
-    _logger.d('Force refreshing meal plan for user: $userId');
+  Future<void> refreshMealPlan(String userId, {String? mealPlanId}) async {
+    _logger.d('Force refreshing meal plan for user: $userId${mealPlanId != null ? ' with mealPlanId: $mealPlanId' : ''}');
 
     // Clear local cache to force refresh
     await MealPlanLocalStorageService.clearMealPlan();
 
     // Reload from server
-    await loadMealPlan(userId);
+    await loadMealPlan(userId, mealPlanId: mealPlanId);
   }
 
   /// Clear local cache

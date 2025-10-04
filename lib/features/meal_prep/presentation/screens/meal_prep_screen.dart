@@ -93,8 +93,10 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       }
 
       // Load meal plan for current user
-      _logger.d('Loading meal plan for user ${authProvider.userModel!.id}');
-      await mealPlanProvider.loadMealPlan(authProvider.userModel!.id);
+      final user = authProvider.userModel!;
+      _logger.d('Loading meal plan for user ${user.id}');
+      _logger.d('User mealPlanId: ${user.mealPlanId ?? 'null'}');
+      await mealPlanProvider.loadMealPlan(user.id, mealPlanId: user.mealPlanId);
 
       // Load cheat day from diet preferences
       await _loadCheatDay(authProvider.userModel!.id);

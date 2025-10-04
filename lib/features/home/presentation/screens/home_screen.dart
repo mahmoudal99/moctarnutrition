@@ -149,9 +149,13 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       // Load meal plan for current user
-      _logger.d(
-          'HomeScreen - Loading meal plan for user: ${authProvider.userModel!.id}');
-      await mealPlanProvider.loadMealPlan(authProvider.userModel!.id);
+      final user = authProvider.userModel!;
+      _logger.d('HomeScreen - Loading meal plan for user: ${user.id}');
+      _logger.d('HomeScreen - User email: ${user.email}');
+      _logger.d('HomeScreen - User mealPlanId: ${user.mealPlanId ?? 'null'}');
+      _logger.d('HomeScreen - User role: ${user.role}');
+      _logger.d('HomeScreen - User created at: ${user.createdAt}');
+      await mealPlanProvider.loadMealPlan(user.id, mealPlanId: user.mealPlanId);
       _logger.d(
           'HomeScreen - Meal plan loaded: ${mealPlanProvider.mealPlan?.title ?? 'null'}');
     } catch (e) {

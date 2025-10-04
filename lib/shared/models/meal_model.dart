@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum MealType { breakfast, lunch, dinner, snack }
 
 enum CuisineType {
@@ -81,14 +83,14 @@ class MealPlanModel {
     );
   }
 
-  factory MealPlanModel.fromJson(Map<String, dynamic> json) {
+  factory MealPlanModel.fromJson(Map<String, dynamic> json, {String? documentId}) {
     return MealPlanModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
+      id: json['id'] as String? ?? documentId ?? '',
+      userId: _extractStringFromField(json['userId']) ?? '',
+      title: json['title'] as String? ?? 'Untitled Meal Plan',
+      description: json['description'] as String? ?? 'No description available',
+      startDate: _extractDateTimeFromField(json['startDate']),
+      endDate: _extractDateTimeFromField(json['endDate']),
       mealDays: (json['mealDays'] as List<dynamic>)
           .map((e) => MealDay.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -98,8 +100,8 @@ class MealPlanModel {
       totalFat: (json['totalFat'] as num?)?.toDouble() ?? 0.0,
       dietaryTags: List<String>.from(json['dietaryTags'] ?? []),
       isAIGenerated: json['isAIGenerated'] as bool? ?? true,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: _extractDateTimeFromField(json['createdAt']),
+      updatedAt: _extractDateTimeFromField(json['updatedAt']),
     );
   }
 
@@ -121,6 +123,25 @@ class MealPlanModel {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
+  }
+
+  /// Helper method to extract string from field that might be DocumentReference or String
+  static String? _extractStringFromField(dynamic field) {
+    if (field == null) return null;
+    if (field is String) return field;
+    if (field is DocumentReference) return field.id;
+    return field.toString();
+  }
+
+  /// Helper method to extract DateTime from field that might be Timestamp or String
+  static DateTime _extractDateTimeFromField(dynamic field) {
+    if (field is Timestamp) {
+      return field.toDate();
+    } else if (field is String) {
+      return DateTime.parse(field);
+    } else {
+      throw Exception('Invalid date field type: ${field.runtimeType}');
+    }
   }
 }
 

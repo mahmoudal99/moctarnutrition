@@ -19,12 +19,18 @@ service cloud.firestore {
       // Allow admins to read/write/create any meal plan
       allow read, write, create: if request.auth != null &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      
       // Allow users to read/write their own meal plans (by userId)
       allow read, write: if request.auth != null && 
         resource.data.userId == request.auth.uid;
-      // Allow users to read meal plans assigned to them (by mealPlanId in their profile)
+      
+      // Allow users to read meal plans assigned to them (safer version)
       allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.keys().hasAll(['mealPlanId']) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.mealPlanId != null &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.mealPlanId == mealPlanId;
+      
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
     }
@@ -84,4 +90,4 @@ service cloud.firestore {
       allow read, write: if false;
     }
   }
-} 
+}

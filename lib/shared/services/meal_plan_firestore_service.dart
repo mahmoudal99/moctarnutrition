@@ -13,29 +13,42 @@ class MealPlanFirestoreService {
     try {
       _logger.d('Fetching meal plan for user: $userId');
 
-      // Add timeout to prevent hanging
       final querySnapshot = await _firestore
           .collection(_collectionName)
           .where('userId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .limit(1)
-          .get(const GetOptions(source: Source.serverAndCache))
-          .timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          _logger.w('Firestore query timed out for user: $userId');
-          throw TimeoutException(
-              'Firestore query timed out', const Duration(seconds: 10));
-        },
-      );
+          .get();
+
+      _logger.d('Query completed. Found ${querySnapshot.docs.length} documents');
 
       if (querySnapshot.docs.isNotEmpty) {
         final doc = querySnapshot.docs.first;
-        final mealPlan = MealPlanModel.fromJson(doc.data());
-        _logger.i('Meal plan found: ${mealPlan.id}');
+        final data = doc.data();
+        _logger.d('Meal plan document data: ${data.keys.toList()}');
+        _logger.d('Document userId: ${data['userId']}, Query userId: $userId');
+        
+        final mealPlan = MealPlanModel.fromJson(data, documentId: doc.id);
+        _logger.i('Meal plan found: ${mealPlan.id} - ${mealPlan.title}');
         return mealPlan;
       } else {
         _logger.i('No meal plan found for user: $userId');
+        
+        // Debug: Let's check if there are ANY meal plans for this user without ordering
+        try {
+          final debugQuery = await _firestore
+              .collection(_collectionName)
+              .where('userId', isEqualTo: userId)
+              .get();
+          _logger.d('Debug: Found ${debugQuery.docs.length} meal plans without ordering');
+          for (var doc in debugQuery.docs) {
+            final data = doc.data();
+            _logger.d('  - Plan: ${doc.id}, userId: ${data['userId']}, title: ${data['title']}');
+          }
+        } catch (debugError) {
+          _logger.w('Debug query failed: $debugError');
+        }
+        
         return null;
       }
     } on FirebaseException catch (e) {
@@ -43,7 +56,8 @@ class MealPlanFirestoreService {
       if (e.code == 'failed-precondition') {
         _logger.e(
             'Firestore index error - missing composite index for userId + createdAt');
-        throw Exception('Database index error. Please contact support.');
+        _logger.i('Attempting fallback query without ordering...');
+        return await getMealPlanFallback(userId);
       }
       rethrow;
     } on TimeoutException catch (e) {
@@ -60,22 +74,13 @@ class MealPlanFirestoreService {
     try {
       _logger.d('Fetching meal plan by ID: $mealPlanId');
 
-      // Add timeout to prevent hanging
       final doc = await _firestore
           .collection(_collectionName)
           .doc(mealPlanId)
-          .get(const GetOptions(source: Source.serverAndCache))
-          .timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          _logger.w('Firestore query timed out for meal plan ID: $mealPlanId');
-          throw TimeoutException(
-              'Firestore query timed out', const Duration(seconds: 10));
-        },
-      );
+          .get();
 
       if (doc.exists) {
-        final mealPlan = MealPlanModel.fromJson(doc.data()!);
+        final mealPlan = MealPlanModel.fromJson(doc.data()!, documentId: doc.id);
         _logger.i('Meal plan found: ${mealPlan.id}');
         return mealPlan;
       } else {
@@ -164,7 +169,7 @@ class MealPlanFirestoreService {
           .get();
 
       final mealPlans = querySnapshot.docs
-          .map((doc) => MealPlanModel.fromJson(doc.data()))
+          .map((doc) => MealPlanModel.fromJson(doc.data(), documentId: doc.id))
           .toList();
 
       _logger.i('Found ${mealPlans.length} meal plans in history');
@@ -185,19 +190,11 @@ class MealPlanFirestoreService {
           .collection(_collectionName)
           .where('userId', isEqualTo: userId)
           .limit(1)
-          .get(const GetOptions(source: Source.serverAndCache))
-          .timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          _logger.w('Firestore fallback query timed out for user: $userId');
-          throw TimeoutException(
-              'Firestore query timed out', const Duration(seconds: 10));
-        },
-      );
+          .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         final doc = querySnapshot.docs.first;
-        final mealPlan = MealPlanModel.fromJson(doc.data());
+        final mealPlan = MealPlanModel.fromJson(doc.data(), documentId: doc.id);
         _logger.i('Meal plan found (fallback): ${mealPlan.id}');
         return mealPlan;
       } else {

@@ -1,4 +1,5 @@
 import 'package:champions_gym_app/shared/services/calorie_calculation_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum UserRole { user, trainer, admin }
 
@@ -66,18 +67,18 @@ class UserModel {
         orElse: () => SubscriptionStatus.free,
       ),
       subscriptionExpiry: json['subscriptionExpiry'] != null
-          ? DateTime.parse(json['subscriptionExpiry'] as String)
+          ? _extractDateTimeFromField(json['subscriptionExpiry'])
           : null,
       preferences:
           UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>),
-      selectedTrainerId: json['selectedTrainerId'] as String?,
-      mealPlanId: json['mealPlanId'] as String?,
+      selectedTrainerId: _extractStringFromField(json['selectedTrainerId']),
+      mealPlanId: _extractStringFromField(json['mealPlanId']),
       hasSeenSubscriptionScreen:
           json['hasSeenSubscriptionScreen'] as bool? ?? false,
       hasSeenOnboarding: json['hasSeenOnboarding'] as bool? ?? false,
       hasSeenGetStarted: json['hasSeenGetStarted'] as bool? ?? false,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: _extractDateTimeFromField(json['createdAt']),
+      updatedAt: _extractDateTimeFromField(json['updatedAt']),
     );
   }
 
@@ -136,6 +137,25 @@ class UserModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  /// Helper method to extract string from field that might be DocumentReference or String
+  static String? _extractStringFromField(dynamic field) {
+    if (field == null) return null;
+    if (field is String) return field;
+    if (field is DocumentReference) return field.id;
+    return field.toString();
+  }
+
+  /// Helper method to extract DateTime from field that might be Timestamp or String
+  static DateTime _extractDateTimeFromField(dynamic field) {
+    if (field is Timestamp) {
+      return field.toDate();
+    } else if (field is String) {
+      return DateTime.parse(field);
+    } else {
+      throw Exception('Invalid date field type: ${field.runtimeType}');
+    }
   }
 }
 
