@@ -40,8 +40,6 @@ class OnboardingStepBuilder {
     required Function(BatchCookingPreferences?) onBatchCookingChanged,
     required Function(TimeOfDay?) onTimeChanged,
     required Function(bool) onNotificationsChanged,
-    required VoidCallback onSkip,
-    required VoidCallback onEnable,
     required VoidCallback onComplete,
   }) {
     switch (stepIndex) {
@@ -155,13 +153,11 @@ class OnboardingStepBuilder {
           onPreferencesChanged: onBatchCookingChanged,
         );
       case 15:
-        return OnboardingWorkoutNotificationsStepWithActions(
+        return OnboardingWorkoutNotificationsStep(
           selectedTime: data.workoutNotificationTime,
           notificationsEnabled: data.workoutNotificationsEnabled,
           onTimeChanged: onTimeChanged,
           onNotificationsChanged: onNotificationsChanged,
-          onSkip: onSkip,
-          onEnable: onEnable,
         );
       case 16:
         return OnboardingRatingStep(

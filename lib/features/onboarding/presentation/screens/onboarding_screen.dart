@@ -172,24 +172,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           _data.workoutNotificationsEnabled = enabled;
                         });
                       },
-                      onSkip: () {
-                        _completeOnboarding();
-                      },
-                      onEnable: () async {
-                        final permissionResult = await NotificationService
-                            .requestNotificationPermission();
-                        if (permissionResult.isGranted) {
-                          setState(() {
-                            _data.workoutNotificationsEnabled = true;
-                          });
-                          await NotificationService.showTestNotification();
-                        }
-                        // Go to next step instead of completing onboarding
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
                       onComplete: _completeOnboarding,
                     ),
                   );
@@ -216,6 +198,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 );
               },
               onComplete: _completeOnboarding,
+              onNotificationSkip: () {
+                _completeOnboarding();
+              },
+              onNotificationEnable: () async {
+                final permissionResult = await NotificationService
+                    .requestNotificationPermission();
+                if (permissionResult.isGranted) {
+                  setState(() {
+                    _data.workoutNotificationsEnabled = true;
+                  });
+                  await NotificationService.showTestNotification();
+                }
+                // Go to next step instead of completing onboarding
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              },
             ),
           ],
         ),

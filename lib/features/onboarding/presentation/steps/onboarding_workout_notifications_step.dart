@@ -36,8 +36,14 @@ class _OnboardingWorkoutNotificationsStepState
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    final screenHeight = MediaQuery.of(context).size.height;
+    final availableHeight =
+        screenHeight * 0.5; // Use 50% of screen for centering
+
+    return SizedBox(
+      height: availableHeight,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           // Notification preview card
@@ -219,72 +225,5 @@ class _OnboardingWorkoutNotificationsStepState
       });
       widget.onTimeChanged(picked);
     }
-  }
-
-
-}
-
-// Extension to add bottom action buttons
-class OnboardingWorkoutNotificationsStepWithActions extends StatelessWidget {
-  final TimeOfDay? selectedTime;
-  final bool notificationsEnabled;
-  final ValueChanged<TimeOfDay?> onTimeChanged;
-  final ValueChanged<bool> onNotificationsChanged;
-  final VoidCallback onSkip;
-  final VoidCallback onEnable;
-
-  const OnboardingWorkoutNotificationsStepWithActions({
-    super.key,
-    this.selectedTime,
-    required this.notificationsEnabled,
-    required this.onTimeChanged,
-    required this.onNotificationsChanged,
-    required this.onSkip,
-    required this.onEnable,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.spacingM,
-        vertical: AppConstants.spacingS,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Main content
-          OnboardingWorkoutNotificationsStep(
-            selectedTime: selectedTime,
-            notificationsEnabled: notificationsEnabled,
-            onTimeChanged: onTimeChanged,
-            onNotificationsChanged: onNotificationsChanged,
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: CustomButton(
-                  onPressed: onSkip,
-                  text: 'Not Now',
-                  type: ButtonType.outline,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingM),
-              Expanded(
-                flex: 2,
-                child: CustomButton(
-                  onPressed: onEnable,
-                  text: 'Enable Notifications',
-                  type: ButtonType.primary,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -10,6 +10,8 @@ class OnboardingNavigationButtons extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onNext;
   final VoidCallback? onComplete;
+  final VoidCallback? onNotificationSkip;
+  final VoidCallback? onNotificationEnable;
 
   const OnboardingNavigationButtons({
     super.key,
@@ -19,17 +21,64 @@ class OnboardingNavigationButtons extends StatelessWidget {
     required this.onBack,
     required this.onNext,
     this.onComplete,
+    this.onNotificationSkip,
+    this.onNotificationEnable,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Hide navigation buttons for workout notifications step and rating step since they have their own
+    // Hide navigation buttons for rating step since it has its own complete action
     if (currentPage == 16 ||
         currentPage == 17 ||
         currentPage == totalSteps - 1) {
       return const SizedBox.shrink();
     }
 
+    // Show notification-specific buttons for workout notifications step (step 15)
+    if (currentPage == 15) {
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingL,
+          vertical: AppConstants.spacingM,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: SizedBox(
+                height: 52,
+                child: CustomButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    onNotificationSkip?.call();
+                  },
+                  text: 'Not Now',
+                  type: ButtonType.outline,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppConstants.spacingM),
+            Expanded(
+              flex: 2,
+              child: SizedBox(
+                height: 52,
+                child: CustomButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    onNotificationEnable?.call();
+                  },
+                  text: 'Enable Notifications',
+                  type: ButtonType.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Default navigation buttons (Back & Next)
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(
