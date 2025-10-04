@@ -80,9 +80,7 @@ class _OnboardingGenderStepState extends State<OnboardingGenderStep> {
           width: double.infinity,
           padding: const EdgeInsets.all(AppConstants.spacingM),
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppConstants.primaryColor.withOpacity(0.1)
-                : AppConstants.surfaceColor,
+            color: AppConstants.surfaceColor,
             borderRadius: BorderRadius.circular(AppConstants.radiusM),
             border: Border.all(
               color: isSelected
@@ -106,14 +104,14 @@ class _OnboardingGenderStepState extends State<OnboardingGenderStep> {
                   color: isSelected
                       ? AppConstants.surfaceColor
                       : AppConstants.textSecondary,
-                  size: 24,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: AppConstants.spacingM),
               Expanded(
                 child: Text(
                   gender,
-                  style: AppTextStyles.bodyLarge.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     color: isSelected
                         ? AppConstants.primaryColor

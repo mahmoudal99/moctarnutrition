@@ -47,7 +47,7 @@ class _ActivityCardsStackState extends State<_ActivityCardsStack> {
     return Column(
       children: [
         SizedBox(
-          height: 370,
+          height: 400,
           child: PageView.builder(
             controller: _pageController,
             itemCount: _images.length,
@@ -104,8 +104,8 @@ class _PageIndicator extends StatelessWidget {
       children: List.generate(pageCount, (index) {
         final isActive = index == currentPage;
         return Container(
-          width: isActive ? 12 : 8,
-          height: isActive ? 12 : 8,
+          width: isActive ? 8 : 8,
+          height: isActive ? 8 : 8,
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
             shape: BoxShape.circle,

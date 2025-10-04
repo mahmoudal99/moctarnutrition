@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math' as math;
 import '../../../../core/constants/app_constants.dart';
 
 class OnboardingHeightWeightStep extends StatefulWidget {
@@ -98,6 +99,26 @@ class _OnboardingHeightWeightStepState
     }
   }
 
+  Widget _buildMeterDashes({
+    required int totalItems,
+    required double itemExtent,
+    required double containerHeight,
+    int majorInterval = 5,
+    int minorInterval = 1,
+  }) {
+    return CustomPaint(
+      painter: MeterDashPainter(
+        totalItems: totalItems,
+        itemExtent: itemExtent,
+        containerHeight: containerHeight,
+        majorInterval: majorInterval,
+        minorInterval: minorInterval,
+        dashColor: AppConstants.textSecondary.withOpacity(0.3),
+        majorDashColor: AppConstants.textSecondary.withOpacity(0.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -175,7 +196,7 @@ class _OnboardingHeightWeightStepState
                 children: [
                   Text(
                     'Height',
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -197,7 +218,7 @@ class _OnboardingHeightWeightStepState
                 children: [
                   Text(
                     'Weight',
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -267,6 +288,16 @@ class _OnboardingHeightWeightStepState
                     ),
                   ),
                 ),
+                // Meter dashes
+                Positioned.fill(
+                  child: _buildMeterDashes(
+                    totalItems: 7,
+                    itemExtent: 40,
+                    containerHeight: 200,
+                    majorInterval: 1,
+                    minorInterval: 1,
+                  ),
+                ),
                 // Selection indicator
                 Positioned(
                   top: 80,
@@ -305,7 +336,7 @@ class _OnboardingHeightWeightStepState
                             horizontal: 8, vertical: 4),
                         child: Text(
                           '$feet ft',
-                          style: AppTextStyles.bodyMedium.copyWith(
+                          style: AppTextStyles.bodySmall.copyWith(
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.normal,
@@ -374,6 +405,16 @@ class _OnboardingHeightWeightStepState
                     ),
                   ),
                 ),
+                // Meter dashes
+                Positioned.fill(
+                  child: _buildMeterDashes(
+                    totalItems: 8,
+                    itemExtent: 40,
+                    containerHeight: 200,
+                    majorInterval: 1,
+                    minorInterval: 2,
+                  ),
+                ),
                 // Selection indicator
                 Positioned(
                   top: 80,
@@ -412,7 +453,7 @@ class _OnboardingHeightWeightStepState
                             horizontal: 8, vertical: 4),
                         child: Text(
                           '$inches in',
-                          style: AppTextStyles.bodyMedium.copyWith(
+                          style: AppTextStyles.bodySmall.copyWith(
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.normal,
@@ -481,6 +522,16 @@ class _OnboardingHeightWeightStepState
               ),
             ),
           ),
+          // Meter dashes
+          Positioned.fill(
+            child: _buildMeterDashes(
+              totalItems: 101,
+              itemExtent: 40,
+              containerHeight: 200,
+              majorInterval: 10,
+              minorInterval: 2,
+            ),
+          ),
           // Selection indicator
           Positioned(
             top: 80,
@@ -519,7 +570,7 @@ class _OnboardingHeightWeightStepState
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     '${cm.toInt()} cm',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
@@ -582,6 +633,16 @@ class _OnboardingHeightWeightStepState
                   ],
                 ),
               ),
+            ),
+          ),
+          // Meter dashes
+          Positioned.fill(
+            child: _buildMeterDashes(
+              totalItems: 241,
+              itemExtent: 40,
+              containerHeight: 200,
+              majorInterval: 10,
+              minorInterval: 1,
             ),
           ),
           // Selection indicator
@@ -686,6 +747,16 @@ class _OnboardingHeightWeightStepState
               ),
             ),
           ),
+          // Meter dashes
+          Positioned.fill(
+            child: _buildMeterDashes(
+              totalItems: 129,
+              itemExtent: 40,
+              containerHeight: 200,
+              majorInterval: 5,
+              minorInterval: 1,
+            ),
+          ),
           // Selection indicator
           Positioned(
             top: 80,
@@ -724,7 +795,7 @@ class _OnboardingHeightWeightStepState
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     '${kg.toStringAsFixed(1)} kg',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
@@ -740,4 +811,62 @@ class _OnboardingHeightWeightStepState
       ),
     );
   }
+}
+
+class MeterDashPainter extends CustomPainter {
+  final int totalItems;
+  final double itemExtent;
+  final double containerHeight;
+  final int majorInterval;
+  final int minorInterval;
+  final Color dashColor;
+  final Color majorDashColor;
+
+  MeterDashPainter({
+    required this.totalItems,
+    required this.itemExtent,
+    required this.containerHeight,
+    required this.majorInterval,
+    required this.minorInterval,
+    required this.dashColor,
+    required this.majorDashColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    final startY = (containerHeight - (totalItems * itemExtent)) / 2;
+
+    // Draw dashes for each item
+    for (int i = 0; i < totalItems; i++) {
+      final y = startY + (i * itemExtent) + (itemExtent / 2);
+
+      if (y >= 0 && y <= containerHeight) {
+        final isMajor = i % majorInterval == 0;
+        final isMinor = i % minorInterval == 0 && !isMajor;
+
+        if (isMajor || isMinor) {
+          paint.color = isMajor ? majorDashColor : dashColor;
+
+          // Draw dash only on the left side
+          final dashLength = isMajor ? 12.0 : 8.0;
+          final leftEdge = 6.0; // Distance from left edge
+          final dashStartX = leftEdge;
+          final dashEndX = dashStartX + dashLength;
+
+          canvas.drawLine(
+            Offset(dashStartX, y),
+            Offset(dashEndX, y),
+            paint,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
