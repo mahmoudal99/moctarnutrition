@@ -6,6 +6,7 @@ class OnboardingStep {
   final String icon;
   final Color color;
   bool showIconColor = true;
+  final List<String>? _highlightedWords;
 
   OnboardingStep({
     required this.title,
@@ -13,5 +14,8 @@ class OnboardingStep {
     required this.icon,
     required this.color,
     this.showIconColor = true,
-  });
+    List<String>? highlightedWords,
+  }) : _highlightedWords = highlightedWords;
+
+  List<String> get highlightedWords => _highlightedWords ?? [];
 }
