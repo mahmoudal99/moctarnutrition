@@ -74,84 +74,94 @@ class _OnboardingDesiredWeightStepState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Selected Weight Display
-        Text(
-          '${_currentWeight.toStringAsFixed(1)} kg',
-          style: AppTextStyles.heading1.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-
-        const SizedBox(height: AppConstants.spacingXL),
-
-        // Weight Selector - Ruler-like interface
-        Container(
-          height: 120,
-          margin: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
-          child: Stack(
-            children: [
-              // Ruler background with tick marks
-              CustomPaint(
-                size: Size.infinite,
-                painter: RulerPainter(),
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.5,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Selected Weight Display
+            Text(
+              '${_currentWeight.toStringAsFixed(1)} kg',
+              style: AppTextStyles.heading3.copyWith(
+                fontWeight: FontWeight.bold,
               ),
+            ),
 
-              // Weight Picker - Horizontal scroll
-              NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification notification) {
-                  if (notification is ScrollStartNotification) {
-                    HapticFeedback.lightImpact();
-                  }
-                  return false;
-                },
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      controller: _weightController,
-                      padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth / 2 - 30), // Half container width minus half item width
-                      itemCount: 130, // (100.5-36)*2 + 1
-                      itemBuilder: (context, index) {
-                        double weight = 36.0 + (index * 0.5);
-                        bool isSelected = (weight == _currentWeight);
-                        return _buildWeightItem(weight, isSelected);
-                      },
-                    );
-                  },
-                ),
-              ),
+            const SizedBox(height: AppConstants.spacingXL),
 
-              // Selection indicator - thick black line in center
-              Positioned(
-                top: 45,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Container(
-                    width: 3,
-                    height: 30,
-                    color: AppConstants.textPrimary,
+            // Weight Selector - Ruler-like interface
+            Container(
+              height: 120,
+              margin:
+                  const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
+              child: Stack(
+                children: [
+                  // Ruler background with tick marks
+                  CustomPaint(
+                    size: Size.infinite,
+                    painter: RulerPainter(),
                   ),
-                ),
-              ),
 
-              // Grey background for right side
-              Positioned(
-                top: 0,
-                right: 0,
-                bottom: 0,
-                width: MediaQuery.of(context).size.width * 0.4,
-                child: Container(
-                  color: AppConstants.textTertiary.withOpacity(0.1),
-                ),
+                  // Weight Picker - Horizontal scroll
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification notification) {
+                      if (notification is ScrollStartNotification) {
+                        HapticFeedback.lightImpact();
+                      }
+                      return false;
+                    },
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          controller: _weightController,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: constraints.maxWidth / 2 - 30),
+                          // Half container width minus half item width
+                          itemCount: 130,
+                          // (100.5-36)*2 + 1
+                          itemBuilder: (context, index) {
+                            double weight = 36.0 + (index * 0.5);
+                            bool isSelected = (weight == _currentWeight);
+                            return _buildWeightItem(weight, isSelected);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Selection indicator - thick black line in center
+                  Positioned(
+                    top: 45,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        width: 3,
+                        height: 30,
+                        color: AppConstants.textPrimary,
+                      ),
+                    ),
+                  ),
+
+                  // Grey background for right side
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: Container(
+                      color: AppConstants.textTertiary.withOpacity(0.1),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 

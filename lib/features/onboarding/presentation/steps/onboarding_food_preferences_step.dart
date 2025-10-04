@@ -50,7 +50,7 @@ class OnboardingFoodPreferencesStep extends StatelessWidget {
           _buildInputSection(
             context,
             label: 'Foods to Avoid',
-            hint: 'e.g. pork, dairy, spicy',
+            hint: 'e.g. pork, dairy, mushrooms',
             items: foodsToAvoid,
             controller: avoidController,
             onAdd: onAddAvoid,
@@ -85,7 +85,7 @@ class OnboardingFoodPreferencesStep extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+          style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppConstants.spacingS),
         if (items.isNotEmpty) ...[

@@ -98,24 +98,7 @@ class _SelectionCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : AppConstants.textTertiary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isSelected
-                        ? AppConstants.surfaceColor
-                        : AppConstants.textSecondary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacingM),
+                const SizedBox(width: AppConstants.spacingS),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

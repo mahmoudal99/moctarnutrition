@@ -60,70 +60,75 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Day, Month, Year Selection
-        Row(
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.5,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Day Picker
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Day',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            // Day, Month, Year Selection
+            Row(
+              children: [
+                // Day Picker
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Day',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingM),
+                      _buildDayPicker(),
+                    ],
                   ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  _buildDayPicker(),
-                ],
-              ),
-            ),
+                ),
 
-            const SizedBox(width: AppConstants.spacingL),
+                const SizedBox(width: AppConstants.spacingL),
 
-            // Month Picker
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Month',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                // Month Picker
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Month',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingM),
+                      _buildMonthPicker(),
+                    ],
                   ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  _buildMonthPicker(),
-                ],
-              ),
-            ),
+                ),
 
-            const SizedBox(width: AppConstants.spacingL),
+                const SizedBox(width: AppConstants.spacingL),
 
-            // Year Picker
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Year',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                // Year Picker
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Year',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingM),
+                      _buildYearPicker(),
+                    ],
                   ),
-                  const SizedBox(height: AppConstants.spacingM),
-                  _buildYearPicker(),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
-
-        const SizedBox(height: AppConstants.spacingXL),
-      ],
+      ),
     );
   }
 
@@ -219,7 +224,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     day.toString(),
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
@@ -343,7 +348,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     months[index],
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
@@ -456,7 +461,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     year.toString(),
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
