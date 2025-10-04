@@ -145,7 +145,7 @@ class SquigglyUnderlinePainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
+      ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
 
     final path = Path();

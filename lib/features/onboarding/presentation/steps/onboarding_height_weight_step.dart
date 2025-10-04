@@ -147,7 +147,7 @@ class _OnboardingHeightWeightStepState
                   ),
                   child: Text(
                     'Imperial',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight:
                           _isImperial ? FontWeight.bold : FontWeight.normal,
                       color: _isImperial
@@ -170,7 +170,7 @@ class _OnboardingHeightWeightStepState
                   ),
                   child: Text(
                     'Metric',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight:
                           !_isImperial ? FontWeight.bold : FontWeight.normal,
                       color: !_isImperial
@@ -682,7 +682,7 @@ class _OnboardingHeightWeightStepState
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     '$pounds lb',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
