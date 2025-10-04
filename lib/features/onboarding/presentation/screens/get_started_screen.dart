@@ -12,11 +12,38 @@ class GetStartedScreen extends StatefulWidget {
   State<GetStartedScreen> createState() => _GetStartedScreenState();
 }
 
-class _GetStartedScreenState extends State<GetStartedScreen> {
+class _GetStartedScreenState extends State<GetStartedScreen>
+    with SingleTickerProviderStateMixin {
   final PageController _pageController = PageController();
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    // Start the animation after a short delay
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        _slideController.forward();
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _slideController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -36,9 +63,11 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
           children: [
             // Main content can go here if needed
             // Bottom curved section
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
+            SlideTransition(
+              position: _slideAnimation,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 24, left: 0, right: 0),
                 decoration: const BoxDecoration(
@@ -133,6 +162,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                   ),
                 ),
               ),
+            ),
             ),
           ],
         ),
