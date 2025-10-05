@@ -56,9 +56,9 @@ class _OnboardingHeightWeightStepState
     // Ensure values are within reasonable bounds
     _feet = _feet.clamp(2, 8);
     _inches = _inches.clamp(3, 10);
-    _pounds = _pounds.clamp(80, 320);
+    _pounds = _pounds.clamp(80, 500);
     _centimeters = _centimeters.clamp(120.0, 220.0);
-    _kilograms = _kilograms.clamp(36.0, 100.5);
+    _kilograms = _kilograms.clamp(36.0, 200.5);
   }
 
   void _toggleUnit() {
