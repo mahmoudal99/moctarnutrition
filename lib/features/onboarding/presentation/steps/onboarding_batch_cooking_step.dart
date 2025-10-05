@@ -115,19 +115,6 @@ class _OnboardingBatchCookingStepState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Batch Cooking Preferences',
-            style: AppTextStyles.heading4,
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          Text(
-            'Tell us about your meal preparation habits',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppConstants.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-
           // Cooking Frequency Section
           _buildFrequencySection(),
           const SizedBox(height: AppConstants.spacingL),
