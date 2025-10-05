@@ -282,8 +282,9 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
   }
 
   Widget _buildResultsSection() {
-    if (_proteinTargets == null || _calorieTargets == null)
+    if (_proteinTargets == null || _calorieTargets == null) {
       return const SizedBox.shrink();
+    }
 
     return Expanded(
       child: SingleChildScrollView(
@@ -428,7 +429,7 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
                   context.go('/subscription');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.textPrimary,
+                  backgroundColor: Colors.black,
                   foregroundColor: AppConstants.surfaceColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -439,7 +440,7 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
                   'Let\'s get started!',
                   style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppConstants.surfaceColor,
+                    color: Colors.white,
                   ),
                 ),
               ),
