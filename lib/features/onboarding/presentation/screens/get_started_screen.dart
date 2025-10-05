@@ -52,120 +52,162 @@ class _GetStartedScreenState extends State<GetStartedScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-            image: DecorationImage(
+      body: Stack(
+        children: [
+          // Background Image
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
                 image: AssetImage(
                   "assets/images/get_started_background.jpg",
                 ),
-                fit: BoxFit.cover)),
-        child: Stack(
-          children: [
-            // Main content can go here if needed
-            // Bottom curved section
-            SlideTransition(
-              position: _slideAnimation,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.only(top: 24, left: 0, right: 0),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(36),
-                    topRight: Radius.circular(36),
-                  ),
-                ),
-                child: SafeArea(
-                  top: false,
-                  bottom: true,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 140),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ACHIEVE YOUR FITNESS\nGOALS, YOUR WAY',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.aBeeZee(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                HapticFeedback.mediumImpact();
-                                await OnboardingService.markGetStartedAsSeen();
-                                if (mounted) {
-                                  context.go('/onboarding');
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppConstants.primaryColor,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Container(),
+          ),
+          // Gradient Overlay
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.5),
+                  Colors.black.withOpacity(0.8),
+                  Colors.black,
+                ],
+                stops: const [0.0, 0.6, 0.7, 0.8, 1.0],
+              ),
+            ),
+          ),
+          // Content
+          SlideTransition(
+            position: _slideAnimation,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: SafeArea(
+                top: false,
+                bottom: true,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 5.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Achieve your fitness\n',
+                              style: GoogleFonts.aBeeZee(
+                                fontSize: 24,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white,
                               ),
-                              child: Text(
-                                'Get Started',
-                                style: GoogleFonts.nunitoSans(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
+                            ),
+                            TextSpan(
+                              text: 'goals',
+                              style: GoogleFonts.ptSerif(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                fontStyle: FontStyle.italic,
+                                color: Colors.white,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ', your way',
+                              style: GoogleFonts.aBeeZee(
+                                fontSize: 24,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: AppConstants.spacingS,
+                      ),
+                      Text(
+                        "Build strength, balance and energy\none session at a time.",
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.caption,
+                      ),
+                      const SizedBox(
+                        height: AppConstants.spacingS,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              HapticFeedback.mediumImpact();
+                              await OnboardingService.markGetStartedAsSeen();
+                              if (mounted) {
+                                context.go('/onboarding');
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              'Get Started',
+                              style: GoogleFonts.nunitoSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
                               ),
                             ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () async {
-                            await OnboardingService.markGetStartedAsSeen();
-                            await OnboardingService.markOnboardingAsSeen();
-                            if (mounted) {
-                              context.go('/auth');
-                            }
-                          },
-                          child: Column(
-                            children: [
-                              Text(
-                                'Already a Member?',
-                                style: GoogleFonts.nunitoSans(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black,
-                                ),
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          await OnboardingService.markGetStartedAsSeen();
+                          await OnboardingService.markOnboardingAsSeen();
+                          if (mounted) {
+                            context.go('/auth');
+                          }
+                        },
+                        child: Column(
+                          children: [
+                            Text(
+                              'Already a Member?',
+                              style: GoogleFonts.nunitoSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white,
                               ),
-                              Text(
-                                'LOG IN',
-                                style: GoogleFonts.nunitoSans(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black,
-                                ),
+                            ),
+                            Text(
+                              'LOG IN',
+                              style: GoogleFonts.nunitoSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -199,15 +241,7 @@ class _FeatureCardWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Icon container with gradient
-          // Image.asset(
-          //   "assets/images/${feature.icon}",
-          //   height: 250,
-          // ),
-
           const SizedBox(height: 40),
-
-          // Title
           Text(
             feature.title,
             style: GoogleFonts.nunitoSans(
@@ -217,10 +251,7 @@ class _FeatureCardWidget extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-
           const SizedBox(height: 16),
-
-          // Description
           Text(
             feature.description,
             style: GoogleFonts.nunitoSans(
