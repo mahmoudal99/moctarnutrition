@@ -29,10 +29,35 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>champions_gym_app</title>
+  <title>Moctar Nutrition</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      background-color: #fcfcfc;
+      margin: 0;
+    }
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+    
+    .loading img {
+      width: 200px;
+      height: auto;
+    }
+  </style>
 </head>
 <body>
+  <div class="loading">
+    <img src="assets/images/logo.png" alt="Moctar Nutrition Logo" />
+  </div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

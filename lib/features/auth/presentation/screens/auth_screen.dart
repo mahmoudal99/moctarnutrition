@@ -45,52 +45,67 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: AppConstants.spacingL),
-          child: Column(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: AppConstants.spacingL),
-                    _buildAuthForm(),
-                    const SizedBox(height: AppConstants.spacingM),
-                    _buildSocialAuth(),
-                    const SizedBox(height: AppConstants.spacingM),
-                    _buildOnboardingOption(),
-                  ],
-                ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppConstants.spacingXL * 1),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppConstants.spacingL),
+                    child: Column(
+                      children: [
+                        _buildHeader(),
+                        const SizedBox(height: AppConstants.spacingL),
+                        _buildAuthForm(),
+                        const SizedBox(height: AppConstants.spacingM),
+                        _buildSocialAuth(),
+                        const SizedBox(height: AppConstants.spacingM),
+                        _buildOnboardingOption(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: AppConstants.spacingL),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppConstants.spacingL),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Column(
-      children: [
-        Text(
-          _isSignUp ? 'Create Account' : 'Welcome Back!',
-          style: AppTextStyles.heading3,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppConstants.spacingXS),
-        Text(
-          _isSignUp
-              ? 'Create your account to save your progress'
-              : 'Welcome back! Sign in to continue',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppConstants.textSecondary,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingM,
+        vertical: AppConstants.spacingS,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _isSignUp ? 'Create Account' : 'Sign In',
+            style: AppTextStyles.heading3.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.left,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+          const SizedBox(height: AppConstants.spacingS),
+          Text(
+            _isSignUp
+                ? 'Create your account to save your progress'
+                : 'Welcome back, you\'ve been missed!',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppConstants.textSecondary,
+            ),
+            textAlign: TextAlign.left,
+          ),
+        ],
+      ),
     );
   }
 
@@ -171,7 +186,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Text(
                   'Forgot Password?',
                   style: AppTextStyles.caption.copyWith(
-                    color: AppConstants.primaryColor,
+                    color: AppConstants.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -244,6 +259,7 @@ class _AuthScreenState extends State<AuthScreen> {
           width: double.infinity,
           height: 52,
           child: CustomButton(
+            type: ButtonType.auth,
             text: authProvider.isLoading
                 ? 'Please wait...'
                 : (_isSignUp ? 'Create Account' : 'Sign In'),
@@ -332,7 +348,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Widget _buildToggleAuth() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text(
           _isSignUp ? 'Already have an account? ' : 'Don\'t have an account? ',
@@ -376,6 +392,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 style: AppTextStyles.caption.copyWith(
                   color: AppConstants.textTertiary,
                 ),
+                textAlign: TextAlign.left,
               ),
             ),
             Expanded(

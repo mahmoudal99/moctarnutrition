@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Muktar Nutrition Native Splash Screen -->
+<!-- Moctar Nutrition Native Splash Screen -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- White Background -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#FFFFFF" />
+            <solid android:color="#fcfcfc" />
         </shape>
+    </item>
+    <!-- Logo -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/logo" />
     </item>
 </layer-list>

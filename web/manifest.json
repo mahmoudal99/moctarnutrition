@@ -1,9 +1,9 @@
 {
-    "name": "champions_gym_app",
-    "short_name": "champions_gym_app",
+    "name": "Moctar Nutrition",
+    "short_name": "Moctar Nutrition",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
+    "background_color": "#fcfcfc",
     "theme_color": "#0175C2",
     "description": "A new Flutter project.",
     "orientation": "portrait-primary",

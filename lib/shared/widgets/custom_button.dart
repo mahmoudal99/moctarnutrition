@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 
-enum ButtonType { primary, secondary, outline, text }
+enum ButtonType { primary, secondary, outline, text, auth }
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -109,6 +109,25 @@ class CustomButton extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
             ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingM,
+              vertical: AppConstants.spacingS,
+            ),
+          ),
+          child: _buildButtonContent(),
+        );
+
+      case ButtonType.auth:
+        return ElevatedButton(
+          onPressed: isLoading ? null : onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black, // Black color
+            foregroundColor: AppConstants.surfaceColor, // White text
+            disabledBackgroundColor: AppConstants.textTertiary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.radiusM),
+            ),
+            elevation: 0,
             padding: const EdgeInsets.symmetric(
               horizontal: AppConstants.spacingM,
               vertical: AppConstants.spacingS,
