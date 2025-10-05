@@ -47,7 +47,7 @@ class OnboardingBMIStep extends StatelessWidget {
                             style: AppTextStyles.heading1.copyWith(
                               color: bmiColor,
                               fontWeight: FontWeight.bold,
-                              fontSize: 30,
+                              fontSize: 28,
                             ),
                           ),
                           TextSpan(

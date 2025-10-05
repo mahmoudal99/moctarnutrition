@@ -190,7 +190,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
             height: 40,
             child: Container(
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
+                color: AppConstants.textTertiary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -199,7 +199,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
             itemExtent: 40,
             diameterRatio: 1.5,
             physics: const FixedExtentScrollPhysics(),
-            magnification: 1.3,
+            magnification: 1.1,
             useMagnifier: true,
             overAndUnderCenterOpacity: 0.5,
             controller:
@@ -224,11 +224,10 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     day.toString(),
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.normal,
                       color: isSelected
-                          ? AppConstants.primaryColor
+                          ? Colors.black
                           : AppConstants.textSecondary,
                     ),
                   ),
@@ -312,7 +311,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
             height: 40,
             child: Container(
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
+                color: AppConstants.textTertiary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -321,7 +320,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
             itemExtent: 40,
             diameterRatio: 1.5,
             physics: const FixedExtentScrollPhysics(),
-            magnification: 1.3,
+            magnification: 1.1,
             useMagnifier: true,
             overAndUnderCenterOpacity: 0.5,
             controller:
@@ -348,11 +347,10 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     months[index],
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.normal,
                       color: isSelected
-                          ? AppConstants.primaryColor
+                          ? Colors.black
                           : AppConstants.textSecondary,
                     ),
                   ),
@@ -425,7 +423,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
             height: 40,
             child: Container(
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
+                color: AppConstants.textTertiary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -434,7 +432,7 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
             itemExtent: 40,
             diameterRatio: 1.5,
             physics: const FixedExtentScrollPhysics(),
-            magnification: 1.3,
+            magnification: 1.1,
             useMagnifier: true,
             overAndUnderCenterOpacity: 0.5,
             controller: FixedExtentScrollController(
@@ -461,11 +459,10 @@ class _OnboardingAgeStepState extends State<OnboardingAgeStep> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     year.toString(),
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.normal,
                       color: isSelected
-                          ? AppConstants.primaryColor
+                          ? Colors.black
                           : AppConstants.textSecondary,
                     ),
                   ),
