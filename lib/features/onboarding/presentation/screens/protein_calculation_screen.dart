@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:confetti/confetti.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/services/protein_calculation_service.dart';
@@ -22,6 +23,7 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
   late AnimationController _loadingController;
   late AnimationController _progressController;
   late Animation<double> _progressAnimation;
+  late ConfettiController _confettiController;
 
   bool _isCalculating = true;
   bool _showResults = false;
@@ -60,6 +62,10 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
       curve: Curves.easeInOut,
     ));
 
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
+
     _startCalculation();
   }
 
@@ -67,6 +73,7 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
   void dispose() {
     _loadingController.dispose();
     _progressController.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -130,6 +137,8 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
             setState(() {
               _showResults = true;
             });
+            // Trigger confetti animation
+            _confettiController.play();
           }
         }
       } else {
@@ -182,16 +191,45 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.spacingL),
-          child: Column(
-            children: [
-              if (_isCalculating) _buildLoadingSection(),
-              if (!_isCalculating && _showResults) _buildResultsSection(),
-            ],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.spacingL),
+              child: Column(
+                children: [
+                  if (_isCalculating) _buildLoadingSection(),
+                  if (!_isCalculating && _showResults) _buildResultsSection(),
+                ],
+              ),
+            ),
           ),
-        ),
+          // Confetti widget positioned to cover the entire screen
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Color(0xFFE91E63), // Pink
+                Color(0xFF9C27B0), // Purple
+                Color(0xFF3F51B5), // Indigo
+                Color(0xFF2196F3), // Blue
+                Color(0xFF00BCD4), // Cyan
+                Color(0xFF4CAF50), // Green
+                Color(0xFF8BC34A), // Light Green
+                Color(0xFFFF9800), // Orange
+                Color(0xFFFF5722), // Deep Orange
+              ],
+              numberOfParticles: 20,
+              gravity: 0.3,
+              emissionFrequency: 0.05,
+              minimumSize: const Size(10, 10),
+              maximumSize: const Size(20, 20),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -101,7 +101,8 @@ dependencies:
   
   # UI Effects
   magnifying_glass: ^2.1.1
-  
+  confetti: ^0.7.0
+
   # URL Launcher for email links
   url_launcher: ^6.2.5
   
