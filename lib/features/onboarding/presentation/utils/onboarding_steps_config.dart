@@ -118,7 +118,7 @@ class OnboardingStepsConfig {
         highlightedWords: ['Previews'],
       ),
       OnboardingStep(
-        title: 'Give us a rating',
+        title: 'Help Us Grow!',
         subtitle: 'Help us improve with your feedback',
         icon: "rating.json",
         color: AppConstants.successColor,

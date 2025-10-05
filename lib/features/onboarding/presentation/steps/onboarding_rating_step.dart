@@ -12,66 +12,43 @@ class OnboardingRatingStep extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // App Rating Card
-        Container(
-          padding: const EdgeInsets.all(AppConstants.spacingL),
-          decoration: BoxDecoration(
-            color: AppConstants.surfaceColor,
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
-            border: Border.all(
-              color: AppConstants.textTertiary.withOpacity(0.2),
-              width: 1,
-            ),
-            boxShadow: AppConstants.shadowS,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Left decorative branch
-              Icon(
-                Icons.emoji_events,
-                color: Colors.amber[600],
-                size: 24,
-              ),
-
-              const SizedBox(width: AppConstants.spacingM),
-
-              // Rating content
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '4.8',
-                        style: AppTextStyles.heading1.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Rating content
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                // Laurel wreath decoration
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Transform.scale(
+                      scaleX: -1,
+                      child: Image.asset(
+                        'assets/images/wreath.png',
+                        width: 48,
+                        height: 48,
+                        color: Colors.black,
                       ),
-                      const SizedBox(width: AppConstants.spacingS),
-                      Row(
-                        children: List.generate(
-                          5,
-                          (index) => Icon(
-                            Icons.star,
-                            color: Colors.amber[600],
-                            size: 20,
-                          ),
-                        ),
+                    ),
+                    Text(
+                      '4.6',
+                      style: AppTextStyles.heading2.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(width: AppConstants.spacingM),
-
-              // Right decorative branch
-              Icon(
-                Icons.emoji_events,
-                color: Colors.amber[600],
-                size: 24,
-              ),
-            ],
-          ),
+                    ),
+                    Image.asset(
+                      'assets/images/wreath.png',
+                      width: 48,
+                      height: 48,
+                      color: Colors.black,
+                    ),
+                  ],
+                ),
+              ],
+            )
+          ],
         ),
 
         const SizedBox(height: AppConstants.spacingXL),
