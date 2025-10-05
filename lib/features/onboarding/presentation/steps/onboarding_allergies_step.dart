@@ -64,19 +64,9 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
     'Soy',
     'Wheat',
     'Fish',
-    'Shellfish',
     'Sesame',
     'Gluten',
     'Lactose',
-    'Sulfites',
-    'Sulfa Drugs',
-    'Penicillin',
-    'Latex',
-    'Dust Mites',
-    'Pollen',
-    'Pet Dander',
-    'Mold',
-    'Bee Stings',
   ];
 
   @override
@@ -91,11 +81,6 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Common Allergies & Intolerances',
-          style: AppTextStyles.heading4,
-        ),
-        const SizedBox(height: AppConstants.spacingM),
         Text(
           'Select from common allergies or add your own',
           style: AppTextStyles.bodySmall.copyWith(
@@ -193,11 +178,9 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
                   }
                 },
                 backgroundColor: AppConstants.surfaceColor,
-                selectedColor: AppConstants.primaryColor.withOpacity(0.2),
-                labelStyle: TextStyle(
-                  color: _selectedSeverity == severity
-                      ? AppConstants.primaryColor
-                      : AppConstants.textPrimary,
+                selectedColor: AppConstants.textTertiary.withOpacity(0.2),
+                labelStyle: const TextStyle(
+                  color: Colors.black,
                 ),
               );
             }).toList(),
@@ -236,19 +219,6 @@ class _OnboardingAllergiesStepState extends State<OnboardingAllergiesStep> {
         return 'Severe';
       case AllergySeverity.anaphylaxis:
         return 'Anaphylaxis';
-    }
-  }
-
-  Color _getSeverityColor(AllergySeverity severity) {
-    switch (severity) {
-      case AllergySeverity.mild:
-        return AppConstants.successColor;
-      case AllergySeverity.moderate:
-        return AppConstants.warningColor;
-      case AllergySeverity.severe:
-        return AppConstants.errorColor;
-      case AllergySeverity.anaphylaxis:
-        return Colors.red.shade800;
     }
   }
 
