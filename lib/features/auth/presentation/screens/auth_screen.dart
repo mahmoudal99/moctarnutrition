@@ -100,7 +100,7 @@ class _AuthScreenState extends State<AuthScreen> {
             _isSignUp
                 ? 'Create your account to save your progress'
                 : 'Welcome back, you\'ve been missed!',
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppConstants.textSecondary,
             ),
             textAlign: TextAlign.left,
@@ -366,8 +366,9 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Text(
             _isSignUp ? 'Sign In' : 'Sign Up',
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppConstants.primaryColor,
+              color: Colors.black,
               fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
             ),
           ),
         ),
