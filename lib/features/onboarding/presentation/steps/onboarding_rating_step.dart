@@ -12,42 +12,47 @@ class OnboardingRatingStep extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // App Rating Card
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Rating content
-            Stack(
-              alignment: Alignment.center,
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Laurel wreath decoration
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Transform.scale(
-                      scaleX: -1,
-                      child: Image.asset(
-                        'assets/images/wreath.png',
-                        width: 48,
-                        height: 48,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Text(
-                      '4.6',
-                      style: AppTextStyles.heading2.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Image.asset(
-                      'assets/images/wreath.png',
-                      width: 48,
-                      height: 48,
-                      color: Colors.black,
-                    ),
-                  ],
+                Transform.scale(
+                  scaleX: -1,
+                  child: Image.asset(
+                    'assets/images/wreath.png',
+                    width: 48,
+                    height: 48,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  '4.7',
+                  style: AppTextStyles.heading2.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Image.asset(
+                  'assets/images/wreath.png',
+                  width: 48,
+                  height: 48,
+                  color: Colors.black,
                 ),
               ],
-            )
+            ),
+            const SizedBox(height: AppConstants.spacingM),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                5,
+                (index) => Icon(
+                  Icons.star,
+                  color: Colors.amber[600],
+                  size: 24,
+                ),
+              ),
+            ),
           ],
         ),
 
