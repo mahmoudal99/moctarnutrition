@@ -306,7 +306,7 @@ class _OnboardingHeightWeightStepState
                   height: 40,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppConstants.primaryColor.withOpacity(0.1),
+                      color: AppConstants.textTertiary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -315,7 +315,7 @@ class _OnboardingHeightWeightStepState
                   itemExtent: 40,
                   diameterRatio: 1.5,
                   physics: const FixedExtentScrollPhysics(),
-                  magnification: 1.3,
+                  magnification: 1.1,
                   useMagnifier: true,
                   overAndUnderCenterOpacity: 0.5,
                   controller:
@@ -336,12 +336,10 @@ class _OnboardingHeightWeightStepState
                             horizontal: 8, vertical: 4),
                         child: Text(
                           '$feet ft',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
+                          style: AppTextStyles.caption.copyWith(
+                            fontWeight: FontWeight.normal,
                             color: isSelected
-                                ? AppConstants.primaryColor
+                                ? Colors.black
                                 : AppConstants.textSecondary,
                           ),
                         ),
@@ -423,7 +421,7 @@ class _OnboardingHeightWeightStepState
                   height: 40,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppConstants.primaryColor.withOpacity(0.1),
+                      color: AppConstants.textTertiary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -432,7 +430,7 @@ class _OnboardingHeightWeightStepState
                   itemExtent: 40,
                   diameterRatio: 1.5,
                   physics: const FixedExtentScrollPhysics(),
-                  magnification: 1.3,
+                  magnification: 1.1,
                   useMagnifier: true,
                   overAndUnderCenterOpacity: 0.5,
                   controller:
@@ -453,12 +451,10 @@ class _OnboardingHeightWeightStepState
                             horizontal: 8, vertical: 4),
                         child: Text(
                           '$inches in',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
+                          style: AppTextStyles.caption.copyWith(
+                            fontWeight: FontWeight.normal,
                             color: isSelected
-                                ? AppConstants.primaryColor
+                                ? Colors.black
                                 : AppConstants.textSecondary,
                           ),
                         ),
@@ -540,7 +536,7 @@ class _OnboardingHeightWeightStepState
             height: 40,
             child: Container(
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
+                color: AppConstants.textTertiary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -549,7 +545,7 @@ class _OnboardingHeightWeightStepState
             itemExtent: 40,
             diameterRatio: 1.5,
             physics: const FixedExtentScrollPhysics(),
-            magnification: 1.3,
+            magnification: 1.1,
             useMagnifier: true,
             overAndUnderCenterOpacity: 0.5,
             controller: FixedExtentScrollController(
@@ -570,11 +566,10 @@ class _OnboardingHeightWeightStepState
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     '${cm.toInt()} cm',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.normal,
                       color: isSelected
-                          ? AppConstants.primaryColor
+                          ? Colors.black
                           : AppConstants.textSecondary,
                     ),
                   ),
@@ -653,7 +648,7 @@ class _OnboardingHeightWeightStepState
             height: 40,
             child: Container(
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
+                color: AppConstants.textTertiary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -662,7 +657,7 @@ class _OnboardingHeightWeightStepState
             itemExtent: 40,
             diameterRatio: 1.5,
             physics: const FixedExtentScrollPhysics(),
-            magnification: 1.3,
+            magnification: 1.1,
             useMagnifier: true,
             overAndUnderCenterOpacity: 0.5,
             controller: FixedExtentScrollController(initialItem: _pounds - 80),
@@ -682,11 +677,10 @@ class _OnboardingHeightWeightStepState
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     '$pounds lb',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.normal,
                       color: isSelected
-                          ? AppConstants.primaryColor
+                          ? Colors.black
                           : AppConstants.textSecondary,
                     ),
                   ),
@@ -765,7 +759,7 @@ class _OnboardingHeightWeightStepState
             height: 40,
             child: Container(
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
+                color: AppConstants.textTertiary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -774,7 +768,7 @@ class _OnboardingHeightWeightStepState
             itemExtent: 40,
             diameterRatio: 1.5,
             physics: const FixedExtentScrollPhysics(),
-            magnification: 1.3,
+            magnification: 1.1,
             useMagnifier: true,
             overAndUnderCenterOpacity: 0.5,
             controller: FixedExtentScrollController(
@@ -795,11 +789,10 @@ class _OnboardingHeightWeightStepState
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     '${kg.toStringAsFixed(1)} kg',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.normal,
                       color: isSelected
-                          ? AppConstants.primaryColor
+                          ? Colors.black
                           : AppConstants.textSecondary,
                     ),
                   ),
