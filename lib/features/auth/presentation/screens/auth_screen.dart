@@ -60,9 +60,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         _buildHeader(),
                         const SizedBox(height: AppConstants.spacingL),
                         _buildAuthForm(),
-                        const SizedBox(height: AppConstants.spacingM),
+                        const SizedBox(height: AppConstants.spacingL),
                         _buildSocialAuth(),
-                        const SizedBox(height: AppConstants.spacingM),
+                        const SizedBox(height: AppConstants.spacingL),
                         _buildOnboardingOption(),
                       ],
                     ),
@@ -70,6 +70,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ],
               ),
             ),
+            _buildToggleAuth(),
             const SizedBox(height: AppConstants.spacingL),
           ],
         ),
@@ -199,8 +200,6 @@ class _AuthScreenState extends State<AuthScreen> {
           ],
           const SizedBox(height: AppConstants.spacingM),
           _buildAuthButton(),
-          const SizedBox(height: AppConstants.spacingM),
-          _buildToggleAuth(),
         ],
       ),
     );
@@ -348,7 +347,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Widget _buildToggleAuth() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           _isSignUp ? 'Already have an account? ' : 'Don\'t have an account? ',
@@ -400,7 +399,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     Divider(color: AppConstants.textTertiary.withOpacity(0.3))),
           ],
         ),
-        const SizedBox(height: AppConstants.spacingS),
+        const SizedBox(height: AppConstants.spacingL),
         Row(
           children: [
             Expanded(
