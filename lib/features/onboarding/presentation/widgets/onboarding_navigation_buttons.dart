@@ -27,10 +27,8 @@ class OnboardingNavigationButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Hide navigation buttons for rating step since it has its own complete action
-    if (currentPage == 16 ||
-        currentPage == 17 ||
-        currentPage == totalSteps - 1) {
+    // Hide navigation buttons for final step only (but not rating step)
+    if (currentPage == totalSteps - 1 && currentPage != 16) {
       return const SizedBox.shrink();
     }
 
@@ -110,11 +108,11 @@ class OnboardingNavigationButtons extends StatelessWidget {
                 key: ValueKey(currentPage),
                 height: 52,
                 child: CustomButton(
-                  text: currentPage == totalSteps - 1 ? 'Get Started' : 'Next',
+                  text: currentPage == totalSteps - 1 && currentPage != 16 ? 'Get Started' : 'Next',
                   onPressed: isNextEnabled
                       ? () {
                           HapticFeedback.mediumImpact();
-                          if (currentPage == totalSteps - 1) {
+                          if (currentPage == totalSteps - 1 && currentPage != 16) {
                             onComplete?.call();
                           } else {
                             onNext();

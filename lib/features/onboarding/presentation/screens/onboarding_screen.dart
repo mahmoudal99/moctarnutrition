@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/providers/user_provider.dart';
 import '../../../../shared/services/onboarding_service.dart';
@@ -192,10 +193,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
               onNext: () {
                 HapticFeedback.mediumImpact();
-                _pageController.nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
+                if (_currentPage == 16) {
+                  // Show rating dialog for rating step
+                  _showRatingDialog(context);
+                } else {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                }
               },
               onComplete: _completeOnboarding,
               onNotificationSkip: () {
@@ -237,14 +243,86 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return const BouncingScrollPhysics();
   }
 
+  Future<void> _showRatingDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Rate Moctar Nutrition',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Enjoying Moctar Nutrition? Please take a moment to rate us!',
+                style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  5,
+                  (index) => IconButton(
+                    onPressed: () async {
+                      // Open app store for rating
+                      final Uri url = Uri.parse(
+                          'https://apps.apple.com/app/id123456789' // Replace with actual app store URL
+                          );
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
+                      }
+                      Navigator.of(context).pop();
+                      _completeOnboarding();
+                    },
+                    icon: Icon(
+                      Icons.star,
+                      color: Colors.amber[600],
+                      size: 32,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _completeOnboarding();
+              },
+              child: Text(
+                'Maybe Later',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   bool _isNextEnabled() {
     final isDietaryStep = _currentPage == 8;
     final isWorkoutStep = _currentPage == 10;
     final isWeeklyWorkoutGoalStep = _currentPage == 11;
     final isFoodPreferencesStep = _currentPage == 12;
     final isAllergiesStep = _currentPage == 13;
-    final isWorkoutNotificationsStep = _currentPage == 16;
-    final isRatingStep = _currentPage == 17;
+    final isWorkoutNotificationsStep = _currentPage == 15;
+    final isRatingStep = _currentPage == 16;
 
     if (!isDietaryStep &&
         !isWorkoutStep &&

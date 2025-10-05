@@ -1,85 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class OnboardingRatingStep extends StatelessWidget {
-  final VoidCallback onContinue;
-
   const OnboardingRatingStep({
     super.key,
-    required this.onContinue,
   });
-
-  Future<void> _showRatingDialog(BuildContext context) async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
-          ),
-          title: Text(
-            'Rate Cal AI',
-            style: AppTextStyles.heading3.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Enjoying Cal AI? Please take a moment to rate us!',
-                style: AppTextStyles.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppConstants.spacingL),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  5,
-                  (index) => IconButton(
-                    onPressed: () async {
-                      // Open app store for rating
-                      final Uri url = Uri.parse(
-                          'https://apps.apple.com/app/id123456789' // Replace with actual app store URL
-                          );
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url,
-                            mode: LaunchMode.externalApplication);
-                      }
-                      Navigator.of(context).pop();
-                      onContinue();
-                    },
-                    icon: Icon(
-                      Icons.star,
-                      color: Colors.amber[600],
-                      size: 32,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                onContinue();
-              },
-              child: Text(
-                'Maybe Later',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppConstants.textSecondary,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,14 +71,6 @@ class OnboardingRatingStep extends StatelessWidget {
                 size: 24,
               ),
             ],
-          ),
-        ),
-
-        const SizedBox(height: AppConstants.spacingXL),
-        Text(
-          '5M+ Cal AI Users',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppConstants.textSecondary,
           ),
         ),
 
@@ -230,30 +147,6 @@ class OnboardingRatingStep extends StatelessWidget {
         ),
 
         const SizedBox(height: AppConstants.spacingXL),
-
-        // Continue button
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
-            onPressed: () => _showRatingDialog(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppConstants.textPrimary,
-              foregroundColor: AppConstants.surfaceColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Continue',
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppConstants.surfaceColor,
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }

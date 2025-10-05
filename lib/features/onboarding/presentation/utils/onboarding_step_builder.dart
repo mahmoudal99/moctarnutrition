@@ -160,9 +160,7 @@ class OnboardingStepBuilder {
           onNotificationsChanged: onNotificationsChanged,
         );
       case 16:
-        return OnboardingRatingStep(
-          onContinue: onComplete,
-        );
+        return const OnboardingRatingStep();
       default:
         return const SizedBox.shrink();
     }
