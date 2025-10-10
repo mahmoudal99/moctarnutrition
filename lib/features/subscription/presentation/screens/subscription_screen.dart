@@ -43,55 +43,67 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     final pricingTiers = PricingTier.getPricingTiers();
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            const SizedBox(height: AppConstants.spacingL),
-            // Dynamic personal training image based on current page
-            AnimatedOpacity(
-              opacity: _imageOpacity,
-              duration: const Duration(milliseconds: 800),
-              curve: Curves.easeInOut,
-              child: Center(
-                child: Stack(
-                  children: [
-                    // Image container
-                    Container(
-                      width: 200,
-                      height: 270,
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.radiusL),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                            offset: const Offset(0, 8),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white,
+              Color(0xFFF5F5F5), // Light grey
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              const SizedBox(height: AppConstants.spacingL),
+              // Dynamic personal training image based on current page
+              AnimatedOpacity(
+                opacity: _imageOpacity,
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeInOut,
+                child: Center(
+                  child: Stack(
+                    children: [
+                      // Image container
+                      Container(
+                        width: 200,
+                        height: 250,
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusL),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.3),
+                              blurRadius: 20,
+                              spreadRadius: 5,
+                              offset: const Offset(0, 8),
+                            ),
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.1),
+                              blurRadius: 40,
+                              spreadRadius: 10,
+                              offset: const Offset(0, 16),
+                            ),
+                          ],
+                          image: DecorationImage(
+                            image: AssetImage(_getCurrentPageImage(pricingTiers)),
+                            fit: BoxFit.cover,
                           ),
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.1),
-                            blurRadius: 40,
-                            spreadRadius: 10,
-                            offset: const Offset(0, 16),
-                          ),
-                        ],
-                        image: DecorationImage(
-                          image: AssetImage(_getCurrentPageImage(pricingTiers)),
-                          fit: BoxFit.cover,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-            Expanded(
-              child: _buildPricingCards(pricingTiers),
-            ),
-          ],
+              const SizedBox(height: AppConstants.spacingL),
+              Expanded(
+                child: _buildPricingCards(pricingTiers),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -153,7 +165,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     required double price,
   }) {
     return Card(
-      elevation: 20,
+      elevation: 28,
+      color: Colors.white,
+      shadowColor: Colors.black.withOpacity(0.25),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusXL),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
