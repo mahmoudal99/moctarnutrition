@@ -253,90 +253,121 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.radiusXL),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Stack(
+        children: [
+          // Main content
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.spacingM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(tier.name, style: AppTextStyles.heading4),
-                      const SizedBox(height: AppConstants.spacingXS),
-                      Text(
-                        tier.description,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppConstants.textSecondary,
-                        ),
-                      ),
-                    ],
+                Text(tier.name, style: AppTextStyles.heading4),
+                const SizedBox(height: AppConstants.spacingXS),
+                Text(
+                  tier.description,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.textSecondary,
                   ),
                 ),
+                const SizedBox(height: AppConstants.spacingM),
+                // Features list with bullet points
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: tier.features.map((feature) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppConstants.spacingXS),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '•',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppConstants.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: AppConstants.spacingS),
+                          Expanded(
+                            child: Text(
+                              feature,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppConstants.textSecondary,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _handleSubscription(tier.plan);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppConstants.spacingM,
+                        horizontal: AppConstants.spacingL,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppConstants.radiusL),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Claim ${tier.name}',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Price positioned at top right
+          Positioned(
+            top: AppConstants.spacingM,
+            right: AppConstants.spacingM,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '\$',
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: AppConstants.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          price.toStringAsFixed(0),
-                          style: AppTextStyles.heading3.copyWith(
-                            color: AppConstants.textPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      '\$',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppConstants.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     Text(
-                      '/month',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppConstants.textSecondary,
+                      price.toStringAsFixed(0),
+                      style: AppTextStyles.heading3.copyWith(
+                        color: AppConstants.textPrimary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
+                Text(
+                  '/month',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppConstants.textSecondary,
+                  ),
+                ),
               ],
             ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  _handleSubscription(tier.plan);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppConstants.spacingM,
-                    horizontal: AppConstants.spacingL,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusL),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Claim ${tier.name}',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
