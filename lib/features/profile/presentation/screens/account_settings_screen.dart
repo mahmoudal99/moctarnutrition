@@ -413,11 +413,11 @@ class _SubscriptionSection extends StatelessWidget {
   String _getSubscriptionPlanName(SubscriptionStatus status) {
     switch (status) {
       case SubscriptionStatus.free:
-        return 'Free Plan';
+        return 'Winter';
       case SubscriptionStatus.basic:
-        return 'Basic Plan';
+        return 'Summer Transformation';
       case SubscriptionStatus.premium:
-        return 'Premium Plan';
+        return 'Year-Round Champion';
       case SubscriptionStatus.cancelled:
         return 'Cancelled';
     }

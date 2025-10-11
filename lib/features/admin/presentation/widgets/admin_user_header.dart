@@ -144,14 +144,14 @@ class AdminUserHeader extends StatelessWidget {
   String _subscriptionLabel(SubscriptionStatus status) {
     switch (status) {
       case SubscriptionStatus.premium:
-        return 'Premium';
+        return 'Year-Round Champion';
       case SubscriptionStatus.basic:
-        return 'Basic';
+        return 'Summer Transformation';
       case SubscriptionStatus.cancelled:
         return 'Cancelled';
       case SubscriptionStatus.free:
       default:
-        return 'Free';
+        return 'Winter';
     }
   }
 }

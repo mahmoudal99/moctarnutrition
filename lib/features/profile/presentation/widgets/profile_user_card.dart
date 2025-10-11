@@ -91,7 +91,7 @@ class ProfileUserCard extends StatelessWidget {
                                     AppConstants.primaryColor.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text('Premium',
+                              child: Text('Year-Round Champion',
                                   style: AppTextStyles.caption.copyWith(
                                       color: AppConstants.primaryColor,
                                       fontWeight: FontWeight.bold)),

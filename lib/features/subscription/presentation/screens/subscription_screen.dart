@@ -44,14 +44,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Color(0xFFF5F5F5), // Light grey
-            ],
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(_getCurrentBackgroundImage(pricingTiers)),
+            fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
@@ -65,36 +61,110 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                 duration: const Duration(milliseconds: 800),
                 curve: Curves.easeInOut,
                 child: Center(
-                  child: Stack(
-                    children: [
-                      // Image container
-                      Container(
-                        width: 200,
-                        height: 250,
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.radiusL),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.3),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                              offset: const Offset(0, 8),
+                  child: SizedBox(
+                    width: 320,
+                    height: 280,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Left image (rotated slightly) - bottom layer
+                        Positioned(
+                          left: 0,
+                          child: Transform.rotate(
+                            angle: -0.1,
+                            child: Container(
+                              width: 180,
+                              height: 230,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.circular(AppConstants.radiusL),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.2),
+                                    blurRadius: 15,
+                                    spreadRadius: 3,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.1),
+                                    blurRadius: 30,
+                                    spreadRadius: 8,
+                                    offset: const Offset(0, 12),
+                                  ),
+                                ],
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                      _getSideImage(pricingTiers, -1)),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.1),
-                              blurRadius: 40,
-                              spreadRadius: 10,
-                              offset: const Offset(0, 16),
-                            ),
-                          ],
-                          image: DecorationImage(
-                            image: AssetImage(_getCurrentPageImage(pricingTiers)),
-                            fit: BoxFit.cover,
                           ),
                         ),
-                      ),
-                    ],
+                        // Right image (rotated slightly) - middle layer
+                        Positioned(
+                          right: 0,
+                          child: Transform.rotate(
+                            angle: 0.1,
+                            child: Container(
+                              width: 180,
+                              height: 230,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.circular(AppConstants.radiusL),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.2),
+                                    blurRadius: 15,
+                                    spreadRadius: 3,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.1),
+                                    blurRadius: 30,
+                                    spreadRadius: 8,
+                                    offset: const Offset(0, 12),
+                                  ),
+                                ],
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                      _getSideImage(pricingTiers, 1)),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Center image (main current page image) - top layer
+                        Container(
+                          width: 200,
+                          height: 250,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusL),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.3),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                                offset: const Offset(0, 8),
+                              ),
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.1),
+                                blurRadius: 40,
+                                spreadRadius: 10,
+                                offset: const Offset(0, 16),
+                              ),
+                            ],
+                            image: DecorationImage(
+                              image: AssetImage(
+                                  _getCurrentPageImage(pricingTiers)),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -119,7 +189,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
             children: [
               Text(
                 'Choose Your Plan',
-                style: AppTextStyles.heading4,
+                style: AppTextStyles.heading4.copyWith(color: Colors.white),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -130,33 +200,29 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
   }
 
   Widget _buildPricingCards(List<PricingTier> pricingTiers) {
-    return SizedBox(
-      height: 320, // Reduced height for more compact cards
-      child: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentPageIndex = index;
-          });
-        },
-        itemCount: pricingTiers.length,
-        itemBuilder: (context, index) {
-          final tier = pricingTiers[index];
-          final price = tier.monthlyPrice;
+    return PageView.builder(
+      controller: _pageController,
+      onPageChanged: (index) {
+        setState(() {
+          _currentPageIndex = index;
+        });
+      },
+      itemCount: pricingTiers.length,
+      itemBuilder: (context, index) {
+        final tier = pricingTiers[index];
+        final price = tier.monthlyPrice;
 
-          return Container(
-            margin:
-                const EdgeInsets.symmetric(horizontal: AppConstants.spacingXS),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppConstants.radiusXL),
-            ),
-            child: _buildPricingCard(
-              tier: tier,
-              price: price,
-            ),
-          );
-        },
-      ),
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppConstants.radiusXL),
+          ),
+          child: _buildPricingCard(
+            tier: tier,
+            price: price,
+          ),
+        );
+      },
     );
   }
 
@@ -182,11 +248,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(tier.name, style: AppTextStyles.heading4),
+                      Text(tier.name, style: AppTextStyles.heading5),
                       const SizedBox(height: AppConstants.spacingXS),
                       Text(
                         tier.description,
-                        style: AppTextStyles.bodySmall.copyWith(
+                        style: AppTextStyles.caption.copyWith(
                           color: AppConstants.textSecondary,
                         ),
                       ),
@@ -276,6 +342,32 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         return 'assets/images/moc_three.jpg';
       default:
         return 'assets/images/moc_one.jpg';
+    }
+  }
+
+  String _getSideImage(List<PricingTier> pricingTiers, int offset) {
+    int sideIndex = (_currentPageIndex + offset) % pricingTiers.length;
+    if (sideIndex < 0) sideIndex += pricingTiers.length;
+    return _getTierImage(pricingTiers[sideIndex]);
+  }
+
+  String _getCurrentBackgroundImage(List<PricingTier> pricingTiers) {
+    if (_currentPageIndex < pricingTiers.length) {
+      return _getTierBackgroundImage(pricingTiers[_currentPageIndex]);
+    }
+    return 'assets/images/summer_plan.png';
+  }
+
+  String _getTierBackgroundImage(PricingTier tier) {
+    switch (tier.plan) {
+      case SubscriptionPlan.basic:
+        return 'assets/images/summer_plan.png';
+      case SubscriptionPlan.free:
+        return 'assets/images/winter.png';
+      case SubscriptionPlan.premium:
+        return 'assets/images/transform.png';
+      default:
+        return 'assets/images/winter.png';
     }
   }
 
