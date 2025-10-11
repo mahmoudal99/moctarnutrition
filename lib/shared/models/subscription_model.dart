@@ -175,7 +175,7 @@ class PricingTier {
     return [
       PricingTier(
         plan: SubscriptionPlan.free,
-        name: 'Winter',
+        name: 'Winter Plan',
         description: 'Perfect for getting started',
         monthlyPrice: 0,
         yearlyPrice: 0,
@@ -186,8 +186,8 @@ class PricingTier {
       ),
       PricingTier(
         plan: SubscriptionPlan.basic,
-        name: 'Summer Transformation',
-        description: 'Great for regular fitness enthusiasts',
+        name: 'Summer Plan',
+        description: 'Get ready for summer!',
         monthlyPrice: 9.99,
         yearlyPrice: 99.99,
         yearlySavings: 19.89,

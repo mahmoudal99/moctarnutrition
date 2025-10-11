@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/subscription_model.dart';
 
@@ -62,8 +63,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                 curve: Curves.easeInOut,
                 child: Center(
                   child: SizedBox(
-                    width: 320,
-                    height: 280,
+                    width: 280,
+                    height: 240,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
@@ -73,8 +74,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                           child: Transform.rotate(
                             angle: -0.1,
                             child: Container(
-                              width: 180,
-                              height: 230,
+                              width: 160,
+                              height: 210,
                               decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.circular(AppConstants.radiusL),
@@ -107,8 +108,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                           child: Transform.rotate(
                             angle: 0.1,
                             child: Container(
-                              width: 180,
-                              height: 230,
+                              width: 160,
+                              height: 210,
                               decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.circular(AppConstants.radiusL),
@@ -137,8 +138,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                         ),
                         // Center image (main current page image) - top layer
                         Container(
-                          width: 200,
-                          height: 250,
+                          width: 180,
+                          height: 225,
                           decoration: BoxDecoration(
                             borderRadius:
                                 BorderRadius.circular(AppConstants.radiusL),
@@ -187,10 +188,25 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Choose Your Plan',
-                style: AppTextStyles.heading4.copyWith(color: Colors.white),
+              RichText(
                 textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Choose Your ',
+                      style: AppTextStyles.heading4.copyWith(color: Colors.white),
+                    ),
+                    TextSpan(
+                      text: 'Plan',
+                      style: GoogleFonts.ptSerif(
+                        fontSize: AppTextStyles.heading4.fontSize,
+                        fontWeight: AppTextStyles.heading4.fontWeight,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -248,7 +264,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(tier.name, style: AppTextStyles.heading5),
+                      Text(tier.name, style: AppTextStyles.heading4),
                       const SizedBox(height: AppConstants.spacingXS),
                       Text(
                         tier.description,
@@ -274,7 +290,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                         ),
                         Text(
                           price.toStringAsFixed(0),
-                          style: AppTextStyles.heading2.copyWith(
+                          style: AppTextStyles.heading3.copyWith(
                             color: AppConstants.textPrimary,
                             fontWeight: FontWeight.bold,
                           ),
