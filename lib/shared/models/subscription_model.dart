@@ -197,7 +197,7 @@ class PricingTier {
       ),
       PricingTier(
         plan: SubscriptionPlan.premium,
-        name: 'Year-Round Champion',
+        name: 'Body Building',
         description: 'Ultimate fitness experience',
         monthlyPrice: 19.99,
         yearlyPrice: 199.99,
