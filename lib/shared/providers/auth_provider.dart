@@ -10,13 +10,12 @@ import '../services/notification_service.dart';
 import 'profile_photo_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
-  // Remove old logger instance
-  // static final _logger = Logger();
   User? _firebaseUser;
   UserModel? _userModel;
   bool _isLoading = false;
   String? _error;
   bool _initialized = false;
+  bool _wasUserLoggedIn = false; // Track if user was previously logged in
   final UserLocalStorageService _storageService = UserLocalStorageService();
   ProfilePhotoProvider? _profilePhotoProvider;
 
@@ -62,18 +61,26 @@ class AuthProvider extends ChangeNotifier {
 
       if (user != null) {
         LoggingService.auth.i('AuthProvider - Loading user model for: ${user.uid}');
+        _wasUserLoggedIn = true; // Mark that user is now logged in
         await _loadUserModel(user.uid);
       } else {
-        LoggingService.auth.i('AuthProvider - User signed out, clearing data');
-        _userModel = null;
-        await _storageService.clearUser();
-        await WorkoutPlanLocalStorageService.clearWorkoutPlan();
-        await NotificationService.cancelWorkoutNotifications();
+        // Only clear data and cancel notifications if user was previously logged in
+        if (_wasUserLoggedIn) {
+          LoggingService.auth.i('AuthProvider - User signed out, clearing data');
+          _userModel = null;
+          await _storageService.clearUser();
+          await WorkoutPlanLocalStorageService.clearWorkoutPlan();
+          await NotificationService.cancelWorkoutNotifications();
 
-        if (_profilePhotoProvider != null) {
-          LoggingService.auth.i('AuthProvider - Clearing profile photo provider');
-          _profilePhotoProvider!.clear();
+          if (_profilePhotoProvider != null) {
+            LoggingService.auth.i('AuthProvider - Clearing profile photo provider');
+            _profilePhotoProvider!.clear();
+          }
+        } else {
+          LoggingService.auth.i('AuthProvider - No user on app start, skipping notification cancellation');
+          _userModel = null;
         }
+        _wasUserLoggedIn = false; // Reset the flag
       }
 
       _error = null;
@@ -102,6 +109,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (currentFirebaseUser != null) {
         _firebaseUser = currentFirebaseUser;
+        _wasUserLoggedIn = true; // User was already logged in
         LoggingService.auth.i('Initial Firebase user found: ${currentFirebaseUser.email}');
 
         // Load cached user data if Firebase user exists

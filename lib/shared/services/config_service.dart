@@ -181,7 +181,17 @@ class ConfigService {
       'buildNumber': buildNumber,
       'hasApiKey': openAIApiKey.isNotEmpty,
       'isStripeEnabled': isStripeEnabled,
-      'hasStripeBackendUrl': stripeBackendUrl.isNotEmpty,
+      'hasStripeBackendUrl': _hasStripeBackendUrl(),
     };
+  }
+
+  /// Helper method to safely check if Stripe backend URL is configured
+  static bool _hasStripeBackendUrl() {
+    try {
+      final url = dotenv.env['STRIPE_BACKEND_URL'];
+      return url != null && url.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 }
