@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:logger/logger.dart';
+import 'shared/services/logging_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/profile/presentation/screens/account_settings_screen.dart';
 import 'features/profile/presentation/screens/bug_report_screen.dart';
@@ -49,7 +49,8 @@ import 'shared/services/stripe_subscription_service.dart';
 import 'shared/models/checkin_model.dart';
 
 late final GoRouter _router;
-final _logger = Logger();
+// Remove the old logger instance
+// final _logger = Logger();
 
 GoRouter createRouter(AuthProvider authProvider) {
   return GoRouter(
@@ -268,7 +269,7 @@ GoRouter createRouter(AuthProvider authProvider) {
 
       // If admin and authenticated, redirect to /admin-home only if not on an admin route
       if (isAuthenticated && isAdmin && !adminRoutes.contains(currentRoute)) {
-        _logger.d('Router redirect - Redirecting admin to /admin-home');
+        LoggingService.instance.d('Router redirect - Redirecting admin to /admin-home');
         return '/admin-home';
       }
       return null;
@@ -278,13 +279,16 @@ GoRouter createRouter(AuthProvider authProvider) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Log app startup
+  LoggingService.logAppStart();
 
   // Initialize Firebase
   try {
     await Firebase.initializeApp();
-    _logger.i('Firebase initialized successfully');
+    LoggingService.instance.i('Firebase initialized successfully');
   } catch (e) {
-    _logger.e('Firebase initialization error: $e');
+    LoggingService.logError('Firebase initialization error', error: e, context: 'Firebase');
     // Continue without Firebase for development
   }
 
@@ -292,36 +296,36 @@ void main() async {
   try {
     await dotenv.load();
   } catch (e) {
-    _logger.w('Warning: Could not load .env file: $e');
-    _logger.w(
+    LoggingService.instance.w('Warning: Could not load .env file: $e');
+    LoggingService.instance.w(
         'Please ensure you have copied .env.example to .env and configured your API key');
   }
 
   // Validate environment configuration
   try {
     ConfigService.validateEnvironment();
-    _logger.i('Environment configuration validated successfully');
-    _logger.i('Config summary: ${ConfigService.getConfigSummary()}');
+    LoggingService.instance.i('Environment configuration validated successfully');
+    LoggingService.instance.i('Config summary: ${ConfigService.getConfigSummary()}');
   } catch (e) {
-    _logger.e('Environment configuration error: $e');
-    _logger.e('Please check your .env file and ensure OPENAI_API_KEY is set');
+    LoggingService.logError('Environment configuration error', error: e, context: 'Config');
+    LoggingService.instance.e('Please check your .env file and ensure OPENAI_API_KEY is set');
   }
 
   // Initialize background upload service
   try {
     await BackgroundUploadService.initialize();
-    _logger.i('Background upload service initialized successfully');
+    LoggingService.instance.i('Background upload service initialized successfully');
   } catch (e) {
-    _logger.w('Warning: Could not initialize background upload service: $e');
+    LoggingService.logError('Could not initialize background upload service', error: e, context: 'BackgroundUpload');
     // Continue without background upload service
   }
 
   // Initialize notification service
   try {
     await NotificationService.initialize();
-    _logger.i('Notification service initialized successfully');
+    LoggingService.instance.i('Notification service initialized successfully');
   } catch (e) {
-    _logger.w('Warning: Could not initialize notification service: $e');
+    LoggingService.logError('Could not initialize notification service', error: e, context: 'Notifications');
     // Continue without notification service
   }
 
@@ -332,12 +336,12 @@ void main() async {
         publishableKey: ConfigService.stripePublishableKey,
         backendUrl: ConfigService.stripeBackendUrl,
       );
-      _logger.i('Stripe service initialized successfully');
+      LoggingService.instance.i('Stripe service initialized successfully');
     } else {
-      _logger.w('Stripe service disabled - configuration not found');
+      LoggingService.instance.w('Stripe service disabled - configuration not found');
     }
   } catch (e) {
-    _logger.w('Warning: Could not initialize Stripe service: $e');
+    LoggingService.logError('Could not initialize Stripe service', error: e, context: 'Stripe');
     // Continue without Stripe service
   }
 

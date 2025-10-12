@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:logger/logger.dart';
+import 'logging_service.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,7 +9,8 @@ import '../models/workout_plan_model.dart';
 
 /// Service to handle notification permissions and local notifications
 class NotificationService {
-  static final Logger _logger = Logger();
+  // Remove old logger instance
+  // static final Logger _logger = Logger();
   static final FlutterLocalNotificationsPlugin
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -65,13 +66,13 @@ class NotificationService {
 
       _isInitialized = true;
     } catch (e) {
-      _logger.e('Failed to initialize NotificationService: $e');
+      LoggingService.instance.e('Failed to initialize NotificationService: $e');
     }
   }
 
   /// Handle notification tap
   static void _onNotificationTapped(NotificationResponse response) {
-    _logger.d('Notification tapped: ${response.payload}');
+    LoggingService.instance.d('Notification tapped: ${response.payload}');
     // Handle notification tap logic here
   }
 
@@ -80,7 +81,7 @@ class NotificationService {
     try {
       // First, try to load from cache
       if (_cachedNotificationPermission != null) {
-        _logger.d(
+        LoggingService.instance.d(
             'Notification permission (cached): $_cachedNotificationPermission');
         return _cachedNotificationPermission!;
       }
@@ -88,7 +89,7 @@ class NotificationService {
       // If no cache, try to load from storage
       final storedPermission = await _loadPermissionStatusFromStorage();
       _cachedNotificationPermission = storedPermission;
-      _logger.d(
+      LoggingService.instance.d(
           'Notification permission (loaded from storage): $storedPermission');
 
       if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -103,15 +104,15 @@ class NotificationService {
           // Update cache and storage if different
           _cachedNotificationPermission = isGranted;
           await _savePermissionStatusToStorage(isGranted);
-          _logger.d('Updated Android notification permission: $isGranted');
+          LoggingService.instance.d('Updated Android notification permission: $isGranted');
         }
 
-        _logger.d(
+        LoggingService.instance.d(
             'Android notification permission: status=$status, isGranted=$isGranted');
         return isGranted;
       }
     } catch (e) {
-      _logger.e('Error checking notification permission: $e');
+      LoggingService.instance.e('Error checking notification permission: $e');
       return false;
     }
   }
@@ -120,7 +121,7 @@ class NotificationService {
   static Future<NotificationPermissionResult>
       requestNotificationPermission() async {
     try {
-      _logger.d('Requesting notification permission...');
+      LoggingService.instance.d('Requesting notification permission...');
 
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         // For iOS, request permission through the local notifications plugin
@@ -134,12 +135,12 @@ class NotificationService {
             );
 
         if (result == true) {
-          _logger.i('iOS notification permission granted');
+          LoggingService.instance.i('iOS notification permission granted');
           _cachedNotificationPermission = true;
           await _savePermissionStatusToStorage(true);
           return NotificationPermissionResult.granted;
         } else {
-          _logger.w('iOS notification permission denied');
+          LoggingService.instance.w('iOS notification permission denied');
           _cachedNotificationPermission = false;
           await _savePermissionStatusToStorage(false);
           return NotificationPermissionResult.denied;
@@ -150,40 +151,39 @@ class NotificationService {
 
         switch (status) {
           case PermissionStatus.granted:
-            _logger.i('Android notification permission granted');
+            LoggingService.instance.i('Android notification permission granted');
             _cachedNotificationPermission = true;
             await _savePermissionStatusToStorage(true);
             return NotificationPermissionResult.granted;
           case PermissionStatus.denied:
-            _logger.w('Android notification permission denied');
+            LoggingService.instance.w('Android notification permission denied');
             _cachedNotificationPermission = false;
             await _savePermissionStatusToStorage(false);
             return NotificationPermissionResult.denied;
           case PermissionStatus.permanentlyDenied:
-            _logger.w('Android notification permission permanently denied');
+            LoggingService.instance.w('Android notification permission permanently denied');
             _cachedNotificationPermission = false;
             await _savePermissionStatusToStorage(false);
             return NotificationPermissionResult.permanentlyDenied;
           case PermissionStatus.restricted:
-            _logger.w('Android notification permission restricted');
+            LoggingService.instance.w('Android notification permission restricted');
             _cachedNotificationPermission = false;
             await _savePermissionStatusToStorage(false);
             return NotificationPermissionResult.restricted;
           default:
-            _logger
-                .w('Android notification permission unknown status: $status');
+            LoggingService.instance.w('Android notification permission unknown status: $status');
             _cachedNotificationPermission = false;
             await _savePermissionStatusToStorage(false);
             return NotificationPermissionResult.denied;
         }
       } else {
         // For other platforms (Web, Desktop), assume granted
-        _logger.i(
+        LoggingService.instance.i(
             'Platform ${defaultTargetPlatform.name} - assuming notifications are supported');
         return NotificationPermissionResult.granted;
       }
     } catch (e) {
-      _logger.e('Error requesting notification permission: $e');
+      LoggingService.instance.e('Error requesting notification permission: $e');
       return NotificationPermissionResult.error;
     }
   }
@@ -193,7 +193,7 @@ class NotificationService {
     try {
       return await openAppSettings();
     } catch (e) {
-      _logger.e('Error opening notification settings: $e');
+      LoggingService.instance.e('Error opening notification settings: $e');
       return false;
     }
   }
@@ -203,7 +203,7 @@ class NotificationService {
   static void updateCachedPermissionStatus(bool isGranted) {
     _cachedNotificationPermission = isGranted;
     _savePermissionStatusToStorage(isGranted);
-    _logger.d('Updated cached notification permission: $isGranted');
+    LoggingService.instance.d('Updated cached notification permission: $isGranted');
   }
 
   /// Load notification permission status from SharedPreferences
@@ -212,7 +212,7 @@ class NotificationService {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool(_notificationPermissionKey) ?? false;
     } catch (e) {
-      _logger.e('Error loading notification permission from storage: $e');
+      LoggingService.instance.e('Error loading notification permission from storage: $e');
       return false;
     }
   }
@@ -222,9 +222,9 @@ class NotificationService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_notificationPermissionKey, isGranted);
-      _logger.d('Saved notification permission status to storage: $isGranted');
+      LoggingService.instance.d('Saved notification permission status to storage: $isGranted');
     } catch (e) {
-      _logger.e('Error saving notification permission to storage: $e');
+      LoggingService.instance.e('Error saving notification permission to storage: $e');
     }
   }
 
@@ -232,7 +232,7 @@ class NotificationService {
   static Future<void> showTestNotification() async {
     try {
       if (!await areNotificationsEnabled()) {
-        _logger.w('Cannot show notification: permission not granted');
+        LoggingService.instance.w('Cannot show notification: permission not granted');
         return;
       }
 
@@ -264,9 +264,9 @@ class NotificationService {
         notificationDetails,
       );
 
-      _logger.i('Test notification sent');
+      LoggingService.instance.i('Test notification sent');
     } catch (e) {
-      _logger.e('Error showing test notification: $e');
+      LoggingService.instance.e('Error showing test notification: $e');
     }
   }
 
@@ -274,7 +274,7 @@ class NotificationService {
   static Future<void> scheduleWeeklyCheckinReminder() async {
     try {
       if (!await areNotificationsEnabled()) {
-        _logger.w('Cannot schedule reminder: permission not granted');
+        LoggingService.instance.w('Cannot schedule reminder: permission not granted');
         return;
       }
 
@@ -306,18 +306,18 @@ class NotificationService {
       int weeklyReminderId = WEEKLY_CHECKIN_REMINDER_ID;
       int scheduledCount = 0;
 
-      _logger.d('Starting to schedule weekly reminders for 8 weeks');
+      LoggingService.instance.d('Starting to schedule weekly reminders for 8 weeks');
 
       for (int weekOffset = 0; weekOffset < 8; weekOffset++) {
         final targetDate = DateTime.now().add(Duration(days: weekOffset * 7));
         final nextSunday = _getNextSunday9AMFromDate(targetDate);
 
-        _logger.d(
+        LoggingService.instance.d(
             'Week $weekOffset: targetDate=$targetDate, nextSunday=$nextSunday');
 
         // Skip if the time has already passed
         if (nextSunday.isBefore(DateTime.now())) {
-          _logger.d('Week $weekOffset: Sunday time has passed, skipping');
+          LoggingService.instance.d('Week $weekOffset: Sunday time has passed, skipping');
           continue;
         }
 
@@ -333,20 +333,18 @@ class NotificationService {
                 UILocalNotificationDateInterpretation.absoluteTime,
           );
 
-          _logger.d(
+          LoggingService.instance.d(
               'Successfully scheduled weekly check-in reminder for week $weekOffset (ID: $weeklyReminderId): $nextSunday');
           weeklyReminderId++;
           scheduledCount++;
         } catch (e) {
-          _logger
-              .e('Failed to schedule weekly reminder for week $weekOffset: $e');
+          LoggingService.instance.e('Failed to schedule weekly reminder for week $weekOffset: $e');
         }
       }
 
-      _logger
-          .i('Weekly check-in reminders scheduled: $scheduledCount reminders');
+      LoggingService.instance.i('Weekly check-in reminders scheduled: $scheduledCount reminders');
     } catch (e) {
-      _logger.e('Error scheduling weekly reminder: $e');
+      LoggingService.instance.e('Error scheduling weekly reminder: $e');
     }
   }
 
@@ -359,9 +357,9 @@ class NotificationService {
           i++) {
         await _flutterLocalNotificationsPlugin.cancel(i);
       }
-      _logger.i('All weekly check-in reminders cancelled');
+      LoggingService.instance.i('All weekly check-in reminders cancelled');
     } catch (e) {
-      _logger.e('Error cancelling weekly reminders: $e');
+      LoggingService.instance.e('Error cancelling weekly reminders: $e');
     }
   }
 
@@ -374,7 +372,7 @@ class NotificationService {
   }) async {
     try {
       if (!await areNotificationsEnabled()) {
-        _logger.w('Cannot schedule workout reminder: permission not granted');
+        LoggingService.instance.w('Cannot schedule workout reminder: permission not granted');
         return;
       }
 
@@ -412,9 +410,9 @@ class NotificationService {
             UILocalNotificationDateInterpretation.absoluteTime,
       );
 
-      _logger.i('Workout reminder scheduled for: $scheduledTime');
+      LoggingService.instance.i('Workout reminder scheduled for: $scheduledTime');
     } catch (e) {
-      _logger.e('Error scheduling workout reminder: $e');
+      LoggingService.instance.e('Error scheduling workout reminder: $e');
     }
   }
 
@@ -427,7 +425,7 @@ class NotificationService {
   }) async {
     try {
       if (!await areNotificationsEnabled()) {
-        _logger.w('Cannot schedule meal reminder: permission not granted');
+        LoggingService.instance.w('Cannot schedule meal reminder: permission not granted');
         return;
       }
 
@@ -465,9 +463,9 @@ class NotificationService {
             UILocalNotificationDateInterpretation.absoluteTime,
       );
 
-      _logger.i('Meal reminder scheduled for: $scheduledTime');
+      LoggingService.instance.i('Meal reminder scheduled for: $scheduledTime');
     } catch (e) {
-      _logger.e('Error scheduling meal reminder: $e');
+      LoggingService.instance.e('Error scheduling meal reminder: $e');
     }
   }
 
@@ -475,9 +473,9 @@ class NotificationService {
   static Future<void> cancelNotification(int notificationId) async {
     try {
       await _flutterLocalNotificationsPlugin.cancel(notificationId);
-      _logger.i('Notification cancelled: $notificationId');
+      LoggingService.instance.i('Notification cancelled: $notificationId');
     } catch (e) {
-      _logger.e('Error cancelling notification $notificationId: $e');
+      LoggingService.instance.e('Error cancelling notification $notificationId: $e');
     }
   }
 
@@ -485,9 +483,9 @@ class NotificationService {
   static Future<void> cancelNotificationType(int notificationTypeId) async {
     try {
       await _flutterLocalNotificationsPlugin.cancel(notificationTypeId);
-      _logger.i('Notification type cancelled: $notificationTypeId');
+      LoggingService.instance.i('Notification type cancelled: $notificationTypeId');
     } catch (e) {
-      _logger.e('Error cancelling notification type $notificationTypeId: $e');
+      LoggingService.instance.e('Error cancelling notification type $notificationTypeId: $e');
     }
   }
 
@@ -524,9 +522,9 @@ class NotificationService {
       // Update cache and storage to reflect that notifications are disabled
       _cachedNotificationPermission = false;
       await _savePermissionStatusToStorage(false);
-      _logger.i('All notifications cancelled');
+      LoggingService.instance.i('All notifications cancelled');
     } catch (e) {
-      _logger.e('Error cancelling notifications: $e');
+      LoggingService.instance.e('Error cancelling notifications: $e');
     }
   }
 
@@ -538,9 +536,9 @@ class NotificationService {
       for (int i = 1000; i < 2000; i++) {
         await _flutterLocalNotificationsPlugin.cancel(i);
       }
-      _logger.i('All workout notifications cancelled');
+      LoggingService.instance.i('All workout notifications cancelled');
     } catch (e) {
-      _logger.e('Error cancelling workout notifications: $e');
+      LoggingService.instance.e('Error cancelling workout notifications: $e');
     }
   }
 
@@ -552,10 +550,10 @@ class NotificationService {
       // Check if we have workout notifications (IDs 1000+)
       final workoutNotifications =
           pendingNotifications.where((n) => n.id >= 1000).length;
-      _logger.d('Found $workoutNotifications existing workout notifications');
+      LoggingService.instance.d('Found $workoutNotifications existing workout notifications');
       return workoutNotifications > 0;
     } catch (e) {
-      _logger.e('Error checking workout notifications: $e');
+      LoggingService.instance.e('Error checking workout notifications: $e');
       return false;
     }
   }
@@ -569,8 +567,7 @@ class NotificationService {
   }) async {
     try {
       if (!await areNotificationsEnabled()) {
-        _logger
-            .w('Cannot schedule workout notifications: permission not granted');
+        LoggingService.instance.w('Cannot schedule workout notifications: permission not granted');
         return;
       }
 
@@ -608,14 +605,14 @@ class NotificationService {
       const int maxNotifications = 64; // iOS limitation
 
       // Schedule notifications for the next 6 weeks (42 days) to balance with weekly reminders
-      _logger.d(
+      LoggingService.instance.d(
           'Starting to schedule notifications for ${dailyWorkouts.length} workout days');
-      _logger.d(
+      LoggingService.instance.d(
           'Will schedule up to $maxNotifications notifications across 42 days');
-      _logger.d('Notification time: $hour:$minute');
+      LoggingService.instance.d('Notification time: $hour:$minute');
       for (int dayOffset = 0; dayOffset < 42; dayOffset++) {
         if (scheduledCount >= maxNotifications) {
-          _logger.w('Reached iOS notification limit (64), stopping scheduling');
+          LoggingService.instance.w('Reached iOS notification limit (64), stopping scheduling');
           break;
         }
 
@@ -630,18 +627,18 @@ class NotificationService {
           );
         } catch (e) {
           dailyWorkout = null;
-          _logger.d('No workout found for $dayName');
+          LoggingService.instance.d('No workout found for $dayName');
         }
 
         // Skip if no workout for this day
         if (dailyWorkout == null) {
-          _logger.d('No workout found for $dayName, skipping');
+          LoggingService.instance.d('No workout found for $dayName, skipping');
           continue;
         }
 
         // Skip if it's a rest day
         if (dailyWorkout.restDay == true) {
-          _logger.d('Rest day for $dayName, skipping');
+          LoggingService.instance.d('Rest day for $dayName, skipping');
           continue;
         }
 
@@ -656,7 +653,7 @@ class NotificationService {
 
         // Skip if the time has already passed today
         if (dayOffset == 0 && scheduledTime.isBefore(DateTime.now())) {
-          _logger.d('Notification time for today has already passed, skipping');
+          LoggingService.instance.d('Notification time for today has already passed, skipping');
           continue;
         }
 
@@ -688,7 +685,7 @@ class NotificationService {
         scheduledCount++;
       }
     } catch (e) {
-      _logger.e('Error scheduling workout notifications: $e');
+      LoggingService.instance.e('Error scheduling workout notifications: $e');
     }
   }
 

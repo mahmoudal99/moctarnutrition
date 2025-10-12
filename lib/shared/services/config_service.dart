@@ -1,9 +1,10 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:logger/logger.dart';
+import 'logging_service.dart';
 
 /// Service for managing environment-specific configurations
 class ConfigService {
-  static final _logger = Logger();
+  // Remove old logger instance
+  // static final _logger = Logger();
   static const String _defaultOpenAIUrl =
       'https://api.openai.com/v1/chat/completions';
   static const String _defaultModel =
@@ -24,7 +25,8 @@ class ConfigService {
     // Log the first and last few characters of the API key for debugging
     final maskedKey =
         '${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 10)}';
-    _logger.i('ConfigService: Using OpenAI API key: $maskedKey');
+    LoggingService.instance
+        .i('ConfigService: Using OpenAI API key: $maskedKey');
 
     return apiKey;
   }
@@ -95,7 +97,9 @@ class ConfigService {
   /// Get Stripe publishable key from environment variables
   static String get stripePublishableKey {
     final key = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
-    if (key == null || key.isEmpty || key == 'your_stripe_publishable_key_here') {
+    if (key == null ||
+        key.isEmpty ||
+        key == 'your_stripe_publishable_key_here') {
       throw Exception('STRIPE_PUBLISHABLE_KEY not found or not configured. '
           'Please copy .env.example to .env and set your actual Stripe publishable key.');
     }
@@ -128,7 +132,7 @@ class ConfigService {
     final requiredVars = ['OPENAI_API_KEY'];
     final optionalVars = ['STRIPE_PUBLISHABLE_KEY', 'STRIPE_BACKEND_URL'];
     final missingVars = <String>[];
-    
+
     // Check required variables
     for (final varName in requiredVars) {
       final value = dotenv.env[varName];
@@ -144,12 +148,12 @@ class ConfigService {
           'Missing or invalid required environment variables: ${missingVars.join(', ')}. '
           'Please copy .env.example to .env and configure your API key.');
     }
-    
+
     // Log optional variables status
     for (final varName in optionalVars) {
       final value = dotenv.env[varName];
       if (value == null || value.isEmpty || value.contains('your_')) {
-        _logger.w('Optional environment variable $varName not configured. '
+        LoggingService.instance.w('Optional environment variable $varName not configured. '
             'Stripe functionality will be disabled.');
       }
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:logger/logger.dart';
+import '../services/logging_service.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/user_local_storage_service.dart';
@@ -10,7 +10,8 @@ import '../services/notification_service.dart';
 import 'profile_photo_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
-  static final _logger = Logger();
+  // Remove old logger instance
+  // static final _logger = Logger();
   User? _firebaseUser;
   UserModel? _userModel;
   bool _isLoading = false;
@@ -49,28 +50,28 @@ class AuthProvider extends ChangeNotifier {
 
   /// Initialize authentication state listener
   void _initializeAuthState() {
-    _logger.i('AuthProvider - Starting auth state initialization');
+    LoggingService.auth.i('AuthProvider - Starting auth state initialization');
     
     // Set up listener for auth state changes
     AuthService.authStateChanges.listen((User? user) async {
-      _logger.i('AuthProvider - Auth state changed: ${user?.email ?? 'null'}');
+      LoggingService.auth.i('AuthProvider - Auth state changed: ${user?.email ?? 'null'}');
 
       _firebaseUser = user;
       _isLoading = true;
       notifyListeners();
 
       if (user != null) {
-        _logger.i('AuthProvider - Loading user model for: ${user.uid}');
+        LoggingService.auth.i('AuthProvider - Loading user model for: ${user.uid}');
         await _loadUserModel(user.uid);
       } else {
-        _logger.i('AuthProvider - User signed out, clearing data');
+        LoggingService.auth.i('AuthProvider - User signed out, clearing data');
         _userModel = null;
         await _storageService.clearUser();
         await WorkoutPlanLocalStorageService.clearWorkoutPlan();
         await NotificationService.cancelWorkoutNotifications();
 
         if (_profilePhotoProvider != null) {
-          _logger.i('AuthProvider - Clearing profile photo provider');
+          LoggingService.auth.i('AuthProvider - Clearing profile photo provider');
           _profilePhotoProvider!.clear();
         }
       }
@@ -83,31 +84,31 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _checkInitialAuthState() async {
     try {
-      _logger.i('AuthProvider - Starting initial auth state check');
+      LoggingService.auth.i('AuthProvider - Starting initial auth state check');
       _isLoading = true;
       notifyListeners();
 
-      _logger.i('AuthProvider - Current state before initialization:');
-      _logger.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
-      _logger.i('  - userModel: ${_userModel?.name ?? 'null'}');
-      _logger.i('  - initialized: $_initialized');
+      LoggingService.auth.i('AuthProvider - Current state before initialization:');
+      LoggingService.auth.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
+      LoggingService.auth.i('  - userModel: ${_userModel?.name ?? 'null'}');
+      LoggingService.auth.i('  - initialized: $_initialized');
 
       // Wait a bit for Firebase to be fully ready
       await Future.delayed(const Duration(milliseconds: 100));
 
       final currentFirebaseUser = AuthService.currentUser;
-      _logger.i(
+      LoggingService.auth.i(
           'AuthProvider - Firebase currentUser check result: ${currentFirebaseUser?.email ?? 'null'}');
 
       if (currentFirebaseUser != null) {
         _firebaseUser = currentFirebaseUser;
-        _logger.i('Initial Firebase user found: ${currentFirebaseUser.email}');
+        LoggingService.auth.i('Initial Firebase user found: ${currentFirebaseUser.email}');
 
         // Load cached user data if Firebase user exists
         final cachedUser = await _storageService.loadUser();
         if (cachedUser != null) {
           _userModel = cachedUser;
-          _logger.i('Loaded cached user: ${cachedUser.name}');
+          LoggingService.auth.i('Loaded cached user: ${cachedUser.name}');
         }
 
         // Load fresh user model from Firestore
@@ -116,20 +117,20 @@ class AuthProvider extends ChangeNotifier {
         // No Firebase user, check if we have cached data
         final cachedUser = await _storageService.loadUser();
         if (cachedUser != null) {
-          _logger.i('No Firebase user but cached user exists, clearing cache');
+          LoggingService.auth.i('No Firebase user but cached user exists, clearing cache');
           await _storageService.clearUser();
         } else {
-          _logger.i('No Firebase user and no cached user data');
+          LoggingService.auth.i('No Firebase user and no cached user data');
         }
       }
 
       _initialized = true;
       _isLoading = false;
       notifyListeners();
-      _logger.i('AuthProvider - Initial auth state check completed');
+      LoggingService.auth.i('AuthProvider - Initial auth state check completed');
       logAuthState();
     } catch (e) {
-      _logger.e('Error checking initial auth state: $e');
+      LoggingService.auth.e('Error checking initial auth state: $e');
       _initialized = true;
       _isLoading = false;
       notifyListeners();
@@ -139,13 +140,13 @@ class AuthProvider extends ChangeNotifier {
   /// Load user model from Firestore
   Future<void> _loadUserModel(String userId) async {
     try {
-      _logger.i('AuthProvider - Starting to load user model');
+      LoggingService.auth.i('AuthProvider - Starting to load user model');
       _isLoading = true;
       notifyListeners();
 
       final userModel = await AuthService.getCurrentUserModel();
       if (userModel != null) {
-        _logger.i(
+        LoggingService.auth.i(
             'AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
 
         // Check if this is a different user than the previously cached one
@@ -153,7 +154,7 @@ class AuthProvider extends ChangeNotifier {
         final isDifferentUser = cachedUser?.id != userModel.id;
 
         if (isDifferentUser) {
-          _logger.i(
+          LoggingService.auth.i(
               'AuthProvider - Different user detected, clearing workout plan cache');
           await WorkoutPlanLocalStorageService.clearWorkoutPlan();
         }
@@ -163,15 +164,15 @@ class AuthProvider extends ChangeNotifier {
 
         // Initialize profile photo provider if available
         if (_profilePhotoProvider != null) {
-          _logger.i(
+          LoggingService.auth.i(
               'AuthProvider - Initializing profile photo provider for user: ${userModel.id}');
           await _profilePhotoProvider!.initialize(userModel.id);
         }
       } else {
-        _logger.w('AuthProvider - No user model found');
+        LoggingService.auth.w('AuthProvider - No user model found');
       }
     } catch (e) {
-      _logger.e('AuthProvider - Error loading user model: $e');
+      LoggingService.auth.e('AuthProvider - Error loading user model: $e');
       _error = 'Failed to load user profile: $e';
     } finally {
       _isLoading = false;
@@ -242,11 +243,11 @@ class AuthProvider extends ChangeNotifier {
   /// Sign in with Google
   Future<bool> signInWithGoogle() async {
     try {
-      _logger.i('AuthProvider - Starting Google sign in (current state:)');
-      _logger.i('  - isLoading: $_isLoading');
-      _logger.i('  - initialized: $_initialized');
-      _logger.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
-      _logger.i('  - userModel: ${_userModel?.name ?? 'null'}');
+      LoggingService.auth.i('AuthProvider - Starting Google sign in (current state:)');
+      LoggingService.auth.i('  - isLoading: $_isLoading');
+      LoggingService.auth.i('  - initialized: $_initialized');
+      LoggingService.auth.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
+      LoggingService.auth.i('  - userModel: ${_userModel?.name ?? 'null'}');
 
       _isLoading = true;
       _error = null;
@@ -386,25 +387,25 @@ class AuthProvider extends ChangeNotifier {
   /// Update user profile
   Future<bool> updateUserProfile(UserModel userModel) async {
     try {
-      _logger.i(
+      LoggingService.auth.i(
           'AuthProvider - Starting profile update for user: ${userModel.id}');
-      _logger.d('AuthProvider - New name: "${userModel.name}"');
+      LoggingService.auth.d('AuthProvider - New name: "${userModel.name}"');
 
       _isLoading = true;
       _error = null;
       notifyListeners();
 
       await AuthService.updateUserProfile(userModel);
-      _logger.i('AuthProvider - AuthService update completed');
+      LoggingService.auth.i('AuthProvider - AuthService update completed');
 
       _userModel = userModel;
       await _storageService.saveUser(userModel);
-      _logger.i('AuthProvider - Local storage update completed');
+      LoggingService.auth.i('AuthProvider - Local storage update completed');
 
-      _logger.i('AuthProvider - Profile update successful');
+      LoggingService.auth.i('AuthProvider - Profile update successful');
       return true;
     } catch (e) {
-      _logger.e('AuthProvider - Error updating profile: $e');
+      LoggingService.auth.e('AuthProvider - Error updating profile: $e');
       _error = e.toString();
       return false;
     } finally {
@@ -453,13 +454,13 @@ class AuthProvider extends ChangeNotifier {
 
   /// Debug method to log current auth state
   void logAuthState() {
-    _logger.i('AuthProvider - Current state:');
-    _logger.i('  - isLoading: $_isLoading');
-    _logger.i('  - initialized: $_initialized');
-    _logger.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
-    _logger.i('  - userModel: ${_userModel?.name ?? 'null'}');
-    _logger.i('  - isAuthenticated: $isAuthenticated');
-    _logger.i('  - error: $_error');
+    LoggingService.auth.i('AuthProvider - Current state:');
+    LoggingService.auth.i('  - isLoading: $_isLoading');
+    LoggingService.auth.i('  - initialized: $_initialized');
+    LoggingService.auth.i('  - firebaseUser: ${_firebaseUser?.email ?? 'null'}');
+    LoggingService.auth.i('  - userModel: ${_userModel?.name ?? 'null'}');
+    LoggingService.auth.i('  - isAuthenticated: $isAuthenticated');
+    LoggingService.auth.i('  - error: $_error');
   }
 
   /// Refresh user data

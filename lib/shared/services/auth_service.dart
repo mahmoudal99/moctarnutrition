@@ -3,14 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:logger/logger.dart';
+import 'logging_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import 'user_local_storage_service.dart';
 import 'meal_plan_storage_service.dart';
 
 class AuthService {
-  static final _logger = Logger();
+  // Remove old logger instance
+  // static final _logger = Logger();
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -33,7 +34,7 @@ class AuthService {
     required String name,
   }) async {
     try {
-      _logger.i('Attempting to sign up with email: $email');
+      LoggingService.logAuthEvent('Sign up attempt', metadata: {'email': email});
 
       // Create user with Firebase Auth
       final UserCredential userCredential =
@@ -114,13 +115,26 @@ class AuthService {
       }
       await _createUserDocument(userModel);
 
-      _logger.i('User signed up successfully: ${user.uid}');
+      LoggingService.logAuthEvent(
+        'User signed up successfully',
+        userId: user.uid,
+        metadata: {'email': email, 'name': name},
+      );
       return userModel;
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase Auth error during sign up: ${e.code} - ${e.message}');
+      LoggingService.logError(
+        'Firebase Auth error during sign up',
+        error: e,
+        context: 'AuthService.signUpWithEmailAndPassword',
+        metadata: {'code': e.code, 'message': e.message},
+      );
       throw _handleFirebaseAuthException(e);
     } catch (e) {
-      _logger.e('Unexpected error during sign up: $e');
+      LoggingService.logError(
+        'Unexpected error during sign up',
+        error: e,
+        context: 'AuthService.signUpWithEmailAndPassword',
+      );
       throw Exception('Failed to create account: $e');
     }
   }
@@ -131,7 +145,10 @@ class AuthService {
     required String password,
   }) async {
     try {
-      _logger.i('Attempting to sign in with email: $email');
+      LoggingService.logAuthEvent(
+        'Sign in attempt',
+        metadata: {'email': email},
+      );
       final UserCredential userCredential =
           await _auth.signInWithEmailAndPassword(
         email: email,
@@ -160,19 +177,19 @@ class AuthService {
           await _createUserDocument(migratedUser);
           userModel = migratedUser;
           await _storageService.clearUser(); // Clear local user after migration
-          _logger.i(
+          LoggingService.auth.i(
               'Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
           throw Exception('User profile not found');
         }
       }
-      _logger.i('User signed in successfully: ${user.uid}');
+      LoggingService.auth.i('User signed in successfully: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase Auth error during sign in: ${e.code} - ${e.message}');
+      LoggingService.auth.e('Firebase Auth error during sign in: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
-      _logger.e('Unexpected error during sign in: $e');
+      LoggingService.auth.e('Unexpected error during sign in: $e');
       throw Exception('Failed to sign in: $e');
     }
   }
@@ -180,12 +197,12 @@ class AuthService {
   /// Sign in with Google
   static Future<UserModel> signInWithGoogle() async {
     try {
-      _logger.i('Attempting Google sign in');
+      LoggingService.auth.i('Attempting Google sign in');
       
       // Check if Google Play Services are available (Android only)
-      _logger.i('Checking Google Sign In configuration');
+      LoggingService.auth.i('Checking Google Sign In configuration');
       if (!await _googleSignIn.isSignedIn()) {
-        _logger.i('User is not signed in with Google, showing sign-in UI');
+        LoggingService.auth.i('User is not signed in with Google, showing sign-in UI');
       }
       
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -256,7 +273,7 @@ class AuthService {
           await prefs.remove('temp_protein_targets');
           await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
-          _logger.i(
+          LoggingService.auth.i(
               'Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
           // Create new user document for first-time Google sign in
@@ -274,18 +291,17 @@ class AuthService {
             updatedAt: DateTime.now(),
           );
           await _createUserDocument(userModel);
-          _logger
-              .i('Created new user document for Google sign in: ${user.uid}');
+          LoggingService.auth.i('Created new user document for Google sign in: ${user.uid}');
         }
       }
-      _logger.i('Google sign in successful: ${user.uid}');
+      LoggingService.auth.i('Google sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
-      _logger.e(
+      LoggingService.auth.e(
           'Firebase Auth error during Google sign in: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
-      _logger.e('Unexpected error during Google sign in: $e');
+      LoggingService.auth.e('Unexpected error during Google sign in: $e');
       if (e.toString().contains('cloud_firestore/unavailable')) {
         throw Exception(
             'Firebase service is temporarily unavailable. Please try again in a few moments.');
@@ -304,7 +320,7 @@ class AuthService {
   /// Sign in with Apple
   static Future<UserModel> signInWithApple() async {
     try {
-      _logger.i('Attempting Apple sign in');
+      LoggingService.auth.i('Attempting Apple sign in');
       final isAvailable = await SignInWithApple.isAvailable();
       if (!isAvailable) {
         throw Exception('Apple Sign-In is not available on this device');
@@ -379,7 +395,7 @@ class AuthService {
           await prefs.remove('temp_protein_targets');
           await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
-          _logger.i(
+          LoggingService.auth.i(
               'Migrated user from SharedPreferences to Firestore: ${user.uid}');
         } else {
           final displayName =
@@ -399,18 +415,18 @@ class AuthService {
             updatedAt: DateTime.now(),
           );
           await _createUserDocument(userModel);
-          _logger.i(
+          LoggingService.auth.i(
               'Created new user document for Apple sign in: ${user.uid} with name: $displayName');
         }
       }
-      _logger.i('Apple sign in successful: ${user.uid}');
+      LoggingService.auth.i('Apple sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
-      _logger.e(
+      LoggingService.auth.e(
           'Firebase Auth error during Apple sign in: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
-      _logger.e('Unexpected error during Apple sign in: $e');
+      LoggingService.auth.e('Unexpected error during Apple sign in: $e');
       if (e.toString().contains('cloud_firestore/unavailable')) {
         throw Exception(
             'Firebase service is temporarily unavailable. Please try again in a few moments.');
@@ -429,7 +445,7 @@ class AuthService {
   /// Sign in anonymously (guest mode)
   static Future<UserModel> signInAnonymously() async {
     try {
-      _logger.i('Attempting anonymous sign in');
+      LoggingService.auth.i('Attempting anonymous sign in');
       final UserCredential userCredential = await _auth.signInAnonymously();
       final User? user = userCredential.user;
       if (user == null) {
@@ -486,7 +502,7 @@ class AuthService {
           await prefs.remove('temp_protein_targets');
           await prefs.remove('temp_calorie_targets');
           await _storageService.clearUser(); // Clear local user after migration
-          _logger.i(
+          LoggingService.auth.i(
               'Migrated anonymous user from SharedPreferences to Firestore: ${user.uid}');
         } else {
           userModel = UserModel(
@@ -505,14 +521,14 @@ class AuthService {
           await _createUserDocument(userModel);
         }
       }
-      _logger.i('Anonymous sign in successful: ${user.uid}');
+      LoggingService.auth.i('Anonymous sign in successful: ${user.uid}');
       return userModel;
     } on FirebaseAuthException catch (e) {
-      _logger.e(
+      LoggingService.auth.e(
           'Firebase Auth error during anonymous sign in: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
-      _logger.e('Unexpected error during anonymous sign in: $e');
+      LoggingService.auth.e('Unexpected error during anonymous sign in: $e');
       if (e.toString().contains('cloud_firestore/unavailable')) {
         throw Exception(
             'Firebase service is temporarily unavailable. Please try again in a few moments.');
@@ -531,7 +547,7 @@ class AuthService {
   /// Sign out
   static Future<void> signOut() async {
     try {
-      _logger.i('Signing out user');
+      LoggingService.auth.i('Signing out user');
 
       await Future.wait([
         _auth.signOut(),
@@ -539,9 +555,9 @@ class AuthService {
         _storageService.clearUser(),
       ]);
 
-      _logger.i('User signed out successfully');
+      LoggingService.auth.i('User signed out successfully');
     } catch (e) {
-      _logger.e('Error during sign out: $e');
+      LoggingService.auth.e('Error during sign out: $e');
       throw Exception('Failed to sign out: $e');
     }
   }
@@ -549,7 +565,7 @@ class AuthService {
   /// Reset password
   static Future<void> resetPassword(String email) async {
     try {
-      _logger.i('Attempting to reset password for: $email');
+      LoggingService.auth.i('Attempting to reset password for: $email');
 
       // Validate email format before sending
       if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
@@ -558,13 +574,13 @@ class AuthService {
 
       await _auth.sendPasswordResetEmail(email: email);
 
-      _logger.i('Password reset email sent successfully');
+      LoggingService.auth.i('Password reset email sent successfully');
     } on FirebaseAuthException catch (e) {
-      _logger.e(
+      LoggingService.auth.e(
           'Firebase Auth error during password reset: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
-      _logger.e('Unexpected error during password reset: $e');
+      LoggingService.auth.e('Unexpected error during password reset: $e');
       throw Exception('Failed to send password reset email: $e');
     }
   }
@@ -572,27 +588,27 @@ class AuthService {
   /// Update user profile
   static Future<void> updateUserProfile(UserModel userModel) async {
     try {
-      _logger.i('AuthService - Updating user profile: ${userModel.id}');
-      _logger.d('AuthService - New name: "${userModel.name}"');
+      LoggingService.auth.i('AuthService - Updating user profile: ${userModel.id}');
+      LoggingService.auth.d('AuthService - New name: "${userModel.name}"');
 
       await _updateUserDocument(userModel);
-      _logger.i('AuthService - Firestore document updated');
+      LoggingService.auth.i('AuthService - Firestore document updated');
 
       // Update Firebase Auth display name if it changed
       final currentUser = _auth.currentUser;
       if (currentUser != null && currentUser.displayName != userModel.name) {
-        _logger.d(
+        LoggingService.auth.d(
             'AuthService - Updating Firebase Auth display name from "${currentUser.displayName}" to "${userModel.name}"');
         await currentUser.updateDisplayName(userModel.name);
-        _logger.i('AuthService - Firebase Auth display name updated');
+        LoggingService.auth.i('AuthService - Firebase Auth display name updated');
       } else {
-        _logger.d(
+        LoggingService.auth.d(
             'AuthService - Firebase Auth display name unchanged or user not found');
       }
 
-      _logger.i('AuthService - User profile updated successfully');
+      LoggingService.auth.i('AuthService - User profile updated successfully');
     } catch (e) {
-      _logger.e('AuthService - Error updating user profile: $e');
+      LoggingService.auth.e('AuthService - Error updating user profile: $e');
       throw Exception('Failed to update profile: $e');
     }
   }
@@ -600,7 +616,7 @@ class AuthService {
   /// Delete user account
   static Future<void> deleteAccount() async {
     try {
-      _logger.i('Attempting to delete user account');
+      LoggingService.auth.i('Attempting to delete user account');
 
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
@@ -611,11 +627,11 @@ class AuthService {
 
       // Delete all user data from Firestore
       await _retryFirestoreOperation(() async {
-        _logger.i('Deleting all user data from Firestore: $userId');
+        LoggingService.auth.i('Deleting all user data from Firestore: $userId');
 
         // Delete user document
         await _firestore.collection('users').doc(userId).delete();
-        _logger.i('User document deleted successfully');
+        LoggingService.auth.i('User document deleted successfully');
 
         // Delete all check-ins for the user
         await _deleteUserCheckins(userId);
@@ -626,13 +642,13 @@ class AuthService {
         // Delete all meal plans for the user
         await _deleteUserMealPlans(userId);
 
-        _logger.i('All user data deleted successfully');
+        LoggingService.auth.i('All user data deleted successfully');
       });
 
       // Delete Firebase Auth account
-      _logger.i('Deleting Firebase Auth account: $userId');
+      LoggingService.auth.i('Deleting Firebase Auth account: $userId');
       await currentUser.delete();
-      _logger.i('Firebase Auth account deleted successfully');
+      LoggingService.auth.i('Firebase Auth account deleted successfully');
 
       // Clear local storage
       await _storageService.clearUser();
@@ -643,13 +659,13 @@ class AuthService {
       // Sign out to complete the deletion process
       await signOut();
 
-      _logger.i('User account deleted successfully');
+      LoggingService.auth.i('User account deleted successfully');
     } on FirebaseAuthException catch (e) {
-      _logger.e(
+      LoggingService.auth.e(
           'Firebase Auth error during account deletion: ${e.code} - ${e.message}');
       throw _handleFirebaseAuthException(e);
     } catch (e) {
-      _logger.e('Unexpected error during account deletion: $e');
+      LoggingService.auth.e('Unexpected error during account deletion: $e');
       throw Exception('Failed to delete account: $e');
     }
   }
@@ -657,7 +673,7 @@ class AuthService {
   /// Delete all check-ins for a user
   static Future<void> _deleteUserCheckins(String userId) async {
     try {
-      _logger.i('Deleting all check-ins for user: $userId');
+      LoggingService.auth.i('Deleting all check-ins for user: $userId');
 
       final querySnapshot = await _firestore
           .collection('checkins')
@@ -670,10 +686,10 @@ class AuthService {
       }
 
       await batch.commit();
-      _logger.i(
+      LoggingService.auth.i(
           'Deleted ${querySnapshot.docs.length} check-ins for user: $userId');
     } catch (e) {
-      _logger.e('Error deleting user check-ins: $e');
+      LoggingService.auth.e('Error deleting user check-ins: $e');
       // Don't rethrow - we want to continue with account deletion even if check-in deletion fails
     }
   }
@@ -681,7 +697,7 @@ class AuthService {
   /// Delete all workout plans for a user
   static Future<void> _deleteUserWorkoutPlans(String userId) async {
     try {
-      _logger.i('Deleting all workout plans for user: $userId');
+      LoggingService.auth.i('Deleting all workout plans for user: $userId');
 
       final querySnapshot = await _firestore
           .collection('workout_plans')
@@ -694,10 +710,10 @@ class AuthService {
       }
 
       await batch.commit();
-      _logger.i(
+      LoggingService.auth.i(
           'Deleted ${querySnapshot.docs.length} workout plans for user: $userId');
     } catch (e) {
-      _logger.e('Error deleting user workout plans: $e');
+      LoggingService.auth.e('Error deleting user workout plans: $e');
       // Don't rethrow - we want to continue with account deletion even if workout plan deletion fails
     }
   }
@@ -705,7 +721,7 @@ class AuthService {
   /// Delete all meal plans for a user
   static Future<void> _deleteUserMealPlans(String userId) async {
     try {
-      _logger.i('Deleting all meal plans for user: $userId');
+      LoggingService.auth.i('Deleting all meal plans for user: $userId');
 
       final querySnapshot = await _firestore
           .collection('meal_plans')
@@ -718,10 +734,10 @@ class AuthService {
       }
 
       await batch.commit();
-      _logger.i(
+      LoggingService.auth.i(
           'Deleted ${querySnapshot.docs.length} meal plans for user: $userId');
     } catch (e) {
-      _logger.e('Error deleting user meal plans: $e');
+      LoggingService.auth.e('Error deleting user meal plans: $e');
       // Don't rethrow - we want to continue with account deletion even if meal plan deletion fails
     }
   }
@@ -729,11 +745,11 @@ class AuthService {
   /// Clear meal plan data from local storage
   static Future<void> _clearMealPlanData(String userId) async {
     try {
-      _logger.i('Clearing meal plan data from local storage for user: $userId');
+      LoggingService.auth.i('Clearing meal plan data from local storage for user: $userId');
       await MealPlanStorageService.clearMealPlanData(userId);
-      _logger.i('Meal plan data cleared from local storage successfully');
+      LoggingService.auth.i('Meal plan data cleared from local storage successfully');
     } catch (e) {
-      _logger.e('Error clearing meal plan data from local storage: $e');
+      LoggingService.auth.e('Error clearing meal plan data from local storage: $e');
       // Don't rethrow - we want to continue with account deletion even if local storage clearing fails
     }
   }
@@ -756,12 +772,12 @@ class AuthService {
         throw Exception('User not authenticated');
       }
 
-      _logger.i('Creating user document for: ${userModel.id}');
+      LoggingService.auth.i('Creating user document for: ${userModel.id}');
       await _firestore
           .collection('users')
           .doc(userModel.id)
           .set(userModel.toJson());
-      _logger.i('User document created successfully');
+      LoggingService.auth.i('User document created successfully');
     });
   }
 
@@ -773,13 +789,13 @@ class AuthService {
         throw Exception('User not authenticated');
       }
 
-      _logger.i('Getting user document for: $userId');
+      LoggingService.auth.i('Getting user document for: $userId');
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
-        _logger.i('User document found');
+        LoggingService.auth.i('User document found');
         return UserModel.fromJson(doc.data()!);
       }
-      _logger.i('User document not found');
+      LoggingService.auth.i('User document not found');
       return null;
     });
   }
@@ -792,14 +808,14 @@ class AuthService {
         throw Exception('User not authenticated');
       }
 
-      _logger.i('AuthService - Updating user document for: ${userModel.id}');
-      _logger.d('AuthService - User data to update: ${userModel.toJson()}');
+      LoggingService.auth.i('AuthService - Updating user document for: ${userModel.id}');
+      LoggingService.auth.d('AuthService - User data to update: ${userModel.toJson()}');
 
       await _firestore
           .collection('users')
           .doc(userModel.id)
           .update(userModel.toJson());
-      _logger.i('AuthService - User document updated successfully');
+      LoggingService.auth.i('AuthService - User document updated successfully');
     });
   }
 
@@ -814,7 +830,7 @@ class AuthService {
         attempts++;
         if (e.toString().contains('cloud_firestore/unavailable') &&
             attempts < maxRetries) {
-          _logger.w(
+          LoggingService.auth.w(
               'Firestore unavailable, retrying in ${attempts * 2} seconds... (attempt $attempts/$maxRetries)');
           await Future.delayed(Duration(seconds: attempts * 2));
           continue;
@@ -831,7 +847,7 @@ class AuthService {
     required String newPassword,
   }) async {
     try {
-      _logger.i('Attempting to change password');
+      LoggingService.auth.i('Attempting to change password');
 
       final User? currentUser = _auth.currentUser;
       if (currentUser == null) {
@@ -844,13 +860,13 @@ class AuthService {
       );
 
       await currentUser.reauthenticateWithCredential(credential);
-      _logger.i('User re-authenticated successfully');
+      LoggingService.auth.i('User re-authenticated successfully');
 
       // Update password
       await currentUser.updatePassword(newPassword);
-      _logger.i('Password updated successfully');
+      LoggingService.auth.i('Password updated successfully');
     } catch (e) {
-      _logger.e('Error changing password: $e');
+      LoggingService.auth.e('Error changing password: $e');
       if (e is FirebaseAuthException) {
         throw _handleFirebaseAuthException(e);
       }

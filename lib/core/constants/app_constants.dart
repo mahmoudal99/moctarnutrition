@@ -160,7 +160,9 @@ class AppTextStyles {
       );
 }
 
-/// Centralized logger configuration to fix ANSI escape codes
+/// Centralized logger configuration - DEPRECATED
+/// Use LoggingService instead for better structured logging
+@Deprecated('Use LoggingService.instance instead')
 class AppLogger {
   static Logger get instance {
     return Logger(
