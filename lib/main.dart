@@ -45,6 +45,7 @@ import 'shared/providers/auth_provider.dart';
 import 'shared/providers/checkin_provider.dart';
 import 'shared/providers/workout_provider.dart';
 import 'shared/services/config_service.dart';
+import 'shared/services/stripe_subscription_service.dart';
 import 'shared/models/checkin_model.dart';
 
 late final GoRouter _router;
@@ -61,9 +62,11 @@ GoRouter createRouter(AuthProvider authProvider) {
         builder: (context, state) {
           final authProvider =
               Provider.of<AuthProvider>(context, listen: false);
-          
+
           // Show loading indicator while determining auth state
-          if (authProvider.isLoading || (authProvider.firebaseUser != null && authProvider.userModel == null)) {
+          if (authProvider.isLoading ||
+              (authProvider.firebaseUser != null &&
+                  authProvider.userModel == null)) {
             return const Scaffold(
               backgroundColor: Colors.white,
               body: Center(
@@ -73,16 +76,16 @@ GoRouter createRouter(AuthProvider authProvider) {
               ),
             );
           }
-          
+
           if (!authProvider.isAuthenticated) {
             return const GetStartedScreen();
           }
-          
+
           if (authProvider.userModel?.role == UserRole.admin) {
             // The redirect will handle navigation, just show a placeholder
             return const SizedBox.shrink();
           }
-          
+
           return const FloatingMainNavigation(child: HomeScreen());
         },
       ),
@@ -320,6 +323,22 @@ void main() async {
   } catch (e) {
     _logger.w('Warning: Could not initialize notification service: $e');
     // Continue without notification service
+  }
+
+  // Initialize Stripe service
+  try {
+    if (ConfigService.isStripeEnabled) {
+      await StripeSubscriptionService.initialize(
+        publishableKey: ConfigService.stripePublishableKey,
+        backendUrl: ConfigService.stripeBackendUrl,
+      );
+      _logger.i('Stripe service initialized successfully');
+    } else {
+      _logger.w('Stripe service disabled - configuration not found');
+    }
+  } catch (e) {
+    _logger.w('Warning: Could not initialize Stripe service: $e');
+    // Continue without Stripe service
   }
 
   final authProvider = AuthProvider();

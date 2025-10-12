@@ -92,10 +92,44 @@ class ConfigService {
     return key.isNotEmpty && key != 'DEMO_KEY';
   }
 
+  /// Get Stripe publishable key from environment variables
+  static String get stripePublishableKey {
+    final key = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
+    if (key == null || key.isEmpty || key == 'your_stripe_publishable_key_here') {
+      throw Exception('STRIPE_PUBLISHABLE_KEY not found or not configured. '
+          'Please copy .env.example to .env and set your actual Stripe publishable key.');
+    }
+    return key;
+  }
+
+  /// Get Stripe backend URL from environment variables
+  static String get stripeBackendUrl {
+    final url = dotenv.env['STRIPE_BACKEND_URL'];
+    if (url == null || url.isEmpty) {
+      throw Exception('STRIPE_BACKEND_URL not found or not configured. '
+          'Please set your backend URL for Stripe operations.');
+    }
+    return url;
+  }
+
+  /// Check if Stripe is enabled
+  static bool get isStripeEnabled {
+    try {
+      stripePublishableKey;
+      stripeBackendUrl;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Validate that all required environment variables are set
   static void validateEnvironment() {
     final requiredVars = ['OPENAI_API_KEY'];
+    final optionalVars = ['STRIPE_PUBLISHABLE_KEY', 'STRIPE_BACKEND_URL'];
     final missingVars = <String>[];
+    
+    // Check required variables
     for (final varName in requiredVars) {
       final value = dotenv.env[varName];
       if (value == null ||
@@ -109,6 +143,15 @@ class ConfigService {
       throw Exception(
           'Missing or invalid required environment variables: ${missingVars.join(', ')}. '
           'Please copy .env.example to .env and configure your API key.');
+    }
+    
+    // Log optional variables status
+    for (final varName in optionalVars) {
+      final value = dotenv.env[varName];
+      if (value == null || value.isEmpty || value.contains('your_')) {
+        _logger.w('Optional environment variable $varName not configured. '
+            'Stripe functionality will be disabled.');
+      }
     }
   }
 
@@ -133,6 +176,8 @@ class ConfigService {
       'appVersion': appVersion,
       'buildNumber': buildNumber,
       'hasApiKey': openAIApiKey.isNotEmpty,
+      'isStripeEnabled': isStripeEnabled,
+      'hasStripeBackendUrl': stripeBackendUrl.isNotEmpty,
     };
   }
 }

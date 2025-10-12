@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../shared/services/food_search_service.dart';
-import '../../../../shared/models/meal_model.dart';
 import '../../../../core/constants/app_constants.dart';
 import 'food_details_screen.dart';
 

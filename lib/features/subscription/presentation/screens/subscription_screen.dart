@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/subscription_model.dart';
+import '../../../../shared/services/stripe_subscription_service.dart';
+import '../../../../shared/providers/auth_provider.dart';
+import '../../../../shared/services/config_service.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -438,9 +442,138 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     );
   }
 
-  void _handleSubscription(SubscriptionPlan plan) {
-    // TODO: Implement subscription logic
-    // After selecting a plan, go to auth screen for sign up
-    context.go('/auth-signup');
+  void _handleSubscription(SubscriptionPlan plan) async {
+    // Skip free plan - no payment needed
+    if (plan == SubscriptionPlan.free) {
+      context.go('/auth-signup');
+      return;
+    }
+
+    // Check if Stripe is configured
+    if (!ConfigService.isStripeEnabled) {
+      _showErrorDialog('Payment system not configured. Please contact support.');
+      return;
+    }
+
+    // Get current user
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isAuthenticated) {
+      // User not authenticated, redirect to signup first
+      context.go('/auth-signup');
+      return;
+    }
+
+    final user = authProvider.userModel;
+    if (user == null) {
+      _showErrorDialog('User not found. Please try again.');
+      return;
+    }
+
+    // Show loading dialog
+    _showLoadingDialog();
+
+    try {
+      // Map subscription plan to Stripe price ID
+      final priceId = _getPriceIdForPlan(plan);
+      if (priceId == null) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showErrorDialog('Subscription plan not available. Please contact support.');
+        return;
+      }
+
+      // Create checkout session
+      final checkoutResult = await StripeSubscriptionService.createCheckoutSession(
+        priceId: priceId,
+        userId: user.id,
+        successUrl: 'moctarnutrition://subscription-success',
+        cancelUrl: 'moctarnutrition://subscription-cancel',
+        customerEmail: user.email,
+      );
+
+      Navigator.of(context).pop(); // Close loading dialog
+
+      if (checkoutResult.isSuccess && checkoutResult.sessionId != null) {
+        // Present Stripe checkout
+        final paymentResult = await StripeSubscriptionService.presentCheckout(
+          sessionId: checkoutResult.sessionId!,
+        );
+
+        if (paymentResult.isSuccess) {
+          _showSuccessDialog('Subscription activated successfully!');
+          // Refresh user data to get updated subscription status
+          await authProvider.refreshUser();
+        } else {
+          _showErrorDialog(paymentResult.errorMessage ?? 'Payment failed. Please try again.');
+        }
+      } else {
+        _showErrorDialog(checkoutResult.errorMessage ?? 'Failed to create checkout session. Please try again.');
+      }
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog
+      _showErrorDialog('An error occurred: ${e.toString()}');
+    }
+  }
+
+  String? _getPriceIdForPlan(SubscriptionPlan plan) {
+    // These should match your Stripe Dashboard price IDs
+    switch (plan) {
+      case SubscriptionPlan.basic:
+        return 'price_basic_monthly'; // Replace with actual Stripe price ID
+      case SubscriptionPlan.premium:
+        return 'price_premium_monthly'; // Replace with actual Stripe price ID
+      case SubscriptionPlan.free:
+        return null; // Free plan doesn't need payment
+    }
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 16),
+            Text('Processing subscription...'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Success'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.go('/home');
+            },
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 }
