@@ -49,3 +49,7 @@ app.*.map.json
 .env.staging
 *.key
 *.pem
+
+# Firebase Functions
+functions/node_modules/
+functions/.runtimeconfig.json
