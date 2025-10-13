@@ -1,6 +1,5 @@
-enum SubscriptionPlan { free, basic, premium }
-
-enum BillingCycle { monthly, yearly }
+import 'package:champions_gym_app/shared/enums/billing_cycle.dart';
+import 'package:champions_gym_app/shared/enums/subscription_plan.dart';
 
 class SubscriptionModel {
   final String id;

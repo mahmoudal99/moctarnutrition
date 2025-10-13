@@ -31,9 +31,6 @@ class RateLimitService {
     required String body,
     String? context,
   }) async {
-    // Disable internal rate limiting - let OpenAI handle it
-    // await _checkRateLimit();
-
     return retry(
       () async {
         final response = await http.post(url, headers: headers, body: body);

@@ -6,7 +6,6 @@ import '../models/user_model.dart';
 import '../models/meal_model.dart';
 import 'prompt_service.dart';
 import 'parser_service.dart';
-import 'json_validation_service.dart';
 
 import 'config_service.dart';
 import 'cache_service.dart';
