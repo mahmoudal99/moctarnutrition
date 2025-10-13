@@ -41,7 +41,7 @@ class StripeSubscriptionService {
       _logger.i('Creating checkout session for priceId: $priceId');
 
       final response = await http.post(
-        Uri.parse('$_backendUrl/create-checkout-session'),
+        Uri.parse('$_backendUrl/createCheckoutSession'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -57,8 +57,8 @@ class StripeSubscriptionService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return StripeCheckoutResult.success(
-          sessionId: data['sessionId'],
-          url: data['url'],
+          sessionId: data['clientSecret'], // Now using clientSecret for Payment Intent
+          url: null, // No URL needed for Payment Intents
         );
       } else {
         final error = json.decode(response.body);
@@ -74,20 +74,23 @@ class StripeSubscriptionService {
     }
   }
 
-  /// Present Stripe checkout session
+  /// Present Stripe payment intent
   static Future<StripePaymentResult> presentCheckout({
-    required String sessionId,
+    required String sessionId, // Now this is actually the clientSecret
+    String? checkoutUrl, // Not used for Payment Intents
   }) async {
     try {
-      _logger.i('Presenting checkout session: $sessionId');
+      _logger.i('Presenting payment intent with client secret: $sessionId');
 
+      // Initialize payment sheet with Payment Intent client secret
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: sessionId, // This is the client secret
           merchantDisplayName: 'Moctar Nutrition',
-          paymentIntentClientSecret: sessionId,
         ),
       );
 
+      // Present the payment sheet
       await Stripe.instance.presentPaymentSheet();
 
       _logger.i('Payment successful');
@@ -115,7 +118,7 @@ class StripeSubscriptionService {
       _logger.i('Creating portal session for customer: $customerId');
 
       final response = await http.post(
-        Uri.parse('$_backendUrl/create-portal-session'),
+        Uri.parse('$_backendUrl/createPortalSession'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -150,7 +153,7 @@ class StripeSubscriptionService {
       _logger.i('Getting subscription status for user: $userId');
 
       final response = await http.get(
-        Uri.parse('$_backendUrl/subscription-status/$userId'),
+        Uri.parse('$_backendUrl/getSubscriptionStatus?userId=$userId'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -178,7 +181,7 @@ class StripeSubscriptionService {
       _logger.i('Cancelling subscription: $subscriptionId');
 
       final response = await http.post(
-        Uri.parse('$_backendUrl/cancel-subscription'),
+        Uri.parse('$_backendUrl/cancelSubscription'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -219,7 +222,7 @@ class StripeSubscriptionService {
       _logger.i('Updating subscription: $subscriptionId to price: $newPriceId');
 
       final response = await http.post(
-        Uri.parse('$_backendUrl/update-subscription'),
+        Uri.parse('$_backendUrl/updateSubscription'), // TODO: Deploy this function
         headers: {
           'Content-Type': 'application/json',
         },
@@ -255,7 +258,7 @@ class StripeSubscriptionService {
       _logger.i('Getting available subscription plans');
 
       final response = await http.get(
-        Uri.parse('$_backendUrl/subscription-plans'),
+        Uri.parse('$_backendUrl/getSubscriptionPlans'), // TODO: Deploy this function
         headers: {
           'Content-Type': 'application/json',
         },
@@ -380,7 +383,7 @@ class StripeCheckoutResult {
 
   factory StripeCheckoutResult.success({
     required String sessionId,
-    required String url,
+    String? url,
   }) {
     return StripeCheckoutResult._(
       isSuccess: true,

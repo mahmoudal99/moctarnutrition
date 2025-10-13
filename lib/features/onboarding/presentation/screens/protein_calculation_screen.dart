@@ -464,7 +464,7 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
               height: 55,
               child: ElevatedButton(
                 onPressed: () {
-                  context.go('/subscription');
+                  context.go('/auth-signup');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,

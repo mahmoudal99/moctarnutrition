@@ -65,9 +65,7 @@ GoRouter createRouter(AuthProvider authProvider) {
               Provider.of<AuthProvider>(context, listen: false);
 
           // Show loading indicator while determining auth state
-          if (authProvider.isLoading ||
-              (authProvider.firebaseUser != null &&
-                  authProvider.userModel == null)) {
+          if (authProvider.isLoading) {
             return const Scaffold(
               backgroundColor: Colors.white,
               body: Center(
@@ -78,13 +76,34 @@ GoRouter createRouter(AuthProvider authProvider) {
             );
           }
 
+          // If not authenticated, show get started screen
           if (!authProvider.isAuthenticated) {
             return const GetStartedScreen();
+          }
+
+          // If authenticated but user model is still loading, show loading
+          if (authProvider.userModel == null) {
+            return const Scaffold(
+              backgroundColor: Colors.white,
+              body: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black54),
+                ),
+              ),
+            );
           }
 
           if (authProvider.userModel?.role == UserRole.admin) {
             // The redirect will handle navigation, just show a placeholder
             return const SizedBox.shrink();
+          }
+
+          // Check subscription status
+          final user = authProvider.userModel!;
+          final hasSubscription = user.subscriptionStatus != SubscriptionStatus.free;
+          
+          if (!hasSubscription) {
+            return const SubscriptionScreen();
           }
 
           return const FloatingMainNavigation(child: HomeScreen());

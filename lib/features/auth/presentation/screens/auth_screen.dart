@@ -520,16 +520,16 @@ class _AuthScreenState extends State<AuthScreen> {
       // Wait for user data to be loaded before navigating
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       if (authProvider.userModel != null) {
-        _logger.i('AuthScreen - User data loaded, navigating to home');
-        context.go('/home');
+        _logger.i('AuthScreen - User data loaded, navigating to main route');
+        context.go('/');
       } else {
         _logger.d('AuthScreen - Waiting for user data to load...');
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
           _logger.i(
-              'AuthScreen - User data loaded after delay, navigating to home');
-          context.go('/home');
+              'AuthScreen - User data loaded after delay, navigating to main route');
+          context.go('/');
         }
       }
     } else if (mounted && authProvider.error != null) {
@@ -561,16 +561,16 @@ class _AuthScreenState extends State<AuthScreen> {
     if (success && mounted) {
       // Wait for user data to be loaded before navigating
       if (authProvider.userModel != null) {
-        _logger.i('AuthScreen - User data loaded, navigating to home');
-        context.go('/home');
+        _logger.i('AuthScreen - User data loaded, navigating to main route');
+        context.go('/');
       } else {
         _logger.d('AuthScreen - Waiting for user data to load...');
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
           _logger.i(
-              'AuthScreen - User data loaded after delay, navigating to home');
-          context.go('/home');
+              'AuthScreen - User data loaded after delay, navigating to main route');
+          context.go('/');
         }
       }
     } else if (mounted && authProvider.error != null) {
@@ -601,16 +601,16 @@ class _AuthScreenState extends State<AuthScreen> {
     if (success && mounted) {
       // Wait for user data to be loaded before navigating
       if (authProvider.userModel != null) {
-        _logger.i('AuthScreen - User data loaded, navigating to home');
-        context.go('/home');
+        _logger.i('AuthScreen - User data loaded, navigating to main route');
+        context.go('/');
       } else {
         _logger.d('AuthScreen - Waiting for user data to load...');
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
           _logger.i(
-              'AuthScreen - User data loaded after delay, navigating to home');
-          context.go('/home');
+              'AuthScreen - User data loaded after delay, navigating to main route');
+          context.go('/');
         }
       }
     } else if (mounted && authProvider.error != null) {
@@ -638,16 +638,16 @@ class _AuthScreenState extends State<AuthScreen> {
     if (success && mounted) {
       // Wait for user data to be loaded before navigating
       if (authProvider.userModel != null) {
-        _logger.i('AuthScreen - User data loaded, navigating to home');
-        context.go('/home');
+        _logger.i('AuthScreen - User data loaded, navigating to main route');
+        context.go('/');
       } else {
         _logger.d('AuthScreen - Waiting for user data to load...');
         // Wait a bit for the auth state listener to load the user data
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted && authProvider.userModel != null) {
           _logger.i(
-              'AuthScreen - User data loaded after delay, navigating to home');
-          context.go('/home');
+              'AuthScreen - User data loaded after delay, navigating to main route');
+          context.go('/');
         }
       }
     } else if (mounted && authProvider.error != null) {

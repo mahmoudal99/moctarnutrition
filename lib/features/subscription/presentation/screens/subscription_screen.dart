@@ -458,17 +458,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
 
     // Get current user
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (!authProvider.isAuthenticated) {
-      // User not authenticated, redirect to signup first
-      context.go('/auth-signup');
+    
+    // Debug: Show current auth state
+    print('Subscription Debug:');
+    print('  - isLoading: ${authProvider.isLoading}');
+    print('  - firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
+    print('  - userModel: ${authProvider.userModel?.name ?? 'null'}');
+    print('  - isAuthenticated: ${authProvider.isAuthenticated}');
+    
+    // Check if user data is still loading
+    if (authProvider.isLoading || authProvider.userModel == null) {
+      _showErrorDialog('Loading user data... Please wait a moment and try again.');
       return;
     }
-
-    final user = authProvider.userModel;
-    if (user == null) {
-      _showErrorDialog('User not found. Please try again.');
-      return;
-    }
+    
+    final user = authProvider.userModel!;
 
     // Show loading dialog
     _showLoadingDialog();
@@ -478,7 +482,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
       final priceId = _getPriceIdForPlan(plan);
       if (priceId == null) {
         Navigator.of(context).pop(); // Close loading dialog
-        _showErrorDialog('Subscription plan not available. Please contact support.');
+        _showErrorDialog('Subscription plan not ddavailable. Please contact support.');
         return;
       }
 
@@ -497,12 +501,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         // Present Stripe checkout
         final paymentResult = await StripeSubscriptionService.presentCheckout(
           sessionId: checkoutResult.sessionId!,
+          checkoutUrl: checkoutResult.url,
         );
 
         if (paymentResult.isSuccess) {
-          _showSuccessDialog('Subscription activated successfully!');
           // Refresh user data to get updated subscription status
           await authProvider.refreshUser();
+          _showSuccessDialog('Subscription activated successfully!');
         } else {
           _showErrorDialog(paymentResult.errorMessage ?? 'Payment failed. Please try again.');
         }
@@ -519,9 +524,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     // These should match your Stripe Dashboard price IDs
     switch (plan) {
       case SubscriptionPlan.basic:
-        return 'price_basic_monthly'; // Replace with actual Stripe price ID
+        return 'price_1SGzgzBa6NGVc5lJvVOssWsG'; // Replace with actual Stripe price ID
       case SubscriptionPlan.premium:
-        return 'price_premium_monthly'; // Replace with actual Stripe price ID
+        return 'price_1SGzgzBa6NGVc5lJvVOssWsG'; // Replace with actual Stripe price ID
       case SubscriptionPlan.free:
         return null; // Free plan doesn't need payment
     }
