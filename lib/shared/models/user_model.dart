@@ -13,7 +13,7 @@ enum ActivityLevel {
   extremelyActive
 }
 
-enum SubscriptionStatus { free, basic, premium, cancelled }
+enum TrainingProgramStatus { none, winter, summer, bodybuilding }
 
 class UserModel {
   final String id;
@@ -21,12 +21,14 @@ class UserModel {
   final String? name;
   final String? photoUrl;
   final UserRole role;
-  final SubscriptionStatus subscriptionStatus;
-  final DateTime? subscriptionExpiry;
+  final TrainingProgramStatus trainingProgramStatus;
+  final DateTime? programPurchaseDate;
+  final String? currentProgramId; // Reference to the active training program document
   final UserPreferences preferences;
   final String? selectedTrainerId;
   // Reference to the user's current meal plan (Firestore best practice)
   final String? mealPlanId;
+  final String? stripeCustomerId; // Stripe customer ID for subscription management
   final bool hasSeenSubscriptionScreen;
   final bool hasSeenOnboarding;
   final bool hasSeenGetStarted;
@@ -39,11 +41,13 @@ class UserModel {
     this.name,
     this.photoUrl,
     this.role = UserRole.user,
-    this.subscriptionStatus = SubscriptionStatus.free,
-    this.subscriptionExpiry,
+    this.trainingProgramStatus = TrainingProgramStatus.none,
+    this.programPurchaseDate,
+    this.currentProgramId,
     required this.preferences,
     this.selectedTrainerId,
     this.mealPlanId,
+    this.stripeCustomerId,
     this.hasSeenSubscriptionScreen = false,
     this.hasSeenOnboarding = false,
     this.hasSeenGetStarted = false,
@@ -61,18 +65,19 @@ class UserModel {
         (e) => e.toString() == 'UserRole.${json['role']}',
         orElse: () => UserRole.user,
       ),
-      subscriptionStatus: SubscriptionStatus.values.firstWhere(
-        (e) =>
-            e.toString() == 'SubscriptionStatus.${json['subscriptionStatus']}',
-        orElse: () => SubscriptionStatus.free,
+      trainingProgramStatus: TrainingProgramStatus.values.firstWhere(
+        (e) => e.name == json['trainingProgramStatus'],
+        orElse: () => TrainingProgramStatus.none,
       ),
-      subscriptionExpiry: json['subscriptionExpiry'] != null
-          ? _extractDateTimeFromField(json['subscriptionExpiry'])
+      programPurchaseDate: json['programPurchaseDate'] != null
+          ? _extractDateTimeFromField(json['programPurchaseDate'])
           : null,
+      currentProgramId: _extractStringFromField(json['currentProgramId']),
       preferences:
           UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>),
       selectedTrainerId: _extractStringFromField(json['selectedTrainerId']),
       mealPlanId: _extractStringFromField(json['mealPlanId']),
+      stripeCustomerId: _extractStringFromField(json['stripeCustomerId']),
       hasSeenSubscriptionScreen:
           json['hasSeenSubscriptionScreen'] as bool? ?? false,
       hasSeenOnboarding: json['hasSeenOnboarding'] as bool? ?? false,
@@ -89,11 +94,13 @@ class UserModel {
       'name': name,
       'photoUrl': photoUrl,
       'role': role.toString().split('.').last,
-      'subscriptionStatus': subscriptionStatus.toString().split('.').last,
-      'subscriptionExpiry': subscriptionExpiry?.toIso8601String(),
+      'trainingProgramStatus': trainingProgramStatus.toString().split('.').last,
+      'programPurchaseDate': programPurchaseDate?.toIso8601String(),
+      'currentProgramId': currentProgramId,
       'preferences': preferences.toJson(),
       'selectedTrainerId': selectedTrainerId,
       'mealPlanId': mealPlanId,
+      'stripeCustomerId': stripeCustomerId,
       'hasSeenSubscriptionScreen': hasSeenSubscriptionScreen,
       'hasSeenOnboarding': hasSeenOnboarding,
       'hasSeenGetStarted': hasSeenGetStarted,
@@ -108,11 +115,13 @@ class UserModel {
     String? name,
     String? photoUrl,
     UserRole? role,
-    SubscriptionStatus? subscriptionStatus,
-    DateTime? subscriptionExpiry,
+    TrainingProgramStatus? trainingProgramStatus,
+    DateTime? programPurchaseDate,
+    String? currentProgramId,
     UserPreferences? preferences,
     String? selectedTrainerId,
     String? mealPlanId,
+    String? stripeCustomerId,
     bool? hasSeenSubscriptionScreen,
     bool? hasSeenOnboarding,
     bool? hasSeenGetStarted,
@@ -125,11 +134,13 @@ class UserModel {
       name: name ?? this.name,
       photoUrl: photoUrl ?? this.photoUrl,
       role: role ?? this.role,
-      subscriptionStatus: subscriptionStatus ?? this.subscriptionStatus,
-      subscriptionExpiry: subscriptionExpiry ?? this.subscriptionExpiry,
+      trainingProgramStatus: trainingProgramStatus ?? this.trainingProgramStatus,
+      programPurchaseDate: programPurchaseDate ?? this.programPurchaseDate,
+      currentProgramId: currentProgramId ?? this.currentProgramId,
       preferences: preferences ?? this.preferences,
       selectedTrainerId: selectedTrainerId ?? this.selectedTrainerId,
       mealPlanId: mealPlanId ?? this.mealPlanId,
+      stripeCustomerId: stripeCustomerId ?? this.stripeCustomerId,
       hasSeenSubscriptionScreen:
           hasSeenSubscriptionScreen ?? this.hasSeenSubscriptionScreen,
       hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,

@@ -1,9 +1,10 @@
+import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/enums/subscription_plan.dart';
+import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/subscription_model.dart';
 import '../../../../shared/services/stripe_subscription_service.dart';
 import '../../../../shared/providers/auth_provider.dart';
@@ -46,7 +47,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
 
   @override
   Widget build(BuildContext context) {
-    final pricingTiers = PricingTier.getPricingTiers();
+    final pricingTiers = TrainingProgramTier.getTrainingProgramTiers();
 
     return Scaffold(
       body: Container(
@@ -77,7 +78,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                         Positioned(
                           left: 0,
                           child: Transform.rotate(
-                            angle: -0.1,
+                            angle: -0.15,
                             child: Container(
                               width: 160,
                               height: 210,
@@ -111,7 +112,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                         Positioned(
                           right: 0,
                           child: Transform.rotate(
-                            angle: 0.1,
+                            angle: 0.15,
                             child: Container(
                               width: 160,
                               height: 210,
@@ -220,7 +221,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     );
   }
 
-  Widget _buildPricingCards(List<PricingTier> pricingTiers) {
+  Widget _buildPricingCards(List<TrainingProgramTier> pricingTiers) {
     return PageView.builder(
       controller: _pageController,
       onPageChanged: (index) {
@@ -231,7 +232,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
       itemCount: pricingTiers.length,
       itemBuilder: (context, index) {
         final tier = pricingTiers[index];
-        final price = tier.monthlyPrice;
+        final price = tier.price;
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: AppConstants.spacingS),
@@ -248,7 +249,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
   }
 
   Widget _buildPricingCard({
-    required PricingTier tier,
+    required TrainingProgramTier tier,
     required double price,
   }) {
     return Card(
@@ -311,7 +312,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      _handleSubscription(tier.plan);
+                      _handleTrainingProgram(tier.program);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
@@ -377,46 +378,46 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     );
   }
 
-  String _getCurrentPageImage(List<PricingTier> pricingTiers) {
+  String _getCurrentPageImage(List<TrainingProgramTier> pricingTiers) {
     if (_currentPageIndex < pricingTiers.length) {
       return _getTierImage(pricingTiers[_currentPageIndex]);
     }
     return 'assets/images/moc_one.jpg';
   }
 
-  String _getTierImage(PricingTier tier) {
-    switch (tier.plan) {
-      case SubscriptionPlan.free:
+  String _getTierImage(TrainingProgramTier tier) {
+    switch (tier.program) {
+      case TrainingProgram.winter:
         return 'assets/images/moc_one.jpg';
-      case SubscriptionPlan.basic:
+      case TrainingProgram.summer:
         return 'assets/images/moc_two.jpg';
-      case SubscriptionPlan.premium:
+      case TrainingProgram.bodybuilding:
         return 'assets/images/moc_three.jpg';
       default:
         return 'assets/images/moc_one.jpg';
     }
   }
 
-  String _getSideImage(List<PricingTier> pricingTiers, int offset) {
+  String _getSideImage(List<TrainingProgramTier> pricingTiers, int offset) {
     int sideIndex = (_currentPageIndex + offset) % pricingTiers.length;
     if (sideIndex < 0) sideIndex += pricingTiers.length;
     return _getTierImage(pricingTiers[sideIndex]);
   }
 
-  String _getCurrentBackgroundImage(List<PricingTier> pricingTiers) {
+  String _getCurrentBackgroundImage(List<TrainingProgramTier> pricingTiers) {
     if (_currentPageIndex < pricingTiers.length) {
       return _getTierBackgroundImage(pricingTiers[_currentPageIndex]);
     }
     return 'assets/images/summer_plan.png';
   }
 
-  String _getTierBackgroundImage(PricingTier tier) {
-    switch (tier.plan) {
-      case SubscriptionPlan.basic:
-        return 'assets/images/summer_plan.png';
-      case SubscriptionPlan.free:
+  String _getTierBackgroundImage(TrainingProgramTier tier) {
+    switch (tier.program) {
+      case TrainingProgram.winter:
         return 'assets/images/winter.png';
-      case SubscriptionPlan.premium:
+      case TrainingProgram.summer:
+        return 'assets/images/summer_plan.png';
+      case TrainingProgram.bodybuilding:
         return 'assets/images/transform.png';
       default:
         return 'assets/images/winter.png';
@@ -443,12 +444,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     );
   }
 
-  void _handleSubscription(SubscriptionPlan plan) async {
-    // Skip free plan - no payment needed
-    if (plan == SubscriptionPlan.free) {
-      context.go('/auth-signup');
-      return;
-    }
+  void _handleTrainingProgram(TrainingProgram program) async {
+    // All programs require payment
 
     // Check if Stripe is configured
     if (!ConfigService.isStripeEnabled) {
@@ -478,11 +475,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     _showLoadingDialog();
 
     try {
-      // Map subscription plan to Stripe price ID
-      final priceId = _getPriceIdForPlan(plan);
+      // Map training program to Stripe price ID
+      final priceId = _getPriceIdForProgram(program);
       if (priceId == null) {
         Navigator.of(context).pop(); // Close loading dialog
-        _showErrorDialog('Subscription plan not ddavailable. Please contact support.');
+        _showErrorDialog('Training program not available. Please contact support.');
         return;
       }
 
@@ -505,9 +502,43 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         );
 
         if (paymentResult.isSuccess) {
-          // Refresh user data to get updated subscription status
-          await authProvider.refreshUser();
-          _showSuccessDialog('Subscription activated successfully!');
+          // Wait longer for webhook to process the payment
+          await Future.delayed(const Duration(seconds: 3));
+          
+          // Try to refresh user data multiple times with retry logic
+          bool statusUpdated = false;
+          int retryCount = 0;
+          const maxRetries = 5;
+          
+          while (!statusUpdated && retryCount < maxRetries) {
+            print('Subscription Debug: Attempt ${retryCount + 1} to refresh user data...');
+            
+            // Force refresh user data to get updated training program status
+            await authProvider.refreshUser();
+            
+            // Wait a moment for the refresh to complete
+            await Future.delayed(const Duration(milliseconds: 1000));
+            
+            // Check if training program status was updated
+            final updatedUser = authProvider.userModel;
+            print('Subscription Debug: Updated user status: ${updatedUser?.trainingProgramStatus}');
+            
+            if (updatedUser != null && updatedUser.trainingProgramStatus != TrainingProgramStatus.none) {
+              statusUpdated = true;
+              _showSuccessDialog('Training program activated successfully!');
+              break;
+            }
+            
+            retryCount++;
+            if (retryCount < maxRetries) {
+              print('Subscription Debug: Status not updated yet, retrying in 2 seconds...');
+              await Future.delayed(const Duration(seconds: 2));
+            }
+          }
+          
+          if (!statusUpdated) {
+            _showErrorDialog('Payment successful but training program status not updated. Please refresh the app or contact support.');
+          }
         } else {
           _showErrorDialog(paymentResult.errorMessage ?? 'Payment failed. Please try again.');
         }
@@ -520,15 +551,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     }
   }
 
-  String? _getPriceIdForPlan(SubscriptionPlan plan) {
-    // These should match your Stripe Dashboard price IDs
-    switch (plan) {
-      case SubscriptionPlan.basic:
-        return 'price_1SGzgzBa6NGVc5lJvVOssWsG'; // Replace with actual Stripe price ID
-      case SubscriptionPlan.premium:
-        return 'price_1SGzgzBa6NGVc5lJvVOssWsG'; // Replace with actual Stripe price ID
-      case SubscriptionPlan.free:
-        return null; // Free plan doesn't need payment
+  String? _getPriceIdForProgram(TrainingProgram program) {
+    // These should match your Stripe Dashboard price IDs for one-time payments
+    switch (program) {
+      case TrainingProgram.winter:
+        return 'price_1SGzgzBa6NGVc5lJvVOssWsG'; // Winter Plan - $400 one-time (replace with actual price ID)
+      case TrainingProgram.summer:
+        return 'price_1SGzfcBa6NGVc5lJwmTNs2xk'; // Summer Plan - $600 one-time
+      case TrainingProgram.bodybuilding:
+        return 'price_1SHG5NBa6NGVc5lJdOEVEhZv'; // Body Building - $1000 one-time (replace with actual price ID)
     }
   }
 

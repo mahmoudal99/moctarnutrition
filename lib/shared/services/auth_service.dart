@@ -107,7 +107,7 @@ class AuthService {
           name: name,
           photoUrl: user.photoURL,
           role: UserRole.user,
-          subscriptionStatus: SubscriptionStatus.free,
+          trainingProgramStatus: TrainingProgramStatus.none,
           preferences: UserPreferences.defaultPreferences(),
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -283,7 +283,7 @@ class AuthService {
             name: user.displayName ?? 'User',
             photoUrl: user.photoURL,
             role: UserRole.user,
-            subscriptionStatus: SubscriptionStatus.free,
+            trainingProgramStatus: TrainingProgramStatus.none,
             preferences: UserPreferences.defaultPreferences(),
             hasSeenOnboarding: false,
             hasSeenGetStarted: false,
@@ -407,7 +407,7 @@ class AuthService {
             name: displayName.isNotEmpty ? displayName : 'User',
             photoUrl: user.photoURL,
             role: UserRole.user,
-            subscriptionStatus: SubscriptionStatus.free,
+            trainingProgramStatus: TrainingProgramStatus.none,
             preferences: UserPreferences.defaultPreferences(),
             hasSeenOnboarding: false,
             hasSeenGetStarted: false,
@@ -511,7 +511,7 @@ class AuthService {
             name: 'Guest User',
             photoUrl: null,
             role: UserRole.user,
-            subscriptionStatus: SubscriptionStatus.free,
+            trainingProgramStatus: TrainingProgramStatus.none,
             preferences: UserPreferences.defaultPreferences(),
             hasSeenOnboarding: false,
             hasSeenGetStarted: false,
@@ -792,8 +792,9 @@ class AuthService {
       LoggingService.auth.i('Getting user document for: $userId');
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
-        LoggingService.auth.i('User document found');
-        return UserModel.fromJson(doc.data()!);
+        final data = doc.data()!;
+        LoggingService.auth.i('User document found with trainingProgramStatus: ${data['trainingProgramStatus']}');
+        return UserModel.fromJson(data);
       }
       LoggingService.auth.i('User document not found');
       return null;

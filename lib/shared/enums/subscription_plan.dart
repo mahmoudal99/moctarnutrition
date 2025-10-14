@@ -1,1 +1,1 @@
-enum SubscriptionPlan { free, basic, premium }
+enum TrainingProgram { winter, summer, bodybuilding }

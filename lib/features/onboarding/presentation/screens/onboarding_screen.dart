@@ -440,7 +440,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       photoUrl: null,
       preferences: preferences,
       role: UserRole.user,
-      subscriptionStatus: SubscriptionStatus.free,
+      trainingProgramStatus: TrainingProgramStatus.none,
       hasSeenOnboarding: true,
       hasSeenGetStarted: true,
       createdAt: DateTime.now(),

@@ -1,56 +1,49 @@
-import 'package:champions_gym_app/shared/enums/billing_cycle.dart';
 import 'package:champions_gym_app/shared/enums/subscription_plan.dart';
 
-class SubscriptionModel {
+class TrainingProgramModel {
   final String id;
   final String userId;
-  final SubscriptionPlan plan;
-  final BillingCycle billingCycle;
+  final TrainingProgram program;
   final double price;
   final String currency;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime purchaseDate;
   final bool isActive;
   final String? paymentMethodId;
   final String? receiptUrl;
+  final String? stripePaymentIntentId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  SubscriptionModel({
+  TrainingProgramModel({
     required this.id,
     required this.userId,
-    required this.plan,
-    required this.billingCycle,
+    required this.program,
     required this.price,
     this.currency = 'USD',
-    required this.startDate,
-    required this.endDate,
+    required this.purchaseDate,
     this.isActive = true,
     this.paymentMethodId,
     this.receiptUrl,
+    this.stripePaymentIntentId,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
-    return SubscriptionModel(
+  factory TrainingProgramModel.fromJson(Map<String, dynamic> json) {
+    return TrainingProgramModel(
       id: json['id'] as String,
       userId: json['userId'] as String,
-      plan: SubscriptionPlan.values.firstWhere(
-        (e) => e.toString() == 'SubscriptionPlan.${json['plan']}',
-        orElse: () => SubscriptionPlan.free,
-      ),
-      billingCycle: BillingCycle.values.firstWhere(
-        (e) => e.toString() == 'BillingCycle.${json['billingCycle']}',
-        orElse: () => BillingCycle.monthly,
+      program: TrainingProgram.values.firstWhere(
+        (e) => e.toString() == 'TrainingProgram.${json['program']}',
+        orElse: () => TrainingProgram.summer,
       ),
       price: (json['price'] as num).toDouble(),
       currency: json['currency'] as String? ?? 'USD',
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
+      purchaseDate: DateTime.parse(json['purchaseDate'] as String),
       isActive: json['isActive'] as bool? ?? true,
       paymentMethodId: json['paymentMethodId'] as String?,
       receiptUrl: json['receiptUrl'] as String?,
+      stripePaymentIntentId: json['stripePaymentIntentId'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -60,149 +53,133 @@ class SubscriptionModel {
     return {
       'id': id,
       'userId': userId,
-      'plan': plan.toString().split('.').last,
-      'billingCycle': billingCycle.toString().split('.').last,
+      'program': program.toString().split('.').last,
       'price': price,
       'currency': currency,
-      'startDate': startDate.toIso8601String(),
-      'endDate': endDate.toIso8601String(),
+      'purchaseDate': purchaseDate.toIso8601String(),
       'isActive': isActive,
       'paymentMethodId': paymentMethodId,
       'receiptUrl': receiptUrl,
+      'stripePaymentIntentId': stripePaymentIntentId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
-  bool get isExpired => DateTime.now().isAfter(endDate);
-  bool get isExpiringSoon {
-    final daysUntilExpiry = endDate.difference(DateTime.now()).inDays;
-    return daysUntilExpiry <= 7 && daysUntilExpiry > 0;
-  }
+  bool get isActiveProgram => isActive;
 }
 
-class SubscriptionPlanDetails {
-  final SubscriptionPlan plan;
+class TrainingProgramDetails {
+  final TrainingProgram program;
   final String name;
   final String description;
-  final double monthlyPrice;
-  final double yearlyPrice;
+  final double price;
   final List<String> features;
   final bool isPopular;
   final bool isRecommended;
 
-  SubscriptionPlanDetails({
-    required this.plan,
+  TrainingProgramDetails({
+    required this.program,
     required this.name,
     required this.description,
-    required this.monthlyPrice,
-    required this.yearlyPrice,
+    required this.price,
     required this.features,
     this.isPopular = false,
     this.isRecommended = false,
   });
 }
 
-class SubscriptionFeatures {
-  static const Map<SubscriptionPlan, List<String>> features = {
-    SubscriptionPlan.free: [
-      'Access to basic workouts',
-      'Limited meal plans',
-      'Basic progress tracking',
-      'Community access',
-    ],
-    SubscriptionPlan.basic: [
-      'All free features',
-      'Unlimited workouts',
+class TrainingProgramFeatures {
+  static const Map<TrainingProgram, List<String>> features = {
+    TrainingProgram.winter: [
+      'Winter-specific workouts',
+      'Indoor training focus',
       'AI-generated meal plans',
       'Progress analytics',
       'Trainer selection',
       'Ad-free experience',
+      'Winter transformation guide',
     ],
-    SubscriptionPlan.premium: [
-      'All basic features',
-      'Personalized AI coaching',
+    TrainingProgram.summer: [
+      'All winter features',
+      'Summer-specific workouts',
+      'Outdoor training options',
+      'Summer transformation guide',
+    ],
+    TrainingProgram.bodybuilding: [
+      'All summer features',
+      'Advanced bodybuilding workouts',
       '1-on-1 trainer sessions',
       'Advanced analytics',
       'Custom meal plans',
       'Priority support',
       'Exclusive content',
-      'Early access to features',
+      'Bodybuilding nutrition guide',
     ],
   };
 
-  static List<String> getFeaturesForPlan(SubscriptionPlan plan) {
-    return features[plan] ?? [];
+  static List<String> getFeaturesForProgram(TrainingProgram program) {
+    return features[program] ?? [];
   }
 
   static bool hasFeature(
-      SubscriptionPlan userPlan, SubscriptionPlan requiredPlan) {
-    final planOrder = {
-      SubscriptionPlan.free: 0,
-      SubscriptionPlan.basic: 1,
-      SubscriptionPlan.premium: 2,
+      TrainingProgram userProgram, TrainingProgram requiredProgram) {
+    final programOrder = {
+      TrainingProgram.winter: 1,
+      TrainingProgram.summer: 2,
+      TrainingProgram.bodybuilding: 3,
     };
 
-    return planOrder[userPlan]! >= planOrder[requiredPlan]!;
+    return programOrder[userProgram]! >= programOrder[requiredProgram]!;
   }
 }
 
-class PricingTier {
-  final SubscriptionPlan plan;
+class TrainingProgramTier {
+  final TrainingProgram program;
   final String name;
   final String description;
-  final double monthlyPrice;
-  final double yearlyPrice;
-  final double yearlySavings;
+  final double price;
   final List<String> features;
   final bool isPopular;
   final bool isRecommended;
 
-  PricingTier({
-    required this.plan,
+  TrainingProgramTier({
+    required this.program,
     required this.name,
     required this.description,
-    required this.monthlyPrice,
-    required this.yearlyPrice,
-    required this.yearlySavings,
+    required this.price,
     required this.features,
     this.isPopular = false,
     this.isRecommended = false,
   });
 
-  static List<PricingTier> getPricingTiers() {
+  static List<TrainingProgramTier> getTrainingProgramTiers() {
     return [
-      PricingTier(
-        plan: SubscriptionPlan.free,
+      TrainingProgramTier(
+        program: TrainingProgram.winter,
         name: 'Winter Plan',
-        description: 'Perfect for getting started',
-        monthlyPrice: 0,
-        yearlyPrice: 0,
-        yearlySavings: 0,
+        description: 'Perfect for winter training',
+        price: 400.00,
         features:
-            SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.free),
+            TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.winter),
         isRecommended: true,
       ),
-      PricingTier(
-        plan: SubscriptionPlan.basic,
+      TrainingProgramTier(
+        program: TrainingProgram.summer,
         name: 'Summer Plan',
         description: 'Get ready for summer!',
-        monthlyPrice: 9.99,
-        yearlyPrice: 99.99,
-        yearlySavings: 19.89,
+        price: 600.00,
         features:
-            SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.basic),
+            TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.summer),
         isPopular: true,
       ),
-      PricingTier(
-        plan: SubscriptionPlan.premium,
+      TrainingProgramTier(
+        program: TrainingProgram.bodybuilding,
         name: 'Body Building',
         description: 'Ultimate fitness experience',
-        monthlyPrice: 19.99,
-        yearlyPrice: 199.99,
-        yearlySavings: 39.89,
+        price: 1000.00,
         features:
-            SubscriptionFeatures.getFeaturesForPlan(SubscriptionPlan.premium),
+            TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.bodybuilding),
       ),
     ];
   }

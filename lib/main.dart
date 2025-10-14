@@ -98,11 +98,11 @@ GoRouter createRouter(AuthProvider authProvider) {
             return const SizedBox.shrink();
           }
 
-          // Check subscription status
+          // Check training program status - all programs are paid
           final user = authProvider.userModel!;
-          final hasSubscription = user.subscriptionStatus != SubscriptionStatus.free;
+          final hasTrainingProgram = user.trainingProgramStatus != TrainingProgramStatus.none;
           
-          if (!hasSubscription) {
+          if (!hasTrainingProgram) {
             return const SubscriptionScreen();
           }
 

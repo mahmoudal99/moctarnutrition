@@ -81,8 +81,8 @@ class ProfileUserCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          if (user.subscriptionStatus ==
-                              SubscriptionStatus.premium)
+                          if (user.trainingProgramStatus ==
+                              TrainingProgramStatus.bodybuilding)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 2),

@@ -240,31 +240,31 @@ class _UserCard extends StatelessWidget {
     }
   }
 
-  Color _subscriptionColor(SubscriptionStatus status) {
+  Color _trainingProgramColor(TrainingProgramStatus status) {
     switch (status) {
-      case SubscriptionStatus.premium:
+      case TrainingProgramStatus.bodybuilding:
         return AppConstants.successColor;
-      case SubscriptionStatus.basic:
+      case TrainingProgramStatus.summer:
         return AppConstants.secondaryColor;
-      case SubscriptionStatus.cancelled:
-        return AppConstants.errorColor;
-      case SubscriptionStatus.free:
+      case TrainingProgramStatus.winter:
+        return AppConstants.primaryColor;
+      case TrainingProgramStatus.none:
       default:
         return AppConstants.textTertiary;
     }
   }
 
-  String _subscriptionLabel(SubscriptionStatus status) {
+  String _trainingProgramLabel(TrainingProgramStatus status) {
     switch (status) {
-      case SubscriptionStatus.premium:
-        return 'Year-Round Champion';
-      case SubscriptionStatus.basic:
-        return 'Summer Transformation';
-      case SubscriptionStatus.cancelled:
-        return 'Cancelled';
-      case SubscriptionStatus.free:
+      case TrainingProgramStatus.bodybuilding:
+        return 'Body Building';
+      case TrainingProgramStatus.summer:
+        return 'Summer Plan';
+      case TrainingProgramStatus.winter:
+        return 'Winter Plan';
+      case TrainingProgramStatus.none:
       default:
-        return 'Winter';
+        return 'No Program';
     }
   }
 
@@ -327,15 +327,15 @@ class _UserCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _subscriptionColor(user.subscriptionStatus)
+                            color: _trainingProgramColor(user.trainingProgramStatus)
                                 .withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            _subscriptionLabel(user.subscriptionStatus),
+                            _trainingProgramLabel(user.trainingProgramStatus),
                             style: AppTextStyles.caption.copyWith(
                               color:
-                                  _subscriptionColor(user.subscriptionStatus),
+                                  _trainingProgramColor(user.trainingProgramStatus),
                               fontWeight: FontWeight.w600,
                             ),
                           ),

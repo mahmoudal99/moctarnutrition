@@ -119,7 +119,7 @@ class AuthProvider extends ChangeNotifier {
           LoggingService.auth.i('Loaded cached user: ${cachedUser.name}');
         }
 
-        // Load fresh user model from Firestore
+        // Always load fresh user model from Firestore to get latest subscription status
         await _loadUserModel(currentFirebaseUser.uid);
       } else {
         // No Firebase user, check if we have cached data
@@ -178,6 +178,12 @@ class AuthProvider extends ChangeNotifier {
         }
       } else {
         LoggingService.auth.w('AuthProvider - No user model found');
+        // If Firebase user exists but no user model found, it means the account was deleted
+        // Sign out the user to clear the authentication state
+        if (_firebaseUser != null) {
+          LoggingService.auth.i('AuthProvider - User model not found but Firebase user exists, signing out');
+          await signOut();
+        }
       }
     } catch (e) {
       LoggingService.auth.e('AuthProvider - Error loading user model: $e');
@@ -474,7 +480,19 @@ class AuthProvider extends ChangeNotifier {
   /// Refresh user data
   Future<void> refreshUser() async {
     if (_firebaseUser != null) {
+      LoggingService.auth.i('AuthProvider - Starting user refresh for: ${_firebaseUser!.uid}');
+      
+      // Clear cached data to force fresh fetch
+      await _storageService.clearUser();
+      _userModel = null;
+      notifyListeners();
+      
+      // Load fresh user model from Firestore
       await _loadUserModel(_firebaseUser!.uid);
+      
+      LoggingService.auth.i('AuthProvider - User refresh completed. Current status: ${_userModel?.trainingProgramStatus}');
+    } else {
+      LoggingService.auth.w('AuthProvider - Cannot refresh user: no Firebase user');
     }
   }
 

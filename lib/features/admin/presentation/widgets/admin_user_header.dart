@@ -71,8 +71,8 @@ class AdminUserHeader extends StatelessWidget {
                               _roleLabel(user.role), _roleColor(user.role)),
                           const SizedBox(width: 8),
                           _buildBadge(
-                              _subscriptionLabel(user.subscriptionStatus),
-                              _subscriptionColor(user.subscriptionStatus)),
+                              _trainingProgramLabel(user.trainingProgramStatus),
+                              _trainingProgramColor(user.trainingProgramStatus)),
                         ],
                       ),
                     ],
@@ -127,31 +127,31 @@ class AdminUserHeader extends StatelessWidget {
     }
   }
 
-  Color _subscriptionColor(SubscriptionStatus status) {
+  Color _trainingProgramColor(TrainingProgramStatus status) {
     switch (status) {
-      case SubscriptionStatus.premium:
+      case TrainingProgramStatus.bodybuilding:
         return AppConstants.successColor;
-      case SubscriptionStatus.basic:
+      case TrainingProgramStatus.summer:
         return AppConstants.secondaryColor;
-      case SubscriptionStatus.cancelled:
-        return AppConstants.errorColor;
-      case SubscriptionStatus.free:
+      case TrainingProgramStatus.winter:
+        return AppConstants.primaryColor;
+      case TrainingProgramStatus.none:
       default:
         return AppConstants.textTertiary;
     }
   }
 
-  String _subscriptionLabel(SubscriptionStatus status) {
+  String _trainingProgramLabel(TrainingProgramStatus status) {
     switch (status) {
-      case SubscriptionStatus.premium:
-        return 'Year-Round Champion';
-      case SubscriptionStatus.basic:
-        return 'Summer Transformation';
-      case SubscriptionStatus.cancelled:
-        return 'Cancelled';
-      case SubscriptionStatus.free:
+      case TrainingProgramStatus.bodybuilding:
+        return 'Body Building';
+      case TrainingProgramStatus.summer:
+        return 'Summer Plan';
+      case TrainingProgramStatus.winter:
+        return 'Winter Plan';
+      case TrainingProgramStatus.none:
       default:
-        return 'Winter';
+        return 'No Program';
     }
   }
 }

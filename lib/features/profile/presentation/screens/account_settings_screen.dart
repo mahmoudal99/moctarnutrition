@@ -343,10 +343,11 @@ class _SubscriptionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subscriptionStatus = user.subscriptionStatus;
-    final isPremium = subscriptionStatus == SubscriptionStatus.premium;
-    final isBasic = subscriptionStatus == SubscriptionStatus.basic;
-    final isFree = subscriptionStatus == SubscriptionStatus.free;
+    final trainingProgramStatus = user.trainingProgramStatus;
+    final isBodybuilding = trainingProgramStatus == TrainingProgramStatus.bodybuilding;
+    final isSummer = trainingProgramStatus == TrainingProgramStatus.summer;
+    final isWinter = trainingProgramStatus == TrainingProgramStatus.winter;
+    final hasNoProgram = trainingProgramStatus == TrainingProgramStatus.none;
 
     return _SettingsSection(
       title: 'Subscription',
@@ -354,21 +355,21 @@ class _SubscriptionSection extends StatelessWidget {
       children: [
         _InfoCard(
           title: 'Current Plan',
-          subtitle: _getSubscriptionPlanName(subscriptionStatus),
+          subtitle: _getTrainingProgramName(trainingProgramStatus),
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color:
-                  _getSubscriptionColor(subscriptionStatus).withOpacity(0.12),
+                  _getTrainingProgramColor(trainingProgramStatus).withOpacity(0.12),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
-              _getSubscriptionIcon(subscriptionStatus),
-              color: _getSubscriptionColor(subscriptionStatus),
+              _getTrainingProgramIcon(trainingProgramStatus),
+              color: _getTrainingProgramColor(trainingProgramStatus),
               size: 20,
             ),
           ),
-          trailing: isFree
+          trailing: hasNoProgram
               ? ElevatedButton(
                   onPressed: () => _upgradeSubscription(context),
                   style: ElevatedButton.styleFrom(
@@ -380,15 +381,15 @@ class _SubscriptionSection extends StatelessWidget {
                 )
               : null,
         ),
-        if (!isFree) ...[
+        if (!hasNoProgram) ...[
           const _InfoCard(
             title: 'Billing Cycle',
             subtitle: 'Monthly', // TODO: Get from subscription data
           ),
           _InfoCard(
             title: 'Next Billing Date',
-            subtitle: user.subscriptionExpiry != null
-                ? _formatDate(user.subscriptionExpiry!)
+            subtitle: user.programPurchaseDate != null
+                ? _formatDate(user.programPurchaseDate!)
                 : 'Not available',
           ),
           _InfoCard(
@@ -400,7 +401,7 @@ class _SubscriptionSection extends StatelessWidget {
         ],
         _InfoCard(
           title: 'Subscription Management',
-          subtitle: isFree
+          subtitle: hasNoProgram
               ? 'Upgrade to access premium features'
               : 'Manage your subscription',
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -410,41 +411,44 @@ class _SubscriptionSection extends StatelessWidget {
     );
   }
 
-  String _getSubscriptionPlanName(SubscriptionStatus status) {
+  String _getTrainingProgramName(TrainingProgramStatus status) {
     switch (status) {
-      case SubscriptionStatus.free:
-        return 'Winter';
-      case SubscriptionStatus.basic:
-        return 'Summer Transformation';
-      case SubscriptionStatus.premium:
-        return 'Year-Round Champion';
-      case SubscriptionStatus.cancelled:
-        return 'Cancelled';
+      case TrainingProgramStatus.winter:
+        return 'Winter Plan';
+      case TrainingProgramStatus.summer:
+        return 'Summer Plan';
+      case TrainingProgramStatus.bodybuilding:
+        return 'Body Building';
+      case TrainingProgramStatus.none:
+      default:
+        return 'No Program';
     }
   }
 
-  Color _getSubscriptionColor(SubscriptionStatus status) {
+  Color _getTrainingProgramColor(TrainingProgramStatus status) {
     switch (status) {
-      case SubscriptionStatus.free:
-        return AppConstants.textTertiary;
-      case SubscriptionStatus.basic:
+      case TrainingProgramStatus.winter:
         return AppConstants.primaryColor;
-      case SubscriptionStatus.premium:
+      case TrainingProgramStatus.summer:
+        return AppConstants.secondaryColor;
+      case TrainingProgramStatus.bodybuilding:
         return AppConstants.accentColor;
-      case SubscriptionStatus.cancelled:
-        return AppConstants.errorColor;
+      case TrainingProgramStatus.none:
+      default:
+        return AppConstants.textTertiary;
     }
   }
 
-  IconData _getSubscriptionIcon(SubscriptionStatus status) {
+  IconData _getTrainingProgramIcon(TrainingProgramStatus status) {
     switch (status) {
-      case SubscriptionStatus.free:
-        return Icons.person;
-      case SubscriptionStatus.basic:
+      case TrainingProgramStatus.winter:
+        return Icons.ac_unit;
+      case TrainingProgramStatus.summer:
         return Icons.star;
-      case SubscriptionStatus.premium:
+      case TrainingProgramStatus.bodybuilding:
         return Icons.diamond;
-      case SubscriptionStatus.cancelled:
+      case TrainingProgramStatus.none:
+      default:
         return Icons.cancel;
     }
   }
