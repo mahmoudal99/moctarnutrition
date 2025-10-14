@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import 'user_local_storage_service.dart';
 import 'meal_plan_storage_service.dart';
+import 'meal_plan_local_storage_service.dart';
+import 'workout_plan_local_storage_service.dart';
 
 class AuthService {
   // Remove old logger instance
@@ -549,6 +551,14 @@ class AuthService {
     try {
       LoggingService.auth.i('Signing out user');
 
+      // Clear local storage first to prevent data leakage
+      LoggingService.auth.i('Clearing all local storage data during sign out');
+      await Future.wait([
+        MealPlanLocalStorageService.clearMealPlan(),
+        WorkoutPlanLocalStorageService.clearWorkoutPlan(),
+      ]);
+
+      // Then sign out from auth services
       await Future.wait([
         _auth.signOut(),
         _googleSignIn.signOut(),
@@ -746,8 +756,14 @@ class AuthService {
   static Future<void> _clearMealPlanData(String userId) async {
     try {
       LoggingService.auth.i('Clearing meal plan data from local storage for user: $userId');
-      await MealPlanStorageService.clearMealPlanData(userId);
-      LoggingService.auth.i('Meal plan data cleared from local storage successfully');
+      
+      // Clear both local storage services
+      await Future.wait([
+        MealPlanStorageService.clearMealPlanData(userId),
+        MealPlanLocalStorageService.clearMealPlan(),
+      ]);
+      
+      LoggingService.auth.i('Meal plan data cleared from all local storage services successfully');
     } catch (e) {
       LoggingService.auth.e('Error clearing meal plan data from local storage: $e');
       // Don't rethrow - we want to continue with account deletion even if local storage clearing fails
@@ -760,6 +776,25 @@ class AuthService {
     if (user == null) return null;
 
     return await _getUserDocument(user.uid);
+  }
+
+  /// Clear all local storage data (useful for debugging or manual cleanup)
+  static Future<void> clearAllLocalStorage() async {
+    try {
+      LoggingService.auth.i('Clearing all local storage data');
+      
+      await Future.wait([
+        _storageService.clearUser(),
+        MealPlanStorageService.clearMealPlanData(''), // Clear all meal plan data
+        MealPlanLocalStorageService.clearMealPlan(),
+        WorkoutPlanLocalStorageService.clearWorkoutPlan(),
+      ]);
+      
+      LoggingService.auth.i('All local storage data cleared successfully');
+    } catch (e) {
+      LoggingService.auth.e('Error clearing all local storage data: $e');
+      throw Exception('Failed to clear local storage: $e');
+    }
   }
 
   // Private methods for Firestore operations
@@ -790,7 +825,13 @@ class AuthService {
       }
 
       LoggingService.auth.i('Getting user document for: $userId');
+      LoggingService.auth.i('Current Firebase user: ${currentUser.uid}');
+      LoggingService.auth.i('User IDs match: ${currentUser.uid == userId}');
+      
       final doc = await _firestore.collection('users').doc(userId).get();
+      LoggingService.auth.i('Document exists: ${doc.exists}');
+      LoggingService.auth.i('Document ID: ${doc.id}');
+      
       if (doc.exists) {
         final data = doc.data()!;
         LoggingService.auth.i('User document found with trainingProgramStatus: ${data['trainingProgramStatus']}');
@@ -829,12 +870,20 @@ class AuthService {
         return await operation();
       } catch (e) {
         attempts++;
-        if (e.toString().contains('cloud_firestore/unavailable') &&
-            attempts < maxRetries) {
-          LoggingService.auth.w(
-              'Firestore unavailable, retrying in ${attempts * 2} seconds... (attempt $attempts/$maxRetries)');
-          await Future.delayed(Duration(seconds: attempts * 2));
-          continue;
+        LoggingService.auth.e('Firestore operation failed (attempt $attempts/$maxRetries): $e');
+        
+        if (e.toString().contains('cloud_firestore/unavailable') ||
+            e.toString().contains('cloud_firestore/deadline-exceeded') ||
+            e.toString().contains('cloud_firestore/resource-exhausted') ||
+            e.toString().contains('network') ||
+            e.toString().contains('timeout')) {
+          
+          if (attempts < maxRetries) {
+            LoggingService.auth.w(
+                'Firestore error, retrying in ${attempts * 2} seconds... (attempt $attempts/$maxRetries)');
+            await Future.delayed(Duration(seconds: attempts * 2));
+            continue;
+          }
         }
         rethrow;
       }

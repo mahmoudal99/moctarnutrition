@@ -36,6 +36,9 @@ class WorkoutPlanLocalStorageService {
 
       final prefs = await SharedPreferences.getInstance();
       final storedUserId = prefs.getString(_userIdKey);
+      
+      LoggingService.workout.d('Stored user ID: $storedUserId, Current user ID: $userId');
+      LoggingService.workout.d('User IDs match: ${storedUserId == userId}');
 
       // Check if the stored plan is for the current user
       if (storedUserId != userId) {

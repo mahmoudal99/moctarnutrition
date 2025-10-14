@@ -74,25 +74,25 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
         category: 'Support',
       ),
       HelpItem(
-        question: 'What\'s included in the Premium subscription?',
-        answer: 'Premium features include:\n\n'
-            '• Direct messaging with your trainer\n'
+        question: 'What\'s included in the Training Programs?',
+        answer: 'Training programs include:\n\n'
+            '• Personalized workout plans\n'
             '• Advanced meal planning and customization\n'
             '• Detailed progress analytics and reports\n'
             '• Priority customer support\n'
-            '• Exclusive workout plans\n'
+            '• Exclusive workout content\n'
             '• No ads\n\n'
-            'You can upgrade anytime from your Profile screen.',
-        category: 'Subscription',
+            'You can purchase a program anytime from the subscription screen.',
+        category: 'Training Programs',
       ),
       HelpItem(
-        question: 'How do I cancel my subscription?',
-        answer: 'To cancel your subscription:\n\n'
-            '1. Go to Profile → Settings → Account Settings\n'
-            '2. Select "Manage Subscription"\n'
-            '3. Follow the prompts to cancel\n\n'
-            'You\'ll continue to have access until the end of your current billing period.',
-        category: 'Subscription',
+        question: 'How do training programs work?',
+        answer: 'Training programs are one-time purchases:\n\n'
+            '1. Choose your program (Winter, Summer, or Body Building)\n'
+            '2. Complete the one-time payment\n'
+            '3. Get lifetime access to your program\n\n'
+            'No recurring charges or cancellation needed.',
+        category: 'Training Programs',
       ),
       HelpItem(
         question: 'How accurate is the nutrition information?',

@@ -145,52 +145,75 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Load user model from Firestore
+  /// Load user model from Firestore with retry logic
   Future<void> _loadUserModel(String userId) async {
-    try {
-      LoggingService.auth.i('AuthProvider - Starting to load user model');
-      _isLoading = true;
-      notifyListeners();
+    const maxRetries = 3;
+    int retryCount = 0;
+    
+    while (retryCount < maxRetries) {
+      try {
+        LoggingService.auth.i('AuthProvider - Starting to load user model (attempt ${retryCount + 1}/$maxRetries)');
+        _isLoading = true;
+        notifyListeners();
 
-      final userModel = await AuthService.getCurrentUserModel();
-      if (userModel != null) {
-        LoggingService.auth.i(
-            'AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
-
-        // Check if this is a different user than the previously cached one
-        final cachedUser = await _storageService.loadUser();
-        final isDifferentUser = cachedUser?.id != userModel.id;
-
-        if (isDifferentUser) {
+        final userModel = await AuthService.getCurrentUserModel();
+        if (userModel != null) {
           LoggingService.auth.i(
-              'AuthProvider - Different user detected, clearing workout plan cache');
-          await WorkoutPlanLocalStorageService.clearWorkoutPlan();
-        }
+              'AuthProvider - User model loaded: ${userModel.name} with role: ${userModel.role}');
 
-        _userModel = userModel;
-        await _storageService.saveUser(userModel);
+          // Check if this is a different user than the previously cached one
+          final cachedUser = await _storageService.loadUser();
+          final isDifferentUser = cachedUser?.id != userModel.id;
 
-        // Initialize profile photo provider if available
-        if (_profilePhotoProvider != null) {
-          LoggingService.auth.i(
-              'AuthProvider - Initializing profile photo provider for user: ${userModel.id}');
-          await _profilePhotoProvider!.initialize(userModel.id);
+          if (isDifferentUser) {
+            LoggingService.auth.i(
+                'AuthProvider - Different user detected, clearing workout plan cache');
+            await WorkoutPlanLocalStorageService.clearWorkoutPlan();
+          }
+
+          _userModel = userModel;
+          await _storageService.saveUser(userModel);
+
+          // Initialize profile photo provider if available
+          if (_profilePhotoProvider != null) {
+            LoggingService.auth.i(
+                'AuthProvider - Initializing profile photo provider for user: ${userModel.id}');
+            await _profilePhotoProvider!.initialize(userModel.id);
+          }
+          
+          // Success - exit retry loop
+          break;
+        } else {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            LoggingService.auth.w('AuthProvider - No user model found, retrying in ${retryCount * 2} seconds... (attempt $retryCount/$maxRetries)');
+            await Future.delayed(Duration(seconds: retryCount * 2));
+            continue;
+          } else {
+            LoggingService.auth.e('AuthProvider - No user model found after $maxRetries attempts');
+            // If Firebase user exists but no user model found after retries, sign out
+            if (_firebaseUser != null) {
+              LoggingService.auth.i('AuthProvider - User model not found after retries, signing out');
+              await signOut();
+            }
+          }
         }
-      } else {
-        LoggingService.auth.w('AuthProvider - No user model found');
-        // If Firebase user exists but no user model found, it means the account was deleted
-        // Sign out the user to clear the authentication state
-        if (_firebaseUser != null) {
-          LoggingService.auth.i('AuthProvider - User model not found but Firebase user exists, signing out');
-          await signOut();
+      } catch (e) {
+        retryCount++;
+        LoggingService.auth.e('AuthProvider - Error loading user model (attempt $retryCount/$maxRetries): $e');
+        
+        if (retryCount < maxRetries) {
+          LoggingService.auth.w('AuthProvider - Retrying in ${retryCount * 2} seconds...');
+          await Future.delayed(Duration(seconds: retryCount * 2));
+          continue;
+        } else {
+          LoggingService.auth.e('AuthProvider - Failed to load user model after $maxRetries attempts: $e');
+          _error = 'Failed to load user profile: $e';
         }
+      } finally {
+        _isLoading = false;
+        notifyListeners();
       }
-    } catch (e) {
-      LoggingService.auth.e('AuthProvider - Error loading user model: $e');
-      _error = 'Failed to load user profile: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 

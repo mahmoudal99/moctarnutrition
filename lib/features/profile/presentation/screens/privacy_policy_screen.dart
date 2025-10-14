@@ -67,7 +67,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'Apple Sign-In - Authentication service (iOS)',
                 'USDA Food Database API - Nutritional information',
                 'Open Food Facts API - Food product data',
-                'Payment processors (for premium subscriptions)',
+                'Payment processors (for training program purchases)',
                 'Analytics and crash reporting services',
               ],
             ),

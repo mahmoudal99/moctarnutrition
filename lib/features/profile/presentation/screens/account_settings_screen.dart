@@ -10,6 +10,7 @@ import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/providers/profile_photo_provider.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/utils/avatar_utils.dart';
+import '../../../../shared/services/auth_service.dart';
 
 class AccountSettingsScreen extends StatefulWidget {
   const AccountSettingsScreen({super.key});
@@ -382,28 +383,27 @@ class _SubscriptionSection extends StatelessWidget {
               : null,
         ),
         if (!hasNoProgram) ...[
-          const _InfoCard(
-            title: 'Billing Cycle',
-            subtitle: 'Monthly', // TODO: Get from subscription data
-          ),
           _InfoCard(
-            title: 'Next Billing Date',
+            title: 'Purchase Date',
             subtitle: user.programPurchaseDate != null
                 ? _formatDate(user.programPurchaseDate!)
                 : 'Not available',
           ),
           _InfoCard(
-            title: 'Payment Method',
-            subtitle: '•••• •••• •••• 4242', // TODO: Get from Stripe
-            trailing: const Icon(Icons.edit, color: AppConstants.textTertiary),
-            onTap: () => _managePaymentMethod(context),
+            title: 'Program Type',
+            subtitle: _getTrainingProgramName(trainingProgramStatus),
+          ),
+          _InfoCard(
+            title: 'Payment Status',
+            subtitle: 'Paid',
+            trailing: const Icon(Icons.check_circle, color: Colors.green),
           ),
         ],
         _InfoCard(
-          title: 'Subscription Management',
+          title: 'Training Program',
           subtitle: hasNoProgram
               ? 'Upgrade to access premium features'
-              : 'Manage your subscription',
+              : 'View program details',
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () => _manageSubscription(context),
         ),
@@ -476,22 +476,6 @@ class _SubscriptionSection extends StatelessWidget {
     context.push('/subscription');
   }
 
-  void _managePaymentMethod(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Payment Methods'),
-        content: const Text(
-            'Payment method management will be available when Stripe integration is complete.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _manageSubscription(BuildContext context) {
     // TODO: Navigate to subscription management
@@ -632,6 +616,24 @@ class _DangerZoneSection extends StatelessWidget {
       title: 'Account Deletion',
       icon: Icons.warning,
       children: [
+        // DEBUG: Clear Local Storage Button
+        _InfoCard(
+          title: 'DEBUG: Clear Local Storage',
+          subtitle: 'Clear all cached meal plans and workout plans',
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.bug_report,
+              color: Colors.orange,
+              size: 20,
+            ),
+          ),
+          onTap: () => _clearLocalStorage(context),
+        ),
         _InfoCard(
           title: 'Delete Account',
           subtitle: 'Permanently delete your account and all data',
@@ -651,6 +653,68 @@ class _DangerZoneSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _clearLocalStorage(BuildContext context) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Clearing local storage...'),
+            ],
+          ),
+        ),
+      );
+
+      // Clear all local storage
+      await AuthService.clearAllLocalStorage();
+      
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show success dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Success'),
+            content: const Text('All local storage has been cleared. Please restart the app to see the changes.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Failed to clear local storage: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   void _showDeleteAccountDialog(BuildContext context) {

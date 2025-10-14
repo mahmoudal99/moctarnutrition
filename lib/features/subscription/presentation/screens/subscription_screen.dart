@@ -462,11 +462,24 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     print('  - firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
     print('  - userModel: ${authProvider.userModel?.name ?? 'null'}');
     print('  - isAuthenticated: ${authProvider.isAuthenticated}');
+    print('  - userModel trainingProgramStatus: ${authProvider.userModel?.trainingProgramStatus}');
     
     // Check if user data is still loading
-    if (authProvider.isLoading || authProvider.userModel == null) {
+    if (authProvider.isLoading) {
       _showErrorDialog('Loading user data... Please wait a moment and try again.');
       return;
+    }
+    
+    if (authProvider.userModel == null) {
+      // Try to refresh user data automatically
+      print('Subscription Debug: User model is null, attempting to refresh...');
+      await authProvider.refreshUser();
+      
+      // Check again after refresh
+      if (authProvider.userModel == null) {
+        _showErrorDialog('User data not found. Please sign out and sign in again.');
+        return;
+      }
     }
     
     final user = authProvider.userModel!;
