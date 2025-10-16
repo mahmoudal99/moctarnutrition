@@ -79,7 +79,7 @@ class LoggingExampleService {
       'POST',
       '/api/meal-plans',
       statusCode: 201,
-      duration: Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 250),
       requestData: {
         'userId': 'user123',
         'preferences': ['vegetarian', 'low_carb'],
@@ -103,7 +103,7 @@ class LoggingExampleService {
     });
     
     // Simulate some work
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       timer.end(); // This will automatically log the performance
     });
 
@@ -219,7 +219,7 @@ class LoggingExampleService {
               metadata: {'context': 'demo'},
             );
           },
-          child: Text('Example Button'),
+          child: const Text('Example Button'),
         );
       },
     );
@@ -235,7 +235,7 @@ class ExampleService {
       LoggingService.instance.i('Starting operation');
       
       // Simulate some work
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       
       LoggingService.instance.i('Operation completed successfully');
       

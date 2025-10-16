@@ -85,15 +85,10 @@ class MealPlanModel {
 
   factory MealPlanModel.fromJson(Map<String, dynamic> json, {String? documentId}) {
     // Debug the JSON structure
-    print('🔥 MEAL PLAN DEBUG - JSON keys: ${json.keys.toList()}');
-    print('🔥 MEAL PLAN DEBUG - nutritionSummary: ${json['nutritionSummary']}');
-    print('🔥 MEAL PLAN DEBUG - dailyAverage: ${json['nutritionSummary']?['dailyAverage']}');
-    
+
     // Extract nutrition data from the correct structure
     final nutritionSummary = json['nutritionSummary']?['dailyAverage'] as Map<String, dynamic>?;
-    print('🔥 MEAL PLAN DEBUG - nutritionSummary type: ${nutritionSummary.runtimeType}');
-    print('🔥 MEAL PLAN DEBUG - nutritionSummary content: $nutritionSummary');
-    
+
     return MealPlanModel(
       id: json['id'] as String? ?? documentId ?? '',
       userId: _extractStringFromField(json['userId']) ?? '',
@@ -213,16 +208,10 @@ class MealDay {
 
   factory MealDay.fromJson(Map<String, dynamic> json) {
     // Debug logging for meal day nutrition data
-    print('🔥 MEAL DAY DEBUG - Day ${json['id']}:');
-    print('🔥 MEAL DAY DEBUG - totalNutrition: ${json['totalNutrition']}');
-    print('🔥 MEAL DAY DEBUG - totalCalories: ${json['totalCalories']} (type: ${json['totalCalories'].runtimeType})');
-    print('🔥 MEAL DAY DEBUG - totalProtein: ${json['totalProtein']} (type: ${json['totalProtein'].runtimeType})');
-    
+
     // Extract nutrition data from the correct structure
     final totalNutrition = json['totalNutrition'] as Map<String, dynamic>?;
-    print('🔥 MEAL DAY DEBUG - totalNutrition type: ${totalNutrition.runtimeType}');
-    print('🔥 MEAL DAY DEBUG - totalNutrition content: $totalNutrition');
-    
+
     return MealDay(
       id: json['id'] as String,
       date: DateTime.parse(json['date'] as String),
@@ -308,15 +297,10 @@ class Meal {
 
   factory Meal.fromJson(Map<String, dynamic> json) {
     // Debug logging for meal nutrition data
-    print('🔥 MEAL DEBUG - ${json['name']} (${json['id']}):');
-    print('🔥 MEAL DEBUG - totalNutrition: ${json['totalNutrition']}');
-    print('🔥 MEAL DEBUG - nutrition field: ${json['nutrition']}');
-    
+
     // Extract nutrition data from the correct structure
     final totalNutrition = json['totalNutrition'] as Map<String, dynamic>?;
-    print('🔥 MEAL DEBUG - totalNutrition type: ${totalNutrition.runtimeType}');
-    print('🔥 MEAL DEBUG - totalNutrition content: $totalNutrition');
-    
+
     // Create nutrition info from totalNutrition if available, otherwise use nutrition field
     NutritionInfo nutritionInfo;
     if (totalNutrition != null) {

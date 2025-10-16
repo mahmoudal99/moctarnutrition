@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../shared/widgets/custom_button.dart';
 
 class OnboardingWorkoutNotificationsStep extends StatefulWidget {
   final TimeOfDay? selectedTime;

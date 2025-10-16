@@ -46,19 +46,12 @@ class BackendMealService {
       // Debug the raw response structure
       if (response.statusCode == 200) {
         final rawData = jsonDecode(response.body);
-        print('🔥 RAW API DEBUG - Response keys: ${rawData.keys.toList()}');
         if (rawData['mealPlan'] != null) {
           final mealPlan = rawData['mealPlan'];
-          print('🔥 RAW API DEBUG - mealPlan keys: ${mealPlan.keys.toList()}');
-          print('🔥 RAW API DEBUG - nutritionSummary: ${mealPlan['nutritionSummary']}');
           if (mealPlan['mealDays'] != null && mealPlan['mealDays'].isNotEmpty) {
             final firstDay = mealPlan['mealDays'][0];
-            print('🔥 RAW API DEBUG - First day keys: ${firstDay.keys.toList()}');
-            print('🔥 RAW API DEBUG - First day totalNutrition: ${firstDay['totalNutrition']}');
             if (firstDay['meals'] != null && firstDay['meals'].isNotEmpty) {
               final firstMeal = firstDay['meals'][0];
-              print('🔥 RAW API DEBUG - First meal keys: ${firstMeal.keys.toList()}');
-              print('🔥 RAW API DEBUG - First meal totalNutrition: ${firstMeal['totalNutrition']}');
             }
           }
         }
@@ -194,10 +187,7 @@ class BackendMealService {
       }
 
       // Debug the API response structure
-      print('🔥 BACKEND DEBUG - mealPlanData keys: ${mealPlanData.keys.toList()}');
-      print('🔥 BACKEND DEBUG - nutritionSummary: ${mealPlanData['nutritionSummary']}');
-      print('🔥 BACKEND DEBUG - dailyAverage: ${mealPlanData['nutritionSummary']?['dailyAverage']}');
-      
+
       final nutritionSummary = mealPlanData['nutritionSummary']?['dailyAverage'];
       
       final mealPlanJson = {

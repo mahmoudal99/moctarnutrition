@@ -457,13 +457,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     // Debug: Show current auth state
-    print('Subscription Debug:');
-    print('  - isLoading: ${authProvider.isLoading}');
-    print('  - firebaseUser: ${authProvider.firebaseUser?.email ?? 'null'}');
-    print('  - userModel: ${authProvider.userModel?.name ?? 'null'}');
-    print('  - isAuthenticated: ${authProvider.isAuthenticated}');
-    print('  - userModel trainingProgramStatus: ${authProvider.userModel?.trainingProgramStatus}');
-    
+
     // Check if user data is still loading
     if (authProvider.isLoading) {
       _showErrorDialog('Loading user data... Please wait a moment and try again.');
@@ -472,7 +466,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     
     if (authProvider.userModel == null) {
       // Try to refresh user data automatically
-      print('Subscription Debug: User model is null, attempting to refresh...');
       await authProvider.refreshUser();
       
       // Check again after refresh
@@ -524,8 +517,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
           const maxRetries = 5;
           
           while (!statusUpdated && retryCount < maxRetries) {
-            print('Subscription Debug: Attempt ${retryCount + 1} to refresh user data...');
-            
+
             // Force refresh user data to get updated training program status
             await authProvider.refreshUser();
             
@@ -534,8 +526,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
             
             // Check if training program status was updated
             final updatedUser = authProvider.userModel;
-            print('Subscription Debug: Updated user status: ${updatedUser?.trainingProgramStatus}');
-            
+
             if (updatedUser != null && updatedUser.trainingProgramStatus != TrainingProgramStatus.none) {
               statusUpdated = true;
               _showSuccessDialog('Training program activated successfully!');
@@ -544,7 +535,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
             
             retryCount++;
             if (retryCount < maxRetries) {
-              print('Subscription Debug: Status not updated yet, retrying in 2 seconds...');
               await Future.delayed(const Duration(seconds: 2));
             }
           }

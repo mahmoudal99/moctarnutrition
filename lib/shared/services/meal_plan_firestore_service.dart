@@ -29,18 +29,12 @@ class MealPlanFirestoreService {
         _logger.d('Document userId: ${data['userId']}, Query userId: $userId');
         
         // Debug nutrition data
-        print('🔥 FIRESTORE DEBUG - Meal plan totalCalories: ${data['totalCalories']} (type: ${data['totalCalories'].runtimeType})');
-        print('🔥 FIRESTORE DEBUG - Meal plan totalProtein: ${data['totalProtein']} (type: ${data['totalProtein'].runtimeType})');
-        print('🔥 FIRESTORE DEBUG - Meal plan totalCarbs: ${data['totalCarbs']} (type: ${data['totalCarbs'].runtimeType})');
-        print('🔥 FIRESTORE DEBUG - Meal plan totalFat: ${data['totalFat']} (type: ${data['totalFat'].runtimeType})');
-        
+
         // Debug meal days data
         if (data['mealDays'] != null) {
           final mealDays = data['mealDays'] as List;
-          print('🔥 FIRESTORE DEBUG - Meal plan has ${mealDays.length} meal days');
           for (int i = 0; i < mealDays.length; i++) {
             final day = mealDays[i] as Map<String, dynamic>;
-            print('🔥 FIRESTORE DEBUG - Day ${i + 1} (${day['id']}): totalCalories=${day['totalCalories']}, totalProtein=${day['totalProtein']}');
           }
         }
         

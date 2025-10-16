@@ -15,10 +15,6 @@ class MealPlanLocalStorageService {
       _logger.d('Saving meal plan to local storage: ${mealPlan.id}');
 
       // Debug what we're saving
-      print('🔥 SAVE DEBUG - Saving meal plan totalCalories: ${mealPlan.totalCalories}');
-      print('🔥 SAVE DEBUG - Saving meal plan totalProtein: ${mealPlan.totalProtein}');
-      print('🔥 SAVE DEBUG - Saving meal plan totalCarbs: ${mealPlan.totalCarbs}');
-      print('🔥 SAVE DEBUG - Saving meal plan totalFat: ${mealPlan.totalFat}');
 
       final prefs = await SharedPreferences.getInstance();
       final mealPlanJson = jsonEncode(mealPlan.toJson());
@@ -61,24 +57,16 @@ class MealPlanLocalStorageService {
       final mealPlanData = jsonDecode(mealPlanJson) as Map<String, dynamic>;
       
       // Debug the JSON data before parsing
-      print('🔥 LOCAL STORAGE DEBUG - Meal plan totalCalories: ${mealPlanData['totalCalories']} (type: ${mealPlanData['totalCalories'].runtimeType})');
-      print('🔥 LOCAL STORAGE DEBUG - Meal plan totalProtein: ${mealPlanData['totalProtein']} (type: ${mealPlanData['totalProtein'].runtimeType})');
-      print('🔥 LOCAL STORAGE DEBUG - Meal plan totalCarbs: ${mealPlanData['totalCarbs']} (type: ${mealPlanData['totalCarbs'].runtimeType})');
-      print('🔥 LOCAL STORAGE DEBUG - Meal plan totalFat: ${mealPlanData['totalFat']} (type: ${mealPlanData['totalFat'].runtimeType})');
-      
+
       // Debug meal days data
       if (mealPlanData['mealDays'] != null) {
         final mealDays = mealPlanData['mealDays'] as List;
-        print('🔥 LOCAL STORAGE DEBUG - Meal plan has ${mealDays.length} meal days');
         for (int i = 0; i < mealDays.length; i++) {
           final day = mealDays[i] as Map<String, dynamic>;
-          print('🔥 LOCAL STORAGE DEBUG - Day ${i + 1} (${day['id']}): totalCalories=${day['totalCalories']}, totalProtein=${day['totalProtein']}');
         }
       }
 
       final mealPlan = MealPlanModel.fromJson(mealPlanData);
-      print('🔥 LOCAL STORAGE DEBUG - Parsed meal plan totalCalories: ${mealPlan.totalCalories}');
-      print('🔥 LOCAL STORAGE DEBUG - Parsed meal plan totalProtein: ${mealPlan.totalProtein}');
       _logger.i('Meal plan loaded from local storage: ${mealPlan.id}');
       return mealPlan;
     } catch (e) {

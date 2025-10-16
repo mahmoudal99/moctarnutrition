@@ -227,7 +227,7 @@ class ScannerOverlayPainter extends CustomPainter {
     // Clear the scanning area with a larger clear area
     final centerX = size.width / 2;
     final centerY = size.height / 2;
-    final scanAreaSize = 140.0; // Slightly larger clear area
+    const scanAreaSize = 140.0; // Slightly larger clear area
     
     final scanRect = Rect.fromCenter(
       center: Offset(centerX, centerY),
@@ -251,8 +251,8 @@ class ScannerOverlayPainter extends CustomPainter {
     canvas.drawRect(scanRect, borderPaint);
     
     // Add corner indicators for better visual guidance
-    final cornerLength = 30.0;
-    final cornerWidth = 4.0;
+    const cornerLength = 30.0;
+    const cornerWidth = 4.0;
     
     final cornerPaint = Paint()
       ..color = AppConstants.primaryColor
