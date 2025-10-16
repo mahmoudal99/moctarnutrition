@@ -196,11 +196,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (consumptionData != null) {
           // Calculate actual consumed calories from meal plan data
-          final weekdayIndex = date.weekday - 1;
-          if (weekdayIndex >= 0 &&
-              weekdayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
-            final templateMealDay =
-                mealPlanProvider.mealPlan!.mealDays[weekdayIndex];
+          MealDay? templateMealDay;
+          
+          if (mealPlanProvider.mealPlan!.mealDays.length <= 7) {
+            // This is likely a batch cooking meal plan with fewer than 7 days
+            // Map the date to the appropriate meal day using modulo
+            final daysSinceStart = date.difference(mealPlanProvider.mealPlan!.startDate).inDays;
+            final mealDayIndex = daysSinceStart % mealPlanProvider.mealPlan!.mealDays.length;
+            
+            if (mealDayIndex >= 0 && mealDayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
+              templateMealDay = mealPlanProvider.mealPlan!.mealDays[mealDayIndex];
+            }
+          } else {
+            // This is a full 7-day meal plan, use weekday indexing
+            final weekdayIndex = date.weekday - 1;
+            if (weekdayIndex >= 0 &&
+                weekdayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
+              templateMealDay = mealPlanProvider.mealPlan!.mealDays[weekdayIndex];
+            }
+          }
+          
+          if (templateMealDay != null) {
             final mealConsumption = Map<String, bool>.from(
                 consumptionData['mealConsumption'] ?? {});
 
@@ -253,16 +269,32 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      // Get the weekday index (0 = Monday, 6 = Sunday)
-      final weekdayIndex = _selectedDate.weekday - 1;
-      _logger.d(
-          'HomeScreen - Loading meals for weekday index: $weekdayIndex (${_selectedDate.weekday})');
+      // For batch cooking meal plans, we need to map the selected date to the appropriate meal day
+      // instead of using weekday indices
+      MealDay? templateMealDay;
+      
+      if (mealPlan.mealDays.length <= 7) {
+        // This is likely a batch cooking meal plan with fewer than 7 days
+        // Map the selected date to the appropriate meal day using modulo
+        final daysSinceStart = _selectedDate.difference(mealPlan.startDate).inDays;
+        final mealDayIndex = daysSinceStart % mealPlan.mealDays.length;
+        
+        if (mealDayIndex >= 0 && mealDayIndex < mealPlan.mealDays.length) {
+          templateMealDay = mealPlan.mealDays[mealDayIndex];
+          _logger.d('HomeScreen - Using batch cooking meal day index: $mealDayIndex for date: ${_selectedDate.toIso8601String()}');
+        }
+      } else {
+        // This is a full 7-day meal plan, use weekday indexing
+        final weekdayIndex = _selectedDate.weekday - 1;
+        _logger.d('HomeScreen - Loading meals for weekday index: $weekdayIndex (${_selectedDate.weekday})');
+        
+        if (weekdayIndex >= 0 && weekdayIndex < mealPlan.mealDays.length) {
+          templateMealDay = mealPlan.mealDays[weekdayIndex];
+        }
+      }
 
-      // Get the meal day from the weekly template
-      if (weekdayIndex >= 0 && weekdayIndex < mealPlan.mealDays.length) {
-        final templateMealDay = mealPlan.mealDays[weekdayIndex];
-        _logger
-            .d('HomeScreen - Found template meal day: ${templateMealDay.id}');
+      if (templateMealDay != null) {
+        _logger.d('HomeScreen - Found template meal day: ${templateMealDay.id}');
 
         // Create a copy of the template meal day for the selected date
         _currentDayMeals = MealDay(
@@ -325,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         setState(() {});
       } else {
-        _logger.w('HomeScreen - Invalid weekday index: $weekdayIndex');
+        _logger.w('HomeScreen - No meal day found for date: ${_selectedDate.toIso8601String()}, meal plan has ${mealPlan.mealDays.length} days');
       }
     } catch (e) {
       _logger.e('HomeScreen - Error loading current day meals: $e');
@@ -393,17 +425,34 @@ class _HomeScreenState extends State<HomeScreen> {
         // Always get the latest meal day data from the provider
         if (mealPlanProvider.mealPlan != null) {
           try {
-            // Find meal day based on day of week (Monday = 1, Sunday = 7)
-            final dayOfWeek = _selectedDate.weekday; // 1 = Monday, 7 = Sunday
-            final mealDayIndex = dayOfWeek - 1; // Convert to 0-based index
-
-            if (mealDayIndex >= 0 &&
-                mealDayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
-              // Don't override _currentDayMeals here - let the date selection handle it
-              _logger.d('HomeScreen - Found meal day for index: $mealDayIndex');
+            // For batch cooking meal plans, we need to map the selected date to the appropriate meal day
+            // instead of using weekday indices
+            bool foundMealDay = false;
+            
+            if (mealPlanProvider.mealPlan!.mealDays.length <= 7) {
+              // This is likely a batch cooking meal plan with fewer than 7 days
+              // Map the selected date to the appropriate meal day using modulo
+              final daysSinceStart = _selectedDate.difference(mealPlanProvider.mealPlan!.startDate).inDays;
+              final mealDayIndex = daysSinceStart % mealPlanProvider.mealPlan!.mealDays.length;
+              
+              if (mealDayIndex >= 0 && mealDayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
+                foundMealDay = true;
+                _logger.d('HomeScreen - Found batch cooking meal day for index: $mealDayIndex');
+              }
             } else {
-              _logger
-                  .w('HomeScreen - No meal day found for index: $mealDayIndex');
+              // This is a full 7-day meal plan, use weekday indexing
+              final dayOfWeek = _selectedDate.weekday; // 1 = Monday, 7 = Sunday
+              final mealDayIndex = dayOfWeek - 1; // Convert to 0-based index
+
+              if (mealDayIndex >= 0 &&
+                  mealDayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
+                foundMealDay = true;
+                _logger.d('HomeScreen - Found meal day for index: $mealDayIndex');
+              }
+            }
+            
+            if (!foundMealDay) {
+              _logger.w('HomeScreen - No meal day found for date: ${_selectedDate.toIso8601String()}, meal plan has ${mealPlanProvider.mealPlan!.mealDays.length} days');
             }
           } catch (e) {
             // No meal day found for this date

@@ -3,7 +3,7 @@ import 'package:logger/logger.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/models/user_model.dart';
-import '../../../../shared/services/ai_meal_service.dart';
+import '../../../../shared/services/backend_meal_service.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
 import '../../../../shared/services/email_service.dart';
 
@@ -196,9 +196,10 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
     });
 
     try {
-      final mealPlan = await AIMealService.generateMealPlan(
+      final mealPlan = await BackendMealService.generateMealPlan(
         preferences: dietPlanPreferences,
         days: _selectedDays,
+        userId: 'admin_generated_${DateTime.now().millisecondsSinceEpoch}', // Admin-generated meal plan
         onProgress: (completedMeals, totalMeals) {
           setState(() {
             _completedDays = completedMeals;

@@ -84,6 +84,16 @@ class MealPlanModel {
   }
 
   factory MealPlanModel.fromJson(Map<String, dynamic> json, {String? documentId}) {
+    // Debug the JSON structure
+    print('🔥 MEAL PLAN DEBUG - JSON keys: ${json.keys.toList()}');
+    print('🔥 MEAL PLAN DEBUG - nutritionSummary: ${json['nutritionSummary']}');
+    print('🔥 MEAL PLAN DEBUG - dailyAverage: ${json['nutritionSummary']?['dailyAverage']}');
+    
+    // Extract nutrition data from the correct structure
+    final nutritionSummary = json['nutritionSummary']?['dailyAverage'] as Map<String, dynamic>?;
+    print('🔥 MEAL PLAN DEBUG - nutritionSummary type: ${nutritionSummary.runtimeType}');
+    print('🔥 MEAL PLAN DEBUG - nutritionSummary content: $nutritionSummary');
+    
     return MealPlanModel(
       id: json['id'] as String? ?? documentId ?? '',
       userId: _extractStringFromField(json['userId']) ?? '',
@@ -94,10 +104,10 @@ class MealPlanModel {
       mealDays: (json['mealDays'] as List<dynamic>)
           .map((e) => MealDay.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalCalories: (json['totalCalories'] as num?)?.toDouble() ?? 0.0,
-      totalProtein: (json['totalProtein'] as num?)?.toDouble() ?? 0.0,
-      totalCarbs: (json['totalCarbs'] as num?)?.toDouble() ?? 0.0,
-      totalFat: (json['totalFat'] as num?)?.toDouble() ?? 0.0,
+      totalCalories: nutritionSummary?['calories']?.toDouble() ?? (json['totalCalories'] as num?)?.toDouble() ?? 0.0,
+      totalProtein: nutritionSummary?['protein']?.toDouble() ?? (json['totalProtein'] as num?)?.toDouble() ?? 0.0,
+      totalCarbs: nutritionSummary?['carbs']?.toDouble() ?? (json['totalCarbs'] as num?)?.toDouble() ?? 0.0,
+      totalFat: nutritionSummary?['fat']?.toDouble() ?? (json['totalFat'] as num?)?.toDouble() ?? 0.0,
       dietaryTags: List<String>.from(json['dietaryTags'] ?? []),
       isAIGenerated: json['isAIGenerated'] as bool? ?? true,
       createdAt: _extractDateTimeFromField(json['createdAt']),
@@ -202,16 +212,27 @@ class MealDay {
   double get remainingFat => totalFat - consumedFat;
 
   factory MealDay.fromJson(Map<String, dynamic> json) {
+    // Debug logging for meal day nutrition data
+    print('🔥 MEAL DAY DEBUG - Day ${json['id']}:');
+    print('🔥 MEAL DAY DEBUG - totalNutrition: ${json['totalNutrition']}');
+    print('🔥 MEAL DAY DEBUG - totalCalories: ${json['totalCalories']} (type: ${json['totalCalories'].runtimeType})');
+    print('🔥 MEAL DAY DEBUG - totalProtein: ${json['totalProtein']} (type: ${json['totalProtein'].runtimeType})');
+    
+    // Extract nutrition data from the correct structure
+    final totalNutrition = json['totalNutrition'] as Map<String, dynamic>?;
+    print('🔥 MEAL DAY DEBUG - totalNutrition type: ${totalNutrition.runtimeType}');
+    print('🔥 MEAL DAY DEBUG - totalNutrition content: $totalNutrition');
+    
     return MealDay(
       id: json['id'] as String,
       date: DateTime.parse(json['date'] as String),
       meals: (json['meals'] as List<dynamic>)
           .map((e) => Meal.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalCalories: (json['totalCalories'] as num?)?.toDouble() ?? 0.0,
-      totalProtein: (json['totalProtein'] as num?)?.toDouble() ?? 0.0,
-      totalCarbs: (json['totalCarbs'] as num?)?.toDouble() ?? 0.0,
-      totalFat: (json['totalFat'] as num?)?.toDouble() ?? 0.0,
+      totalCalories: totalNutrition?['calories']?.toDouble() ?? (json['totalCalories'] as num?)?.toDouble() ?? 0.0,
+      totalProtein: totalNutrition?['protein']?.toDouble() ?? (json['totalProtein'] as num?)?.toDouble() ?? 0.0,
+      totalCarbs: totalNutrition?['carbs']?.toDouble() ?? (json['totalCarbs'] as num?)?.toDouble() ?? 0.0,
+      totalFat: totalNutrition?['fat']?.toDouble() ?? (json['totalFat'] as num?)?.toDouble() ?? 0.0,
       consumedCalories: (json['consumedCalories'] as num?)?.toDouble() ?? 0.0,
       consumedProtein: (json['consumedProtein'] as num?)?.toDouble() ?? 0.0,
       consumedCarbs: (json['consumedCarbs'] as num?)?.toDouble() ?? 0.0,
@@ -286,6 +307,34 @@ class Meal {
   });
 
   factory Meal.fromJson(Map<String, dynamic> json) {
+    // Debug logging for meal nutrition data
+    print('🔥 MEAL DEBUG - ${json['name']} (${json['id']}):');
+    print('🔥 MEAL DEBUG - totalNutrition: ${json['totalNutrition']}');
+    print('🔥 MEAL DEBUG - nutrition field: ${json['nutrition']}');
+    
+    // Extract nutrition data from the correct structure
+    final totalNutrition = json['totalNutrition'] as Map<String, dynamic>?;
+    print('🔥 MEAL DEBUG - totalNutrition type: ${totalNutrition.runtimeType}');
+    print('🔥 MEAL DEBUG - totalNutrition content: $totalNutrition');
+    
+    // Create nutrition info from totalNutrition if available, otherwise use nutrition field
+    NutritionInfo nutritionInfo;
+    if (totalNutrition != null) {
+      nutritionInfo = NutritionInfo(
+        calories: totalNutrition['calories']?.toDouble() ?? 0.0,
+        protein: totalNutrition['protein']?.toDouble() ?? 0.0,
+        carbs: totalNutrition['carbs']?.toDouble() ?? 0.0,
+        fat: totalNutrition['fat']?.toDouble() ?? 0.0,
+        fiber: totalNutrition['fiber']?.toDouble() ?? 0.0,
+        sugar: totalNutrition['sugar']?.toDouble() ?? 0.0,
+        sodium: totalNutrition['sodium']?.toDouble() ?? 0.0,
+      );
+    } else if (json['nutrition'] != null) {
+      nutritionInfo = NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>);
+    } else {
+      nutritionInfo = NutritionInfo.empty();
+    }
+    
     return Meal(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -307,9 +356,7 @@ class Meal {
       prepTime: json['prepTime'] as int,
       cookTime: json['cookTime'] as int,
       servings: json['servings'] as int,
-      nutrition: json['nutrition'] != null
-          ? NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>)
-          : NutritionInfo.empty(),
+      nutrition: nutritionInfo,
       tags: List<String>.from(json['tags'] ?? []),
       dietaryTags: List<String>.from(json['dietaryTags'] ?? []),
       isVegetarian: json['isVegetarian'] as bool? ?? false,

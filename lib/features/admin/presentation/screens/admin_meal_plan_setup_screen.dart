@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
-import 'package:champions_gym_app/shared/services/ai_meal_service.dart';
+import 'package:champions_gym_app/shared/services/backend_meal_service.dart';
 import 'package:champions_gym_app/shared/services/email_service.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -268,9 +268,10 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         mealTimingPreferences: prefs.mealTimingPreferences,
         batchCookingPreferences: prefs.batchCookingPreferences,
       );
-      final mealPlan = await AIMealService.generateMealPlan(
+      final mealPlan = await BackendMealService.generateMealPlan(
         preferences: dietPlanPreferences,
         days: _selectedDays,
+        userId: userId,
         onProgress: (completedMeals, totalMeals) {
           _logger.d('Progress update: $completedMeals/$totalMeals meals');
           setState(() {

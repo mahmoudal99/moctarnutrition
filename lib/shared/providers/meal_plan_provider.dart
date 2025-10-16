@@ -193,6 +193,7 @@ class MealPlanProvider with ChangeNotifier {
 
     // Clear local cache to force refresh
     await MealPlanLocalStorageService.clearMealPlan();
+    print('🔥 REFRESH DEBUG - Cleared local cache, forcing Firestore load');
 
     // Reload from server
     await loadMealPlan(userId, mealPlanId: mealPlanId);
