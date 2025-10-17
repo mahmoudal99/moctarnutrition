@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:champions_gym_app/shared/services/stripe_analytics_service.dart';
+import 'package:logger/logger.dart';
 
 class AdminHomeScreen extends StatefulWidget {
   final String adminName;
@@ -14,6 +16,17 @@ class AdminHomeScreen extends StatefulWidget {
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   String selectedPeriod = 'This Month';
+  bool _isLoading = true;
+  StripeDashboardMetrics? _metrics;
+  String? _errorMessage;
+  final _logger = Logger();
+  
+  // Cache for different periods to avoid unnecessary API calls
+  final Map<String, StripeDashboardMetrics> _metricsCache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+  
+  // Cache duration - refresh data if older than 5 minutes
+  static const Duration _cacheDuration = Duration(minutes: 5);
 
   final List<String> timePeriods = [
     'Today',
@@ -24,33 +37,176 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     'Last Year',
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _initializeAndFetchData();
+  }
+
+  Future<void> _initializeAndFetchData() async {
+    try {
+      await StripeAnalyticsService.initialize();
+      
+      // Check if we have cached data for the initial period
+      if (_isDataCached(selectedPeriod)) {
+        _logger.i('Using cached data for initial period: $selectedPeriod');
+        if (mounted) {
+          setState(() {
+            _metrics = _metricsCache[selectedPeriod];
+            _isLoading = false;
+          });
+        }
+        return; // Exit early if we have cached data
+      }
+      
+      // Only show loading if we need to fetch data
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+      
+      await _fetchDataForPeriod(selectedPeriod);
+    } catch (e) {
+      _logger.e('Error initializing analytics service: $e');
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to load metrics data';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+  
+  /// Force refresh data by clearing cache and fetching fresh data
+  Future<void> _forceRefreshData() async {
+    _logger.i('Force refreshing data - clearing cache');
+    
+    // Clear all cached data
+    _metricsCache.clear();
+    _cacheTimestamps.clear();
+    
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    await _fetchDataForPeriod(selectedPeriod);
+  }
+
   void _onPeriodChanged(String? newPeriod) {
-    if (newPeriod != null) {
+    if (newPeriod != null && newPeriod != selectedPeriod) {
       setState(() {
         selectedPeriod = newPeriod;
+        _errorMessage = null;
       });
-      // Here you can add logic to fetch data based on the selected period
-      _fetchDataForPeriod(newPeriod);
+      
+      // Check if we have cached data for this period
+      if (_isDataCached(newPeriod)) {
+        _logger.i('Using cached data for period: $newPeriod');
+        setState(() {
+          _metrics = _metricsCache[newPeriod];
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = true;
+        });
+        _fetchDataForPeriod(newPeriod);
+      }
     }
   }
 
-  void _fetchDataForPeriod(String period) {
-    // TODO: Implement data fetching logic based on selected period
-    // This is where you would typically make API calls or update the statistics
-    print('Fetching data for period: $period');
+  Future<void> _fetchDataForPeriod(String period) async {
+    try {
+      _logger.i('Fetching data for period: $period');
+      final metrics = await StripeAnalyticsService.getMetricsForPeriod(period);
+      
+      _logger.i('Received metrics: $metrics');
+      
+      if (mounted) {
+        // Cache the data
+        if (metrics != null) {
+          _metricsCache[period] = metrics;
+          _cacheTimestamps[period] = DateTime.now();
+        }
+        
+        setState(() {
+          _metrics = metrics;
+          _isLoading = false;
+          _errorMessage = null;
+        });
+      }
+    } catch (e) {
+      _logger.e('Error fetching metrics for period $period: $e');
+      _logger.e('Stack trace: ${StackTrace.current}');
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to load metrics for $period: ${e.toString()}';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+  
+  /// Check if data is cached and still valid for the given period
+  bool _isDataCached(String period) {
+    if (!_metricsCache.containsKey(period) || !_cacheTimestamps.containsKey(period)) {
+      return false;
+    }
+    
+    final cacheTime = _cacheTimestamps[period]!;
+    final now = DateTime.now();
+    final isExpired = now.difference(cacheTime) > _cacheDuration;
+    
+    if (isExpired) {
+      _logger.i('Cache expired for period: $period');
+      _metricsCache.remove(period);
+      _cacheTimestamps.remove(period);
+      return false;
+    }
+    
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    final metrics = [
-      _MetricCardData('Clients', '42', Icons.group, AppConstants.primaryColor),
-      _MetricCardData('Active Subs', '30', Icons.workspace_premium,
-          AppConstants.accentColor),
-      _MetricCardData('Pending Check-ins', '5', Icons.pending_actions,
-          AppConstants.secondaryColor),
-    ];
-    final now = TimeOfDay.now();
-    final lastUpdated = 'Last Updated ${now.format(context)}';
+    if (_errorMessage != null && _metrics == null) {
+      return Scaffold(
+        backgroundColor: AppConstants.backgroundColor,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: AppConstants.errorColor,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage!,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppConstants.errorColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _initializeAndFetchData,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final metrics = _buildMetricsData();
+    final lastUpdated = _metrics?.lastUpdated != null 
+        ? 'Last Updated ${_formatLastUpdated(_metrics!.lastUpdated)}'
+        : 'Last Updated ${TimeOfDay.now().format(context)}';
+
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       body: SafeArea(
@@ -59,36 +215,60 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Welcome back, ${widget.adminName}!',
-                  style: AppTextStyles.heading3),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Welcome back, ${widget.adminName}!',
+                      style: AppTextStyles.heading3),
+                  IconButton(
+                    onPressed: _forceRefreshData,
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Refresh metrics',
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
-              // Text('This is your admin dashboard.',
-              //     style: AppTextStyles.bodyMedium
-              //         .copyWith(color: AppConstants.textSecondary)),
               const SizedBox(height: 15),
               // Sales Card
-              _SalesCard(lastUpdated: lastUpdated),
+              _SalesCard(
+                lastUpdated: lastUpdated,
+                totalRevenue: _metrics?.revenue.totalRevenue ?? 0.0,
+              ),
               const SizedBox(height: 18),
               _StatisticsCard(
-                stats: [
-                  _SalesStat('Earnings', '€12,235.99', '+20.46%', true),
-                  _SalesStat('Sales', '€31,890.00', '-3.46%', false),
-                  _SalesStat('Product Views', ' 129,781', '+8.30%', true),
-                ],
+                stats: _buildStatisticsData(),
                 selectedPeriod: selectedPeriod,
                 timePeriods: timePeriods,
                 onPeriodChanged: _onPeriodChanged,
+                isLoading: _isLoading,
               ),
               const SizedBox(height: 28),
               // Metrics grid
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.5,
-                children: metrics.map((m) => _MetricCard(m)).toList(),
+              Stack(
+                children: [
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.2,
+                    children: metrics.map((m) => _MetricCard(m)).toList(),
+                  ),
+                  if (_isLoading && _metrics != null)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.white.withOpacity(0.7),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 96),
             ],
@@ -96,6 +276,90 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ),
       ),
     );
+  }
+
+  List<_MetricCardData> _buildMetricsData() {
+    if (_metrics == null) {
+      return [
+        _MetricCardData('Active Customers', '0', Icons.group, AppConstants.primaryColor),
+        _MetricCardData('New Customers', '0', Icons.person_add, AppConstants.accentColor),
+        _MetricCardData('Total Sales', '0', Icons.shopping_cart, AppConstants.secondaryColor),
+        _MetricCardData('Success Rate', '0%', Icons.check_circle, AppConstants.successColor),
+      ];
+    }
+
+    return [
+      _MetricCardData(
+        'Active Customers', 
+        '${_metrics!.activeCustomers}', 
+        Icons.group, 
+        AppConstants.primaryColor
+      ),
+      _MetricCardData(
+        'New Customers', 
+        '${_metrics!.newCustomers}', 
+        Icons.person_add, 
+        AppConstants.accentColor
+      ),
+      _MetricCardData(
+        'Total Sales', 
+        '${_metrics!.sales.totalSales}', 
+        Icons.shopping_cart, 
+        AppConstants.secondaryColor
+      ),
+      _MetricCardData(
+        'Success Rate', 
+        _metrics!.transactions.formattedSuccessRate, 
+        Icons.check_circle, 
+        AppConstants.successColor
+      ),
+    ];
+  }
+
+  List<_SalesStat> _buildStatisticsData() {
+    if (_metrics == null) {
+      return [
+        _SalesStat('Earnings', '\$0.00', '0%', true),
+        _SalesStat('Sales', '\$0.00', '0%', true),
+        _SalesStat('Transactions', '0', '0%', true),
+      ];
+    }
+
+    return [
+      _SalesStat(
+        'Earnings', 
+        _metrics!.revenue.formattedTotalRevenue, 
+        _metrics!.revenue.formattedRevenueGrowth ?? '0%', 
+        (_metrics!.revenue.revenueGrowth ?? 0) >= 0
+      ),
+      _SalesStat(
+        'Sales', 
+        _metrics!.sales.formattedTotalSalesValue, 
+        _metrics!.sales.formattedSalesGrowth ?? '0%', 
+        (_metrics!.sales.salesGrowth ?? 0) >= 0
+      ),
+      _SalesStat(
+        'Transactions', 
+        '${_metrics!.transactions.totalTransactions}', 
+        _metrics!.transactions.formattedTransactionGrowth ?? '0%', 
+        (_metrics!.transactions.transactionGrowth ?? 0) >= 0
+      ),
+    ];
+  }
+
+  String _formatLastUpdated(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
   }
 }
 
@@ -120,31 +384,49 @@ class _MetricCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: data.color.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(10),
-              child: Icon(data.icon, color: data.color, size: 28),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: data.color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(data.icon, color: data.color, size: 20),
+                ),
+                Icon(
+                  Icons.trending_up,
+                  color: data.color.withOpacity(0.6),
+                  size: 16,
+                ),
+              ],
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(data.value,
-                      style: AppTextStyles.heading4.copyWith(
-                          color: data.color, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 2),
-                  Text(data.label,
-                      style: AppTextStyles.caption
-                          .copyWith(color: AppConstants.textSecondary)),
-                ],
+            const SizedBox(height: 12),
+            Text(
+              data.value,
+              style: AppTextStyles.heading4.copyWith(
+                color: data.color,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              data.label,
+              style: AppTextStyles.caption.copyWith(
+                color: AppConstants.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ],
         ),
@@ -155,13 +437,16 @@ class _MetricCard extends StatelessWidget {
 
 class _SalesCard extends StatelessWidget {
   final String lastUpdated;
+  final double totalRevenue;
 
-  const _SalesCard({required this.lastUpdated});
+  const _SalesCard({
+    required this.lastUpdated,
+    required this.totalRevenue,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Dummy data
-    final totalBalance = '€25,640.00';
+    final totalBalance = '\$${totalRevenue.toStringAsFixed(2)}';
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -293,12 +578,14 @@ class _StatisticsCard extends StatelessWidget {
   final String selectedPeriod;
   final List<String> timePeriods;
   final Function(String?) onPeriodChanged;
+  final bool isLoading;
 
   const _StatisticsCard({
     required this.stats,
     required this.selectedPeriod,
     required this.timePeriods,
     required this.onPeriodChanged,
+    this.isLoading = false,
   });
 
   @override
@@ -364,16 +651,24 @@ class _StatisticsCard extends StatelessWidget {
             const SizedBox(height: 18),
             SizedBox(
               height: 80,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(child: _SalesStatWidget(stats[0])),
-                  _verticalDivider(),
-                  Expanded(child: _SalesStatWidget(stats[1])),
-                  _verticalDivider(),
-                  Expanded(child: _SalesStatWidget(stats[2])),
-                ],
-              ),
+              child: isLoading
+                  ? const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(child: _SalesStatWidget(stats[0])),
+                        _verticalDivider(),
+                        Expanded(child: _SalesStatWidget(stats[1])),
+                        _verticalDivider(),
+                        Expanded(child: _SalesStatWidget(stats[2])),
+                      ],
+                    ),
             ),
           ],
         ),

@@ -386,3 +386,442 @@ async function handlePaymentFailed(invoice) {
   // You might want to send a notification to the user here
   // For now, just log the event
 }
+
+// Get revenue metrics
+exports.getRevenueMetrics = functions.https.onRequest(async (req, res) => {
+  return cors(req, res, async () => {
+    if (req.method !== 'GET') {
+      return res.status(405).json({error: 'Method not allowed'});
+    }
+
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+
+      // Get payment intents from Stripe
+      const paymentIntents = await stripe.paymentIntents.list({
+        created: {
+          gte: startDate ? Math.floor(startDate.getTime() / 1000) : undefined,
+          lte: endDate ? Math.floor(endDate.getTime() / 1000) : undefined,
+        },
+        limit: 100,
+      });
+
+      // Get previous period for comparison
+      const previousStartDate = startDate ? new Date(startDate.getTime() - (endDate.getTime() - startDate.getTime())) : null;
+      const previousEndDate = startDate ? new Date(startDate.getTime()) : null;
+
+      const previousPaymentIntents = await stripe.paymentIntents.list({
+        created: {
+          gte: previousStartDate ? Math.floor(previousStartDate.getTime() / 1000) : undefined,
+          lte: previousEndDate ? Math.floor(previousEndDate.getTime() / 1000) : undefined,
+        },
+        limit: 100,
+      });
+
+      // Calculate metrics
+      const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
+      const totalRevenue = successfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / 100;
+      const totalTransactions = successfulPayments.length;
+      const averageTransactionValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
+
+      // Calculate refunds
+      const charges = await Promise.all(
+        successfulPayments.map(pi => stripe.charges.retrieve(pi.latest_charge))
+      );
+      const refundedAmount = charges.reduce((sum, charge) => {
+        return sum + (charge.refunded ? charge.amount_refunded : 0);
+      }, 0) / 100;
+
+      const netRevenue = totalRevenue - refundedAmount;
+
+      // Previous period metrics
+      const previousSuccessfulPayments = previousPaymentIntents.data.filter(pi => pi.status === 'succeeded');
+      const previousRevenue = previousSuccessfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / 100;
+      const revenueGrowth = previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0;
+
+      res.json({
+        totalRevenue,
+        netRevenue,
+        refundedAmount,
+        totalTransactions,
+        averageTransactionValue,
+        currency: 'usd',
+        previousPeriodRevenue: previousRevenue,
+        revenueGrowth,
+      });
+    } catch (error) {
+      console.error('Error getting revenue metrics:', error);
+      res.status(500).json({error: error.message});
+    }
+  });
+});
+
+// Get sales metrics
+exports.getSalesMetrics = functions.https.onRequest(async (req, res) => {
+  return cors(req, res, async () => {
+    if (req.method !== 'GET') {
+      return res.status(405).json({error: 'Method not allowed'});
+    }
+
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+
+      // Get payment intents with metadata
+      const paymentIntents = await stripe.paymentIntents.list({
+        created: {
+          gte: startDate ? Math.floor(startDate.getTime() / 1000) : undefined,
+          lte: endDate ? Math.floor(endDate.getTime() / 1000) : undefined,
+        },
+        limit: 100,
+      });
+
+      // Get previous period for comparison
+      const previousStartDate = startDate ? new Date(startDate.getTime() - (endDate.getTime() - startDate.getTime())) : null;
+      const previousEndDate = startDate ? new Date(startDate.getTime()) : null;
+
+      const previousPaymentIntents = await stripe.paymentIntents.list({
+        created: {
+          gte: previousStartDate ? Math.floor(previousStartDate.getTime() / 1000) : undefined,
+          lte: previousEndDate ? Math.floor(previousEndDate.getTime() / 1000) : undefined,
+        },
+        limit: 100,
+      });
+
+      // Count sales by product (based on priceId in metadata)
+      const productSales = {};
+      const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
+      
+      successfulPayments.forEach(pi => {
+        const priceId = pi.metadata?.priceId;
+        if (priceId) {
+          // Map price IDs to product names
+          let productName = 'Unknown Product';
+          if (priceId === 'price_1SGzgzBa6NGVc5lJvVOssWsG') {
+            productName = 'Winter Plan';
+          } else if (priceId === 'price_1SGzfcBa6NGVc5lJwmTNs2xk') {
+            productName = 'Summer Plan';
+          } else if (priceId === 'price_1SHG5NBa6NGVc5lJdOEVEhZv') {
+            productName = 'Body Building Plan';
+          }
+          
+          productSales[productName] = (productSales[productName] || 0) + 1;
+        }
+      });
+
+      const totalSales = successfulPayments.length;
+      const totalSalesValue = successfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / 100;
+
+      // Previous period metrics
+      const previousSuccessfulPayments = previousPaymentIntents.data.filter(pi => pi.status === 'succeeded');
+      const previousSales = previousSuccessfulPayments.length;
+      const salesGrowth = previousSales > 0 ? ((totalSales - previousSales) / previousSales) * 100 : 0;
+
+      res.json({
+        productSales,
+        totalSales,
+        totalSalesValue,
+        currency: 'usd',
+        previousPeriodSales: previousSales,
+        salesGrowth,
+      });
+    } catch (error) {
+      console.error('Error getting sales metrics:', error);
+      res.status(500).json({error: error.message});
+    }
+  });
+});
+
+// Get transaction metrics
+exports.getTransactionMetrics = functions.https.onRequest(async (req, res) => {
+  return cors(req, res, async () => {
+    if (req.method !== 'GET') {
+      return res.status(405).json({error: 'Method not allowed'});
+    }
+
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+
+      // Get payment intents from Stripe
+      const paymentIntents = await stripe.paymentIntents.list({
+        created: {
+          gte: startDate ? Math.floor(startDate.getTime() / 1000) : undefined,
+          lte: endDate ? Math.floor(endDate.getTime() / 1000) : undefined,
+        },
+        limit: 100,
+      });
+
+      // Get previous period for comparison
+      const previousStartDate = startDate ? new Date(startDate.getTime() - (endDate.getTime() - startDate.getTime())) : null;
+      const previousEndDate = startDate ? new Date(startDate.getTime()) : null;
+
+      const previousPaymentIntents = await stripe.paymentIntents.list({
+        created: {
+          gte: previousStartDate ? Math.floor(previousStartDate.getTime() / 1000) : undefined,
+          lte: previousEndDate ? Math.floor(previousEndDate.getTime() / 1000) : undefined,
+        },
+        limit: 100,
+      });
+
+      // Calculate transaction metrics
+      const totalTransactions = paymentIntents.data.length;
+      const successfulTransactions = paymentIntents.data.filter(pi => pi.status === 'succeeded').length;
+      const failedTransactions = paymentIntents.data.filter(pi => pi.status === 'requires_payment_method' || pi.status === 'canceled').length;
+      const successRate = totalTransactions > 0 ? (successfulTransactions / totalTransactions) * 100 : 0;
+
+      const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
+      const averageTransactionValue = successfulPayments.length > 0 
+        ? successfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / successfulPayments.length / 100
+        : 0;
+
+      // Previous period metrics
+      const previousTotalTransactions = previousPaymentIntents.data.length;
+      const transactionGrowth = previousTotalTransactions > 0 
+        ? ((totalTransactions - previousTotalTransactions) / previousTotalTransactions) * 100 
+        : 0;
+
+      res.json({
+        totalTransactions,
+        successfulTransactions,
+        failedTransactions,
+        successRate,
+        averageTransactionValue,
+        currency: 'usd',
+        previousPeriodTransactions: previousTotalTransactions,
+        transactionGrowth,
+      });
+    } catch (error) {
+      console.error('Error getting transaction metrics:', error);
+      res.status(500).json({error: error.message});
+    }
+  });
+});
+
+// Get comprehensive dashboard metrics
+exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
+  return cors(req, res, async () => {
+    if (req.method !== 'GET') {
+      return res.status(405).json({error: 'Method not allowed'});
+    }
+
+    try {
+      console.log('Getting dashboard metrics...');
+      const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+      
+      console.log('Date range:', { startDate, endDate });
+
+      // Get all metrics in parallel
+      console.log('Fetching metrics data...');
+      const [revenueData, salesData, transactionData] = await Promise.all([
+        getRevenueMetricsData(startDate, endDate),
+        getSalesMetricsData(startDate, endDate),
+        getTransactionMetricsData(startDate, endDate),
+      ]);
+
+      console.log('Metrics data fetched:', { revenueData, salesData, transactionData });
+
+      // Get customer metrics from Firestore
+      console.log('Fetching user data from Firestore...');
+      const usersSnapshot = await admin.firestore().collection('users').get();
+      console.log(`Found ${usersSnapshot.docs.length} users`);
+      
+      const activeCustomers = usersSnapshot.docs.filter(doc => {
+        const data = doc.data();
+        return data.trainingProgramStatus && data.trainingProgramStatus !== 'none';
+      }).length;
+
+      const newCustomers = usersSnapshot.docs.filter(doc => {
+        const data = doc.data();
+        let createdAt;
+        
+        // Handle different timestamp formats
+        if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+          createdAt = data.createdAt.toDate();
+        } else if (data.createdAt && data.createdAt._seconds) {
+          // Handle Firestore timestamp object
+          createdAt = new Date(data.createdAt._seconds * 1000);
+        } else if (data.createdAt) {
+          // Handle string or other date formats
+          createdAt = new Date(data.createdAt);
+        }
+        
+        return createdAt && startDate && createdAt >= startDate && (!endDate || createdAt <= endDate);
+      }).length;
+
+      console.log('Customer metrics:', { activeCustomers, newCustomers });
+
+      const result = {
+        revenue: revenueData,
+        sales: salesData,
+        transactions: transactionData,
+        activeCustomers,
+        newCustomers,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      console.log('Final result:', result);
+      res.json(result);
+    } catch (error) {
+      console.error('Error getting dashboard metrics:', error);
+      console.error('Stack trace:', error.stack);
+      res.status(500).json({error: error.message});
+    }
+  });
+});
+
+// Helper functions for dashboard metrics
+async function getRevenueMetricsData(startDate, endDate) {
+  const paymentIntents = await stripe.paymentIntents.list({
+    created: {
+      gte: startDate ? Math.floor(startDate.getTime() / 1000) : undefined,
+      lte: endDate ? Math.floor(endDate.getTime() / 1000) : undefined,
+    },
+    limit: 100,
+  });
+
+  const previousStartDate = startDate ? new Date(startDate.getTime() - (endDate.getTime() - startDate.getTime())) : null;
+  const previousEndDate = startDate ? new Date(startDate.getTime()) : null;
+
+  const previousPaymentIntents = await stripe.paymentIntents.list({
+    created: {
+      gte: previousStartDate ? Math.floor(previousStartDate.getTime() / 1000) : undefined,
+      lte: previousEndDate ? Math.floor(previousEndDate.getTime() / 1000) : undefined,
+    },
+    limit: 100,
+  });
+
+  const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
+  const totalRevenue = successfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / 100;
+  const totalTransactions = successfulPayments.length;
+  const averageTransactionValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
+
+  const charges = await Promise.all(
+    successfulPayments.map(pi => stripe.charges.retrieve(pi.latest_charge))
+  );
+  const refundedAmount = charges.reduce((sum, charge) => {
+    return sum + (charge.refunded ? charge.amount_refunded : 0);
+  }, 0) / 100;
+
+  const netRevenue = totalRevenue - refundedAmount;
+
+  const previousSuccessfulPayments = previousPaymentIntents.data.filter(pi => pi.status === 'succeeded');
+  const previousRevenue = previousSuccessfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / 100;
+  const revenueGrowth = previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0;
+
+  return {
+    totalRevenue,
+    netRevenue,
+    refundedAmount,
+    totalTransactions,
+    averageTransactionValue,
+    currency: 'usd',
+    previousPeriodRevenue: previousRevenue,
+    revenueGrowth,
+  };
+}
+
+async function getSalesMetricsData(startDate, endDate) {
+  const paymentIntents = await stripe.paymentIntents.list({
+    created: {
+      gte: startDate ? Math.floor(startDate.getTime() / 1000) : undefined,
+      lte: endDate ? Math.floor(endDate.getTime() / 1000) : undefined,
+    },
+    limit: 100,
+  });
+
+  const previousStartDate = startDate ? new Date(startDate.getTime() - (endDate.getTime() - startDate.getTime())) : null;
+  const previousEndDate = startDate ? new Date(startDate.getTime()) : null;
+
+  const previousPaymentIntents = await stripe.paymentIntents.list({
+    created: {
+      gte: previousStartDate ? Math.floor(previousStartDate.getTime() / 1000) : undefined,
+      lte: previousEndDate ? Math.floor(previousEndDate.getTime() / 1000) : undefined,
+    },
+    limit: 100,
+  });
+
+  const productSales = {};
+  const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
+  
+  successfulPayments.forEach(pi => {
+    const priceId = pi.metadata?.priceId;
+    if (priceId) {
+      let productName = 'Unknown Product';
+      if (priceId === 'price_1SGzgzBa6NGVc5lJvVOssWsG') {
+        productName = 'Winter Plan';
+      } else if (priceId === 'price_1SGzfcBa6NGVc5lJwmTNs2xk') {
+        productName = 'Summer Plan';
+      } else if (priceId === 'price_1SHG5NBa6NGVc5lJdOEVEhZv') {
+        productName = 'Body Building Plan';
+      }
+      
+      productSales[productName] = (productSales[productName] || 0) + 1;
+    }
+  });
+
+  const totalSales = successfulPayments.length;
+  const totalSalesValue = successfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / 100;
+
+  const previousSuccessfulPayments = previousPaymentIntents.data.filter(pi => pi.status === 'succeeded');
+  const previousSales = previousSuccessfulPayments.length;
+  const salesGrowth = previousSales > 0 ? ((totalSales - previousSales) / previousSales) * 100 : 0;
+
+  return {
+    productSales,
+    totalSales,
+    totalSalesValue,
+    currency: 'usd',
+    previousPeriodSales: previousSales,
+    salesGrowth,
+  };
+}
+
+async function getTransactionMetricsData(startDate, endDate) {
+  const paymentIntents = await stripe.paymentIntents.list({
+    created: {
+      gte: startDate ? Math.floor(startDate.getTime() / 1000) : undefined,
+      lte: endDate ? Math.floor(endDate.getTime() / 1000) : undefined,
+    },
+    limit: 100,
+  });
+
+  const previousStartDate = startDate ? new Date(startDate.getTime() - (endDate.getTime() - startDate.getTime())) : null;
+  const previousEndDate = startDate ? new Date(startDate.getTime()) : null;
+
+  const previousPaymentIntents = await stripe.paymentIntents.list({
+    created: {
+      gte: previousStartDate ? Math.floor(previousStartDate.getTime() / 1000) : undefined,
+      lte: previousEndDate ? Math.floor(previousEndDate.getTime() / 1000) : undefined,
+    },
+    limit: 100,
+  });
+
+  const totalTransactions = paymentIntents.data.length;
+  const successfulTransactions = paymentIntents.data.filter(pi => pi.status === 'succeeded').length;
+  const failedTransactions = paymentIntents.data.filter(pi => pi.status === 'requires_payment_method' || pi.status === 'canceled').length;
+  const successRate = totalTransactions > 0 ? (successfulTransactions / totalTransactions) * 100 : 0;
+
+  const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
+  const averageTransactionValue = successfulPayments.length > 0 
+    ? successfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / successfulPayments.length / 100
+    : 0;
+
+  const previousTotalTransactions = previousPaymentIntents.data.length;
+  const transactionGrowth = previousTotalTransactions > 0 
+    ? ((totalTransactions - previousTotalTransactions) / previousTotalTransactions) * 100 
+    : 0;
+
+  return {
+    totalTransactions,
+    successfulTransactions,
+    failedTransactions,
+    successRate,
+    averageTransactionValue,
+    currency: 'usd',
+    previousPeriodTransactions: previousTotalTransactions,
+    transactionGrowth,
+  };
+}

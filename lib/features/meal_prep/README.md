@@ -84,9 +84,7 @@ lib/features/meal_prep/
 Each step is a separate widget for better maintainability:
 
 - **`GoalSelectionStep`**: Choose nutrition goal (lose fat, build muscle, etc.)
-- **`MealFrequencyStep`**: Select number of meals per day
 - **`CaloriesStep`**: Set daily calorie target
-- **`CheatDayStep`**: Choose cheat day (optional)
 - **`PlanDurationStep`**: Set plan rotation and reminders
 - **`FinalReviewStep`**: Review all selections before generation
 

@@ -7,7 +7,6 @@ class FinalReviewStep extends StatelessWidget {
   final UserPreferences userPreferences;
   final int selectedDays;
   final String? userName;
-  final String? cheatDay;
   final int targetCalories;
   final FitnessGoal? selectedFitnessGoal;
 
@@ -16,7 +15,6 @@ class FinalReviewStep extends StatelessWidget {
     required this.userPreferences,
     required this.selectedDays,
     this.userName,
-    this.cheatDay,
     required this.targetCalories,
     this.selectedFitnessGoal,
   });
@@ -166,12 +164,6 @@ class FinalReviewStep extends StatelessWidget {
                       icon: _iconFor('meals'),
                       label: 'Meal Frequency',
                       value: _getMealFrequencyDisplay(),
-                    ),
-                    const SizedBox(height: 16),
-                    _reviewRow(
-                      icon: _iconFor('cheat'),
-                      label: 'Cheat Day',
-                      value: cheatDay ?? 'No cheat day',
                     ),
                     const SizedBox(height: 16),
                     _reviewRow(

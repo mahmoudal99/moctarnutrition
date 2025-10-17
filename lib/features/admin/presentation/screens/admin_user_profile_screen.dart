@@ -119,6 +119,91 @@ class AdminUserProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
+                  // Account Status
+                  AdminInfoCard(
+                    title: 'Account Status',
+                    icon: Icons.account_circle_outlined,
+                    children: [
+                      AdminInfoRow(
+                        label: 'Account Created',
+                        value: _formatDate(user.createdAt),
+                      ),
+                      AdminInfoRow(
+                        label: 'Last Updated',
+                        value: _formatDate(user.updatedAt),
+                      ),
+                      AdminInfoRow(
+                        label: 'Onboarding Completed',
+                        value: user.hasSeenOnboarding ? 'Yes' : 'No',
+                        valueColor: user.hasSeenOnboarding 
+                            ? AppConstants.successColor 
+                            : AppConstants.warningColor,
+                      ),
+                      AdminInfoRow(
+                        label: 'Get Started Seen',
+                        value: user.hasSeenGetStarted ? 'Yes' : 'No',
+                        valueColor: user.hasSeenGetStarted 
+                            ? AppConstants.successColor 
+                            : AppConstants.warningColor,
+                      ),
+                      AdminInfoRow(
+                        label: 'Subscription Screen Seen',
+                        value: user.hasSeenSubscriptionScreen ? 'Yes' : 'No',
+                        valueColor: user.hasSeenSubscriptionScreen 
+                            ? AppConstants.successColor 
+                            : AppConstants.warningColor,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Program Information
+                  AdminInfoCard(
+                    title: 'Program Information',
+                    icon: Icons.fitness_center_outlined,
+                    children: [
+                      AdminInfoRow(
+                        label: 'Training Program',
+                        value: _getTrainingProgramStatusLabel(user.trainingProgramStatus),
+                      ),
+                      if (user.currentProgramId != null)
+                        AdminInfoRow(
+                          label: 'Current Program ID',
+                          value: user.currentProgramId!,
+                        ),
+                      if (user.programPurchaseDate != null)
+                        AdminInfoRow(
+                          label: 'Program Purchase Date',
+                          value: _formatDate(user.programPurchaseDate!),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Subscription Information
+                  if (user.stripeCustomerId != null || user.selectedTrainerId != null)
+                    AdminInfoCard(
+                      title: 'Subscription & Training',
+                      icon: Icons.payment_outlined,
+                      children: [
+                        if (user.stripeCustomerId != null)
+                          AdminInfoRow(
+                            label: 'Stripe Customer ID',
+                            value: user.stripeCustomerId!,
+                          ),
+                        if (user.selectedTrainerId != null)
+                          AdminInfoRow(
+                            label: 'Selected Trainer ID',
+                            value: user.selectedTrainerId!,
+                          ),
+                      ],
+                    ),
+
+                  if (user.stripeCustomerId != null || user.selectedTrainerId != null)
+                    const SizedBox(height: 16),
+
                   // Physical Information
                   AdminInfoCard(
                     title: 'Physical Information',
@@ -137,6 +222,10 @@ class AdminUserProfileScreen extends StatelessWidget {
                       AdminInfoRow(
                         label: 'BMI',
                         value: _calculateBMIDisplay(),
+                      ),
+                      AdminInfoRow(
+                        label: 'Desired Weight',
+                        value: '${user.preferences.desiredWeight} kg',
                       ),
                     ],
                   ),
@@ -166,6 +255,35 @@ class AdminUserProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
+                  // Notification Settings
+                  AdminInfoCard(
+                    title: 'Notification Settings',
+                    icon: Icons.notifications_outlined,
+                    children: [
+                      AdminInfoRow(
+                        label: 'General Notifications',
+                        value: user.preferences.notificationsEnabled ? 'Enabled' : 'Disabled',
+                        valueColor: user.preferences.notificationsEnabled 
+                            ? AppConstants.successColor 
+                            : AppConstants.textSecondary,
+                      ),
+                      AdminInfoRow(
+                        label: 'Workout Notifications',
+                        value: user.preferences.workoutNotificationsEnabled ? 'Enabled' : 'Disabled',
+                        valueColor: user.preferences.workoutNotificationsEnabled 
+                            ? AppConstants.successColor 
+                            : AppConstants.textSecondary,
+                      ),
+                      if (user.preferences.workoutNotificationTime != null)
+                        AdminInfoRow(
+                          label: 'Workout Notification Time',
+                          value: user.preferences.workoutNotificationTime!,
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // Preferences
                   AdminInfoCard(
                     title: 'Preferences',
@@ -185,6 +303,20 @@ class AdminUserProfileScreen extends StatelessWidget {
                             : user.preferences.preferredWorkoutStyles
                                 .join(', '),
                       ),
+                      AdminInfoRow(
+                        label: 'Weekly Workout Days',
+                        value: '${user.preferences.weeklyWorkoutDays} days',
+                      ),
+                      if (user.preferences.specificWorkoutDays != null && user.preferences.specificWorkoutDays!.isNotEmpty)
+                        AdminInfoRow(
+                          label: 'Workout Days',
+                          value: _formatWorkoutDays(user.preferences.specificWorkoutDays!),
+                        ),
+                      if (user.preferences.timezone != null)
+                        AdminInfoRow(
+                          label: 'Timezone',
+                          value: user.preferences.timezone!,
+                        ),
                     ],
                   ),
 
@@ -396,6 +528,19 @@ class AdminUserProfileScreen extends StatelessWidget {
                   if (user.preferences.batchCookingPreferences != null)
                     const SizedBox(height: 16),
 
+                  // Calculated Calorie Targets
+                  if (user.preferences.calculatedCalorieTargets != null)
+                    AdminInfoCard(
+                      title: 'Calculated Calorie Targets',
+                      icon: Icons.calculate_outlined,
+                      children: [
+                        _buildCalculatedCalorieTargetsInfo(),
+                      ],
+                    ),
+
+                  if (user.preferences.calculatedCalorieTargets != null)
+                    const SizedBox(height: 16),
+
                   // Nutritional Information
                   if (user.preferences.proteinTargets != null ||
                       user.preferences.calorieTargets != null)
@@ -462,7 +607,7 @@ class AdminUserProfileScreen extends StatelessWidget {
     final heightInMeters = user.preferences.height / 100;
     final bmi = user.preferences.weight / (heightInMeters * heightInMeters);
     final bmiCategory = _getBMICategory(bmi);
-    return '${bmi.toStringAsFixed(1)} (${bmiCategory})';
+    return '${bmi.toStringAsFixed(1)} ($bmiCategory)';
   }
 
   String _getBMICategory(double bmi) {
@@ -806,6 +951,20 @@ class AdminUserProfileScreen extends StatelessWidget {
           ],
         ),
 
+        // Protein distribution
+        if (proteinTargets['mealDistribution'] != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Protein Distribution',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _buildProteinDistribution(proteinTargets['mealDistribution'] as List<dynamic>),
+        ],
+
         // Additional info
         if (proteinTargets['weightBase'] != null ||
             proteinTargets['fitnessGoal'] != null) ...[
@@ -855,6 +1014,46 @@ class AdminUserProfileScreen extends StatelessWidget {
                   ),
                 ),
             ],
+          ),
+        ],
+
+        // Recommendations
+        if (proteinTargets['recommendations'] != null && (proteinTargets['recommendations'] as List).isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Recommendations',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          ...(proteinTargets['recommendations'] as List).map((recommendation) => 
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 4,
+                    height: 4,
+                    margin: const EdgeInsets.only(top: 8, right: 8),
+                    decoration: BoxDecoration(
+                      color: AppConstants.successColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      recommendation as String,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ],
@@ -1148,5 +1347,296 @@ class AdminUserProfileScreen extends StatelessWidget {
       default:
         return 'Not specified';
     }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _getTrainingProgramStatusLabel(TrainingProgramStatus status) {
+    switch (status) {
+      case TrainingProgramStatus.none:
+        return 'No Program';
+      case TrainingProgramStatus.winter:
+        return 'Winter Program';
+      case TrainingProgramStatus.summer:
+        return 'Summer Program';
+      case TrainingProgramStatus.bodybuilding:
+        return 'Bodybuilding Program';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  String _formatWorkoutDays(List<int> days) {
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days.map((day) => dayNames[day - 1]).join(', ');
+  }
+
+  Widget _buildCalculatedCalorieTargetsInfo() {
+    final calculatedTargets = user.preferences.calculatedCalorieTargets;
+    if (calculatedTargets == null) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Daily calorie target
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppConstants.primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppConstants.primaryColor.withOpacity(0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.local_fire_department,
+                color: AppConstants.primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Calculated Daily Target',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${calculatedTargets.dailyTarget} kcal',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppConstants.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // RMR and TDEE
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppConstants.warningColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'RMR',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      '${calculatedTargets.rmr} kcal',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppConstants.warningColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppConstants.warningColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'TDEE',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      '${calculatedTargets.tdee} kcal',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppConstants.warningColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // Additional info
+        if (calculatedTargets.fitnessGoal.isNotEmpty ||
+            calculatedTargets.activityLevel.isNotEmpty) ...[
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              if (calculatedTargets.fitnessGoal.isNotEmpty)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppConstants.accentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppConstants.accentColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    calculatedTargets.fitnessGoal,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.accentColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              if (calculatedTargets.activityLevel.isNotEmpty)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppConstants.secondaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppConstants.secondaryColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    calculatedTargets.activityLevel,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.secondaryColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+
+        // Recommendations
+        if (calculatedTargets.recommendations.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Recommendations',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          ...calculatedTargets.recommendations.map((recommendation) => 
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 4,
+                    height: 4,
+                    margin: const EdgeInsets.only(top: 8, right: 8),
+                    decoration: BoxDecoration(
+                      color: AppConstants.accentColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      recommendation,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildProteinDistribution(List<dynamic> mealDistribution) {
+    return Column(
+      children: mealDistribution.map((meal) {
+        final mealData = meal as Map<String, dynamic>;
+        final mealName = mealData['mealName'] as String? ?? 'Unknown';
+        final proteinTarget = mealData['proteinTarget'] as int? ?? 0;
+        final mealNumber = mealData['mealNumber'] as int? ?? 0;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppConstants.successColor.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: AppConstants.successColor.withOpacity(0.2),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppConstants.successColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    '$mealNumber',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.successColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  mealName,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Text(
+                '${proteinTarget}g',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.successColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
   }
 }

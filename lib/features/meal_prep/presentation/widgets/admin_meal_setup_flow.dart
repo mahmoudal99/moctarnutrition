@@ -10,7 +10,6 @@ import '../../../../shared/services/email_service.dart';
 import 'package:lottie/lottie.dart';
 import 'setup_steps/goal_selection_step.dart' show GoalSelectionStep;
 import 'setup_steps/calories_step.dart';
-import 'setup_steps/cheat_day_step.dart';
 import 'setup_steps/plan_duration_step.dart';
 import 'setup_steps/final_review_step.dart';
 
@@ -37,7 +36,6 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
   bool _isLoading = false;
   int _setupStep = 0;
   FitnessGoal? _selectedFitnessGoal;
-  String? _cheatDay;
   bool _weeklyRotation = true;
   bool _remindersEnabled = false;
   final int _selectedDays = 7;
@@ -144,7 +142,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
   }
 
   void _nextStep() {
-    if (_setupStep < 5) {
+    if (_setupStep < 4) {
       setState(() {
         _setupStep++;
       });
@@ -177,7 +175,6 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
       foodsToAvoid: List<String>.from(_userPreferences.foodsToAvoid),
       favoriteFoods: List<String>.from(_userPreferences.favoriteFoods),
       mealFrequency: _getMealFrequencyFromUserPreferences(),
-      cheatDay: _cheatDay,
       weeklyRotation: _weeklyRotation,
       remindersEnabled: _remindersEnabled,
       targetCalories: _targetCalories,
@@ -297,7 +294,7 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: AppConstants.spacingL),
-            _ProgressDots(current: _setupStep, total: 5),
+            _ProgressDots(current: _setupStep, total: 4),
             const SizedBox(height: AppConstants.spacingL),
             Expanded(
               child: Padding(
@@ -425,12 +422,6 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
               : null,
         );
       case 2:
-        return CheatDayStep(
-          selectedDay: _cheatDay,
-          onSelect: (day) => setState(() => _cheatDay = day),
-          userName: widget.userName,
-        );
-      case 3:
         return PlanDurationStep(
           weeklyRotation: _weeklyRotation,
           onToggleWeeklyRotation: (value) =>
@@ -440,12 +431,11 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
               setState(() => _remindersEnabled = value),
           userName: widget.userName,
         );
-      case 4:
+      case 3:
         return FinalReviewStep(
           userPreferences: _userPreferences,
           selectedDays: _selectedDays,
           userName: widget.userName,
-          cheatDay: _cheatDay,
           targetCalories: _targetCalories,
           selectedFitnessGoal: _selectedFitnessGoal,
         );
@@ -493,24 +483,6 @@ class _AdminMealSetupFlowState extends State<AdminMealSetupFlow> {
           ],
         );
       case 3:
-        return Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _prevStep,
-                child: const Text('Back'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: _nextStep,
-                child: const Text('Next'),
-              ),
-            ),
-          ],
-        );
-      case 4:
         return SizedBox(
           width: double.infinity,
           height: 52,

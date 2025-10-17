@@ -11,7 +11,6 @@ import 'package:lottie/lottie.dart';
 
 import '../../../meal_prep/presentation/widgets/setup_steps/goal_selection_step.dart';
 import '../../../meal_prep/presentation/widgets/setup_steps/calories_step.dart';
-import '../../../meal_prep/presentation/widgets/setup_steps/cheat_day_step.dart';
 import '../../../meal_prep/presentation/widgets/setup_steps/plan_duration_step.dart';
 import '../../../meal_prep/presentation/widgets/setup_steps/final_review_step.dart';
 
@@ -28,7 +27,6 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
   static final _logger = Logger();
   int _setupStep = 0;
   FitnessGoal? _selectedFitnessGoal;
-  String? _cheatDay;
   bool _weeklyRotation = true;
   bool _remindersEnabled = false;
   final int _selectedDays = 7;
@@ -166,17 +164,11 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         isValid = _targetCalories >= 1200 && _targetCalories <= 4000;
         break;
       case 2:
-        // Cheat day should have a selection (either a day or null for "No cheat day")
-        // The step allows selecting null, so we need to check if user has made any selection
-        // Since the step starts with null and user can select null, we'll consider it always valid
-        isValid = true;
-        break;
-      case 3:
         // Plan duration step has default values (_weeklyRotation = true, _remindersEnabled = false)
         // and both options are always valid, so this step is always complete
         isValid = true;
         break;
-      case 4:
+      case 3:
         // Final review step - check all required fields
         isValid = _selectedFitnessGoal != null &&
             _targetCalories >= 1200 &&
@@ -191,7 +183,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     _logger.i('Step $_setupStep validation: $isValid');
     if (_setupStep == 0) _logger.d('Fitness goal: $_selectedFitnessGoal');
     if (_setupStep == 1) _logger.d('Target calories: $_targetCalories');
-    if (_setupStep == 4) {
+    if (_setupStep == 3) {
       _logger.i(
           'Final validation - Fitness goal: $_selectedFitnessGoal, Calories: $_targetCalories');
     }
@@ -212,12 +204,9 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         }
         return 'Please set a valid calorie target';
       case 2:
-        // Cheat day is optional, so this should never be reached
-        return 'Please make a selection for cheat day';
-      case 3:
         // Plan duration step has default values, so this should never be reached
         return 'Please configure plan duration and reminders';
-      case 4:
+      case 3:
         if (_selectedFitnessGoal == null) {
           return 'Please select a nutrition goal';
         } else if (_targetCalories < 1200 || _targetCalories > 4000) {
@@ -257,7 +246,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         foodsToAvoid: List<String>.from(prefs.foodsToAvoid),
         favoriteFoods: List<String>.from(prefs.favoriteFoods),
         mealFrequency: _getMealFrequencyFromUserPreferences(),
-        cheatDay: _cheatDay,
+        cheatDay: null, // Cheat day is user choice, not admin decision
         weeklyRotation: _weeklyRotation,
         remindersEnabled: _remindersEnabled,
         targetCalories: _targetCalories,
@@ -552,20 +541,18 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(6, (i) {
+                children: List.generate(5, (i) {
                   // Use the same colors as user onboarding for first 4 steps, then distinct colors for last 2
                   final List<Color> stepColors = [
                     AppConstants
                         .primaryColor, // Step 0: Goal Selection (Green - main goal)
                     AppConstants
-                        .accentColor, // Step 1: Meal Frequency (Dark Green - meal planning)
+                        .accentColor, // Step 1: Calories (Dark Green - energy/nutrition)
                     AppConstants
-                        .secondaryColor, // Step 2: Calories (Light Green - energy/nutrition)
-                    AppConstants
-                        .warningColor, // Step 3: Cheat Day (Orange - indulgence)
+                        .secondaryColor, // Step 2: Plan Duration (Light Green - commitment)
                     Colors
-                        .purple, // Step 4: Plan Duration (Purple - commitment)
-                    Colors.blue, // Step 5: Final Review (Blue - completion)
+                        .purple, // Step 3: Final Review (Purple - completion)
+                    Colors.blue, // Step 4: (Blue - reserved)
                   ];
 
                   // Each dot shows its own color when completed, current step color when current, or gray when not reached
@@ -600,7 +587,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 child: Text(
-                  '${_setupStep + 1} of 6',
+                  '${_setupStep + 1} of 5',
                   key: ValueKey(_setupStep),
                   style: AppTextStyles.caption.copyWith(
                     fontSize: 11,
@@ -696,12 +683,6 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
               : null,
         );
       case 2:
-        return CheatDayStep(
-          selectedDay: _cheatDay,
-          onSelect: (day) => setState(() => _cheatDay = day),
-          userName: widget.user.name,
-        );
-      case 3:
         return PlanDurationStep(
           weeklyRotation: _weeklyRotation,
           onToggleWeeklyRotation: (value) =>
@@ -711,12 +692,11 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
               setState(() => _remindersEnabled = value),
           userName: widget.user.name,
         );
-      case 4:
+      case 3:
         return FinalReviewStep(
           userPreferences: prefs,
           selectedDays: _selectedDays,
           userName: widget.user.name,
-          cheatDay: _cheatDay,
           targetCalories: _targetCalories,
         );
       default:
@@ -740,7 +720,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         Expanded(
           child: ElevatedButton(
             onPressed: isCurrentStepValid
-                ? (_setupStep == 4 ? _onSavePlan : _onNextStep)
+                ? (_setupStep == 3 ? _onSavePlan : _onNextStep)
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: isCurrentStepValid
