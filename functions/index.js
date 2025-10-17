@@ -653,12 +653,16 @@ exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
 
       console.log('Customer metrics:', { activeCustomers, newCustomers });
 
+      // Get historical revenue data for the chart
+      const historicalData = await getHistoricalRevenueData(startDate, endDate);
+
       const result = {
         revenue: revenueData,
         sales: salesData,
         transactions: transactionData,
         activeCustomers,
         newCustomers,
+        historicalData,
         lastUpdated: new Date().toISOString(),
       };
 
@@ -824,4 +828,57 @@ async function getTransactionMetricsData(startDate, endDate) {
     previousPeriodTransactions: previousTotalTransactions,
     transactionGrowth,
   };
+}
+
+// Get historical revenue data for charts
+async function getHistoricalRevenueData(startDate, endDate) {
+  try {
+    console.log('Getting historical revenue data from', startDate, 'to', endDate);
+    
+    const stripe = require('stripe')(functions.config().stripe.secret_key);
+    
+    // Get payment intents for the period
+    const paymentIntents = await stripe.paymentIntents.list({
+      created: {
+        gte: Math.floor(startDate.getTime() / 1000),
+        lte: Math.floor(endDate.getTime() / 1000),
+      },
+      limit: 100,
+    });
+
+    // Group by day
+    const dailyRevenue = {};
+    const oneDay = 24 * 60 * 60 * 1000; // milliseconds in a day
+    
+    // Initialize all days in the range with 0
+    for (let d = new Date(startDate); d <= endDate; d.setTime(d.getTime() + oneDay)) {
+      const dayKey = d.toISOString().split('T')[0];
+      dailyRevenue[dayKey] = 0;
+    }
+
+    // Sum up revenue by day
+    paymentIntents.data.forEach(intent => {
+      if (intent.status === 'succeeded' && intent.amount > 0) {
+        const date = new Date(intent.created * 1000);
+        const dayKey = date.toISOString().split('T')[0];
+        if (dailyRevenue.hasOwnProperty(dayKey)) {
+          dailyRevenue[dayKey] += intent.amount / 100; // Convert from cents to dollars
+        }
+      }
+    });
+
+    // Convert to array format for the chart
+    const chartData = Object.entries(dailyRevenue)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, revenue]) => ({
+        date,
+        revenue: Math.round(revenue * 100) / 100, // Round to 2 decimal places
+      }));
+
+    console.log('Historical data points:', chartData.length);
+    return chartData;
+  } catch (error) {
+    console.error('Error getting historical revenue data:', error);
+    return [];
+  }
 }

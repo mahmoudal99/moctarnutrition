@@ -322,6 +322,24 @@ class StripeTransactionMetrics {
   }
 }
 
+/// Model for historical revenue data points
+class HistoricalDataPoint {
+  final String date;
+  final double revenue;
+
+  HistoricalDataPoint({
+    required this.date,
+    required this.revenue,
+  });
+
+  factory HistoricalDataPoint.fromJson(Map<String, dynamic> json) {
+    return HistoricalDataPoint(
+      date: json['date'] as String,
+      revenue: (json['revenue'] as num).toDouble(),
+    );
+  }
+}
+
 /// Comprehensive dashboard metrics model
 class StripeDashboardMetrics {
   final StripeRevenueMetrics revenue;
@@ -329,6 +347,7 @@ class StripeDashboardMetrics {
   final StripeTransactionMetrics transactions;
   final int activeCustomers;
   final int newCustomers;
+  final List<HistoricalDataPoint> historicalData;
   final DateTime lastUpdated;
 
   StripeDashboardMetrics({
@@ -337,16 +356,22 @@ class StripeDashboardMetrics {
     required this.transactions,
     required this.activeCustomers,
     required this.newCustomers,
+    required this.historicalData,
     required this.lastUpdated,
   });
 
   factory StripeDashboardMetrics.fromJson(Map<String, dynamic> json) {
+    final historicalDataList = (json['historicalData'] as List<dynamic>?)
+        ?.map((item) => HistoricalDataPoint.fromJson(item as Map<String, dynamic>))
+        .toList() ?? [];
+    
     return StripeDashboardMetrics(
       revenue: StripeRevenueMetrics.fromJson(json['revenue'] as Map<String, dynamic>),
       sales: StripeSalesMetrics.fromJson(json['sales'] as Map<String, dynamic>),
       transactions: StripeTransactionMetrics.fromJson(json['transactions'] as Map<String, dynamic>),
       activeCustomers: json['activeCustomers'] as int,
       newCustomers: json['newCustomers'] as int,
+      historicalData: historicalDataList,
       lastUpdated: DateTime.parse(json['lastUpdated'] as String),
     );
   }

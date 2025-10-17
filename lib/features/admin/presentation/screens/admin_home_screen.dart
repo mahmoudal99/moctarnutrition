@@ -233,6 +233,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               _SalesCard(
                 lastUpdated: lastUpdated,
                 totalRevenue: _metrics?.revenue.totalRevenue ?? 0.0,
+                historicalData: _metrics?.historicalData ?? [],
               ),
               const SizedBox(height: 18),
               _StatisticsCard(
@@ -438,10 +439,12 @@ class _MetricCard extends StatelessWidget {
 class _SalesCard extends StatelessWidget {
   final String lastUpdated;
   final double totalRevenue;
+  final List<HistoricalDataPoint> historicalData;
 
   const _SalesCard({
     required this.lastUpdated,
     required this.totalRevenue,
+    required this.historicalData,
   });
 
   @override
@@ -470,47 +473,94 @@ class _SalesCard extends StatelessWidget {
             Text(lastUpdated,
                 style: AppTextStyles.caption.copyWith(color: Colors.white54)),
             const SizedBox(height: 16),
-            // Placeholder for line chart
+            // Revenue trend chart
             Container(
               height: 64,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: LineChart(
-                LineChartData(
-                  gridData: const FlGridData(show: false),
-                  titlesData: const FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
-                  minX: 0,
-                  maxX: 6,
-                  minY: 0,
-                  maxY: 10,
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: [
-                        const FlSpot(0, 1),
-                        const FlSpot(1, 7.5),
-                        const FlSpot(2, 2),
-                        const FlSpot(3, 8),
-                        const FlSpot(4, 6.5),
-                        const FlSpot(5, 9),
-                        const FlSpot(6, 1),
-                      ],
-                      isCurved: true,
-                      color: const Color(0xFF4F8DFD),
-                      barWidth: 3,
-                      dotData: const FlDotData(show: false),
-                      belowBarData: BarAreaData(show: false),
-                    ),
-                  ],
-                ),
-              ),
+              child: _buildRevenueChart(),
             ),
             const SizedBox(height: 18),
             // Stats row moved to separate widget below
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildRevenueChart() {
+    if (historicalData.isEmpty) {
+      // Show a flat line if no data
+      return LineChart(
+        LineChartData(
+          gridData: const FlGridData(show: false),
+          titlesData: const FlTitlesData(show: false),
+          borderData: FlBorderData(show: false),
+          minX: 0,
+          maxX: 6,
+          minY: 0,
+          maxY: 10,
+          lineBarsData: [
+            LineChartBarData(
+              spots: [
+                const FlSpot(0, 5),
+                const FlSpot(6, 5),
+              ],
+              isCurved: false,
+              color: const Color(0xFF4F8DFD).withOpacity(0.3),
+              barWidth: 2,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(show: false),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Convert historical data to chart spots
+    final spots = <FlSpot>[];
+    final maxRevenue = historicalData.map((e) => e.revenue).reduce((a, b) => a > b ? a : b);
+    final minRevenue = historicalData.map((e) => e.revenue).reduce((a, b) => a < b ? a : b);
+    final revenueRange = maxRevenue - minRevenue;
+    
+    for (int i = 0; i < historicalData.length; i++) {
+      final dataPoint = historicalData[i];
+      double yValue;
+      
+      if (revenueRange == 0) {
+        yValue = 5.0; // Center if all values are the same
+      } else {
+        // Normalize to 0-10 range
+        yValue = ((dataPoint.revenue - minRevenue) / revenueRange) * 8 + 1;
+      }
+      
+      spots.add(FlSpot(i.toDouble(), yValue));
+    }
+
+    return LineChart(
+      LineChartData(
+        gridData: const FlGridData(show: false),
+        titlesData: const FlTitlesData(show: false),
+        borderData: FlBorderData(show: false),
+        minX: 0,
+        maxX: (historicalData.length - 1).toDouble(),
+        minY: 0,
+        maxY: 10,
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            isCurved: true,
+            color: const Color(0xFF4F8DFD),
+            barWidth: 3,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              color: const Color(0xFF4F8DFD).withOpacity(0.1),
+            ),
+          ),
+        ],
       ),
     );
   }
