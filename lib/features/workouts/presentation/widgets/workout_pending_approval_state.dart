@@ -12,12 +12,6 @@ class WorkoutPendingApprovalState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.hourglass_empty,
-              size: 64,
-              color: AppConstants.primaryColor,
-            ),
-            const SizedBox(height: AppConstants.spacingM),
             Text(
               'Workout Plan Pending Approval',
               style: AppTextStyles.heading3.copyWith(
