@@ -5,7 +5,6 @@ import 'package:uuid/uuid.dart';
 import '../../features/onboarding/presentation/steps/onboarding_meal_timing_step.dart';
 import '../models/meal_model.dart';
 import '../models/user_model.dart';
-import 'config_service.dart';
 
 /// Service for generating meal plans using the backend endpoint
 class BackendMealService {

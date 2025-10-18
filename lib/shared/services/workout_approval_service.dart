@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import '../models/workout_plan_model.dart';
+// ignore: unused_import
 import '../models/user_model.dart';
 import 'workout_approval_notification_service.dart';
 

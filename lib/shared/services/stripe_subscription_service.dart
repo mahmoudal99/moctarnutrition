@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import '../models/subscription_model.dart';
-import 'config_service.dart';
 
 /// Service for handling Stripe subscription operations
 /// This service manages subscription creation, management, and status tracking

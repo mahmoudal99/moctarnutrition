@@ -2,7 +2,6 @@ import '../../../shared/models/workout_model.dart';
 import '../../../shared/models/workout_plan_model.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/services/ai_workout_service.dart';
-import 'package:uuid/uuid.dart';
 
 class WorkoutService {
   static final WorkoutService _instance = WorkoutService._internal();
