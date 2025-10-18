@@ -352,9 +352,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   List<_SalesStat> _buildStatisticsData() {
     if (_metrics == null) {
     return [
-      _SalesStat('Earnings', '€0.00', '0%', true),
-      _SalesStat('Sales', '€0.00', '0%', true),
-      _SalesStat('Transactions', '0', '0%', true),
+      _SalesStat('Earnings', '€0.00', '0%', _GrowthDirection.neutral),
+      _SalesStat('Sales', '€0.00', '0%', _GrowthDirection.neutral),
+      _SalesStat('Transactions', '0', '0%', _GrowthDirection.neutral),
     ];
     }
 
@@ -363,21 +363,32 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         'Earnings', 
         _metrics!.revenue.formattedTotalRevenue, 
         _metrics!.revenue.formattedRevenueGrowth ?? '0%', 
-        (_metrics!.revenue.revenueGrowth ?? 0) >= 0
+        _getGrowthDirection(_metrics!.revenue.revenueGrowth ?? 0)
       ),
       _SalesStat(
         'Sales', 
         _metrics!.sales.formattedTotalSalesValue, 
         _metrics!.sales.formattedSalesGrowth ?? '0%', 
-        (_metrics!.sales.salesGrowth ?? 0) >= 0
+        _getGrowthDirection(_metrics!.sales.salesGrowth ?? 0)
       ),
       _SalesStat(
         'Transactions', 
         '${_metrics!.transactions.totalTransactions}', 
         _metrics!.transactions.formattedTransactionGrowth ?? '0%', 
-        (_metrics!.transactions.transactionGrowth ?? 0) >= 0
+        _getGrowthDirection(_metrics!.transactions.transactionGrowth ?? 0)
       ),
     ];
+  }
+  
+  /// Helper method to determine growth direction based on percentage value
+  _GrowthDirection _getGrowthDirection(double growth) {
+    if (growth > 0) {
+      return _GrowthDirection.positive;
+    } else if (growth < 0) {
+      return _GrowthDirection.negative;
+    } else {
+      return _GrowthDirection.neutral;
+    }
   }
 
   String _formatLastUpdated(DateTime dateTime) {
@@ -598,13 +609,15 @@ class _SalesCard extends StatelessWidget {
   }
 }
 
+enum _GrowthDirection { positive, negative, neutral }
+
 class _SalesStat {
   final String label;
   final String value;
   final String percent;
-  final bool isUp;
+  final _GrowthDirection growthDirection;
 
-  _SalesStat(this.label, this.value, this.percent, this.isUp);
+  _SalesStat(this.label, this.value, this.percent, this.growthDirection);
 }
 
 class _SalesStatWidget extends StatelessWidget {
@@ -614,8 +627,24 @@ class _SalesStatWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        stat.isUp ? AppConstants.successColor : AppConstants.errorColor;
+    Color color;
+    IconData icon;
+    
+    switch (stat.growthDirection) {
+      case _GrowthDirection.positive:
+        color = AppConstants.successColor;
+        icon = Icons.arrow_upward;
+        break;
+      case _GrowthDirection.negative:
+        color = AppConstants.errorColor;
+        icon = Icons.arrow_downward;
+        break;
+      case _GrowthDirection.neutral:
+        color = AppConstants.textSecondary;
+        icon = Icons.remove;
+        break;
+    }
+    
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -639,8 +668,7 @@ class _SalesStatWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(stat.isUp ? Icons.arrow_upward : Icons.arrow_downward,
-                size: 14, color: color),
+            Icon(icon, size: 14, color: color),
             const SizedBox(width: 2),
             Text(
               stat.percent,
