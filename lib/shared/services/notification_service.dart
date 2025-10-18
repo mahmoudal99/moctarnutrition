@@ -198,6 +198,12 @@ class NotificationService {
     }
   }
 
+  /// Get the cached notification permission status synchronously
+  /// Returns null if no cached value is available
+  static bool? getCachedNotificationPermission() {
+    return _cachedNotificationPermission;
+  }
+
   /// Manually update the cached notification permission status
   /// This is useful when the permission status changes outside the app
   static void updateCachedPermissionStatus(bool isGranted) {

@@ -393,10 +393,10 @@ class _SubscriptionSection extends StatelessWidget {
             title: 'Program Type',
             subtitle: _getTrainingProgramName(trainingProgramStatus),
           ),
-          _InfoCard(
+          const _InfoCard(
             title: 'Payment Status',
             subtitle: 'Paid',
-            trailing: const Icon(Icons.check_circle, color: Colors.green),
+            trailing: Icon(Icons.check_circle, color: Colors.green),
           ),
         ],
         _InfoCard(
