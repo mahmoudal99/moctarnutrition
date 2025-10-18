@@ -90,7 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _isSignUp ? 'Create Account' : 'Sign In',
+            _isSignUp ? 'Sign Up' : 'Sign In',
             style: AppTextStyles.heading3.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -232,7 +232,7 @@ class _AuthScreenState extends State<AuthScreen> {
         style: AppTextStyles.bodyMedium,
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon, color: AppConstants.primaryColor, size: 20),
+          prefixIcon: Icon(icon, color: Colors.black87, size: 20),
           suffixIcon: suffixIcon,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -262,7 +262,7 @@ class _AuthScreenState extends State<AuthScreen> {
             type: ButtonType.auth,
             text: authProvider.isLoading
                 ? 'Please wait...'
-                : (_isSignUp ? 'Create Account' : 'Sign In'),
+                : (_isSignUp ? 'Sign Up' : 'Sign In'),
             isLoading: authProvider.isLoading,
             onPressed: _handleAuth,
           ),

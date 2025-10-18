@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'config_service.dart';
@@ -144,6 +145,44 @@ class StripeAnalyticsService {
       }
     } catch (e) {
       _logger.e('Error getting dashboard metrics: $e');
+      return null;
+    }
+  }
+
+  /// Get recent transactions
+  static Future<List<RecentTransaction>?> getRecentTransactions({
+    int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      _logger.i('Fetching recent transactions with limit: $limit');
+      
+      final response = await http.get(
+        Uri.parse('$_backendUrl/getRecentTransactions').replace(
+          queryParameters: {
+            'limit': limit.toString(),
+            if (startDate != null) 'startDate': startDate.toIso8601String(),
+            if (endDate != null) 'endDate': endDate.toIso8601String(),
+          },
+        ),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final transactionsList = (data['transactions'] as List<dynamic>?)
+            ?.map((item) => RecentTransaction.fromJson(item as Map<String, dynamic>))
+            .toList() ?? [];
+        return transactionsList;
+      } else {
+        _logger.w('Failed to get recent transactions: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      _logger.e('Error getting recent transactions: $e');
       return null;
     }
   }
@@ -362,6 +401,92 @@ class HistoricalDataPoint {
   }
 }
 
+/// Model for recent transaction data
+class RecentTransaction {
+  final String id;
+  final double amount;
+  final String currency;
+  final String status;
+  final String productName;
+  final String? customerEmail;
+  final String? userId;
+  final DateTime created;
+  final String description;
+
+  RecentTransaction({
+    required this.id,
+    required this.amount,
+    required this.currency,
+    required this.status,
+    required this.productName,
+    this.customerEmail,
+    this.userId,
+    required this.created,
+    required this.description,
+  });
+
+  factory RecentTransaction.fromJson(Map<String, dynamic> json) {
+    return RecentTransaction(
+      id: json['id'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      currency: json['currency'] as String,
+      status: json['status'] as String,
+      productName: json['productName'] as String,
+      customerEmail: json['customerEmail'] as String?,
+      userId: json['userId'] as String?,
+      created: DateTime.parse(json['created'] as String),
+      description: json['description'] as String,
+    );
+  }
+
+  String get formattedAmount {
+    final symbol = _getCurrencySymbol();
+    return '$symbol${amount.toStringAsFixed(2)}';
+  }
+
+  String _getCurrencySymbol() {
+    switch (currency.toLowerCase()) {
+      case 'eur':
+        return '€';
+      case 'usd':
+        return '\$';
+      default:
+        return '€'; // Default to euro
+    }
+  }
+
+  String get formattedDate {
+    final now = DateTime.now();
+    final difference = now.difference(created);
+    
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${created.day}/${created.month}/${created.year}';
+    }
+  }
+
+  Color get statusColor {
+    switch (status) {
+      case 'succeeded':
+        return const Color(0xFF10B981); // Green
+      case 'requires_payment_method':
+      case 'requires_confirmation':
+        return const Color(0xFFF59E0B); // Yellow
+      case 'canceled':
+        return const Color(0xFFEF4444); // Red
+      default:
+        return const Color(0xFF6B7280); // Gray
+    }
+  }
+}
+
 /// Comprehensive dashboard metrics model
 class StripeDashboardMetrics {
   final StripeRevenueMetrics revenue;
@@ -370,6 +495,7 @@ class StripeDashboardMetrics {
   final int activeCustomers;
   final int newCustomers;
   final List<HistoricalDataPoint> historicalData;
+  final List<RecentTransaction> recentTransactions;
   final DateTime lastUpdated;
 
   StripeDashboardMetrics({
@@ -379,12 +505,17 @@ class StripeDashboardMetrics {
     required this.activeCustomers,
     required this.newCustomers,
     required this.historicalData,
+    required this.recentTransactions,
     required this.lastUpdated,
   });
 
   factory StripeDashboardMetrics.fromJson(Map<String, dynamic> json) {
     final historicalDataList = (json['historicalData'] as List<dynamic>?)
         ?.map((item) => HistoricalDataPoint.fromJson(item as Map<String, dynamic>))
+        .toList() ?? [];
+    
+    final recentTransactionsList = (json['recentTransactions'] as List<dynamic>?)
+        ?.map((item) => RecentTransaction.fromJson(item as Map<String, dynamic>))
         .toList() ?? [];
     
     return StripeDashboardMetrics(
@@ -394,6 +525,7 @@ class StripeDashboardMetrics {
       activeCustomers: json['activeCustomers'] as int,
       newCustomers: json['newCustomers'] as int,
       historicalData: historicalDataList,
+      recentTransactions: recentTransactionsList,
       lastUpdated: DateTime.parse(json['lastUpdated'] as String),
     );
   }

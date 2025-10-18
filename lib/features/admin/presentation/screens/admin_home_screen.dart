@@ -20,14 +20,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   StripeDashboardMetrics? _metrics;
   String? _errorMessage;
   final _logger = Logger();
-  
+
   // STATIC cache for different periods to persist across widget recreations
   static final Map<String, StripeDashboardMetrics> _metricsCache = {};
   static final Map<String, DateTime> _cacheTimestamps = {};
-  
+
   // Cache duration - refresh data if older than 5 minutes
   static const Duration _cacheDuration = Duration(minutes: 5);
-  
+
   // STATIC cache for computed UI data to prevent unnecessary rebuilds
   static String? _cachedLastUpdated;
   static List<_MetricCardData>? _cachedMetricsData;
@@ -51,21 +51,21 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   Future<void> _initializeAndFetchData() async {
     try {
       await StripeAnalyticsService.initialize();
-      
+
       // Check if we have cached data for the initial period
       if (_isDataCached(selectedPeriod)) {
         _logger.i('Using cached data for initial period: $selectedPeriod');
         if (mounted) {
-        setState(() {
-          _metrics = _metricsCache[selectedPeriod];
-          _isLoading = false;
-          _errorMessage = null;
-        });
-        _updateCachedUIData();
+          setState(() {
+            _metrics = _metricsCache[selectedPeriod];
+            _isLoading = false;
+            _errorMessage = null;
+          });
+          _updateCachedUIData();
         }
         return; // Exit early if we have cached data
       }
-      
+
       // Only show loading if we need to fetch data
       if (mounted) {
         setState(() {
@@ -73,7 +73,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           _errorMessage = null;
         });
       }
-      
+
       await _fetchDataForPeriod(selectedPeriod);
     } catch (e) {
       _logger.e('Error initializing analytics service: $e');
@@ -85,23 +85,23 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       }
     }
   }
-  
+
   /// Force refresh data by clearing cache and fetching fresh data
   Future<void> _forceRefreshData() async {
     _logger.i('Force refreshing data - clearing cache');
-    
+
     // Clear all cached data (static variables)
     _metricsCache.clear();
     _cacheTimestamps.clear();
     _cachedLastUpdated = null;
     _cachedMetricsData = null;
     _cachedStatisticsData = null;
-    
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     await _fetchDataForPeriod(selectedPeriod);
   }
 
@@ -111,12 +111,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       _cachedLastUpdated = null;
       _cachedMetricsData = null;
       _cachedStatisticsData = null;
-      
+
       setState(() {
         selectedPeriod = newPeriod;
         _errorMessage = null;
       });
-      
+
       // Check if we have cached data for this period
       if (_isDataCached(newPeriod)) {
         _logger.i('Using cached data for period: $newPeriod');
@@ -139,16 +139,16 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     try {
       _logger.i('Fetching data for period: $period');
       final metrics = await StripeAnalyticsService.getMetricsForPeriod(period);
-      
+
       _logger.i('Received metrics: $metrics');
-      
+
       if (mounted) {
         // Cache the data
         if (metrics != null) {
           _metricsCache[period] = metrics;
           _cacheTimestamps[period] = DateTime.now();
         }
-        
+
         setState(() {
           _metrics = metrics;
           _isLoading = false;
@@ -167,38 +167,40 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       }
     }
   }
-  
+
   /// Check if data is cached and still valid for the given period
   bool _isDataCached(String period) {
-    if (!_metricsCache.containsKey(period) || !_cacheTimestamps.containsKey(period)) {
+    if (!_metricsCache.containsKey(period) ||
+        !_cacheTimestamps.containsKey(period)) {
       _logger.i('No cached data found for period: $period');
       return false;
     }
-    
+
     final cacheTime = _cacheTimestamps[period]!;
     final now = DateTime.now();
     final isExpired = now.difference(cacheTime) > _cacheDuration;
-    
+
     if (isExpired) {
       _logger.i('Cache expired for period: $period (cached at: $cacheTime)');
       _metricsCache.remove(period);
       _cacheTimestamps.remove(period);
       return false;
     }
-    
-    _logger.i('Valid cached data found for period: $period (cached at: $cacheTime)');
+
+    _logger.i(
+        'Valid cached data found for period: $period (cached at: $cacheTime)');
     return true;
   }
-  
+
   /// Update cached UI data when metrics change
   void _updateCachedUIData() {
-    _cachedLastUpdated = _metrics?.lastUpdated != null 
+    _cachedLastUpdated = _metrics?.lastUpdated != null
         ? 'Last Updated ${_formatLastUpdated(_metrics!.lastUpdated)}'
         : 'Last Updated ${TimeOfDay.now().format(context)}';
-    
+
     _cachedMetricsData = _buildMetricsData();
     _cachedStatisticsData = _buildStatisticsData();
-    
+
     _logger.i('Updated cached UI data');
   }
 
@@ -303,6 +305,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     ),
                 ],
               ),
+              const SizedBox(height: 28),
+              // Recent Transactions Card
+              _RecentTransactionsCard(
+                transactions: _metrics?.recentTransactions ?? [],
+                isLoading: _isLoading,
+              ),
               const SizedBox(height: 96),
             ],
           ),
@@ -314,72 +322,49 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   List<_MetricCardData> _buildMetricsData() {
     if (_metrics == null) {
       return [
-        _MetricCardData('Active Customers', '0', Icons.group, AppConstants.primaryColor),
-        _MetricCardData('New Customers', '0', Icons.person_add, AppConstants.accentColor),
-        _MetricCardData('Total Sales', '0', Icons.shopping_cart, AppConstants.secondaryColor),
-        _MetricCardData('Success Rate', '0%', Icons.check_circle, AppConstants.successColor),
+        _MetricCardData(
+            'Active Customers', '0', Icons.group, AppConstants.primaryColor),
+        _MetricCardData('Total Sales', '0', Icons.shopping_cart,
+            AppConstants.secondaryColor),
       ];
     }
 
     return [
-      _MetricCardData(
-        'Active Customers', 
-        '${_metrics!.activeCustomers}', 
-        Icons.group, 
-        AppConstants.primaryColor
-      ),
-      _MetricCardData(
-        'New Customers', 
-        '${_metrics!.newCustomers}', 
-        Icons.person_add, 
-        AppConstants.accentColor
-      ),
-      _MetricCardData(
-        'Total Sales', 
-        '${_metrics!.sales.totalSales}', 
-        Icons.shopping_cart, 
-        AppConstants.secondaryColor
-      ),
-      _MetricCardData(
-        'Success Rate', 
-        _metrics!.transactions.formattedSuccessRate, 
-        Icons.check_circle, 
-        AppConstants.successColor
-      ),
+      _MetricCardData('Active Customers', '${_metrics!.activeCustomers}',
+          Icons.group, AppConstants.primaryColor),
+      _MetricCardData('Total Sales', '${_metrics!.sales.totalSales}',
+          Icons.shopping_cart, AppConstants.secondaryColor),
     ];
   }
 
   List<_SalesStat> _buildStatisticsData() {
     if (_metrics == null) {
-    return [
-      _SalesStat('Earnings', '€0.00', '0%', _GrowthDirection.neutral),
-      _SalesStat('Sales', '€0.00', '0%', _GrowthDirection.neutral),
-      _SalesStat('Transactions', '0', '0%', _GrowthDirection.neutral),
-    ];
+      return [
+        _SalesStat('Earnings', '€0.00', '0%', _GrowthDirection.neutral),
+        _SalesStat('Sales', '€0.00', '0%', _GrowthDirection.neutral),
+        _SalesStat('Transactions', '0', '0%', _GrowthDirection.neutral),
+      ];
     }
 
     return [
       _SalesStat(
-        'Earnings', 
-        _metrics!.revenue.formattedTotalRevenue, 
-        _metrics!.revenue.formattedRevenueGrowth ?? '0%', 
-        _getGrowthDirection(_metrics!.revenue.revenueGrowth ?? 0)
-      ),
+          'Earnings',
+          _metrics!.revenue.formattedTotalRevenue,
+          _metrics!.revenue.formattedRevenueGrowth ?? '0%',
+          _getGrowthDirection(_metrics!.revenue.revenueGrowth ?? 0)),
       _SalesStat(
-        'Sales', 
-        _metrics!.sales.formattedTotalSalesValue, 
-        _metrics!.sales.formattedSalesGrowth ?? '0%', 
-        _getGrowthDirection(_metrics!.sales.salesGrowth ?? 0)
-      ),
+          'Sales',
+          _metrics!.sales.formattedTotalSalesValue,
+          _metrics!.sales.formattedSalesGrowth ?? '0%',
+          _getGrowthDirection(_metrics!.sales.salesGrowth ?? 0)),
       _SalesStat(
-        'Transactions', 
-        '${_metrics!.transactions.totalTransactions}', 
-        _metrics!.transactions.formattedTransactionGrowth ?? '0%', 
-        _getGrowthDirection(_metrics!.transactions.transactionGrowth ?? 0)
-      ),
+          'Transactions',
+          '${_metrics!.transactions.totalTransactions}',
+          _metrics!.transactions.formattedTransactionGrowth ?? '0%',
+          _getGrowthDirection(_metrics!.transactions.transactionGrowth ?? 0)),
     ];
   }
-  
+
   /// Helper method to determine growth direction based on percentage value
   _GrowthDirection _getGrowthDirection(double growth) {
     if (growth > 0) {
@@ -394,7 +379,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   String _formatLastUpdated(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inMinutes < 1) {
       return 'Just now';
     } else if (difference.inMinutes < 60) {
@@ -564,21 +549,23 @@ class _SalesCard extends StatelessWidget {
 
     // Convert historical data to chart spots
     final spots = <FlSpot>[];
-    final maxRevenue = historicalData.map((e) => e.revenue).reduce((a, b) => a > b ? a : b);
-    final minRevenue = historicalData.map((e) => e.revenue).reduce((a, b) => a < b ? a : b);
+    final maxRevenue =
+        historicalData.map((e) => e.revenue).reduce((a, b) => a > b ? a : b);
+    final minRevenue =
+        historicalData.map((e) => e.revenue).reduce((a, b) => a < b ? a : b);
     final revenueRange = maxRevenue - minRevenue;
-    
+
     for (int i = 0; i < historicalData.length; i++) {
       final dataPoint = historicalData[i];
       double yValue;
-      
+
       if (revenueRange == 0) {
         yValue = 5.0; // Center if all values are the same
       } else {
         // Normalize to 0-10 range
         yValue = ((dataPoint.revenue - minRevenue) / revenueRange) * 8 + 1;
       }
-      
+
       spots.add(FlSpot(i.toDouble(), yValue));
     }
 
@@ -629,7 +616,7 @@ class _SalesStatWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color;
     IconData icon;
-    
+
     switch (stat.growthDirection) {
       case _GrowthDirection.positive:
         color = AppConstants.successColor;
@@ -644,7 +631,7 @@ class _SalesStatWidget extends StatelessWidget {
         icon = Icons.remove;
         break;
     }
-    
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -797,4 +784,177 @@ Widget _verticalDivider() {
       color: AppConstants.textTertiary.withOpacity(0.15),
     ),
   );
+}
+
+class _RecentTransactionsCard extends StatelessWidget {
+  final List<RecentTransaction> transactions;
+  final bool isLoading;
+
+  const _RecentTransactionsCard({
+    required this.transactions,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Transactions',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (transactions.isNotEmpty)
+                  Text(
+                    '${transactions.length} transactions',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              )
+            else if (transactions.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.receipt_long_outlined,
+                        size: 48,
+                        color: AppConstants.textTertiary,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No recent transactions',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppConstants.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: transactions.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final transaction = transactions[index];
+                  return _TransactionItem(transaction: transaction);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TransactionItem extends StatelessWidget {
+  final RecentTransaction transaction;
+
+  const _TransactionItem({required this.transaction});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppConstants.backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppConstants.textTertiary.withOpacity(0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Status indicator
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: transaction.statusColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Transaction details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.productName,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Text(
+                      transaction.formattedDate,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Amount
+          Column(
+            children: [
+              Text(
+                transaction.formattedAmount,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppConstants.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                transaction.status[0].toUpperCase() + transaction.status.substring(1),
+                style: AppTextStyles.caption.copyWith(
+                  color: transaction.statusColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

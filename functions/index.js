@@ -656,6 +656,9 @@ exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
       // Get historical revenue data for the chart
       const historicalData = await getHistoricalRevenueData(startDate, endDate);
 
+      // Get recent transactions (last 10)
+      const recentTransactions = await getRecentTransactionsData(10);
+
       const result = {
         revenue: revenueData,
         sales: salesData,
@@ -663,6 +666,7 @@ exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
         activeCustomers,
         newCustomers,
         historicalData,
+        recentTransactions,
         lastUpdated: new Date().toISOString(),
       };
 
@@ -828,6 +832,120 @@ async function getTransactionMetricsData(startDate, endDate) {
     previousPeriodTransactions: previousTotalTransactions,
     transactionGrowth,
   };
+}
+
+// Get recent transactions
+exports.getRecentTransactions = functions.https.onRequest(async (req, res) => {
+  return cors(req, res, async () => {
+    if (req.method !== 'GET') {
+      return res.status(405).json({error: 'Method not allowed'});
+    }
+
+    try {
+      const limit = parseInt(req.query.limit) || 10;
+      const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+
+      console.log('Getting recent transactions with limit:', limit);
+
+      // Get payment intents from Stripe
+      const paymentIntents = await stripe.paymentIntents.list({
+        created: {
+          gte: startDate ? Math.floor(startDate.getTime() / 1000) : undefined,
+          lte: endDate ? Math.floor(endDate.getTime() / 1000) : undefined,
+        },
+        limit: limit,
+      });
+
+      // Process and format transactions
+      const transactions = paymentIntents.data.map(intent => {
+        const priceId = intent.metadata?.priceId;
+        let productName = 'Unknown Product';
+        
+        // Map price IDs to product names
+        if (priceId === 'price_1SGzgzBa6NGVc5lJvVOssWsG') {
+          productName = 'Winter Plan';
+        } else if (priceId === 'price_1SGzfcBa6NGVc5lJwmTNs2xk') {
+          productName = 'Summer Plan';
+        } else if (priceId === 'price_1SHG5NBa6NGVc5lJdOEVEhZv') {
+          productName = 'Body Building Plan';
+        }
+
+        return {
+          id: intent.id,
+          amount: intent.amount / 100, // Convert from cents
+          currency: intent.currency,
+          status: intent.status,
+          productName: productName,
+          customerEmail: intent.receipt_email,
+          userId: intent.metadata?.userId,
+          created: new Date(intent.created * 1000).toISOString(),
+          description: `${productName} - ${intent.currency.toUpperCase()} ${(intent.amount / 100).toFixed(2)}`,
+        };
+      });
+
+      // Sort by creation date (most recent first)
+      transactions.sort((a, b) => new Date(b.created) - new Date(a.created));
+
+      res.json({
+        transactions,
+        total: transactions.length,
+      });
+    } catch (error) {
+      console.error('Error getting recent transactions:', error);
+      res.status(500).json({error: error.message});
+    }
+  });
+});
+
+// Helper function to get recent transactions data
+async function getRecentTransactionsData(limit = 10) {
+  try {
+    console.log('Getting recent transactions data with limit:', limit);
+    
+    const stripe = require('stripe')(functions.config().stripe.secret_key);
+    
+    // Get payment intents from Stripe
+    const paymentIntents = await stripe.paymentIntents.list({
+      limit: limit,
+    });
+
+    // Process and format transactions
+    const transactions = paymentIntents.data.map(intent => {
+      const priceId = intent.metadata?.priceId;
+      let productName = 'Unknown Product';
+      
+      // Map price IDs to product names
+      if (priceId === 'price_1SGzgzBa6NGVc5lJvVOssWsG') {
+        productName = 'Winter Plan';
+      } else if (priceId === 'price_1SGzfcBa6NGVc5lJwmTNs2xk') {
+        productName = 'Summer Plan';
+      } else if (priceId === 'price_1SHG5NBa6NGVc5lJdOEVEhZv') {
+        productName = 'Body Building Plan';
+      }
+
+      return {
+        id: intent.id,
+        amount: intent.amount / 100, // Convert from cents
+        currency: intent.currency,
+        status: intent.status,
+        productName: productName,
+        customerEmail: intent.receipt_email,
+        userId: intent.metadata?.userId,
+        created: new Date(intent.created * 1000).toISOString(),
+        description: `${productName} - ${intent.currency.toUpperCase()} ${(intent.amount / 100).toFixed(2)}`,
+      };
+    });
+
+    // Sort by creation date (most recent first)
+    transactions.sort((a, b) => new Date(b.created) - new Date(a.created));
+
+    console.log('Recent transactions data points:', transactions.length);
+    return transactions;
+  } catch (error) {
+    console.error('Error getting recent transactions data:', error);
+    return [];
+  }
 }
 
 // Get historical revenue data for charts
