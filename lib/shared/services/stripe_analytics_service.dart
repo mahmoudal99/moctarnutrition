@@ -222,9 +222,20 @@ class StripeRevenueMetrics {
     );
   }
 
-  String get formattedTotalRevenue => '\$${totalRevenue.toStringAsFixed(2)}';
-  String get formattedNetRevenue => '\$${netRevenue.toStringAsFixed(2)}';
-  String get formattedAverageTransaction => '\$${averageTransactionValue.toStringAsFixed(2)}';
+  String get formattedTotalRevenue => '${_getCurrencySymbol()}${totalRevenue.toStringAsFixed(2)}';
+  String get formattedNetRevenue => '${_getCurrencySymbol()}${netRevenue.toStringAsFixed(2)}';
+  String get formattedAverageTransaction => '${_getCurrencySymbol()}${averageTransactionValue.toStringAsFixed(2)}';
+  
+  String _getCurrencySymbol() {
+    switch (currency.toLowerCase()) {
+      case 'eur':
+        return '€';
+      case 'usd':
+        return '\$';
+      default:
+        return '€'; // Default to euro
+    }
+  }
   
   String? get formattedRevenueGrowth {
     if (revenueGrowth == null) return null;
@@ -266,7 +277,18 @@ class StripeSalesMetrics {
     );
   }
 
-  String get formattedTotalSalesValue => '\$${totalSalesValue.toStringAsFixed(2)}';
+  String get formattedTotalSalesValue => '${_getCurrencySymbol()}${totalSalesValue.toStringAsFixed(2)}';
+  
+  String _getCurrencySymbol() {
+    switch (currency.toLowerCase()) {
+      case 'eur':
+        return '€';
+      case 'usd':
+        return '\$';
+      default:
+        return '€'; // Default to euro
+    }
+  }
   
   String? get formattedSalesGrowth {
     if (salesGrowth == null) return null;

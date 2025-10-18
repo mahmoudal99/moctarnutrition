@@ -349,7 +349,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '\$',
+                      '€',
                       style: AppTextStyles.bodyLarge.copyWith(
                         color: AppConstants.textPrimary,
                         fontWeight: FontWeight.w600,

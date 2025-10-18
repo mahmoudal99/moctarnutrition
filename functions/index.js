@@ -446,7 +446,7 @@ exports.getRevenueMetrics = functions.https.onRequest(async (req, res) => {
         refundedAmount,
         totalTransactions,
         averageTransactionValue,
-        currency: 'usd',
+        currency: 'eur',
         previousPeriodRevenue: previousRevenue,
         revenueGrowth,
       });
@@ -522,7 +522,7 @@ exports.getSalesMetrics = functions.https.onRequest(async (req, res) => {
         productSales,
         totalSales,
         totalSalesValue,
-        currency: 'usd',
+        currency: 'eur',
         previousPeriodSales: previousSales,
         salesGrowth,
       });
@@ -588,7 +588,7 @@ exports.getTransactionMetrics = functions.https.onRequest(async (req, res) => {
         failedTransactions,
         successRate,
         averageTransactionValue,
-        currency: 'usd',
+        currency: 'eur',
         previousPeriodTransactions: previousTotalTransactions,
         transactionGrowth,
       });
@@ -721,7 +721,7 @@ async function getRevenueMetricsData(startDate, endDate) {
     refundedAmount,
     totalTransactions,
     averageTransactionValue,
-    currency: 'usd',
+    currency: 'eur',
     previousPeriodRevenue: previousRevenue,
     revenueGrowth,
   };
@@ -777,7 +777,7 @@ async function getSalesMetricsData(startDate, endDate) {
     productSales,
     totalSales,
     totalSalesValue,
-    currency: 'usd',
+    currency: 'eur',
     previousPeriodSales: previousSales,
     salesGrowth,
   };
@@ -824,7 +824,7 @@ async function getTransactionMetricsData(startDate, endDate) {
     failedTransactions,
     successRate,
     averageTransactionValue,
-    currency: 'usd',
+    currency: 'eur',
     previousPeriodTransactions: previousTotalTransactions,
     transactionGrowth,
   };

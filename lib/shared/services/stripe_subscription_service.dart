@@ -584,7 +584,18 @@ class StripePrice {
   }
 
   double get price => unitAmount / 100.0; // Convert from cents
-  String get formattedPrice => '\$${price.toStringAsFixed(2)}';
+  String get formattedPrice => '${_getCurrencySymbol()}${price.toStringAsFixed(2)}';
+  
+  String _getCurrencySymbol() {
+    switch (currency.toLowerCase()) {
+      case 'eur':
+        return '€';
+      case 'usd':
+        return '\$';
+      default:
+        return '€'; // Default to euro
+    }
+  }
 
   String get intervalText {
     if (intervalCount == 1) {

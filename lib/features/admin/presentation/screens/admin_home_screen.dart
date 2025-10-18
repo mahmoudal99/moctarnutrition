@@ -319,11 +319,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   List<_SalesStat> _buildStatisticsData() {
     if (_metrics == null) {
-      return [
-        _SalesStat('Earnings', '\$0.00', '0%', true),
-        _SalesStat('Sales', '\$0.00', '0%', true),
-        _SalesStat('Transactions', '0', '0%', true),
-      ];
+    return [
+      _SalesStat('Earnings', '€0.00', '0%', true),
+      _SalesStat('Sales', '€0.00', '0%', true),
+      _SalesStat('Transactions', '0', '0%', true),
+    ];
     }
 
     return [
@@ -449,7 +449,7 @@ class _SalesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalBalance = '\$${totalRevenue.toStringAsFixed(2)}';
+    final totalBalance = '€${totalRevenue.toStringAsFixed(2)}';
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
