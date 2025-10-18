@@ -21,34 +21,42 @@ class ProfileDataProvider {
     ];
   }
 
-  static List<SettingsItem> getSettingsItems(BuildContext context) {
-    return [
+  static List<SettingsItem> getSettingsItems(BuildContext context, {UserModel? user}) {
+    final List<SettingsItem> items = [
       SettingsItem(
         label: 'Account Settings',
         icon: Icons.settings,
         onTap: () => context.push('/account-settings'),
       ),
-      const SettingsItem(
-        label: 'Reminders',
-        icon: Icons.alarm,
-        trailing: Switch(value: false, onChanged: null),
-      ),
-      SettingsItem(
-        label: 'Workout Preferences',
-        icon: Icons.fitness_center,
-        onTap: () => context.push('/workout-preferences'),
-      ),
-      SettingsItem(
-        label: 'Workout Notifications',
-        icon: Icons.notifications_active,
-        onTap: () => context.push('/workout-notifications'),
-      ),
-      SettingsItem(
-        label: 'Nutrition Preferences',
-        icon: Icons.restaurant,
-        onTap: () => context.push('/nutrition-preferences'),
-      ),
     ];
+
+    // Only add user-specific settings for non-admin users
+    if (user == null || user.role != UserRole.admin) {
+      items.addAll([
+        const SettingsItem(
+          label: 'Reminders',
+          icon: Icons.alarm,
+          trailing: Switch(value: false, onChanged: null),
+        ),
+        SettingsItem(
+          label: 'Workout Preferences',
+          icon: Icons.fitness_center,
+          onTap: () => context.push('/workout-preferences'),
+        ),
+        SettingsItem(
+          label: 'Workout Notifications',
+          icon: Icons.notifications_active,
+          onTap: () => context.push('/workout-notifications'),
+        ),
+        SettingsItem(
+          label: 'Nutrition Preferences',
+          icon: Icons.restaurant,
+          onTap: () => context.push('/nutrition-preferences'),
+        ),
+      ]);
+    }
+
+    return items;
   }
 
   static List<SettingsItem> getPrivacyItems(BuildContext context) {

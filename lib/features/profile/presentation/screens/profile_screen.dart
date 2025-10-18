@@ -48,7 +48,7 @@ class ProfileScreen extends StatelessWidget {
 
         // Get data from provider
         final quickAccess = ProfileDataProvider.getQuickAccessItems(context);
-        final settings = ProfileDataProvider.getSettingsItems(context);
+        final settings = ProfileDataProvider.getSettingsItems(context, user: user);
         final privacy = ProfileDataProvider.getPrivacyItems(context);
         final support = ProfileDataProvider.getSupportItems(context);
 
@@ -69,8 +69,11 @@ class ProfileScreen extends StatelessWidget {
                 ],
                 const SizedBox(height: 24),
                 const ProfileSectionHeader(title: 'Settings'),
-                const NotificationsToggle(),
-                const RemindersToggle(),
+                // Only show notification and reminder toggles for non-admin users
+                if (user.role != UserRole.admin) ...[
+                  const NotificationsToggle(),
+                  const RemindersToggle(),
+                ],
                 ...settings
                     .where((item) =>
                         item.label != 'Notifications' &&

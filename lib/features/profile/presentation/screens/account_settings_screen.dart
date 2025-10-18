@@ -11,6 +11,8 @@ import '../../../../shared/providers/profile_photo_provider.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/utils/avatar_utils.dart';
 import '../../../../shared/services/auth_service.dart';
+import '../widgets/notifications_toggle.dart';
+import '../widgets/reminders_toggle.dart';
 
 class AccountSettingsScreen extends StatefulWidget {
   const AccountSettingsScreen({super.key});
@@ -58,6 +60,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             );
           }
 
+
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
@@ -68,6 +71,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               const SizedBox(height: 24),
               _SubscriptionSection(user: user),
               const SizedBox(height: 24),
+              // Only show notification and reminder toggles for non-admin users
+              if (user.role != UserRole.admin) ...[
+                _NotificationSection(),
+                const SizedBox(height: 24),
+              ],
               _AccountDetailsSection(user: user, authUser: authUser),
               const SizedBox(height: 24),
               _SecuritySection(authUser: authUser),
@@ -783,6 +791,22 @@ class _DangerZoneSection extends StatelessWidget {
       // Handle error silently or log it
       Logger().e('Error deleting account: $e');
     }
+  }
+}
+
+class _NotificationSection extends StatelessWidget {
+  const _NotificationSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return _SettingsSection(
+      title: 'Notifications & Reminders',
+      icon: Icons.notifications,
+      children: [
+        const NotificationsToggle(),
+        const RemindersToggle(),
+      ],
+    );
   }
 }
 
