@@ -117,9 +117,10 @@ class _WorkoutGenerationLoadingStateState
             child: Padding(
               padding: const EdgeInsets.all(AppConstants.spacingL),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: AppConstants.spacingXL),
-                  _buildLoadingSpinner(),
+                  // const SizedBox(height: AppConstants.spacingXL),
+                  // _buildLoadingSpinner(),
                   const SizedBox(height: AppConstants.spacingXL),
                   _buildGenerationTitle(),
                   const SizedBox(height: AppConstants.spacingM),

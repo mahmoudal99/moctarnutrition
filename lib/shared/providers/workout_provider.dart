@@ -7,6 +7,7 @@ import '../../features/workouts/data/workout_service.dart';
 import '../services/workout_plan_storage_service.dart';
 import '../services/workout_plan_local_storage_service.dart';
 import '../services/notification_service.dart';
+import '../services/workout_approval_service.dart';
 
 class WorkoutProvider extends ChangeNotifier {
   static final _logger = Logger();
@@ -20,6 +21,8 @@ class WorkoutProvider extends ChangeNotifier {
   bool _isGenerating = false; // New flag to track generation vs loading
   bool _isEditMode = false; // New flag for edit mode
   String? _error;
+  String? _successMessage;
+  bool _hasPendingApproval = false; // Track if user has pending workout plans
 
   WorkoutPlanModel? get currentWorkoutPlan => _currentWorkoutPlan;
   WorkoutPlanModel? get originalWorkoutPlan => _originalWorkoutPlan;
@@ -27,11 +30,48 @@ class WorkoutProvider extends ChangeNotifier {
   bool get isGenerating => _isGenerating; // New getter
   bool get isEditMode => _isEditMode; // New getter
   String? get error => _error;
+  String? get successMessage => _successMessage;
+  bool get hasPendingApproval => _hasPendingApproval;
+
+  /// Check if user has pending workout plans
+  Future<bool> hasPendingWorkoutPlans(String userId) async {
+    try {
+      return await WorkoutApprovalService.hasPendingWorkoutPlans(userId);
+    } catch (e) {
+      _logger.e('Error checking pending workout plans: $e');
+      return false;
+    }
+  }
+
+  /// Get pending workout plans for the user
+  Future<List<WorkoutPlanModel>> getPendingWorkoutPlans(String userId) async {
+    try {
+      return await WorkoutApprovalService.getPendingWorkoutPlansForUser(userId);
+    } catch (e) {
+      _logger.e('Error getting pending workout plans: $e');
+      return [];
+    }
+  }
+
+  /// Check if a workout plan should be visible to the user
+  bool _shouldShowWorkoutPlan(WorkoutPlanModel? plan, UserModel? user) {
+    if (plan == null) return false;
+    
+    // Trainers and admins can see all plans (including pending ones)
+    if (user?.role == UserRole.trainer || user?.role == UserRole.admin) {
+      return true;
+    }
+    
+    // Regular users can only see approved plans or predefined plans
+    return plan.isApproved || plan.type != WorkoutPlanType.ai_generated;
+  }
 
   // Load workout plan based on user's selected workout styles
   Future<void> loadWorkoutPlan(
       String userId, List<String> workoutStyles, UserModel? user) async {
     _error = null;
+    _successMessage = null;
+    _hasPendingApproval = false;
 
     _logger
         .d('Loading workout plan for user $userId with styles: $workoutStyles');
@@ -44,22 +84,29 @@ class WorkoutProvider extends ChangeNotifier {
       if (localWorkoutPlan != null) {
         _logger.d(
             'Found workout plan in local storage: ${localWorkoutPlan.title}');
-        _currentWorkoutPlan = localWorkoutPlan;
-        notifyListeners(); // Update UI immediately with local data
+        
+        // Check if this plan should be visible to the user
+        if (_shouldShowWorkoutPlan(localWorkoutPlan, user)) {
+          _currentWorkoutPlan = localWorkoutPlan;
+          notifyListeners(); // Update UI immediately with local data
 
-        // Check if the local plan is fresh (less than 24 hours old)
-        final isFresh =
-            await WorkoutPlanLocalStorageService.isWorkoutPlanFresh();
-        if (isFresh) {
-          _logger.d('Local workout plan is fresh, using cached data');
-          // Schedule notifications for fresh local plan (non-blocking)
-          if (user != null) {
-            _scheduleWorkoutNotificationsInBackground(user);
+          // Check if the local plan is fresh (less than 24 hours old)
+          final isFresh =
+              await WorkoutPlanLocalStorageService.isWorkoutPlanFresh();
+          if (isFresh) {
+            _logger.d('Local workout plan is fresh, using cached data');
+            // Schedule notifications for fresh local plan (non-blocking)
+            if (user != null) {
+              _scheduleWorkoutNotificationsInBackground(user);
+            }
+            return;
+          } else {
+            _logger.d('Local workout plan is stale, refreshing from server');
+            _setLoading(true); // Only show loading for network operations
           }
-          return;
         } else {
-          _logger.d('Local workout plan is stale, refreshing from server');
-          _setLoading(true); // Only show loading for network operations
+          _logger.d('Local workout plan is not visible to user (pending approval)');
+          _setLoading(true); // Show loading for network operations
         }
       } else {
         _setLoading(true); // Show loading for network operations
@@ -71,22 +118,32 @@ class WorkoutProvider extends ChangeNotifier {
 
       if (storedWorkoutPlan != null) {
         _logger.d('Found stored workout plan: ${storedWorkoutPlan.title}');
-        _currentWorkoutPlan = storedWorkoutPlan;
+        
+        // Check if this plan should be visible to the user
+        if (_shouldShowWorkoutPlan(storedWorkoutPlan, user)) {
+          _currentWorkoutPlan = storedWorkoutPlan;
 
-        // Save to local storage for future use
-        try {
-          await WorkoutPlanLocalStorageService.saveWorkoutPlan(
-              storedWorkoutPlan);
-          _logger.d('Workout plan saved to local storage');
-        } catch (e) {
-          _logger.w('Failed to save workout plan to local storage: $e');
-        }
+          // Save to local storage for future use
+          try {
+            await WorkoutPlanLocalStorageService.saveWorkoutPlan(
+                storedWorkoutPlan);
+            _logger.d('Workout plan saved to local storage');
+          } catch (e) {
+            _logger.w('Failed to save workout plan to local storage: $e');
+          }
 
-        // Schedule notifications for stored workout plan
-        if (user != null) {
-          _scheduleWorkoutNotificationsInBackground(user);
+          // Schedule notifications for stored workout plan
+          if (user != null) {
+            _scheduleWorkoutNotificationsInBackground(user);
+          }
+          return;
+        } else {
+          _logger.d('Stored workout plan is not visible to user (pending approval)');
+          // Set pending approval state and return
+          _hasPendingApproval = true;
+          _successMessage = null; // Don't show success message, show pending state instead
+          return;
         }
-        return;
       }
 
       // If no stored plan, check for predefined plans
@@ -116,7 +173,18 @@ class WorkoutProvider extends ChangeNotifier {
         }
       } else {
         _logger.i(
-            'No predefined workout plan found for styles: $workoutStyles. Generating AI plan...');
+            'No predefined workout plan found for styles: $workoutStyles. Checking for pending plans...');
+
+        // Check if user already has pending workout plans before generating new one
+        final hasPending = await hasPendingWorkoutPlans(userId);
+        if (hasPending) {
+          _logger.i('User already has pending workout plans, not generating new one');
+          _hasPendingApproval = true;
+          _successMessage = null; // Don't show success message, show pending state instead
+          return;
+        }
+
+        _logger.i('No pending plans found. Generating AI plan...');
 
         if (user != null) {
           try {
@@ -139,11 +207,19 @@ class WorkoutProvider extends ChangeNotifier {
               // Don't fail the operation if saving fails
             }
 
-            _currentWorkoutPlan = aiWorkoutPlan;
-
-            // Schedule notifications for AI-generated workout plan
-            if (user != null) {
-              _scheduleWorkoutNotificationsInBackground(user);
+            // Don't set as current plan if it's pending approval for regular users
+            if (_shouldShowWorkoutPlan(aiWorkoutPlan, user)) {
+              _currentWorkoutPlan = aiWorkoutPlan;
+              // Schedule notifications for AI-generated workout plan
+              if (user != null) {
+                _scheduleWorkoutNotificationsInBackground(user);
+              }
+            } else {
+              _logger.i('AI workout plan generated but pending approval - not showing to user');
+              // Clear any previous errors since the generation was successful
+              _error = null;
+              // Set success message for pending approval
+              _successMessage = 'Your personalized workout plan has been generated and is pending trainer approval. You will be notified once it\'s approved.';
             }
           } catch (e) {
             _logger.e('Failed to generate AI workout plan: $e');
@@ -205,6 +281,14 @@ class WorkoutProvider extends ChangeNotifier {
   void clearWorkoutPlan() {
     _currentWorkoutPlan = null;
     _error = null;
+    _successMessage = null;
+    _hasPendingApproval = false;
+    notifyListeners();
+  }
+
+  // Clear success message only
+  void clearSuccessMessage() {
+    _successMessage = null;
     notifyListeners();
   }
 
@@ -213,6 +297,8 @@ class WorkoutProvider extends ChangeNotifier {
     _logger.d('Clearing workout plan for user change');
     _currentWorkoutPlan = null;
     _error = null;
+    _successMessage = null;
+    _hasPendingApproval = false;
     notifyListeners();
   }
 

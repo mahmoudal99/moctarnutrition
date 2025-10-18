@@ -63,9 +63,20 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
             return WorkoutViewBuilder.buildLoadingState();
           }
 
+          // Check for success message first (like pending approval)
+          if (workoutProvider.successMessage != null) {
+            return WorkoutViewBuilder.buildSuccessState(
+                workoutProvider.successMessage!, context);
+          }
+
           if (workoutProvider.error != null) {
             return WorkoutViewBuilder.buildErrorState(
                 workoutProvider.error!, context);
+          }
+
+          // Check for pending approval state
+          if (workoutProvider.hasPendingApproval) {
+            return WorkoutViewBuilder.buildPendingApprovalState(context);
           }
 
           if (workoutProvider.currentWorkoutPlan == null) {

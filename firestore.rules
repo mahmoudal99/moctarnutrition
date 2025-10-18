@@ -3,15 +3,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Users can only read and write their own user document
+    // Users collection - comprehensive rules
     match /users/{userId} {
+      // Users can read and write their own document
       allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Admin users can read and write all user documents (for admin features)
-    match /users/{userId} {
+      
+      // Admins can read and write all user documents
       allow read, write: if request.auth != null && 
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      
+      // Allow reading admin/trainer documents for notification purposes
+      allow read: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(userId)).data.role in ['admin', 'trainer'];
     }
     
     // Meal plans - users can only access their own meal plans, but admins can create/write for any user
@@ -39,9 +42,9 @@ service cloud.firestore {
     
     // Workout plans - users can only access their own workout plans, but admins can create/write for any user
     match /workout_plans/{workoutPlanId} {
-      // Allow admins to read/write/create any workout plan
+      // Allow admins and trainers to read/write/create any workout plan
       allow read, write, create: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'trainer'];
       // Allow users to read/write their own workout plans
       allow read, write: if request.auth != null && 
         resource.data.userId == request.auth.uid;
@@ -70,6 +73,21 @@ service cloud.firestore {
       // Allow users to create their own check-ins
       allow create: if request.auth != null &&
         request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Notifications - users can read their own notifications, authenticated users can create notifications
+    match /notifications/{notificationId} {
+      // Allow users to read their own notifications
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Allow any authenticated user to create notifications (for system notifications)
+      allow create: if request.auth != null;
+      // Allow admins and trainers to create notifications for any user
+      allow create: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'trainer'];
+      // Allow users to update their own notifications (mark as read)
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
     }
     
     // Public data that anyone can read (like workout templates, nutrition info)

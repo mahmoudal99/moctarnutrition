@@ -4,6 +4,8 @@ import '../../../../shared/providers/workout_provider.dart';
 import '../widgets/workout_loading_state.dart';
 import '../widgets/workout_generation_loading_state.dart';
 import '../widgets/workout_error_state.dart';
+import '../widgets/workout_success_state.dart';
+import '../widgets/workout_pending_approval_state.dart';
 import '../widgets/workout_empty_state.dart';
 import '../controllers/workout_controller.dart';
 
@@ -24,11 +26,26 @@ class WorkoutViewBuilder {
     );
   }
 
+  static Widget buildSuccessState(String message, BuildContext context) {
+    return WorkoutSuccessState(
+      message: message,
+      onContinue: () {
+        // Clear the success message and show empty state instead of regenerating
+        final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+        workoutProvider.clearSuccessMessage();
+      },
+    );
+  }
+
   static Widget buildErrorState(String error, BuildContext context) {
     return WorkoutErrorState(
       error: error,
       onRetry: () => WorkoutController.loadWorkoutPlan(context),
     );
+  }
+
+  static Widget buildPendingApprovalState(BuildContext context) {
+    return const WorkoutPendingApprovalState();
   }
 
   static Widget buildNoWorkoutPlanState(BuildContext context) {

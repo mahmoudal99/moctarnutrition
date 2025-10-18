@@ -9,6 +9,12 @@ enum WorkoutPlanType {
   ai_generated
 }
 
+enum WorkoutPlanApprovalStatus {
+  pending,
+  approved,
+  rejected
+}
+
 class WorkoutPlanModel {
   final String id;
   final String userId;
@@ -19,6 +25,11 @@ class WorkoutPlanModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isActive;
+  final WorkoutPlanApprovalStatus approvalStatus;
+  final String? approvedBy; // Trainer ID who approved
+  final DateTime? approvedAt;
+  final String? rejectionReason;
+  final String? approvedByTrainerName;
 
   WorkoutPlanModel({
     required this.id,
@@ -30,6 +41,11 @@ class WorkoutPlanModel {
     required this.createdAt,
     required this.updatedAt,
     this.isActive = true,
+    this.approvalStatus = WorkoutPlanApprovalStatus.pending,
+    this.approvedBy,
+    this.approvedAt,
+    this.rejectionReason,
+    this.approvedByTrainerName,
   });
 
   factory WorkoutPlanModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +64,14 @@ class WorkoutPlanModel {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       isActive: json['isActive'] as bool? ?? true,
+      approvalStatus: WorkoutPlanApprovalStatus.values.firstWhere(
+        (e) => e.toString() == 'WorkoutPlanApprovalStatus.${json['approvalStatus']}',
+        orElse: () => WorkoutPlanApprovalStatus.pending,
+      ),
+      approvedBy: json['approvedBy'] as String?,
+      approvedAt: json['approvedAt'] != null ? DateTime.parse(json['approvedAt'] as String) : null,
+      rejectionReason: json['rejectionReason'] as String?,
+      approvedByTrainerName: json['approvedByTrainerName'] as String?,
     );
   }
 
@@ -62,6 +86,11 @@ class WorkoutPlanModel {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'isActive': isActive,
+      'approvalStatus': approvalStatus.toString().split('.').last,
+      'approvedBy': approvedBy,
+      'approvedAt': approvedAt?.toIso8601String(),
+      'rejectionReason': rejectionReason,
+      'approvedByTrainerName': approvedByTrainerName,
     };
   }
 
@@ -75,6 +104,11 @@ class WorkoutPlanModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
+    WorkoutPlanApprovalStatus? approvalStatus,
+    String? approvedBy,
+    DateTime? approvedAt,
+    String? rejectionReason,
+    String? approvedByTrainerName,
   }) {
     return WorkoutPlanModel(
       id: id ?? this.id,
@@ -86,8 +120,18 @@ class WorkoutPlanModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,
+      approvalStatus: approvalStatus ?? this.approvalStatus,
+      approvedBy: approvedBy ?? this.approvedBy,
+      approvedAt: approvedAt ?? this.approvedAt,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
+      approvedByTrainerName: approvedByTrainerName ?? this.approvedByTrainerName,
     );
   }
+
+  // Helper getters for approval status
+  bool get isApproved => approvalStatus == WorkoutPlanApprovalStatus.approved;
+  bool get isPending => approvalStatus == WorkoutPlanApprovalStatus.pending;
+  bool get isRejected => approvalStatus == WorkoutPlanApprovalStatus.rejected;
 }
 
 class DailyWorkout {

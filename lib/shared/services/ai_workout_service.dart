@@ -8,6 +8,7 @@ import '../models/workout_model.dart';
 import 'parser_service.dart';
 import 'config_service.dart';
 import 'rate_limit_service.dart';
+import 'workout_approval_notification_service.dart';
 
 // Import ValidationException from parser service
 import 'parser_service.dart' show ValidationException;
@@ -25,6 +26,23 @@ class AIWorkoutService {
     try {
       final workoutPlan = await _generateWorkoutPlanWithRetry(user, userId);
       _logger.i('Successfully generated workout plan: ${workoutPlan.title}');
+      
+      // Send notifications for pending approval
+      await WorkoutApprovalNotificationService.notifyWorkoutPlanPending(
+        userId,
+        workoutPlan.title,
+      );
+      
+      await WorkoutApprovalNotificationService.notifyTrainersNewWorkoutPlan(
+        userId,
+        workoutPlan.title,
+      );
+      
+      await WorkoutApprovalNotificationService.notifyAdminsNewWorkoutPlan(
+        userId,
+        workoutPlan.title,
+      );
+      
       return workoutPlan;
     } catch (e) {
       _logger.e('Failed to generate workout plan: $e');
@@ -92,6 +110,7 @@ class AIWorkoutService {
       final data = jsonDecode(response.body);
       final content = data['choices'][0]['message']['content'];
       _logger.i('Workout plan response received successfully');
+      _logger.d('Raw AI response: $content');
 
       try {
         final workoutPlan =
@@ -166,7 +185,7 @@ EXERCISE SELECTION:
 - Consider equipment availability and user preferences
 - Ensure exercises are safe and appropriate for the user's age and fitness level
 
-Please generate the workout plan in the following JSON format:
+Please generate the workout plan in the following JSON format. IMPORTANT: All numeric values must be integers (not strings):
 {
   "title": "Personalized Workout Plan",
   "description": "A comprehensive workout plan tailored to your preferences",
@@ -215,6 +234,8 @@ VALIDATION CHECKLIST (MUST VERIFY BEFORE RESPONDING):
 ✓ Each workout includes warm-up and cool-down
 ✓ Rest days are included (1-2 days per week)
 ✓ Every exercise includes tempo, rest time, and form cues
+✓ CRITICAL: All numeric fields (sets, reps, estimatedDuration, restTime, order) are integers, NOT strings
+✓ CRITICAL: JSON is valid and properly formatted
 
 IMPORTANT REQUIREMENTS:
 - Use realistic exercise names and descriptions
@@ -241,6 +262,7 @@ Key responsibilities:
 4. Include appropriate rest periods and recovery protocols
 5. Ensure exercises are suitable for the user's age and fitness level
 6. Always respond with valid JSON format
+7. CRITICAL: All numeric values (sets, reps, estimatedDuration, restTime, order) must be integers, NOT strings
 
 Evidence-based programming guidelines (MANDATORY):
 - Each major muscle group MUST be trained at least 2× per week - NEVER create plans with only 1 workout per muscle group
@@ -362,7 +384,7 @@ Safety first:
         workouts: (dailyJson['workouts'] as List).map((workoutJson) {
           return _convertJsonToWorkoutModel(workoutJson);
         }).toList(),
-        estimatedDuration: dailyJson['estimatedDuration'] as int? ?? 45,
+        estimatedDuration: _parseIntRequired(dailyJson['estimatedDuration'], 'estimatedDuration'),
         restDay: dailyJson['restDay'] as String?,
       );
     }).toList();
@@ -376,6 +398,7 @@ Safety first:
       dailyWorkouts: dailyWorkouts,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      approvalStatus: WorkoutPlanApprovalStatus.pending, // AI plans need approval
     );
   }
 
@@ -389,7 +412,7 @@ Safety first:
       trainerName: 'AI Fitness Coach',
       difficulty: _parseDifficulty(json['difficulty'] as String?),
       category: _parseCategory(json['category'] as String?),
-      estimatedDuration: json['estimatedDuration'] as int? ?? 30,
+      estimatedDuration: _parseIntRequired(json['estimatedDuration'], 'estimatedDuration'),
       exercises: (json['exercises'] as List).map((exerciseJson) {
         return _convertJsonToExercise(exerciseJson);
       }).toList(),
@@ -401,20 +424,68 @@ Safety first:
 
   /// Convert JSON to Exercise
   static Exercise _convertJsonToExercise(Map<String, dynamic> json) {
-    return Exercise(
-      id: json['id'] as String? ?? const Uuid().v4(),
-      name: json['name'] as String,
-      description: json['description'] as String,
-      sets: json['sets'] as int,
-      reps: json['reps'] as int,
-      tempo: json['tempo'] as String?,
-      duration: json['duration'] as int?,
-      restTime: json['restTime'] as int?,
-      equipment: json['equipment'] as String?,
-      muscleGroups: List<String>.from(json['muscleGroups'] ?? []),
-      order: json['order'] as int,
-      formCues: json['formCues'] as String?,
-    );
+    try {
+      return Exercise(
+        id: json['id'] as String? ?? const Uuid().v4(),
+        name: json['name'] as String,
+        description: json['description'] as String,
+        sets: _parseIntRequired(json['sets'], 'sets'),
+        reps: _parseIntRequired(json['reps'], 'reps'),
+        tempo: json['tempo'] as String?,
+        duration: _safeParseInt(json['duration']),
+        restTime: _safeParseInt(json['restTime']),
+        equipment: json['equipment'] as String?,
+        muscleGroups: List<String>.from(json['muscleGroups'] ?? []),
+        order: _parseIntRequired(json['order'], 'order'),
+        formCues: json['formCues'] as String?,
+      );
+    } catch (e) {
+      _logger.e('Error converting exercise JSON: $e');
+      _logger.e('Exercise JSON data: $json');
+      rethrow;
+    }
+  }
+
+  /// Safely parse an integer from dynamic value (handles both int and string)
+  static int? _safeParseInt(dynamic value, {int? defaultValue}) {
+    if (value == null) return defaultValue;
+    
+    if (value is int) return value;
+    
+    if (value is String) {
+      final parsed = int.tryParse(value);
+      if (parsed != null) return parsed;
+    }
+    
+    if (value is double) return value.toInt();
+    
+    return defaultValue;
+  }
+
+  /// Parse an integer from dynamic value - throws error if not valid integer
+  static int _parseIntRequired(dynamic value, String fieldName) {
+    if (value == null) {
+      throw ValidationException('Field "$fieldName" is null - AI must provide this value');
+    }
+    
+    if (value is int) return value;
+    
+    if (value is String) {
+      final parsed = int.tryParse(value);
+      if (parsed != null) {
+        _logger.w('AI returned string "$value" for field "$fieldName" - should be integer');
+        return parsed;
+      } else {
+        throw ValidationException('Field "$fieldName" contains invalid string "$value" - must be a valid integer');
+      }
+    }
+    
+    if (value is double) {
+      _logger.w('AI returned double $value for field "$fieldName" - should be integer');
+      return value.toInt();
+    }
+    
+    throw ValidationException('Field "$fieldName" has unexpected type ${value.runtimeType} with value "$value" - must be integer');
   }
 
   /// Parse difficulty string to enum
