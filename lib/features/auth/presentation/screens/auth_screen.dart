@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
+import 'package:auth_buttons/auth_buttons.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/providers/auth_provider.dart';
@@ -401,67 +402,48 @@ class _AuthScreenState extends State<AuthScreen> {
           ],
         ),
         const SizedBox(height: AppConstants.spacingL),
-        Row(
+        Column(
           children: [
-            Expanded(
-              child: _buildSocialButton(
-                'Google',
-                Icons.g_mobiledata,
-                AppConstants.errorColor,
-                () => _handleGoogleSignIn(),
+            GoogleAuthButton(
+              onPressed: _handleGoogleSignIn,
+              style: AuthButtonStyle(
+                width: double.infinity,
+                height: 52,
+                borderRadius: AppConstants.radiusM,
+                buttonType: AuthButtonType.secondary,
+                textStyle: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                buttonColor: AppConstants.surfaceColor,
+                borderColor: AppConstants.textTertiary.withOpacity(0.2),
+                borderWidth: 1.0,
+                iconSize: 20,
+                elevation: 2.0,
+                shadowColor: AppConstants.textTertiary.withOpacity(0.1),
               ),
             ),
-            const SizedBox(width: AppConstants.spacingS),
-            Expanded(
-              child: _buildSocialButton(
-                'Apple',
-                Icons.apple,
-                AppConstants.textPrimary,
-                () => _handleAppleSignIn(),
+            const SizedBox(height: AppConstants.spacingS),
+            AppleAuthButton(
+              onPressed: _handleAppleSignIn,
+              style: AuthButtonStyle(
+                width: double.infinity,
+                height: 52,
+                borderRadius: AppConstants.radiusM,
+                buttonType: AuthButtonType.secondary,
+                iconSize: 20,
+                textStyle: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                buttonColor: AppConstants.surfaceColor,
+                borderColor: AppConstants.textTertiary.withOpacity(0.2),
+                borderWidth: 1.0,
+                elevation: 2.0,
+                shadowColor: AppConstants.textTertiary.withOpacity(0.1),
               ),
             ),
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildSocialButton(
-    String text,
-    IconData icon,
-    Color color,
-    VoidCallback onPressed,
-  ) {
-    return Container(
-      height: 52,
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.2),
-        ),
-        boxShadow: AppConstants.shadowS,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: AppConstants.spacingXS),
-              Text(
-                text,
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -626,35 +608,6 @@ class _AuthScreenState extends State<AuthScreen> {
           content: Text(errorMessage),
           backgroundColor: AppConstants.errorColor,
           duration: const Duration(seconds: 5),
-        ),
-      );
-    }
-  }
-
-  void _handleGuestAccess() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.signInAnonymously();
-
-    if (success && mounted) {
-      // Wait for user data to be loaded before navigating
-      if (authProvider.userModel != null) {
-        _logger.i('AuthScreen - User data loaded, navigating to main route');
-        context.go('/');
-      } else {
-        _logger.d('AuthScreen - Waiting for user data to load...');
-        // Wait a bit for the auth state listener to load the user data
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (mounted && authProvider.userModel != null) {
-          _logger.i(
-              'AuthScreen - User data loaded after delay, navigating to main route');
-          context.go('/');
-        }
-      }
-    } else if (mounted && authProvider.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authProvider.error!),
-          backgroundColor: AppConstants.errorColor,
         ),
       );
     }
