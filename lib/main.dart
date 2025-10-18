@@ -282,7 +282,8 @@ GoRouter createRouter(AuthProvider authProvider) {
         '/admin-users',
         '/admin/user-detail',
         '/profile',
-        '/trainers'
+        '/trainers',
+        '/account-settings'
       ];
       final currentRoute = state.uri.toString();
 
