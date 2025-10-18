@@ -21,12 +21,17 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   String? _errorMessage;
   final _logger = Logger();
   
-  // Cache for different periods to avoid unnecessary API calls
-  final Map<String, StripeDashboardMetrics> _metricsCache = {};
-  final Map<String, DateTime> _cacheTimestamps = {};
+  // STATIC cache for different periods to persist across widget recreations
+  static final Map<String, StripeDashboardMetrics> _metricsCache = {};
+  static final Map<String, DateTime> _cacheTimestamps = {};
   
   // Cache duration - refresh data if older than 5 minutes
   static const Duration _cacheDuration = Duration(minutes: 5);
+  
+  // STATIC cache for computed UI data to prevent unnecessary rebuilds
+  static String? _cachedLastUpdated;
+  static List<_MetricCardData>? _cachedMetricsData;
+  static List<_SalesStat>? _cachedStatisticsData;
 
   final List<String> timePeriods = [
     'Today',
@@ -51,10 +56,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       if (_isDataCached(selectedPeriod)) {
         _logger.i('Using cached data for initial period: $selectedPeriod');
         if (mounted) {
-          setState(() {
-            _metrics = _metricsCache[selectedPeriod];
-            _isLoading = false;
-          });
+        setState(() {
+          _metrics = _metricsCache[selectedPeriod];
+          _isLoading = false;
+          _errorMessage = null;
+        });
+        _updateCachedUIData();
         }
         return; // Exit early if we have cached data
       }
@@ -63,6 +70,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       if (mounted) {
         setState(() {
           _isLoading = true;
+          _errorMessage = null;
         });
       }
       
@@ -82,9 +90,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   Future<void> _forceRefreshData() async {
     _logger.i('Force refreshing data - clearing cache');
     
-    // Clear all cached data
+    // Clear all cached data (static variables)
     _metricsCache.clear();
     _cacheTimestamps.clear();
+    _cachedLastUpdated = null;
+    _cachedMetricsData = null;
+    _cachedStatisticsData = null;
     
     setState(() {
       _isLoading = true;
@@ -96,6 +107,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   void _onPeriodChanged(String? newPeriod) {
     if (newPeriod != null && newPeriod != selectedPeriod) {
+      // Clear cached UI data when period changes (static variables)
+      _cachedLastUpdated = null;
+      _cachedMetricsData = null;
+      _cachedStatisticsData = null;
+      
       setState(() {
         selectedPeriod = newPeriod;
         _errorMessage = null;
@@ -108,7 +124,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           _metrics = _metricsCache[newPeriod];
           _isLoading = false;
         });
+        _updateCachedUIData();
       } else {
+        _logger.i('No cached data for period: $newPeriod, fetching...');
         setState(() {
           _isLoading = true;
         });
@@ -136,6 +154,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           _isLoading = false;
           _errorMessage = null;
         });
+        _updateCachedUIData();
       }
     } catch (e) {
       _logger.e('Error fetching metrics for period $period: $e');
@@ -152,6 +171,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   /// Check if data is cached and still valid for the given period
   bool _isDataCached(String period) {
     if (!_metricsCache.containsKey(period) || !_cacheTimestamps.containsKey(period)) {
+      _logger.i('No cached data found for period: $period');
       return false;
     }
     
@@ -160,13 +180,26 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final isExpired = now.difference(cacheTime) > _cacheDuration;
     
     if (isExpired) {
-      _logger.i('Cache expired for period: $period');
+      _logger.i('Cache expired for period: $period (cached at: $cacheTime)');
       _metricsCache.remove(period);
       _cacheTimestamps.remove(period);
       return false;
     }
     
+    _logger.i('Valid cached data found for period: $period (cached at: $cacheTime)');
     return true;
+  }
+  
+  /// Update cached UI data when metrics change
+  void _updateCachedUIData() {
+    _cachedLastUpdated = _metrics?.lastUpdated != null 
+        ? 'Last Updated ${_formatLastUpdated(_metrics!.lastUpdated)}'
+        : 'Last Updated ${TimeOfDay.now().format(context)}';
+    
+    _cachedMetricsData = _buildMetricsData();
+    _cachedStatisticsData = _buildStatisticsData();
+    
+    _logger.i('Updated cached UI data');
   }
 
   @override
@@ -202,10 +235,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       );
     }
 
-    final metrics = _buildMetricsData();
-    final lastUpdated = _metrics?.lastUpdated != null 
-        ? 'Last Updated ${_formatLastUpdated(_metrics!.lastUpdated)}'
-        : 'Last Updated ${TimeOfDay.now().format(context)}';
+    // Use cached data to prevent unnecessary rebuilds
+    final metrics = _cachedMetricsData ?? _buildMetricsData();
+    final lastUpdated = _cachedLastUpdated ?? 'Loading...';
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
@@ -237,7 +269,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               ),
               const SizedBox(height: 18),
               _StatisticsCard(
-                stats: _buildStatisticsData(),
+                stats: _cachedStatisticsData ?? _buildStatisticsData(),
                 selectedPeriod: selectedPeriod,
                 timePeriods: timePeriods,
                 onPeriodChanged: _onPeriodChanged,
