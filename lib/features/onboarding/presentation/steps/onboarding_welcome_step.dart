@@ -104,7 +104,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep>
                       TextSpan(
                         text: 'Transform Your Body,\n',
                         style: GoogleFonts.nunitoSans(
-                          fontSize: 28,
+                          fontSize: 24,
                           fontWeight: FontWeight.w800,
                           color: AppConstants.textPrimary,
                           height: 1.2,
@@ -113,7 +113,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep>
                       TextSpan(
                         text: 'Transform Your Life',
                         style: GoogleFonts.nunitoSans(
-                          fontSize: 28,
+                          fontSize: 24,
                           fontWeight: FontWeight.w800,
                           color: AppConstants.primaryColor,
                           height: 1.2,
