@@ -135,24 +135,10 @@ class AdminUserProfileScreen extends StatelessWidget {
                       AdminInfoRow(
                         label: 'Onboarding Completed',
                         value: user.hasSeenOnboarding ? 'Yes' : 'No',
-                        valueColor: user.hasSeenOnboarding 
-                            ? AppConstants.successColor 
+                        valueColor: user.hasSeenOnboarding
+                            ? AppConstants.successColor
                             : AppConstants.warningColor,
-                      ),
-                      AdminInfoRow(
-                        label: 'Get Started Seen',
-                        value: user.hasSeenGetStarted ? 'Yes' : 'No',
-                        valueColor: user.hasSeenGetStarted 
-                            ? AppConstants.successColor 
-                            : AppConstants.warningColor,
-                      ),
-                      AdminInfoRow(
-                        label: 'Subscription Screen Seen',
-                        value: user.hasSeenSubscriptionScreen ? 'Yes' : 'No',
-                        valueColor: user.hasSeenSubscriptionScreen 
-                            ? AppConstants.successColor 
-                            : AppConstants.warningColor,
-                      ),
+                      )
                     ],
                   ),
 
@@ -165,7 +151,8 @@ class AdminUserProfileScreen extends StatelessWidget {
                     children: [
                       AdminInfoRow(
                         label: 'Training Program',
-                        value: _getTrainingProgramStatusLabel(user.trainingProgramStatus),
+                        value: _getTrainingProgramStatusLabel(
+                            user.trainingProgramStatus),
                       ),
                       if (user.currentProgramId != null)
                         AdminInfoRow(
@@ -174,35 +161,13 @@ class AdminUserProfileScreen extends StatelessWidget {
                         ),
                       if (user.programPurchaseDate != null)
                         AdminInfoRow(
-                          label: 'Program Purchase Date',
+                          label: 'Purchase Date',
                           value: _formatDate(user.programPurchaseDate!),
                         ),
                     ],
                   ),
 
                   const SizedBox(height: 16),
-
-                  // Subscription Information
-                  if (user.stripeCustomerId != null || user.selectedTrainerId != null)
-                    AdminInfoCard(
-                      title: 'Subscription & Training',
-                      icon: Icons.payment_outlined,
-                      children: [
-                        if (user.stripeCustomerId != null)
-                          AdminInfoRow(
-                            label: 'Stripe Customer ID',
-                            value: user.stripeCustomerId!,
-                          ),
-                        if (user.selectedTrainerId != null)
-                          AdminInfoRow(
-                            label: 'Selected Trainer ID',
-                            value: user.selectedTrainerId!,
-                          ),
-                      ],
-                    ),
-
-                  if (user.stripeCustomerId != null || user.selectedTrainerId != null)
-                    const SizedBox(height: 16),
 
                   // Physical Information
                   AdminInfoCard(
@@ -254,36 +219,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 16),
-
-                  // Notification Settings
-                  AdminInfoCard(
-                    title: 'Notification Settings',
-                    icon: Icons.notifications_outlined,
-                    children: [
-                      AdminInfoRow(
-                        label: 'General Notifications',
-                        value: user.preferences.notificationsEnabled ? 'Enabled' : 'Disabled',
-                        valueColor: user.preferences.notificationsEnabled 
-                            ? AppConstants.successColor 
-                            : AppConstants.textSecondary,
-                      ),
-                      AdminInfoRow(
-                        label: 'Workout Notifications',
-                        value: user.preferences.workoutNotificationsEnabled ? 'Enabled' : 'Disabled',
-                        valueColor: user.preferences.workoutNotificationsEnabled 
-                            ? AppConstants.successColor 
-                            : AppConstants.textSecondary,
-                      ),
-                      if (user.preferences.workoutNotificationTime != null)
-                        AdminInfoRow(
-                          label: 'Workout Notification Time',
-                          value: user.preferences.workoutNotificationTime!,
-                        ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
                   // Preferences
                   AdminInfoCard(
                     title: 'Preferences',
@@ -297,8 +232,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                       ),
                       AdminInfoRow(
                         label: 'Preferred Workouts',
-                        value: (user.preferences.preferredWorkoutStyles)
-                                .isEmpty
+                        value: (user.preferences.preferredWorkoutStyles).isEmpty
                             ? 'None'
                             : user.preferences.preferredWorkoutStyles
                                 .join(', '),
@@ -307,10 +241,12 @@ class AdminUserProfileScreen extends StatelessWidget {
                         label: 'Weekly Workout Days',
                         value: '${user.preferences.weeklyWorkoutDays} days',
                       ),
-                      if (user.preferences.specificWorkoutDays != null && user.preferences.specificWorkoutDays!.isNotEmpty)
+                      if (user.preferences.specificWorkoutDays != null &&
+                          user.preferences.specificWorkoutDays!.isNotEmpty)
                         AdminInfoRow(
                           label: 'Workout Days',
-                          value: _formatWorkoutDays(user.preferences.specificWorkoutDays!),
+                          value: _formatWorkoutDays(
+                              user.preferences.specificWorkoutDays!),
                         ),
                       if (user.preferences.timezone != null)
                         AdminInfoRow(
@@ -962,7 +898,8 @@ class AdminUserProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          _buildProteinDistribution(proteinTargets['mealDistribution'] as List<dynamic>),
+          _buildProteinDistribution(
+              proteinTargets['mealDistribution'] as List<dynamic>),
         ],
 
         // Additional info
@@ -1018,7 +955,8 @@ class AdminUserProfileScreen extends StatelessWidget {
         ],
 
         // Recommendations
-        if (proteinTargets['recommendations'] != null && (proteinTargets['recommendations'] as List).isNotEmpty) ...[
+        if (proteinTargets['recommendations'] != null &&
+            (proteinTargets['recommendations'] as List).isNotEmpty) ...[
           const SizedBox(height: 12),
           Text(
             'Recommendations',
@@ -1028,8 +966,8 @@ class AdminUserProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          ...(proteinTargets['recommendations'] as List).map((recommendation) => 
-            Padding(
+          ...(proteinTargets['recommendations'] as List).map(
+            (recommendation) => Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1546,8 +1484,8 @@ class AdminUserProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          ...calculatedTargets.recommendations.map((recommendation) => 
-            Padding(
+          ...calculatedTargets.recommendations.map(
+            (recommendation) => Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
