@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 
+
+
 class AdminUserListScreen extends StatefulWidget {
   const AdminUserListScreen({super.key});
 
@@ -16,6 +18,9 @@ class AdminUserListScreen extends StatefulWidget {
 class _AdminUserListScreenState extends State<AdminUserListScreen> {
   late Future<List<UserModel>> _usersFuture;
   String _search = '';
+  TrainingProgramStatus? _selectedProgram;
+  bool _showNewUsersOnly = false;
+  bool _sortByNameAZ = true;
 
   @override
   void initState() {
@@ -43,6 +48,8 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
           children: [
             _buildSearchBar(),
             const SizedBox(height: 12),
+            _buildFilters(),
+            const SizedBox(height: 12),
             Expanded(
               child: FutureBuilder<List<UserModel>>(
                 future: _usersFuture,
@@ -54,35 +61,12 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                     return Center(child: Text('Error: \\${snapshot.error}'));
                   }
                   final users = (snapshot.data ?? [])
-                      .where((u) =>
-                          _search.isEmpty ||
-                          (u.name
-                                  ?.toLowerCase()
-                                  .contains(_search.toLowerCase()) ??
-                              false) ||
-                          u.email.toLowerCase().contains(_search.toLowerCase()))
-                      .toList()
-                    ..sort((a, b) {
-                      // Sort by name first, then by email if names are the same
-                      final nameA = a.name?.toLowerCase() ?? '';
-                      final nameB = b.name?.toLowerCase() ?? '';
-
-                      if (nameA.isEmpty && nameB.isEmpty) {
-                        // If both names are empty, sort by email
-                        return a.email
-                            .toLowerCase()
-                            .compareTo(b.email.toLowerCase());
-                      } else if (nameA.isEmpty) {
-                        // Empty names go to the end
-                        return 1;
-                      } else if (nameB.isEmpty) {
-                        // Empty names go to the end
-                        return -1;
-                      } else {
-                        // Sort by name
-                        return nameA.compareTo(nameB);
-                      }
-                    });
+                      .where((u) => _matchesFilters(u))
+                      .toList();
+                  
+                  if (_sortByNameAZ) {
+                    users.sort((a, b) => _compareUsers(a, b));
+                  }
                   if (users.isEmpty) {
                     return _buildEmptyState();
                   }
@@ -109,6 +93,32 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
     );
   }
 
+  bool _matchesFilters(UserModel user) {
+    // Search filter
+    if (_search.isNotEmpty) {
+      final matchesSearch = (user.name?.toLowerCase().contains(_search.toLowerCase()) ?? false) ||
+          user.email.toLowerCase().contains(_search.toLowerCase());
+      if (!matchesSearch) return false;
+    }
+
+    // Program type filter
+    if (_selectedProgram != null && user.trainingProgramStatus != _selectedProgram) {
+      return false;
+    }
+
+
+    // New users only filter
+    if (_showNewUsersOnly) {
+      final now = DateTime.now();
+      final sevenDaysAgo = now.subtract(const Duration(days: 7));
+      if (user.createdAt.isBefore(sevenDaysAgo)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   Widget _buildSearchBar() {
     return TextField(
       decoration: InputDecoration(
@@ -130,6 +140,196 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
       },
     );
   }
+
+  Widget _buildFilters() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Filters', style: AppTextStyles.heading5),
+            const Spacer(),
+            if (_hasActiveFilters())
+              TextButton(
+                onPressed: _clearFilters,
+                child: Text('Clear All', style: AppTextStyles.bodySmall.copyWith(
+                  color: AppConstants.primaryColor,
+                )),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 40,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildProgramFilterChip(),
+                const SizedBox(width: 8),
+                _buildNewUsersChip(),
+                const SizedBox(width: 8),
+                _buildNameSortChip(),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  bool _hasActiveFilters() {
+    return _selectedProgram != null || 
+           _showNewUsersOnly;
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedProgram = null;
+      _showNewUsersOnly = false;
+      _sortByNameAZ = true;
+    });
+  }
+
+  int _compareUsers(UserModel a, UserModel b) {
+    final nameA = a.name?.toLowerCase() ?? '';
+    final nameB = b.name?.toLowerCase() ?? '';
+
+    if (nameA.isEmpty && nameB.isEmpty) {
+      // If both names are empty, sort by email
+      return a.email.toLowerCase().compareTo(b.email.toLowerCase());
+    } else if (nameA.isEmpty) {
+      // Empty names go to the end
+      return 1;
+    } else if (nameB.isEmpty) {
+      // Empty names go to the end
+      return -1;
+    } else {
+      // Sort by name A-Z
+      return nameA.compareTo(nameB);
+    }
+  }
+
+  Widget _buildProgramFilterChip() {
+    return Container(
+      decoration: BoxDecoration(
+        color: _selectedProgram != null 
+            ? AppConstants.primaryColor.withOpacity(0.12)
+            : AppConstants.surfaceColor,
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        border: Border.all(
+          color: _selectedProgram != null 
+              ? AppConstants.primaryColor
+              : AppConstants.borderColor,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<TrainingProgramStatus?>(
+          value: _selectedProgram,
+          hint: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Text(
+              'All Programs',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppConstants.textSecondary,
+              ),
+            ),
+          ),
+          items: [
+            DropdownMenuItem<TrainingProgramStatus?>(
+              value: null,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: Text(
+                  'All Programs',
+                  style: AppTextStyles.bodySmall,
+                ),
+              ),
+            ),
+            ...TrainingProgramStatus.values.map((program) => DropdownMenuItem<TrainingProgramStatus?>(
+              value: program,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: Text(
+                  _getProgramLabel(program),
+                  style: AppTextStyles.bodySmall,
+                ),
+              ),
+            )),
+          ],
+          onChanged: (value) {
+            setState(() => _selectedProgram = value);
+          },
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: _selectedProgram != null 
+                ? AppConstants.primaryColor 
+                : AppConstants.textSecondary,
+          ),
+          style: AppTextStyles.bodySmall.copyWith(
+            color: _selectedProgram != null 
+                ? AppConstants.primaryColor 
+                : AppConstants.textSecondary,
+            fontWeight: _selectedProgram != null ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewUsersChip() {
+    return FilterChip(
+      label: const Text('New Users (7 days)'),
+      selected: _showNewUsersOnly,
+      onSelected: (selected) {
+        setState(() => _showNewUsersOnly = selected);
+      },
+      selectedColor: AppConstants.successColor.withOpacity(0.12),
+      checkmarkColor: AppConstants.successColor,
+      labelStyle: AppTextStyles.bodySmall.copyWith(
+        color: _showNewUsersOnly 
+            ? AppConstants.successColor 
+            : AppConstants.textSecondary,
+        fontWeight: _showNewUsersOnly ? FontWeight.w600 : FontWeight.normal,
+      ),
+    );
+  }
+
+
+  String _getProgramLabel(TrainingProgramStatus status) {
+    switch (status) {
+      case TrainingProgramStatus.winter:
+        return 'Winter Plan';
+      case TrainingProgramStatus.summer:
+        return 'Summer Plan';
+      case TrainingProgramStatus.bodybuilding:
+        return 'Body Building';
+      case TrainingProgramStatus.none:
+        return 'No Program';
+    }
+  }
+
+
+
+  Widget _buildNameSortChip() {
+    return FilterChip(
+      label: const Text('Name A-Z'),
+      selected: _sortByNameAZ,
+      onSelected: (selected) {
+        setState(() => _sortByNameAZ = selected);
+      },
+      selectedColor: AppConstants.warningColor.withOpacity(0.12),
+      checkmarkColor: AppConstants.warningColor,
+      labelStyle: AppTextStyles.bodySmall.copyWith(
+        color: _sortByNameAZ 
+            ? AppConstants.warningColor 
+            : AppConstants.textSecondary,
+        fontWeight: _sortByNameAZ ? FontWeight.w600 : FontWeight.normal,
+      ),
+    );
+  }
+
+
 
   Widget _buildLoadingShimmer() {
     return ListView.separated(
