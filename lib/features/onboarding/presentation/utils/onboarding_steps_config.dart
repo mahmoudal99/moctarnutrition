@@ -7,7 +7,7 @@ class OnboardingStepsConfig {
     return [
       OnboardingStep(
         title: 'WELCOME TO MOCTAR NUTRITION',
-        subtitle: 'Your body. Your pace. Your results.',
+        subtitle: 'Transform your body, transform your life.',
         icon: "arrow.json",
         showIconColor: false,
         color: AppConstants.primaryColor,

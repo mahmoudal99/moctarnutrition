@@ -1,266 +1,174 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'dart:math' as math;
 
-class OnboardingWelcomeStep extends StatelessWidget {
+class OnboardingWelcomeStep extends StatefulWidget {
   const OnboardingWelcomeStep({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(top: 40),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _ActivityCardsStack(),
-        ],
-      ),
-    );
-  }
+  State<OnboardingWelcomeStep> createState() => _OnboardingWelcomeStepState();
 }
 
-class _ActivityCardsStack extends StatefulWidget {
-  const _ActivityCardsStack();
+class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep>
+    with TickerProviderStateMixin {
+  late AnimationController _floatController;
+  late AnimationController _fadeController;
+  late Animation<double> _floatAnimation;
+  late Animation<double> _fadeAnimation;
 
-  @override
-  State<_ActivityCardsStack> createState() => _ActivityCardsStackState();
-}
-
-class _ActivityCardsStackState extends State<_ActivityCardsStack> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-
-  final List<String> _images = [
+  final List<String> _transformationImages = [
     'assets/images/moc_one.jpg',
     'assets/images/moc_two.jpg',
     'assets/images/moc_three.jpg',
+    'assets/images/moc_four.png',
+    'assets/images/moc_five.png',
+    'assets/images/moc_six.png',
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _floatController = AnimationController(
+      duration: const Duration(seconds: 4),
+      vsync: this,
+    );
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _floatAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _floatController,
+      curve: Curves.easeInOut,
+    ));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    ));
+
+    // Start animations
+    _floatController.repeat(reverse: true);
+    _fadeController.forward();
+  }
+
+  @override
   void dispose() {
-    _pageController.dispose();
+    _floatController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 400,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: _images.length,
-            onPageChanged: (page) {
-              setState(() {
-                _currentPage = page;
-              });
-            },
-            itemBuilder: (context, index) {
-              final isActive = index == _currentPage;
-              final offset = (index - _currentPage).toDouble();
-              final rotation = offset * 0.05;
-
-              return Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.1,
-                  vertical: 15,
-                ),
-                child: Transform.rotate(
-                  angle: rotation,
-                  child: _ImageCard(
-                    imagePath: _images[index],
-                    isActive: isActive,
-                    elevation: isActive ? 8 : 4 - offset.abs(),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        _PageIndicator(
-          currentPage: _currentPage,
-          pageCount: _images.length,
-        ),
-      ],
-    );
-  }
-}
-
-class _PageIndicator extends StatelessWidget {
-  final int currentPage;
-  final int pageCount;
-
-  const _PageIndicator({
-    required this.currentPage,
-    required this.pageCount,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(pageCount, (index) {
-        final isActive = index == currentPage;
-        return Container(
-          width: isActive ? 8 : 8,
-          height: isActive ? 8 : 8,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive
-                ? Theme.of(context).primaryColor
-                : Theme.of(context).primaryColor.withOpacity(0.3),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class _ImageCard extends StatelessWidget {
-  final String imagePath;
-  final bool isActive;
-  final double elevation;
-
-  const _ImageCard({
-    required this.imagePath,
-    required this.isActive,
-    required this.elevation,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: elevation,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.cover,
-          height: 250,
-        ),
-      ),
-    );
-  }
-}
-
-class _ActivityCardData {
-  final String title;
-  final String time;
-  final Color color;
-  final Color accent;
-  final Color titleColor;
-  final String emoji;
-  final List<String> avatars;
-
-  const _ActivityCardData({
-    required this.title,
-    required this.time,
-    required this.color,
-    required this.accent,
-    required this.titleColor,
-    required this.emoji,
-    required this.avatars,
-  });
-}
-
-class _ActivityCard extends StatelessWidget {
-  final _ActivityCardData card;
-  final double elevation;
-
-  const _ActivityCard({required this.card, this.elevation = 2});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      elevation: elevation,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
-      child: Stack(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left accent bar
-              Container(
-                width: 8,
-                height: 130,
-                margin: const EdgeInsets.only(
-                    left: 0, top: 0, bottom: 0, right: 12),
-                decoration: BoxDecoration(
-                  color: card.accent,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          // Transformation Images Display
+          SizedBox(
+            height: 350,
+            width: double.infinity,
+            child: Stack(
+              children: [
+                // Floating transformation images
+                ...List.generate(_transformationImages.length, (index) {
+                  return _FloatingImage(
+                    imagePath: _transformationImages[index],
+                    index: index,
+                    floatAnimation: _floatAnimation,
+                    fadeAnimation: _fadeAnimation,
+                  );
+                }),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+          // Lifestyle Transformation Message
+          FadeTransition(
+            opacity: _fadeAnimation,
+            child: Column(
+              children: [
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              card.title,
-                              style: AppTextStyles.bodyLarge.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 6)
-                        ],
+                      TextSpan(
+                        text: 'Transform Your Body,\n',
+                        style: GoogleFonts.nunitoSans(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppConstants.textPrimary,
+                          height: 1.2,
+                        ),
                       ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(Icons.access_time,
-                              size: 16, color: AppConstants.textTertiary),
-                          const SizedBox(width: 4),
-                          Text(card.time,
-                              style: AppTextStyles.caption
-                                  .copyWith(color: AppConstants.textTertiary)),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        height: 28,
-                        child: Stack(
-                          children: List.generate(card.avatars.length, (i) {
-                            return Positioned(
-                              left: i * 20.0,
-                              child: CircleAvatar(
-                                radius: 14,
-                                foregroundColor: Colors.green,
-                                backgroundColor: Colors.white,
-                                backgroundImage: NetworkImage(card.avatars[i]),
-                              ),
-                            );
-                          }),
+                      TextSpan(
+                        text: 'Transform Your Life',
+                        style: GoogleFonts.nunitoSans(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppConstants.primaryColor,
+                          height: 1.2,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              // Three-dot menu
-              const Padding(
-                padding: EdgeInsets.only(top: 8, right: 12),
-                child: Icon(Icons.more_horiz, color: AppConstants.textTertiary),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  'Join thousands who have discovered the power of\npersonalized nutrition and fitness coaching',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.nunitoSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppConstants.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppConstants.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: AppConstants.primaryColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: AppConstants.primaryColor,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Your journey to a healthier you starts here',
+                          style: GoogleFonts.nunitoSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppConstants.primaryColor,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -268,75 +176,83 @@ class _ActivityCard extends StatelessWidget {
   }
 }
 
-class _AvatarsRow extends StatelessWidget {
-  final List<_AvatarData> avatars = const [
-    _AvatarData(
-        name: 'You', imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg'),
-    _AvatarData(
-        name: 'Lisa',
-        imageUrl: 'https://randomuser.me/api/portraits/women/2.jpg'),
-    _AvatarData(
-        name: 'Mike',
-        imageUrl: 'https://randomuser.me/api/portraits/men/3.jpg'),
-  ];
+class _FloatingImage extends StatelessWidget {
+  final String imagePath;
+  final int index;
+  final Animation<double> floatAnimation;
+  final Animation<double> fadeAnimation;
 
-  // Fun pastel accent colors for borders
-  final List<Color> borderColors = const [
-    Color(0xFFB3E5FC), // Light Blue
-    Color(0xFFFFE0E6), // Light Pink
-    Color(0xFFC8E6C9), // Light Green
-  ];
-
-  const _AvatarsRow();
+  const _FloatingImage({
+    required this.imagePath,
+    required this.index,
+    required this.floatAnimation,
+    required this.fadeAnimation,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(avatars.length, (i) {
-        final avatar = avatars[i];
-        final borderColor = borderColors[i % borderColors.length];
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: borderColor,
-                    width: 4,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: borderColor.withOpacity(0.18),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = 350.0;
+    final availableWidth = screenWidth - 48.0; // Account for 24px padding on each side from OnboardingStepPage
+    
+    final sizes = [120.0, 110.0, 130.0, 115.0, 125.0, 120.0];
+    final rotations = [0.1, -0.15, 0.2, -0.1, 0.15, -0.2];
+    
+    final size = sizes[index % sizes.length];
+    final rotation = rotations[index % rotations.length];
+    
+    // Simple balanced positioning
+    final positions = [
+      Offset(20, screenHeight * 0.1), // Top left
+      Offset(availableWidth - size - 20, screenHeight * 0.05), // Top right
+      Offset(10, screenHeight * 0.35), // Middle left
+      Offset(availableWidth - size - 10, screenHeight * 0.3), // Middle right
+      Offset(25, screenHeight * 0.6), // Bottom left
+      Offset(availableWidth - size - 25, screenHeight * 0.55), // Bottom right
+    ];
+    
+    final position = positions[index % positions.length];
+    
+    // Create floating animation offset
+    final floatOffset = floatAnimation.value * 10 * math.sin(index * 0.5);
+    
+    return Positioned(
+      left: position.dx,
+      top: position.dy + floatOffset,
+      child: FadeTransition(
+        opacity: fadeAnimation,
+        child: Transform.rotate(
+          angle: rotation + (floatAnimation.value * 0.1),
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              boxShadow: [
+                BoxShadow(
+                  color: AppConstants.primaryColor.withOpacity(0.25),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
-                child: CircleAvatar(
-                  radius: 32,
-                  backgroundImage: NetworkImage(avatar.imageUrl),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 15,
+                  offset: const Offset(0, 6),
                 ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                width: size,
+                height: size,
               ),
-              const SizedBox(height: 8),
-              Text(
-                avatar.name,
-                style:
-                    AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic),
-              ),
-            ],
+            ),
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
-}
-
-class _AvatarData {
-  final String name;
-  final String imageUrl;
-
-  const _AvatarData({required this.name, required this.imageUrl});
 }

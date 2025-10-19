@@ -23,24 +23,24 @@ class OnboardingStepHeader extends StatelessWidget {
             opacity: value,
             child: Column(
               children: [
-                Container(
-                  width: step.icon.contains("arrow") ? 80 : 48,
-                  height: step.icon.contains("arrow") ? 80 : 48,
-                  decoration: const BoxDecoration(),
-                  child: Lottie.asset(
-                    "assets/animations/${step.icon}",
-                    delegates: LottieDelegates(
-                      values: step.showIconColor
-                          ? [
-                              ValueDelegate.color(
-                                const ['**', 'Fill 1'],
-                                value: step.color,
-                              ),
-                            ]
-                          : [],
-                    ),
-                  ),
-                ),
+                // Container(
+                //   width: step.icon.contains("arrow") ? 80 : 48,
+                //   height: step.icon.contains("arrow") ? 80 : 48,
+                //   decoration: const BoxDecoration(),
+                //   child: Lottie.asset(
+                //     "assets/animations/${step.icon}",
+                //     delegates: LottieDelegates(
+                //       values: step.showIconColor
+                //           ? [
+                //               ValueDelegate.color(
+                //                 const ['**', 'Fill 1'],
+                //                 value: step.color,
+                //               ),
+                //             ]
+                //           : [],
+                //     ),
+                //   ),
+                // ),
                 SizedBox(
                     height: step.icon.contains("arrow")
                         ? 0
