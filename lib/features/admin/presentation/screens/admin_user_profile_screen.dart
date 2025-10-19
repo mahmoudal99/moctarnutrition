@@ -29,52 +29,14 @@ class AdminUserProfileScreen extends StatelessWidget {
           elevation: 0,
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.arrow_back_ios_outlined,
-                color: Colors.grey[700],
-                size: 20,
-              ),
-            ),
-          ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Client Details',
-                style: AppTextStyles.heading4.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
-              )
-            ],
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Container(
-              height: 1,
-              color: Colors.grey[200],
+            icon: const Icon(
+              Icons.arrow_back_ios_outlined,
+              color: Colors.black,
+              size: 20,
             ),
           ),
           flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppConstants.primaryColor.withOpacity(0.2),
-                    AppConstants.accentColor.withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: AdminUserHeader(user: user),
-            ),
+            background: AdminUserHeader(user: user),
           ),
         ),
         SliverToBoxAdapter(
@@ -82,8 +44,8 @@ class AdminUserProfileScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(32),
-                topRight: Radius.circular(32),
+                topLeft: Radius.circular(0),
+                topRight: Radius.circular(0),
               ),
               boxShadow: [
                 BoxShadow(

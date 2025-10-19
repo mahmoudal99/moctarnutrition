@@ -37,7 +37,7 @@ class AdminUserHeader extends StatelessWidget {
                     photoUrl: user.photoUrl,
                     name: user.name,
                     email: user.email,
-                    radius: 40,
+                    radius: 25,
                     fontSize: 18,
                   ),
                 ),
