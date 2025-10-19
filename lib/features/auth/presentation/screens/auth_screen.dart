@@ -1,6 +1,7 @@
 import 'package:champions_gym_app/shared/services/onboarding_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 import 'package:auth_buttons/auth_buttons.dart';
@@ -83,25 +84,36 @@ class _AuthScreenState extends State<AuthScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.spacingM,
         vertical: AppConstants.spacingS,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            _isSignUp ? 'Sign Up' : 'Sign In',
-            style: AppTextStyles.heading3.copyWith(
-              fontWeight: FontWeight.w700,
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Welcome to ',
+                  style: GoogleFonts.aBeeZee(
+                      fontSize: 24,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black87),
+                ),
+                TextSpan(
+                  text: 'Moctar Nutrition',
+                  style:
+                      GoogleFonts.ptSerif(fontSize: 24, color: Colors.black87),
+                ),
+              ],
             ),
-            textAlign: TextAlign.left,
           ),
           const SizedBox(height: AppConstants.spacingS),
           Text(
             _isSignUp
                 ? 'Create your account to save your progress'
-                : 'Welcome back, you\'ve been missed!',
-            style: AppTextStyles.bodySmall.copyWith(
+                : 'Let’s keep the momentum going!',
+            style: AppTextStyles.bodyMedium.copyWith(
               color: AppConstants.textSecondary,
             ),
             textAlign: TextAlign.left,
@@ -196,7 +208,7 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
           ],
           if (_isSignUp) ...[
-            const SizedBox(height: AppConstants.spacingS),
+            const SizedBox(height: AppConstants.spacingM),
             _buildTermsCheckbox(),
           ],
           const SizedBox(height: AppConstants.spacingM),
@@ -272,77 +284,64 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Widget _buildTermsCheckbox() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.2),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Checkbox(
+            value: _acceptedTerms,
+            onChanged: (value) {
+              setState(() {
+                _acceptedTerms = value ?? false;
+              });
+            },
+            activeColor: AppConstants.primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.radiusS),
+            ),
+          ),
         ),
-        boxShadow: AppConstants.shadowS,
-      ),
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: Checkbox(
-              value: _acceptedTerms,
-              onChanged: (value) {
-                setState(() {
-                  _acceptedTerms = value ?? false;
-                });
-              },
-              activeColor: AppConstants.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.radiusS),
+        const SizedBox(width: AppConstants.spacingS),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppConstants.textSecondary,
               ),
-            ),
-          ),
-          const SizedBox(width: AppConstants.spacingS),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppConstants.textSecondary,
+              children: [
+                const TextSpan(text: 'I agree to the '),
+                WidgetSpan(
+                  child: GestureDetector(
+                    onTap: _showTermsAndConditions,
+                    child: Text(
+                      'Terms and Conditions',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
                 ),
-                children: [
-                  const TextSpan(text: 'I agree to the '),
-                  WidgetSpan(
-                    child: GestureDetector(
-                      onTap: _showTermsAndConditions,
-                      child: Text(
-                        'Terms and Conditions',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppConstants.primaryColor,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline,
-                        ),
+                const TextSpan(text: ' and '),
+                WidgetSpan(
+                  child: GestureDetector(
+                    onTap: _showPrivacyPolicy,
+                    child: Text(
+                      'Privacy Policy',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
-                  const TextSpan(text: ' and '),
-                  WidgetSpan(
-                    child: GestureDetector(
-                      onTap: _showPrivacyPolicy,
-                      child: Text(
-                        'Privacy Policy',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppConstants.primaryColor,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

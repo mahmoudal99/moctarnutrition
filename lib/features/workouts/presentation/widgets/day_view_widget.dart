@@ -88,16 +88,22 @@ class DayViewWidget extends StatelessWidget {
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, child) {
         return SafeArea(
-          child: Column(
-            children: [
-              if (!workoutProvider.isEditMode) ...[
-                ViewToggle(
-                  selectedView: selectedView,
-                  onViewChanged: onViewChanged,
-                ),
-                DayView(dailyWorkout: todayWorkout!),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+              children: [
+                if (!workoutProvider.isEditMode) ...[
+                  ViewToggle(
+                    selectedView: selectedView,
+                    onViewChanged: onViewChanged,
+                  ),
+                  DayView(dailyWorkout: todayWorkout!),
+                  SizedBox(
+                    height: 128,
+                  )
+                ],
               ],
-            ],
+            ),
           ),
         );
       },

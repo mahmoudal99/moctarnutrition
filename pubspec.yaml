@@ -114,7 +114,7 @@ dependencies:
   package_info_plus: ^8.3.0
   mobile_scanner: ^6.0.10
   
-  # Auth Buttons for social authentication
+  # Auth Buttons for social login
   auth_buttons: ^3.0.3
 
 dev_dependencies:
