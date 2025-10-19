@@ -1033,47 +1033,6 @@ class AdminUserProfileScreen extends StatelessWidget {
             ],
           ),
         ],
-
-        // Recommendations
-        if (proteinTargets['recommendations'] != null &&
-            (proteinTargets['recommendations'] as List).isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(
-            'Recommendations',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 6),
-          ...(proteinTargets['recommendations'] as List).map(
-            (recommendation) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 4,
-                    height: 4,
-                    margin: const EdgeInsets.only(top: 8, right: 8),
-                    decoration: BoxDecoration(
-                      color: AppConstants.successColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      recommendation as String,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppConstants.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }
