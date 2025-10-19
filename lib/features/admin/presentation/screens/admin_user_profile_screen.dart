@@ -78,7 +78,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   // Account Status
                   AdminInfoCard(
                     title: 'Account Status',
-                    icon: Icons.account_circle_outlined,
                     children: [
                       AdminInfoRow(
                         label: 'Account Created',
@@ -103,7 +102,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   // Program Information
                   AdminInfoCard(
                     title: 'Program Information',
-                    icon: Icons.fitness_center_outlined,
                     children: [
                       AdminInfoRow(
                         label: 'Training Program',
@@ -128,7 +126,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   // Physical Information
                   AdminInfoCard(
                     title: 'Physical Information',
-                    icon: Icons.person_outline,
                     children: [
                       AdminInfoRow(
                           label: 'Age', value: '${user.preferences.age} years'),
@@ -163,14 +160,16 @@ class AdminUserProfileScreen extends StatelessWidget {
                     future: _getWeightProgressData(),
                     builder: (context, snapshot) {
                       final weightProgress = snapshot.data;
-                      final progressPercentage = weightProgress?.progressPercentage ?? 0.0;
+                      final progressPercentage =
+                          weightProgress?.progressPercentage ?? 0.0;
 
                       return Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppConstants.spacingL),
                         decoration: BoxDecoration(
                           color: AppConstants.surfaceColor,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusL),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusL),
                           boxShadow: AppConstants.shadowM,
                         ),
                         child: Column(
@@ -220,7 +219,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   // Fitness Information
                   AdminInfoCard(
                     title: 'Fitness Profile',
-                    icon: Icons.fitness_center_outlined,
                     children: [
                       AdminInfoRow(
                         label: 'Fitness Goal',
@@ -242,7 +240,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   // Preferences
                   AdminInfoCard(
                     title: 'Preferences',
-                    icon: Icons.settings_outlined,
                     children: [
                       AdminInfoRow(
                         label: 'Dietary Restrictions',
@@ -284,7 +281,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                       user.preferences.favoriteFoods.isNotEmpty)
                     AdminInfoCard(
                       title: 'Food Preferences',
-                      icon: Icons.restaurant_outlined,
                       children: [
                         if (user.preferences.preferredCuisines.isNotEmpty) ...[
                           Padding(
@@ -445,7 +441,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   if (user.preferences.allergies.isNotEmpty)
                     AdminInfoCard(
                       title: 'Allergies & Intolerances',
-                      icon: Icons.warning_amber_outlined,
                       children: user.preferences.allergies.map((allergy) {
                         final severity =
                             allergy['severity'] as String? ?? 'mild';
@@ -466,7 +461,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   if (user.preferences.mealTimingPreferences != null)
                     AdminInfoCard(
                       title: 'Meal Timing',
-                      icon: Icons.schedule_outlined,
                       children: _buildMealTimingInfo(),
                     ),
 
@@ -477,7 +471,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   if (user.preferences.batchCookingPreferences != null)
                     AdminInfoCard(
                       title: 'Batch Cooking',
-                      icon: Icons.kitchen_outlined,
                       children: _buildBatchCookingInfo(),
                     ),
 
@@ -488,7 +481,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                   if (user.preferences.calculatedCalorieTargets != null)
                     AdminInfoCard(
                       title: 'Calculated Calorie Targets',
-                      icon: Icons.calculate_outlined,
                       children: [
                         _buildCalculatedCalorieTargetsInfo(),
                       ],
@@ -502,7 +494,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                       user.preferences.calorieTargets != null)
                     AdminInfoCard(
                       title: 'Nutritional Information',
-                      icon: Icons.monitor_weight_outlined,
                       children: [
                         if (user.preferences.proteinTargets != null) ...[
                           Padding(
@@ -631,7 +622,6 @@ class AdminUserProfileScreen extends StatelessWidget {
     if (bmi < 30) return BMICategory.overweight;
     return BMICategory.obese;
   }
-
 
   List<AdminInfoRow> _buildMealTimingInfo() {
     final timing = user.preferences.mealTimingPreferences;

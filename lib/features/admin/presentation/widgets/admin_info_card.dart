@@ -3,13 +3,11 @@ import 'package:champions_gym_app/core/constants/app_constants.dart';
 
 class AdminInfoCard extends StatelessWidget {
   final String title;
-  final IconData icon;
   final List<Widget> children;
 
   const AdminInfoCard({
     super.key,
     required this.title,
-    required this.icon,
     required this.children,
   });
 
@@ -31,29 +29,9 @@ class AdminInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppConstants.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: AppConstants.primaryColor,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
-                ),
-              ),
-            ],
+          Text(
+            title,
+            style: AppTextStyles.heading5,
           ),
           const SizedBox(height: 16),
           ...children,
