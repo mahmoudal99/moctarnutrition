@@ -135,7 +135,9 @@ class _GetStartedScreenState extends State<GetStartedScreen>
                       Text(
                         "Build strength, balance and energy\none session at a time.",
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.caption,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.white
+                        ),
                       ),
                       const SizedBox(
                         height: AppConstants.spacingS,
