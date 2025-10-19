@@ -19,7 +19,7 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   static final _logger = Logger();
   late bool _isSignUp; // Will be initialized in initState
   final _formKey = GlobalKey<FormState>();
@@ -28,15 +28,51 @@ class _AuthScreenState extends State<AuthScreen> {
   final _nameController = TextEditingController();
   bool _obscurePassword = true;
   bool _acceptedTerms = false; // New field for terms acceptance
+  
+  // Animation controllers
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _isSignUp = widget.isSignUp;
+    
+    // Initialize animations
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+    
+    // Start animation with a small delay to ensure it's visible
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _animationController.forward();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
@@ -59,24 +95,56 @@ class _AuthScreenState extends State<AuthScreen> {
                         horizontal: AppConstants.spacingL),
                     child: Column(
                       children: [
-                        _buildHeader(),
+                        _buildAnimatedWidget(_buildHeader(), 0),
                         const SizedBox(height: AppConstants.spacingL),
-                        _buildAuthForm(),
+                        _buildAnimatedWidget(_buildAuthForm(), 1),
                         const SizedBox(height: AppConstants.spacingL),
-                        _buildSocialAuth(),
+                        _buildAnimatedWidget(_buildSocialAuth(), 2),
                         const SizedBox(height: AppConstants.spacingL),
-                        _buildOnboardingOption(),
+                        _buildAnimatedWidget(_buildOnboardingOption(), 3),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            _buildToggleAuth(),
+            _buildAnimatedWidget(_buildToggleAuth(), 4),
             const SizedBox(height: AppConstants.spacingL),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAnimatedWidget(Widget child, int index) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        // Create staggered delay for each widget
+        final delay = index * 0.15; // 150ms delay between each widget
+        final animationValue = (_animationController.value - delay).clamp(0.0, 1.0);
+        
+        return FadeTransition(
+          opacity: Tween<double>(
+            begin: 0.0,
+            end: 1.0,
+          ).animate(CurvedAnimation(
+            parent: AlwaysStoppedAnimation(animationValue),
+            curve: Curves.easeInOut,
+          )),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.3),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: AlwaysStoppedAnimation(animationValue),
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 
@@ -362,6 +430,9 @@ class _AuthScreenState extends State<AuthScreen> {
               _acceptedTerms =
                   false; // Reset terms acceptance when switching modes
             });
+            // Restart animation for smooth transition
+            _animationController.reset();
+            _animationController.forward();
           },
           child: Text(
             _isSignUp ? 'Sign In' : 'Sign Up',
