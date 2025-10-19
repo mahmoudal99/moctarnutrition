@@ -4,6 +4,8 @@ import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_header.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_info_card.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_create_meal_plan_card.dart';
+import 'package:champions_gym_app/shared/services/progress_service.dart';
+import 'package:champions_gym_app/shared/widgets/bmi_widget.dart';
 
 class AdminUserProfileScreen extends StatelessWidget {
   final UserModel user;
@@ -67,17 +69,6 @@ class AdminUserProfileScreen extends StatelessWidget {
                     ),
 
                   if (mealPlanId == null) const SizedBox(height: 24),
-
-                  // Contact Information
-                  AdminInfoCard(
-                    title: 'Contact Information',
-                    icon: Icons.contact_mail_outlined,
-                    children: [
-                      AdminInfoRow(
-                          label: 'Name', value: user.name ?? user.email),
-                      AdminInfoRow(label: 'Email', value: user.email),
-                    ],
-                  ),
 
                   const SizedBox(height: 16),
 
@@ -147,14 +138,19 @@ class AdminUserProfileScreen extends StatelessWidget {
                       AdminInfoRow(
                           label: 'Gender', value: user.preferences.gender),
                       AdminInfoRow(
-                        label: 'BMI',
-                        value: _calculateBMIDisplay(),
-                      ),
-                      AdminInfoRow(
                         label: 'Desired Weight',
                         value: '${user.preferences.desiredWeight} kg',
                       ),
                     ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // BMI Widget
+                  BMIWidget(
+                    bmiData: _calculateBMIData(),
+                    title: 'BMI Information',
+                    weightLabel: 'Weight is',
                   ),
 
                   const SizedBox(height: 16),
@@ -501,18 +497,31 @@ class AdminUserProfileScreen extends StatelessWidget {
     );
   }
 
-  String _calculateBMIDisplay() {
-    final heightInMeters = user.preferences.height / 100;
-    final bmi = user.preferences.weight / (heightInMeters * heightInMeters);
+  /// Calculate BMI data from user model
+  BMIData _calculateBMIData() {
+    if (user.preferences.height <= 0 || user.preferences.weight <= 0) {
+      return BMIData.empty();
+    }
+
+    final bmi = user.preferences.weight /
+        ((user.preferences.height / 100) * (user.preferences.height / 100));
     final bmiCategory = _getBMICategory(bmi);
-    return '${bmi.toStringAsFixed(1)} ($bmiCategory)';
+
+    return BMIData(
+      currentBMI: bmi,
+      bmiCategory: bmiCategory,
+      weight: user.preferences.weight,
+      height: user.preferences.height,
+      isHealthy: bmiCategory == BMICategory.healthy,
+    );
   }
 
-  String _getBMICategory(double bmi) {
-    if (bmi < 18.5) return 'Underweight';
-    if (bmi < 25) return 'Normal';
-    if (bmi < 30) return 'Overweight';
-    return 'Obese';
+  /// Get BMI category from BMI value
+  BMICategory _getBMICategory(double bmi) {
+    if (bmi < 18.5) return BMICategory.underweight;
+    if (bmi < 25) return BMICategory.healthy;
+    if (bmi < 30) return BMICategory.overweight;
+    return BMICategory.obese;
   }
 
   List<AdminInfoRow> _buildMealTimingInfo() {
