@@ -222,6 +222,7 @@ class AuthProvider extends ChangeNotifier {
     required String email,
     required String password,
     required String name,
+    required String phoneNumber,
   }) async {
     try {
       _isLoading = true;
@@ -232,6 +233,7 @@ class AuthProvider extends ChangeNotifier {
         email: email,
         password: password,
         name: name,
+        phoneNumber: phoneNumber,
       );
 
       _userModel = userModel;

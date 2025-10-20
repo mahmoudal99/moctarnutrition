@@ -26,6 +26,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _obscurePassword = true;
   bool _acceptedTerms = false; // New field for terms acceptance
   
@@ -76,6 +77,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -86,30 +88,26 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         child: Column(
           children: [
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(height: AppConstants.spacingXL * 1),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppConstants.spacingL),
-                    child: Column(
-                      children: [
-                        _buildAnimatedWidget(_buildHeader(), 0),
-                        const SizedBox(height: AppConstants.spacingL),
-                        _buildAnimatedWidget(_buildAuthForm(), 1),
-                        const SizedBox(height: AppConstants.spacingL),
-                        _buildAnimatedWidget(_buildSocialAuth(), 2),
-                        const SizedBox(height: AppConstants.spacingL),
-                        _buildAnimatedWidget(_buildOnboardingOption(), 3),
-                      ],
-                    ),
-                  ),
-                ],
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.spacingL),
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppConstants.spacingXL * 1),
+                    _buildAnimatedWidget(_buildHeader(), 0),
+                    const SizedBox(height: AppConstants.spacingL),
+                    _buildAnimatedWidget(_buildAuthForm(), 1),
+                    const SizedBox(height: AppConstants.spacingL),
+                    _buildAnimatedWidget(_buildSocialAuth(), 2),
+                    const SizedBox(height: AppConstants.spacingL),
+                    _buildAnimatedWidget(_buildOnboardingOption(), 3),
+                    const SizedBox(height: AppConstants.spacingL),
+                    _buildAnimatedWidget(_buildToggleAuth(), 4),
+                    const SizedBox(height: AppConstants.spacingL),
+                  ],
+                ),
               ),
             ),
-            _buildAnimatedWidget(_buildToggleAuth(), 4),
-            const SizedBox(height: AppConstants.spacingL),
           ],
         ),
       ),
@@ -204,6 +202,26 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               validator: (value) {
                 if (_isSignUp && (value == null || value.isEmpty)) {
                   return 'Please enter your name';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppConstants.spacingS),
+            _buildTextField(
+              controller: _phoneController,
+              label: 'Phone Number',
+              icon: Icons.phone,
+              keyboardType: TextInputType.phone,
+              validator: (value) {
+                if (_isSignUp && (value == null || value.isEmpty)) {
+                  return 'Please enter your phone number';
+                }
+                if (_isSignUp && value != null && value.isNotEmpty) {
+                  // Basic phone number validation - can be enhanced
+                  final phoneRegex = RegExp(r'^\+?[\d\s\-\(\)]{10,}$');
+                  if (!phoneRegex.hasMatch(value)) {
+                    return 'Please enter a valid phone number';
+                  }
                 }
                 return null;
               },
@@ -560,6 +578,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         email: _emailController.text.trim(),
         password: _passwordController.text,
         name: _nameController.text.trim(),
+        phoneNumber: _phoneController.text.trim(),
       );
     } else {
       success = await authProvider.signInWithEmailAndPassword(

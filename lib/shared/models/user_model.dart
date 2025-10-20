@@ -19,6 +19,7 @@ class UserModel {
   final String id;
   final String email;
   final String? name;
+  final String? phoneNumber;
   final String? photoUrl;
   final UserRole role;
   final TrainingProgramStatus trainingProgramStatus;
@@ -39,6 +40,7 @@ class UserModel {
     required this.id,
     required this.email,
     this.name,
+    this.phoneNumber,
     this.photoUrl,
     this.role = UserRole.user,
     this.trainingProgramStatus = TrainingProgramStatus.none,
@@ -60,6 +62,7 @@ class UserModel {
       id: json['id'] as String,
       email: json['email'] as String,
       name: json['name'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
       photoUrl: json['photoUrl'] as String?,
       role: UserRole.values.firstWhere(
         (e) => e.toString() == 'UserRole.${json['role']}',
@@ -92,6 +95,7 @@ class UserModel {
       'id': id,
       'email': email,
       'name': name,
+      'phoneNumber': phoneNumber,
       'photoUrl': photoUrl,
       'role': role.toString().split('.').last,
       'trainingProgramStatus': trainingProgramStatus.toString().split('.').last,
@@ -113,6 +117,7 @@ class UserModel {
     String? id,
     String? email,
     String? name,
+    String? phoneNumber,
     String? photoUrl,
     UserRole? role,
     TrainingProgramStatus? trainingProgramStatus,
@@ -132,6 +137,7 @@ class UserModel {
       id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
       photoUrl: photoUrl ?? this.photoUrl,
       role: role ?? this.role,
       trainingProgramStatus: trainingProgramStatus ?? this.trainingProgramStatus,

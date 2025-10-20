@@ -34,6 +34,7 @@ class AuthService {
     required String email,
     required String password,
     required String name,
+    required String phoneNumber,
   }) async {
     try {
       LoggingService.logAuthEvent('Sign up attempt', metadata: {'email': email});
@@ -91,6 +92,7 @@ class AuthService {
           id: user.uid,
           email: email,
           name: name,
+          phoneNumber: phoneNumber,
           photoUrl: user.photoURL ?? localUser.photoUrl,
           hasSeenOnboarding: localUser.hasSeenOnboarding,
           hasSeenGetStarted: localUser.hasSeenGetStarted,
@@ -107,6 +109,7 @@ class AuthService {
           id: user.uid,
           email: email,
           name: name,
+          phoneNumber: phoneNumber,
           photoUrl: user.photoURL,
           role: UserRole.user,
           trainingProgramStatus: TrainingProgramStatus.none,
