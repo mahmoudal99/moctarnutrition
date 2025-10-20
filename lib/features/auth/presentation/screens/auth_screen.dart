@@ -89,8 +89,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.spacingL),
+                padding: EdgeInsets.only(
+                  left: AppConstants.spacingL,
+                  right: AppConstants.spacingL,
+                  bottom: MediaQuery.of(context).padding.bottom + AppConstants.spacingL,
+                ),
                 child: Column(
                   children: [
                     const SizedBox(height: AppConstants.spacingXL * 1),
@@ -102,7 +105,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                     const SizedBox(height: AppConstants.spacingL),
                     _buildAnimatedWidget(_buildOnboardingOption(), 3),
                     const SizedBox(height: AppConstants.spacingL),
-                    _buildAnimatedWidget(_buildToggleAuth(), 4),
+                    _buildToggleAuth(),
                     const SizedBox(height: AppConstants.spacingL),
                   ],
                 ),
@@ -432,36 +435,42 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildToggleAuth() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          _isSignUp ? 'Already have an account? ' : 'Don\'t have an account? ',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppConstants.textSecondary,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _isSignUp = !_isSignUp;
-              _acceptedTerms =
-                  false; // Reset terms acceptance when switching modes
-            });
-            // Restart animation for smooth transition
-            _animationController.reset();
-            _animationController.forward();
-          },
-          child: Text(
-            _isSignUp ? 'Sign In' : 'Sign Up',
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppConstants.spacingM,
+        horizontal: AppConstants.spacingS,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _isSignUp ? 'Already have an account? ' : 'Don\'t have an account? ',
             style: AppTextStyles.bodySmall.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              decoration: TextDecoration.underline,
+              color: AppConstants.textSecondary,
             ),
           ),
-        ),
-      ],
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isSignUp = !_isSignUp;
+                _acceptedTerms =
+                    false; // Reset terms acceptance when switching modes
+              });
+              // Restart animation for smooth transition
+              _animationController.reset();
+              _animationController.forward();
+            },
+            child: Text(
+              _isSignUp ? 'Sign In' : 'Sign Up',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
