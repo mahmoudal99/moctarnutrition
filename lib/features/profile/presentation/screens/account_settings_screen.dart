@@ -152,6 +152,16 @@ class _PersonalInfoSection extends StatelessWidget {
               ),
             ),
             _InfoCard(
+              title: 'Phone Number',
+              subtitle: user.phoneNumber ?? 'Not set',
+              trailing: user.phoneNumber != null
+                  ? const Icon(Icons.edit, color: AppConstants.textTertiary)
+                  : null,
+              onTap: user.phoneNumber != null
+                  ? () => _showEditPhoneDialog(context, user)
+                  : null,
+            ),
+            _InfoCard(
               title: 'Age',
               subtitle: '${user.preferences.age} years old',
               onTap: () => _showEditAgeDialog(context, user),
@@ -260,6 +270,42 @@ class _PersonalInfoSection extends StatelessWidget {
               final newName = nameController.text.trim();
               if (newName.isNotEmpty && newName != user.name) {
                 // TODO: Implement name update
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditPhoneDialog(BuildContext context, UserModel user) {
+    final phoneController = TextEditingController(text: user.phoneNumber ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Phone Number'),
+        content: TextField(
+          controller: phoneController,
+          keyboardType: TextInputType.phone,
+          decoration: const InputDecoration(
+            labelText: 'Phone Number',
+            hintText: 'Enter your phone number',
+            prefixIcon: Icon(Icons.phone),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newPhone = phoneController.text.trim();
+              if (newPhone.isNotEmpty && newPhone != user.phoneNumber) {
+                // TODO: Implement phone number update
                 Navigator.of(context).pop();
               }
             },
