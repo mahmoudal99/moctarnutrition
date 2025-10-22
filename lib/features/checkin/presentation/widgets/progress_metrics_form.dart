@@ -91,7 +91,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Basic Metrics',
+          'Current Weight',
           style: AppTextStyles.bodyMedium.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -103,6 +103,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
           hint: '70.5',
           suffix: 'kg',
           icon: Icons.monitor_weight,
+          isRequired: true,
         ),
       ],
     );
@@ -187,6 +188,7 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
     required String hint,
     required String suffix,
     required IconData icon,
+    bool isRequired = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,12 +208,32 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
                 fontWeight: FontWeight.w500,
               ),
             ),
+            if (isRequired) ...[
+              const SizedBox(width: 4),
+              Text(
+                '*',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.errorColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          validator: isRequired ? (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Weight is required';
+            }
+            final weight = double.tryParse(value);
+            if (weight == null || weight <= 0) {
+              return 'Please enter a valid weight';
+            }
+            return null;
+          } : null,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: AppTextStyles.bodyMedium.copyWith(
@@ -238,6 +260,18 @@ class _ProgressMetricsFormState extends State<ProgressMetricsForm> {
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
                 color: AppConstants.primaryColor,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: AppConstants.errorColor,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: AppConstants.errorColor,
               ),
             ),
             contentPadding:

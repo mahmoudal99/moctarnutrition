@@ -109,7 +109,7 @@ class PhotoCaptureWidget extends StatelessWidget {
   Widget _buildPhotoCaptureArea(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 300,
+      height: 200,
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
         borderRadius: BorderRadius.circular(16),
@@ -121,35 +121,6 @@ class PhotoCaptureWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: const Icon(
-              Icons.camera_alt_outlined,
-              size: 40,
-              color: AppConstants.primaryColor,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Take Progress Photo',
-            style: AppTextStyles.heading4.copyWith(
-              color: AppConstants.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Capture your progress with a clear photo',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppConstants.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -185,7 +156,7 @@ class PhotoCaptureWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: AppConstants.primaryColor,
+          color: Colors.black87,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

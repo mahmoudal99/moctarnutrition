@@ -73,9 +73,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
           Expanded(
             child: _buildCurrentStep(),
           ),
-          const SizedBox(
-            height: 128,
-          )
         ],
       ),
     );
@@ -158,12 +155,12 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
         children: [
           Text(
             'Take Progress Photo',
-            style: AppTextStyles.heading3,
+            style: AppTextStyles.heading4,
           ),
           const SizedBox(height: 8),
           Text(
             'Capture your progress with a clear, consistent photo. This helps track your fitness journey over time.',
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppConstants.textSecondary,
             ),
           ),
@@ -212,12 +209,12 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
           children: [
             Text(
               'Progress Metrics',
-              style: AppTextStyles.heading3,
+              style: AppTextStyles.heading4,
             ),
             const SizedBox(height: 8),
             Text(
-              'Track your physical progress with these optional metrics.',
-              style: AppTextStyles.bodyMedium.copyWith(
+              'Track your physical progress. Weight is required to continue.',
+              style: AppTextStyles.bodySmall.copyWith(
                 color: AppConstants.textSecondary,
               ),
             ),
@@ -294,7 +291,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _nextStep,
+                    onPressed: _validateAndNextStep,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppConstants.primaryColor,
                       foregroundColor: Colors.white,
@@ -503,6 +500,17 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       setState(() {
         _currentStep--;
       });
+    }
+  }
+
+  void _validateAndNextStep() {
+    // Only validate on the metrics step (step 1)
+    if (_currentStep == 1) {
+      if (_formKey.currentState!.validate()) {
+        _nextStep();
+      }
+    } else {
+      _nextStep();
     }
   }
 
