@@ -9,6 +9,8 @@ import 'package:champions_gym_app/shared/services/progress_service.dart';
 import 'package:champions_gym_app/shared/widgets/bmi_widget.dart';
 import 'package:champions_gym_app/shared/widgets/weight_progress_widget.dart';
 import 'package:champions_gym_app/shared/widgets/weight_chart_widget.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AdminUserProfileScreen extends StatelessWidget {
   final UserModel user;
@@ -93,7 +95,16 @@ class AdminUserProfileScreen extends StatelessWidget {
                         valueColor: user.hasSeenOnboarding
                             ? AppConstants.successColor
                             : AppConstants.warningColor,
-                      )
+                      ),
+                      if (user.phoneNumber != null &&
+                          user.phoneNumber!.isNotEmpty)
+                        AdminInfoRow(
+                          label: 'Phone Number',
+                          value: user.phoneNumber!,
+                          valueColor: AppConstants.primaryColor,
+                          onTap: () =>
+                              _sharePhoneNumber(context, user.phoneNumber!),
+                        ),
                     ],
                   ),
 
@@ -1604,6 +1615,116 @@ class AdminUserProfileScreen extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+
+  /// Show messaging app selection dialog
+  void _sharePhoneNumber(BuildContext context, String phoneNumber) {
+    _showMessagingOptions(context, phoneNumber);
+  }
+
+  /// Show messaging app selection dialog
+  void _showMessagingOptions(BuildContext context, String phoneNumber) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Choose messaging app',
+                style: AppTextStyles.heading5,
+              ),
+              const SizedBox(height: 20),
+              _buildMessagingOption(
+                context,
+                'SMS',
+                Icons.message,
+                () => _launchApp('sms', phoneNumber),
+              ),
+              _buildMessagingOption(
+                context,
+                'WhatsApp',
+                Icons.chat,
+                () => _launchApp('whatsapp', phoneNumber),
+              ),
+              _buildMessagingOption(
+                context,
+                'Telegram',
+                Icons.telegram,
+                () => _launchApp('telegram', phoneNumber),
+              ),
+              _buildMessagingOption(
+                context,
+                'Share',
+                Icons.share,
+                () => _shareContact(phoneNumber),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Build messaging option button
+  Widget _buildMessagingOption(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return ListTile(
+      leading: Icon(icon, color: AppConstants.primaryColor),
+      title: Text(title, style: AppTextStyles.bodyMedium),
+      onTap: () {
+        Navigator.of(context).pop();
+        onTap();
+      },
+    );
+  }
+
+  /// Launch specific messaging app
+  void _launchApp(String scheme, String phoneNumber) async {
+    final Uri uri;
+
+    switch (scheme) {
+      case 'whatsapp':
+        uri = Uri.parse('https://wa.me/${phoneNumber.replaceAll('+', '')}');
+        break;
+      case 'sms':
+        uri = Uri.parse('sms:$phoneNumber');
+        break;
+      case 'telegram':
+        uri = Uri.parse(
+            'https://t.me/$phoneNumber'); // Telegram usernames usually differ
+        break;
+      default:
+        return;
+    }
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        // Fallback to share if app is not installed
+        _shareContact(phoneNumber);
+      }
+    } catch (e) {
+      // Fallback to share if launch fails
+      _shareContact(phoneNumber);
+    }
+  }
+
+  /// Share contact as fallback
+  void _shareContact(String phoneNumber) {
+    final userName = user.name ?? user.email.split('@').first;
+    Share.share(
+      'Hi! Here is the contact information:\n\nPhone: $phoneNumber\nUser: $userName',
+      subject: 'Contact Information',
     );
   }
 }

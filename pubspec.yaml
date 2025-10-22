@@ -116,6 +116,9 @@ dependencies:
   
   # Auth Buttons for social login
   auth_buttons: ^3.0.3
+  
+  # Share functionality
+  share_plus: ^10.0.2
 
 dev_dependencies:
   flutter_test:

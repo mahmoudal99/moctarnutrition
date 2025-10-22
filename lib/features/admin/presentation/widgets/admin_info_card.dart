@@ -45,17 +45,19 @@ class AdminInfoRow extends StatelessWidget {
   final String label;
   final String value;
   final Color? valueColor;
+  final VoidCallback? onTap;
 
   const AdminInfoRow({
     super.key,
     required this.label,
     required this.value,
     this.valueColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    Widget content = Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
@@ -71,19 +73,43 @@ class AdminInfoRow extends StatelessWidget {
           const Spacer(),
           Expanded(
             flex: 2,
-            child: Text(
-              value,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: valueColor ?? Colors.grey[800],
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              textAlign: TextAlign.end,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: Text(
+                    value,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: valueColor ?? Colors.grey[800],
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+                if (onTap != null) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.share,
+                    size: 16,
+                    color: valueColor ?? Colors.grey[600],
+                  ),
+                ],
+              ],
             ),
           ),
         ],
       ),
     );
+
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: onTap,
+        child: content,
+      );
+    }
+
+    return content;
   }
 }
