@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/checkin_provider.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/models/checkin_model.dart';
+import '../../../../shared/services/checkin_service.dart';
 import '../widgets/checkin_status_card.dart';
 import '../widgets/checkin_progress_summary.dart';
 import '../widgets/checkin_history_list.dart';
@@ -19,6 +20,7 @@ class CheckinScreen extends StatefulWidget {
 
 class _CheckinScreenState extends State<CheckinScreen> {
   static final _logger = Logger();
+
   @override
   void initState() {
     super.initState();
@@ -262,7 +264,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
     );
   }
 
-  void _navigateToCheckinForm(BuildContext context) {
+  void _navigateToCheckinForm(BuildContext context) async {
     final now = DateTime.now();
     if (now.weekday != 7) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -274,6 +276,25 @@ class _CheckinScreenState extends State<CheckinScreen> {
       );
       return;
     }
+
+    // Check if user has already checked in today
+    final authProvider =
+        Provider.of<app_auth.AuthProvider>(context, listen: false);
+    final user = authProvider.firebaseUser;
+    if (user != null) {
+      final hasCheckedInToday =
+          await CheckinService.hasCheckedInToday(user.uid);
+      if (hasCheckedInToday) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You can only check in once per day on Sundays.'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+        return;
+      }
+    }
+
     context.push('/checkin/form');
   }
 

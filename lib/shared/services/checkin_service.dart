@@ -64,6 +64,28 @@ class CheckinService {
     }
   }
 
+  /// Check if user has already checked in today (for Sunday validation)
+  static Future<bool> hasCheckedInToday(String userId) async {
+    try {
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+      final todayEnd = todayStart.add(const Duration(days: 1));
+
+      final querySnapshot = await _checkinsCollection
+          .where('userId', isEqualTo: userId)
+          .where('submittedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(todayStart))
+          .where('submittedAt', isLessThan: Timestamp.fromDate(todayEnd))
+          .where('status', isEqualTo: 'completed')
+          .limit(1)
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      _logger.e('Error checking if user checked in today: $e');
+      return false; // Return false on error to allow check-in attempt
+    }
+  }
+
   /// Get all check-ins for a user (paginated)
   static Future<List<CheckinModel>> getUserCheckins(
     String userId, {
@@ -166,6 +188,12 @@ class CheckinService {
       final now = DateTime.now();
       if (now.weekday != 7) {
         throw Exception('Check-ins can only be submitted on Sundays');
+      }
+
+      // Check if user has already checked in today
+      final hasCheckedInToday = await CheckinService.hasCheckedInToday(userId);
+      if (hasCheckedInToday) {
+        throw Exception('You can only check in once per day on Sundays');
       }
 
       // Get or create current week check-in

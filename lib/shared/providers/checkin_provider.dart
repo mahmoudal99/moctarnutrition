@@ -155,6 +155,13 @@ class CheckinProvider extends ChangeNotifier {
         return false;
       }
 
+      // Check if user has already checked in today
+      final hasCheckedInToday = await CheckinService.hasCheckedInToday(user.uid);
+      if (hasCheckedInToday) {
+        _setError('You can only check in once per day on Sundays');
+        return false;
+      }
+
       // Check if there's already a completed check-in for this week
       final existingCheckin =
           await CheckinService.getCurrentWeekCheckin(user.uid);

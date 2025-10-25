@@ -19,23 +19,17 @@ class CheckinStatusCard extends StatelessWidget {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: _getStatusGradient(),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 16),
-              _buildStatusContent(),
-              const SizedBox(height: 20),
-              _buildActionButton(),
-            ],
-          ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 16),
+            _buildStatusContent(),
+            const SizedBox(height: 20),
+            _buildActionButton(),
+          ],
         ),
       ),
     );
@@ -47,7 +41,7 @@ class CheckinStatusCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.black87.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -64,14 +58,14 @@ class CheckinStatusCard extends StatelessWidget {
               Text(
                 _getStatusTitle(),
                 style: AppTextStyles.heading4.copyWith(
-                  color: Colors.white,
+                  color: Colors.black87,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 _getStatusSubtitle(),
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.black87.withOpacity(0.9),
                 ),
               ),
             ],
@@ -99,14 +93,14 @@ class CheckinStatusCard extends StatelessWidget {
           children: [
             const Icon(
               Icons.check_circle,
-              color: Colors.white,
+              color: Colors.black87,
               size: 20,
             ),
             const SizedBox(width: 8),
             Text(
               'Check-in completed!',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: Colors.white,
+                color: Colors.black87,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -116,7 +110,7 @@ class CheckinStatusCard extends StatelessWidget {
         Text(
           'Great job staying consistent with your progress tracking',
           style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.black87.withOpacity(0.8),
           ),
         ),
         if (currentCheckin?.submittedAt != null) ...[
@@ -124,7 +118,7 @@ class CheckinStatusCard extends StatelessWidget {
           Text(
             'Submitted ${_formatDate(currentCheckin!.submittedAt!)}',
             style: AppTextStyles.caption.copyWith(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.black87.withOpacity(0.7),
             ),
           ),
         ],
@@ -140,14 +134,14 @@ class CheckinStatusCard extends StatelessWidget {
           children: [
             const Icon(
               Icons.warning_amber_rounded,
-              color: Colors.white,
+              color: Colors.black87,
               size: 20,
             ),
             const SizedBox(width: 8),
             Text(
               'Check-in overdue',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: Colors.white,
+                color: Colors.black87,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -157,20 +151,20 @@ class CheckinStatusCard extends StatelessWidget {
         Text(
           'You missed last week\'s check-in. Don\'t worry, you can still catch up!',
           style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.black87.withOpacity(0.8),
           ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.black87.withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             '${currentCheckin?.daysSinceSubmitted ?? 0} days overdue',
             style: AppTextStyles.caption.copyWith(
-              color: Colors.white,
+              color: Colors.black87,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -219,7 +213,7 @@ class CheckinStatusCard extends StatelessWidget {
           child: Text(
             nextCheckinText,
             style: AppTextStyles.body2.copyWith(
-              color: Colors.white,
+              color: Colors.black87,
             ),
           ),
         ),
@@ -229,13 +223,13 @@ class CheckinStatusCard extends StatelessWidget {
         width: double.infinity,
         child: OutlinedButton.icon(
           onPressed: onViewCheckin,
-          icon: const Icon(Icons.visibility, color: Colors.white),
+          icon: const Icon(Icons.visibility, color: Colors.black87),
           label: const Text(
             'View Check-in',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.black87),
           ),
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.white),
+            side: const BorderSide(color: Colors.black87),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
