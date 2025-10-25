@@ -23,17 +23,10 @@ class AdminUserAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       leading: IconButton(
         onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
-        icon: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            Icons.arrow_back_ios_outlined,
-            color: Colors.grey[700],
-            size: 20,
-          ),
+        icon: Icon(
+          Icons.arrow_back_ios_outlined,
+          color: Colors.grey[700],
+          size: 20,
         ),
       ),
       title: Column(

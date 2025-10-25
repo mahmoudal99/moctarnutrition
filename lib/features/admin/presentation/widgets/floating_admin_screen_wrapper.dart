@@ -66,8 +66,9 @@ class _FloatingAdminScreenWrapperState
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildBottomNavItem(0, 'Profile', 'assets/images/profile.svg'),
-          _buildBottomNavItem(1, 'Check-ins', 'assets/images/checkin.svg'),
-          _buildBottomNavItem(2, 'Meal Plan', 'assets/images/meal.svg'),
+          _buildBottomNavItem(1, 'Performance', 'assets/images/weights.png'),
+          _buildBottomNavItem(2, 'Check-ins', 'assets/images/checkin.svg'),
+          _buildBottomNavItem(3, 'Meal Plan', 'assets/images/meal.svg'),
         ],
       ),
     );
@@ -75,6 +76,8 @@ class _FloatingAdminScreenWrapperState
 
   Widget _buildBottomNavItem(int index, String label, String svgPath) {
     final isSelected = widget.currentIndex == index;
+    final isPng = svgPath.endsWith('.png');
+    
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -90,17 +93,26 @@ class _FloatingAdminScreenWrapperState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(
-                svgPath,
-                width: 20,
-                height: 20,
-                colorFilter: ColorFilter.mode(
-                  isSelected
-                      ? AppConstants.primaryColor
-                      : AppConstants.textTertiary,
-                  BlendMode.srcIn,
-                ),
-              ),
+              isPng
+                  ? Image.asset(
+                      svgPath,
+                      width: 20,
+                      height: 20,
+                      color: isSelected
+                          ? AppConstants.primaryColor
+                          : AppConstants.textTertiary,
+                    )
+                  : SvgPicture.asset(
+                      svgPath,
+                      width: 20,
+                      height: 20,
+                      colorFilter: ColorFilter.mode(
+                        isSelected
+                            ? AppConstants.primaryColor
+                            : AppConstants.textTertiary,
+                        BlendMode.srcIn,
+                      ),
+                    ),
               const SizedBox(height: 4),
               Text(
                 label,

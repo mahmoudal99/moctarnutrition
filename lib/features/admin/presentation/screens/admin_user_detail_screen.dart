@@ -3,6 +3,7 @@ import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/floating_admin_screen_wrapper.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_profile_screen.dart';
+import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_performance_screen.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_checkins_screen.dart';
 import 'package:champions_gym_app/features/admin/presentation/screens/admin_user_meal_plan_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -51,8 +52,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen> {
           onMealPlanCreated: _refreshMealPlanId,
         );
       case 1:
-        return AdminUserCheckinsScreen(user: widget.user);
+        return AdminUserPerformanceScreen(user: widget.user);
       case 2:
+        return AdminUserCheckinsScreen(user: widget.user);
+      case 3:
         return AdminUserMealPlanScreen(
           user: widget.user,
           mealPlanId: _mealPlanId,
