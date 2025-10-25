@@ -66,7 +66,7 @@ class _FloatingAdminScreenWrapperState
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildBottomNavItem(0, 'Profile', 'assets/images/profile.svg'),
-          _buildBottomNavItem(1, 'Performance', 'assets/images/weights.png'),
+          _buildBottomNavItem(1, 'Metrics', 'assets/images/weights.png'),
           _buildBottomNavItem(2, 'Check-ins', 'assets/images/checkin.svg'),
           _buildBottomNavItem(3, 'Meal Plan', 'assets/images/meal.svg'),
         ],
