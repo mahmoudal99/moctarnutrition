@@ -14,74 +14,64 @@ class AdminUserHeader extends StatelessWidget {
         '@${user.name?.toLowerCase().replaceAll(' ', '') ?? user.email.split('@').first}';
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: Border.all(color: Colors.white, width: 3),
-                  ),
-                  child: AvatarUtils.buildAvatar(
-                    photoUrl: user.photoUrl,
-                    name: user.name,
-                    email: user.email,
-                    radius: 25,
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.name ?? user.email,
-                        style: AppTextStyles.heading4.copyWith(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        handle,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.black54,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          _buildBadge(
-                              _roleLabel(user.role), _roleColor(user.role)),
-                          const SizedBox(width: 8),
-                          _buildBadge(
-                              _trainingProgramLabel(user.trainingProgramStatus),
-                              _trainingProgramColor(user.trainingProgramStatus)),
-                        ],
-                      ),
-                    ],
-                  ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
+              border: Border.all(color: Colors.white, width: 3),
             ),
-          ],
-        ),
+            child: AvatarUtils.buildAvatar(
+              photoUrl: user.photoUrl,
+              name: user.name,
+              email: user.email,
+              radius: 30,
+              fontSize: 18,
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                user.name ?? user.email,
+                style: AppTextStyles.heading5.copyWith(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                handle,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: Colors.black54,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildBadge(_roleLabel(user.role), _roleColor(user.role)),
+                  const SizedBox(width: 8),
+                  _buildBadge(_trainingProgramLabel(user.trainingProgramStatus),
+                      _trainingProgramColor(user.trainingProgramStatus)),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

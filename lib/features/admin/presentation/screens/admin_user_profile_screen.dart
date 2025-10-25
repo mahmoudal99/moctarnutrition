@@ -32,7 +32,7 @@ class AdminUserProfileScreen extends StatelessWidget {
           expandedHeight: 180,
           collapsedHeight: 60,
           pinned: true,
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xfffafafa),
           elevation: 0,
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -49,7 +49,7 @@ class AdminUserProfileScreen extends StatelessWidget {
         SliverToBoxAdapter(
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xfffafafa),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(0),
                 topRight: Radius.circular(0),
@@ -63,7 +63,7 @@ class AdminUserProfileScreen extends StatelessWidget {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               child: Column(
                 children: [
                   // Create Meal Plan button (if needed)
@@ -75,7 +75,7 @@ class AdminUserProfileScreen extends StatelessWidget {
 
                   if (mealPlanId == null) const SizedBox(height: 24),
 
-                  const SizedBox(height: 16),
+                  if (mealPlanId != null) const SizedBox(height: 16),
 
                   // Account Status
                   AdminInfoCard(
