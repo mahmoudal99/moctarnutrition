@@ -37,7 +37,7 @@ class ProfileUserCard extends StatelessWidget {
                   children: [
                     profilePhotoProvider.hasProfilePhoto
                         ? CircleAvatar(
-                            radius: 38,
+                            radius: 32,
                             backgroundImage:
                                 profilePhotoProvider.getProfilePhotoImage(),
                           )
@@ -45,7 +45,7 @@ class ProfileUserCard extends StatelessWidget {
                             photoUrl: user.photoUrl,
                             name: user.name,
                             email: user.email,
-                            radius: 38,
+                            radius: 32,
                             fontSize: 18,
                           ),
                     if (authUser.emailVerified)
@@ -97,8 +97,11 @@ class ProfileUserCard extends StatelessWidget {
                                       fontWeight: FontWeight.bold)),
                             ),
                           IconButton(
-                            icon: const Icon(Icons.edit,
-                                color: AppConstants.textTertiary),
+                            icon: const Icon(
+                              Icons.edit,
+                              color: AppConstants.textTertiary,
+                              size: 18,
+                            ),
                             onPressed: () {
                               HapticFeedback.lightImpact();
                               _showEditProfileDialog(
