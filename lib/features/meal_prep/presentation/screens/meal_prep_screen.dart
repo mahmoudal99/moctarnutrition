@@ -148,8 +148,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       builder: (context, authProvider, mealPlanProvider, child) {
         // Get the appropriate calorie target
         final user = authProvider.userModel;
-        final targetCalories = user?.preferences.targetCalories ?? 
-            user?.preferences.calculatedCalorieTargets?.dailyTarget ?? 2000;
+        final targetCalories = user?.preferences.targetCalories ??
+            user?.preferences.calculatedCalorieTargets?.dailyTarget ??
+            2000;
         // Handle AuthProvider loading state
         if (authProvider.isLoading) {
           return const MealPlanLoadingState();
@@ -181,8 +182,15 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         // If we have a meal plan, show it
         if (mealPlanProvider.mealPlan != null) {
           return Scaffold(
+            backgroundColor: AppConstants.surfaceColor,
             appBar: AppBar(
-              title: const Text('Meal Plan'),
+              backgroundColor: AppConstants.surfaceColor,
+              title: Text(
+                'Meal Plan',
+                style: AppTextStyles.heading5.copyWith(
+                  color: AppConstants.textPrimary,
+                ),
+              ),
               actions: [
                 IconButton(
                   onPressed: () {
@@ -226,8 +234,15 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
 
   Widget _buildErrorState(String error) {
     return Scaffold(
+      backgroundColor: AppConstants.surfaceColor,
       appBar: AppBar(
-        title: const Text('Meal Plan'),
+        backgroundColor: AppConstants.surfaceColor,
+        title: Text(
+          'Meal Plan',
+          style: AppTextStyles.heading5.copyWith(
+            color: AppConstants.textPrimary,
+          ),
+        ),
       ),
       body: Center(
         child: Padding(
