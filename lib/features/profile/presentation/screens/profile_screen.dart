@@ -30,13 +30,6 @@ class ProfileScreen extends StatelessWidget {
         final user = authProvider.userModel;
         final authUser = authProvider.firebaseUser;
 
-        // Debug logging
-        _logger.d('Profile Screen - AuthProvider state:');
-        _logger.d('  isAuthenticated: ${authProvider.isAuthenticated}');
-        _logger.d('  isLoading: ${authProvider.isLoading}');
-        _logger.d('  userModel: ${user?.name ?? 'null'}');
-        _logger.d('  firebaseUser: ${authUser?.email ?? 'null'}');
-
         if (user == null || authUser == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
@@ -58,6 +51,7 @@ class ProfileScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               children: [
+                const ProfileSectionHeader(title: 'Settings'),
                 ProfileUserCard(
                   user: user,
                   authUser: authUser,
@@ -68,7 +62,6 @@ class ProfileScreen extends StatelessWidget {
                   ProfileQuickAccessGrid(items: quickAccess),
                 ],
                 const SizedBox(height: 24),
-                const ProfileSectionHeader(title: 'Settings'),
                 // Only show notification and reminder toggles for non-admin users
                 if (user.role != UserRole.admin) ...[
                   const NotificationsToggle(),
@@ -79,17 +72,11 @@ class ProfileScreen extends StatelessWidget {
                         item.label != 'Notifications' &&
                         item.label != 'Reminders')
                     .map((item) => ProfileSettingsTile(item: item)),
-                const SizedBox(height: 24),
-                const ProfileSectionHeader(title: 'Privacy'),
                 ...privacy.map((item) => ProfileSettingsTile(item: item)),
-                const SizedBox(height: 24),
-                const ProfileSectionHeader(title: 'Support'),
                 ...support.map((item) => ProfileSettingsTile(item: item)),
 
                 // Debug Settings (only visible in debug mode)
                 if (kDebugMode) ...[
-                  const SizedBox(height: 24),
-                  const ProfileSectionHeader(title: 'Debug'),
                   ListTile(
                     leading: CircleAvatar(
                       backgroundColor: AppConstants.errorColor.withOpacity(0.1),

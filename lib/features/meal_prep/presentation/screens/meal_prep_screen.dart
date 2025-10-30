@@ -182,9 +182,9 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         // If we have a meal plan, show it
         if (mealPlanProvider.mealPlan != null) {
           return Scaffold(
-            backgroundColor: AppConstants.surfaceColor,
+            backgroundColor: AppConstants.backgroundColor,
             appBar: AppBar(
-              backgroundColor: AppConstants.surfaceColor,
+              backgroundColor: AppConstants.backgroundColor,
               title: Text(
                 'Meal Plan',
                 style: AppTextStyles.heading5.copyWith(

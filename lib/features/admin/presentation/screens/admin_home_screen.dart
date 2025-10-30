@@ -490,7 +490,7 @@ class _SalesCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Total balance',
+                Text('Total Revenue',
                     style: AppTextStyles.bodyMedium
                         .copyWith(color: Colors.white70)),
                 Text(totalBalance,

@@ -286,19 +286,19 @@ class _MealPlanViewState extends State<MealPlanView>
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildPillNutritionItem(
-            Icons.local_fire_department,
+            "scale.png",
             '${totalCalories.toInt()}',
             AppConstants.accentColor,
           ),
           const SizedBox(width: AppConstants.spacingM),
           _buildPillNutritionItem(
-            Icons.fitness_center,
+            "fish.png",
             '${totalProtein.toStringAsFixed(1)}g',
             AppConstants.successColor,
           ),
           const SizedBox(width: AppConstants.spacingM),
           _buildPillNutritionItem(
-            Icons.grain,
+            "bread.png",
             '${totalCarbs.toStringAsFixed(1)}g',
             AppConstants.warningColor,
           ),
@@ -307,15 +307,11 @@ class _MealPlanViewState extends State<MealPlanView>
     );
   }
 
-  Widget _buildPillNutritionItem(IconData icon, String value, Color color) {
+  Widget _buildPillNutritionItem(String icon, String value, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: color,
-        ),
+        Image.asset("assets/images/$icon", height: 28, width: 28, color: color,),
         const SizedBox(width: 4),
         Text(
           value,

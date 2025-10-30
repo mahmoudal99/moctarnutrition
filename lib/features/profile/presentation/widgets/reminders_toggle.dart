@@ -148,7 +148,11 @@ class _RemindersToggleState extends State<RemindersToggle> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.alarm, color: AppConstants.textSecondary),
+      leading: const Icon(
+        Icons.alarm,
+        color: Colors.black,
+        size: 16,
+      ),
       title: Text(
         'Reminders',
         style: AppTextStyles.bodyMedium,

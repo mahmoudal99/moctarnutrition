@@ -27,7 +27,7 @@ class ProfileUserCard extends StatelessWidget {
       builder: (context, profilePhotoProvider, child) {
         return Card(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 2,
           child: Padding(
             padding: const EdgeInsets.all(20),

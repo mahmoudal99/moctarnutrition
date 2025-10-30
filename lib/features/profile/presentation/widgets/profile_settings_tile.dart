@@ -11,11 +11,20 @@ class ProfileSettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(item.icon, color: AppConstants.textSecondary),
-      title: Text(item.label, style: AppTextStyles.bodyMedium),
-      trailing: item.trailing,
-      onTap: item.onTap,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ListTile(
+        tileColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        leading: Icon(
+          item.icon,
+          color: Colors.black,
+          size: 16,
+        ),
+        title: Text(item.label, style: AppTextStyles.bodyMedium),
+        trailing: item.trailing,
+        onTap: item.onTap,
+      ),
     );
   }
 }

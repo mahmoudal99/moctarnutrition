@@ -15,7 +15,7 @@ class ProfileSectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8, left: 2),
       child: Text(
         title,
-        style: AppTextStyles.heading5.copyWith(
+        style: AppTextStyles.heading3.copyWith(
           fontWeight: FontWeight.w600,
         ),
       ),

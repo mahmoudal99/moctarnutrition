@@ -12,12 +12,12 @@ class ProfileQuickAccessGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.count(
-      crossAxisCount: 2,
+      crossAxisCount: 1,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 14,
       crossAxisSpacing: 14,
-      childAspectRatio: 1.7,
+      childAspectRatio: 5,
       children: items.map((item) => QuickAccessTile(item: item)).toList(),
     );
   }
@@ -34,7 +34,7 @@ class QuickAccessTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 1,
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -43,7 +43,7 @@ class QuickAccessTile extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(item.icon, color: AppConstants.primaryColor, size: 28),
+              Icon(item.icon, color: AppConstants.primaryColor, size: 16),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
