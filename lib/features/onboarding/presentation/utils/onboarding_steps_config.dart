@@ -111,6 +111,13 @@ class OnboardingStepsConfig {
         highlightedWords: ['Cooking'],
       ),
       OnboardingStep(
+        title: 'Cheat Day',
+        subtitle: 'Pick a weekly day for flexibility',
+        icon: "calendar.json",
+        color: AppConstants.secondaryColor,
+        highlightedWords: ['Cheat', 'Day'],
+      ),
+      OnboardingStep(
         title: 'Workout Previews',
         subtitle: 'Get workout previews on training days',
         icon: "run.json",

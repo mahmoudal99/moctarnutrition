@@ -211,6 +211,9 @@ class UserPreferences {
   // Batch Cooking Preferences
   final Map<String, dynamic>? batchCookingPreferences;
 
+  // Cheat Day Preference
+  final String? cheatDay; // e.g., "Monday"
+
   // Protein Targets
   final Map<String, dynamic>? proteinTargets;
 
@@ -241,6 +244,7 @@ class UserPreferences {
     this.allergies = const [],
     this.mealTimingPreferences,
     this.batchCookingPreferences,
+    this.cheatDay,
     this.proteinTargets,
     this.calorieTargets,
   });
@@ -284,6 +288,7 @@ class UserPreferences {
           json['mealTimingPreferences'] as Map<String, dynamic>?,
       batchCookingPreferences:
           json['batchCookingPreferences'] as Map<String, dynamic>?,
+      cheatDay: json['cheatDay'] as String?,
       proteinTargets: json['proteinTargets'] as Map<String, dynamic>?,
       calorieTargets: json['calorieTargets'] as Map<String, dynamic>?,
     );
@@ -314,6 +319,7 @@ class UserPreferences {
       'allergies': allergies,
       'mealTimingPreferences': mealTimingPreferences,
       'batchCookingPreferences': batchCookingPreferences,
+      'cheatDay': cheatDay,
       'proteinTargets': proteinTargets,
       'calorieTargets': calorieTargets,
     };
@@ -343,6 +349,7 @@ class UserPreferences {
     List<Map<String, dynamic>>? allergies,
     Map<String, dynamic>? mealTimingPreferences,
     Map<String, dynamic>? batchCookingPreferences,
+    String? cheatDay,
     Map<String, dynamic>? proteinTargets,
     Map<String, dynamic>? calorieTargets,
   }) {
@@ -375,6 +382,7 @@ class UserPreferences {
           mealTimingPreferences ?? this.mealTimingPreferences,
       batchCookingPreferences:
           batchCookingPreferences ?? this.batchCookingPreferences,
+      cheatDay: cheatDay ?? this.cheatDay,
       proteinTargets: proteinTargets ?? this.proteinTargets,
       calorieTargets: calorieTargets ?? this.calorieTargets,
     );
@@ -402,6 +410,7 @@ class UserPreferences {
       allergies: [],
       mealTimingPreferences: null,
       batchCookingPreferences: null,
+      cheatDay: null,
       proteinTargets: null,
       calorieTargets: null,
     );

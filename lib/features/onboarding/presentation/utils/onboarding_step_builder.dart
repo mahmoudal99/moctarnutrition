@@ -18,6 +18,7 @@ import '../steps/onboarding_meal_timing_step.dart';
 import '../steps/onboarding_batch_cooking_step.dart';
 import '../steps/onboarding_workout_notifications_step.dart';
 import '../steps/onboarding_rating_step.dart';
+import '../steps/onboarding_cheat_day_step.dart';
 
 class OnboardingStepBuilder {
   static Widget buildStepContent({
@@ -38,6 +39,7 @@ class OnboardingStepBuilder {
     required Function(List<AllergyItem>) onAllergiesChanged,
     required Function(MealTimingPreferences?) onMealTimingChanged,
     required Function(BatchCookingPreferences?) onBatchCookingChanged,
+    required Function(String?) onCheatDayChanged,
     required Function(TimeOfDay?) onTimeChanged,
     required Function(bool) onNotificationsChanged,
     required VoidCallback onComplete,
@@ -153,13 +155,18 @@ class OnboardingStepBuilder {
           onPreferencesChanged: onBatchCookingChanged,
         );
       case 15:
+        return OnboardingCheatDayStep(
+          selectedCheatDay: data.cheatDay,
+          onCheatDayChanged: onCheatDayChanged,
+        );
+      case 16:
         return OnboardingWorkoutNotificationsStep(
           selectedTime: data.workoutNotificationTime,
           notificationsEnabled: data.workoutNotificationsEnabled,
           onTimeChanged: onTimeChanged,
           onNotificationsChanged: onNotificationsChanged,
         );
-      case 16:
+      case 17:
         return const OnboardingRatingStep();
       default:
         return const SizedBox.shrink();
@@ -205,6 +212,7 @@ class OnboardingData {
   List<AllergyItem> selectedAllergies = [];
   MealTimingPreferences? mealTimingPreferences;
   BatchCookingPreferences? batchCookingPreferences;
+  String? cheatDay; // e.g., "Monday"
   TimeOfDay workoutNotificationTime = const TimeOfDay(hour: 9, minute: 0);
   bool workoutNotificationsEnabled = false;
   int weeklyWorkoutDays = 3;

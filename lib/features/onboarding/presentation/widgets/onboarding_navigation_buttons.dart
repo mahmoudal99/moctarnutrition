@@ -28,12 +28,12 @@ class OnboardingNavigationButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Hide navigation buttons for final step only (but not rating step)
-    if (currentPage == totalSteps - 1 && currentPage != 16) {
+    if (currentPage == totalSteps - 1 && currentPage != 17) {
       return const SizedBox.shrink();
     }
 
-    // Show notification-specific buttons for workout notifications step (step 15)
-    if (currentPage == 15) {
+    // Show notification-specific buttons for workout notifications step (step 16)
+    if (currentPage == 16) {
       return AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(
@@ -108,11 +108,12 @@ class OnboardingNavigationButtons extends StatelessWidget {
                 key: ValueKey(currentPage),
                 height: 52,
                 child: CustomButton(
-                  text: currentPage == totalSteps - 1 && currentPage != 16 ? 'Get Started' : 'Next',
+                  type: ButtonType.auth,
+                  text: currentPage == totalSteps - 1 && currentPage != 17 ? 'Get Started' : 'Next',
                   onPressed: isNextEnabled
                       ? () {
                           HapticFeedback.mediumImpact();
-                          if (currentPage == totalSteps - 1 && currentPage != 16) {
+                          if (currentPage == totalSteps - 1 && currentPage != 17) {
                             onComplete?.call();
                           } else {
                             onNext();

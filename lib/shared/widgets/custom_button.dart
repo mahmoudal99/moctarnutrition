@@ -88,8 +88,9 @@ class CustomButton extends StatelessWidget {
         return OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppConstants.primaryColor,
-            side: const BorderSide(color: AppConstants.primaryColor),
+            foregroundColor: AppConstants.buttonGrey,
+            backgroundColor: AppConstants.buttonGrey,
+            side: const BorderSide(color: AppConstants.buttonGrey),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
             ),
@@ -121,8 +122,10 @@ class CustomButton extends StatelessWidget {
         return ElevatedButton(
           onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black, // Black color
-            foregroundColor: AppConstants.surfaceColor, // White text
+            backgroundColor: Colors.black,
+            // Black color
+            foregroundColor: AppConstants.surfaceColor,
+            // White text
             disabledBackgroundColor: AppConstants.textTertiary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -150,9 +153,11 @@ class CustomButton extends StatelessWidget {
       );
     }
 
-    final textColor = type == ButtonType.outline || type == ButtonType.text
-        ? AppConstants.primaryColor
-        : AppConstants.surfaceColor;
+    final textColor = type == ButtonType.outline
+        ? Colors.black
+        : type == ButtonType.text
+            ? AppConstants.primaryColor
+            : AppConstants.surfaceColor;
 
     if (icon != null) {
       return Row(

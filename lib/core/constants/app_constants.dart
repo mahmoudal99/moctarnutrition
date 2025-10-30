@@ -25,6 +25,7 @@ class AppConstants {
 
   // Border Colors
   static const Color borderColor = Color(0xFFE5E7EB);
+  static const Color buttonGrey = Color(0xffE0E0E0);
 
   // Gradient Colors
   static const LinearGradient primaryGradient = LinearGradient(

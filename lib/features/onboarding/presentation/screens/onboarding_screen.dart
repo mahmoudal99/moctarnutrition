@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:champions_gym_app/shared/services/calorie_calculation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,6 +50,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -162,6 +164,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           _data.batchCookingPreferences = preferences;
                         });
                       },
+                      onCheatDayChanged: (day) {
+                        setState(() {
+                          _data.cheatDay = day;
+                        });
+                      },
                       onTimeChanged: (time) {
                         setState(() {
                           _data.workoutNotificationTime =
@@ -193,7 +200,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
               onNext: () {
                 HapticFeedback.mediumImpact();
-                if (_currentPage == 16) {
+                if (_currentPage == 17) {
                   // Show rating dialog for rating step
                   _showRatingDialog(context);
                 } else {
@@ -321,8 +328,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isWeeklyWorkoutGoalStep = _currentPage == 11;
     final isFoodPreferencesStep = _currentPage == 12;
     final isAllergiesStep = _currentPage == 13;
-    final isWorkoutNotificationsStep = _currentPage == 15;
-    final isRatingStep = _currentPage == 16;
+    final isWorkoutNotificationsStep = _currentPage == 16;
+    final isRatingStep = _currentPage == 17;
 
     if (!isDietaryStep &&
         !isWorkoutStep &&
@@ -431,6 +438,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       allergies: allergiesJson,
       mealTimingPreferences: mealTimingJson,
       batchCookingPreferences: batchCookingJson,
+      cheatDay: _data.cheatDay,
     );
 
     final user = UserModel(
