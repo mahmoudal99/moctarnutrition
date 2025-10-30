@@ -1,7 +1,5 @@
+import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'dart:math' as math;
 
 class OnboardingWelcomeStep extends StatefulWidget {
   const OnboardingWelcomeStep({super.key});
@@ -10,249 +8,187 @@ class OnboardingWelcomeStep extends StatefulWidget {
   State<OnboardingWelcomeStep> createState() => _OnboardingWelcomeStepState();
 }
 
-class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep>
-    with TickerProviderStateMixin {
-  late AnimationController _floatController;
-  late AnimationController _fadeController;
-  late Animation<double> _floatAnimation;
-  late Animation<double> _fadeAnimation;
-
-  final List<String> _transformationImages = [
-    'assets/images/moc_one.jpg',
-    'assets/images/moc_two.jpg',
-    'assets/images/moc_three.jpg',
-    'assets/images/moc_four.png',
-    'assets/images/moc_five.png',
-    'assets/images/moc_six.png',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _floatController = AnimationController(
-      duration: const Duration(seconds: 4),
-      vsync: this,
-    );
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    _floatAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _floatController,
-      curve: Curves.easeInOut,
-    ));
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    ));
-
-    // Start animations
-    _floatController.repeat(reverse: true);
-    _fadeController.forward();
-  }
-
-  @override
-  void dispose() {
-    _floatController.dispose();
-    _fadeController.dispose();
-    super.dispose();
-  }
-
+class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Transformation Images Display
-          SizedBox(
-            height: 350,
-            width: double.infinity,
-            child: Stack(
-              children: [
-                // Floating transformation images
-                ...List.generate(_transformationImages.length, (index) {
-                  return _FloatingImage(
-                    imagePath: _transformationImages[index],
-                    index: index,
-                    floatAnimation: _floatAnimation,
-                    fadeAnimation: _fadeAnimation,
-                  );
-                }),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
-          // Lifestyle Transformation Message
-          FadeTransition(
-            opacity: _fadeAnimation,
-            child: Column(
-              children: [
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Transform Your Body,\n',
-                        style: GoogleFonts.nunitoSans(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: AppConstants.textPrimary,
-                          height: 1.2,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'Transform Your Life',
-                        style: GoogleFonts.nunitoSans(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: AppConstants.primaryColor,
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Join thousands who have discovered the power of\npersonalized nutrition and fitness coaching',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunitoSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: AppConstants.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color: AppConstants.primaryColor.withOpacity(0.3),
-                      width: 1,
+      child: Center(
+        child: SizedBox(
+          height: 540,
+          width: double.infinity,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Use full width minus horizontal margins (6 left + 6 right)
+              final double maxW = constraints.maxWidth;
+              final double cardWidth = (maxW - 100).clamp(0, maxW);
+              const double cardHeight = 120;
+
+              final double maxH = constraints.maxHeight;
+
+              final double leftX = 1; // align with horizontal margin
+              const double centerShiftX = 40; // push middle card to the right
+              final double centerX = (maxW - cardWidth) / 2 + centerShiftX;
+
+              final double topY = 0;
+              final double centerY = (maxH - cardHeight) / 2;
+              final double bottomY = maxH - cardHeight / 1;
+
+              final Offset p1 =
+                  Offset(leftX + cardWidth, topY + cardHeight / 2);
+              final Offset p2 =
+                  Offset(centerX + cardWidth / 2, centerY + cardHeight / 2);
+              final Offset p3 =
+                  Offset(leftX + cardWidth, bottomY + cardHeight / 2);
+
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Dotted road connecting cards
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _DottedRoadPainter(points: [p1, p2, p3]),
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.star,
-                        color: AppConstants.primaryColor,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          'Your journey to a healthier you starts here',
-                          style: GoogleFonts.nunitoSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppConstants.primaryColor,
+
+                  // Step numbers outside the cards
+                  Positioned(
+                    left: leftX,
+                    top: topY - 24,
+                    child: Text(
+                      '1.',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                  Positioned(
+                    left: centerX,
+                    top: centerY - 24,
+                    child: Text(
+                      '2.',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                  Positioned(
+                    left: leftX,
+                    top: bottomY - 24,
+                    child: Text(
+                      '3.',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+
+                  // Cards
+                  Positioned(
+                    left: leftX,
+                    top: topY,
+                    child: _StepCard(stepNumber: 1, width: cardWidth, cardMessage: "Define your goals tell us what success looks like to you.",),
+                  ),
+                  Positioned(
+                    left: centerX,
+                    top: centerY,
+                    child: _StepCard(stepNumber: 2, width: cardWidth, cardMessage: "Create your account it only takes a minute.",),
+                  ),
+                  Positioned(
+                    left: leftX,
+                    top: bottomY,
+                    child: _StepCard(stepNumber: 3, width: cardWidth, cardMessage: "Check in with Moctar we’ll tailor your plan to your goals.",),
+                  ),
+                ],
+              );
+            },
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _FloatingImage extends StatelessWidget {
-  final String imagePath;
-  final int index;
-  final Animation<double> floatAnimation;
-  final Animation<double> fadeAnimation;
+class _StepCard extends StatelessWidget {
+  final int stepNumber;
+  final double width;
+  final String cardMessage;
 
-  const _FloatingImage({
-    required this.imagePath,
-    required this.index,
-    required this.floatAnimation,
-    required this.fadeAnimation,
-  });
+  const _StepCard({required this.stepNumber, required this.width, required this.cardMessage});
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = 350.0;
-    final availableWidth = screenWidth - 48.0; // Account for 24px padding on each side from OnboardingStepPage
-    
-    final sizes = [120.0, 110.0, 130.0, 115.0, 125.0, 120.0];
-    final rotations = [0.1, -0.15, 0.2, -0.1, 0.15, -0.2];
-    
-    final size = sizes[index % sizes.length];
-    final rotation = rotations[index % rotations.length];
-    
-    // Simple balanced positioning
-    final positions = [
-      Offset(20, screenHeight * 0.1), // Top left
-      Offset(availableWidth - size - 20, screenHeight * 0.05), // Top right
-      Offset(10, screenHeight * 0.35), // Middle left
-      Offset(availableWidth - size - 10, screenHeight * 0.3), // Middle right
-      Offset(25, screenHeight * 0.6), // Bottom left
-      Offset(availableWidth - size - 25, screenHeight * 0.55), // Bottom right
-    ];
-    
-    final position = positions[index % positions.length];
-    
-    // Create floating animation offset
-    final floatOffset = floatAnimation.value * 10 * math.sin(index * 0.5);
-    
-    return Positioned(
-      left: position.dx,
-      top: position.dy + floatOffset,
-      child: FadeTransition(
-        opacity: fadeAnimation,
-        child: Transform.rotate(
-          angle: rotation + (floatAnimation.value * 0.1),
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: AppConstants.primaryColor.withOpacity(0.25),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 15,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                width: size,
-                height: size,
-              ),
-            ),
+    return Container(
+      width: width,
+      height: 100,
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Center(
+          child: Text(
+            cardMessage,
+            textAlign: TextAlign.center,
+            maxLines: 5,
+            style: AppTextStyles.bodySmall,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
     );
+  }
+}
+
+class _DottedRoadPainter extends CustomPainter {
+  final List<Offset> points;
+  final double dotRadius;
+  final double gap;
+
+  _DottedRoadPainter({
+    required this.points,
+    this.dotRadius = 2,
+    this.gap = 8,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (points.length < 2) return;
+
+    final paint = Paint()
+      ..color = Colors.grey.shade400
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < points.length - 1; i++) {
+      final start = points[i];
+      final end = points[i + 1];
+      final segment = end - start;
+      final length = segment.distance;
+      final direction = segment / length;
+
+      double traveled = 0;
+      while (traveled <= length) {
+        final center = start + direction * traveled;
+        canvas.drawCircle(center, dotRadius, paint);
+        traveled += dotRadius * 2 + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DottedRoadPainter oldDelegate) {
+    return oldDelegate.points != points ||
+        oldDelegate.dotRadius != dotRadius ||
+        oldDelegate.gap != gap;
   }
 }
