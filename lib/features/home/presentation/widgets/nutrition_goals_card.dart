@@ -150,21 +150,21 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
                     ),
                   ),
 
-                  // Light grey background circle for icon
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                  // // Light grey background circle for icon
+                  // Container(
+                  //   width: 24,
+                  //   height: 24,
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.grey.shade100,
+                  //     shape: BoxShape.circle,
+                  //   ),
+                  // ),
 
                   // Icon in center
-                  Icon(
-                    macroData.icon,
+                  Image.asset(
+                    "assets/images/${macroData.icon}",
                     color: macroData.color,
-                    size: 14,
+                    height: 32,
                   ),
                 ],
               ),
@@ -204,28 +204,28 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
         return MacroData(
           grams: (widget.macros.protein.grams - consumedProtein).round(),
           label: 'Protein left',
-          icon: Icons.restaurant, // Fork and knife icon
+          icon: "fish.png", // Fork and knife icon
           color: Colors.red,
         );
       case 1:
         return MacroData(
           grams: (widget.macros.carbs.grams - consumedCarbs).round(),
           label: 'Carbs left',
-          icon: Icons.grain, // Wheat/grain icon
+          icon: "bread.png", // Fork and knife icon
           color: Colors.orange,
         );
       case 2:
         return MacroData(
           grams: (widget.macros.fat.grams - consumedFat).round(),
           label: 'Fat left',
-          icon: Icons.water_drop, // Water drop/avocado icon
+          icon: "fish.png", // Fork and knife icon
           color: Colors.blue,
         );
       default:
         return MacroData(
           grams: 0,
           label: '',
-          icon: Icons.circle,
+          icon: "fish.png", // Fork and knife icon
           color: Colors.black,
         );
     }
@@ -260,7 +260,7 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
 class MacroData {
   final int grams;
   final String label;
-  final IconData icon;
+  final String icon;
   final Color color;
 
   MacroData({
