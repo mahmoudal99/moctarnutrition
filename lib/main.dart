@@ -17,7 +17,7 @@ import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/onboarding/presentation/screens/protein_calculation_screen.dart';
 import 'features/subscription/presentation/screens/subscription_screen.dart';
 import 'features/meal_prep/presentation/screens/meal_prep_screen.dart';
-import 'features/profile/presentation/screens/profile_screen.dart';
+import 'features/profile/presentation/screens/settings_screen.dart';
 import 'features/checkin/presentation/screens/checkin_screen.dart';
 import 'features/checkin/presentation/screens/checkin_form_screen.dart';
 import 'features/checkin/presentation/screens/checkin_details_screen.dart';

@@ -148,6 +148,8 @@ class _RemindersToggleState extends State<RemindersToggle> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      contentPadding: EdgeInsets.zero,
+      tileColor: Colors.white,
       title: Text(
         'Reminders',
           style: AppTextStyles.bodyMedium

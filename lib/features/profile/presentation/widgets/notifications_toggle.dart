@@ -51,6 +51,8 @@ class _NotificationsToggleState extends State<NotificationsToggle> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      contentPadding: EdgeInsets.zero,
+      tileColor: AppConstants.surfaceColor,
       title: Text(
         'Notifications',
         style: AppTextStyles.bodyMedium,
