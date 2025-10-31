@@ -148,17 +148,12 @@ class _RemindersToggleState extends State<RemindersToggle> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(
-        Icons.alarm,
-        color: Colors.black,
-        size: 16,
-      ),
       title: Text(
         'Reminders',
-        style: AppTextStyles.bodyMedium,
+          style: AppTextStyles.bodyMedium
       ),
       subtitle: Text(
-        'Weekly check-in reminders (Sundays at 9 AM)',
+        'Weekly check-in reminders\n(Sundays at 9 AM)',
         style: AppTextStyles.caption.copyWith(
           color: AppConstants.textTertiary,
         ),

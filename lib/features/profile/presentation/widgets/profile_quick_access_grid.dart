@@ -11,14 +11,14 @@ class ProfileQuickAccessGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 1,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 14,
-      crossAxisSpacing: 14,
-      childAspectRatio: 5,
-      children: items.map((item) => QuickAccessTile(item: item)).toList(),
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: items
+          .map((item) => QuickAccessTile(item: item))
+          .toList(growable: false),
     );
   }
 }
@@ -33,34 +33,37 @@ class QuickAccessTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 1,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: item.onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(item.icon, color: AppConstants.primaryColor, size: 16),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      item.label,
-                      style: AppTextStyles.bodySmall
-                          .copyWith(fontWeight: FontWeight.w600),
-                    ),
-                  ],
+    final Widget? trailing = item.trailing ??
+        (item.badge != null
+            ? Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(999),
                 ),
-              ),
-            ],
-          ),
+                child: Text(
+                  item.badge!,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              )
+            : null);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ListTile(
+        tileColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        leading: Icon(item.icon, color: Colors.black, size: 16),
+        title: Text(
+          item.label,
+          style: AppTextStyles.bodyMedium,
         ),
+        trailing: trailing,
+        onTap: item.onTap,
       ),
     );
   }
@@ -71,11 +74,13 @@ class QuickAccessItem {
   final IconData icon;
   final String? badge;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
   const QuickAccessItem({
     required this.label,
     required this.icon,
     this.badge,
     this.onTap,
+    this.trailing,
   });
 }

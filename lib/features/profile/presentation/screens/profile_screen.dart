@@ -45,6 +45,58 @@ class ProfileScreen extends StatelessWidget {
         final privacy = ProfileDataProvider.getPrivacyItems(context);
         final support = ProfileDataProvider.getSupportItems(context);
 
+        void showNotificationsSheet() {
+          showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            builder: (sheetContext) {
+              final viewInsets = MediaQuery.of(sheetContext).viewInsets;
+              final padding = MediaQuery.of(sheetContext).padding;
+
+              return SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    top: 12,
+                    bottom: viewInsets.bottom + padding.bottom + 100,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: AppConstants.textTertiary.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Notification Preferences',
+                        style: Theme.of(sheetContext).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      const NotificationsToggle(),
+                      const SizedBox(height: 12),
+                      const RemindersToggle(),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
+
         return Scaffold(
           backgroundColor: AppConstants.backgroundColor,
           body: SafeArea(
@@ -61,11 +113,14 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   ProfileQuickAccessGrid(items: quickAccess),
                 ],
-                const SizedBox(height: 24),
-                // Only show notification and reminder toggles for non-admin users
                 if (user.role != UserRole.admin) ...[
-                  const NotificationsToggle(),
-                  const RemindersToggle(),
+                  ProfileSettingsTile(
+                    item: SettingsItem(
+                      label: 'Notifications',
+                      icon: Icons.notifications_outlined,
+                      onTap: showNotificationsSheet,
+                    ),
+                  ),
                 ],
                 ...settings
                     .where((item) =>
