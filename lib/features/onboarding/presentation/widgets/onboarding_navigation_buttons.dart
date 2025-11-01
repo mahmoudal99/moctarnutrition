@@ -109,7 +109,11 @@ class OnboardingNavigationButtons extends StatelessWidget {
                 height: 52,
                 child: CustomButton(
                   type: ButtonType.auth,
-                  text: currentPage == totalSteps - 1 && currentPage != 17 ? 'Get Started' : 'Next',
+                  text: currentPage == totalSteps - 1 && currentPage != 17
+                      ? 'Get Started'
+                      : currentPage == 0
+                          ? "Let's Begin"
+                          : 'Next',
                   onPressed: isNextEnabled
                       ? () {
                           HapticFeedback.mediumImpact();

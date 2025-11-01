@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +11,35 @@ class OnboardingWelcomeStep extends StatefulWidget {
 }
 
 class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
+  final List<bool> _cardVisible = [false, false, false];
+  final List<Timer> _timers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    const int baseDelayMs = 200;
+    const int stepDelayMs = 1000;
+
+    for (int i = 0; i < _cardVisible.length; i++) {
+      final timer =
+          Timer(Duration(milliseconds: baseDelayMs + stepDelayMs * i), () {
+        if (!mounted) return;
+        setState(() {
+          _cardVisible[i] = true;
+        });
+      });
+      _timers.add(timer);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final timer in _timers) {
+      timer.cancel();
+    }
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -44,13 +75,6 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // Dotted road connecting cards
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _DottedRoadPainter(points: [p1, p2, p3]),
-                    ),
-                  ),
-
                   // Step numbers outside the cards
                   Positioned(
                     left: leftX,
@@ -87,17 +111,41 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                   Positioned(
                     left: leftX,
                     top: topY,
-                    child: _StepCard(stepNumber: 1, width: cardWidth, cardMessage: "Define your goals tell us what success looks like to you.",),
+                    child: _StepCard(
+                      stepNumber: 1,
+                      width: cardWidth,
+                      icon: "targeting.png",
+                      isVisible: _cardVisible[0],
+                      highlightWords: ['goals'],
+                      cardMessage:
+                          "Define your goals tell us what success looks like to you.",
+                    ),
                   ),
                   Positioned(
                     left: centerX,
                     top: centerY,
-                    child: _StepCard(stepNumber: 2, width: cardWidth, cardMessage: "Create your account it only takes a minute.",),
+                    child: _StepCard(
+                      stepNumber: 2,
+                      icon: "user.png",
+                      width: cardWidth,
+                      isVisible: _cardVisible[1],
+                      highlightWords: ["account"],
+                      cardMessage:
+                          "Create your account it only takes a minute.",
+                    ),
                   ),
                   Positioned(
                     left: leftX,
                     top: bottomY,
-                    child: _StepCard(stepNumber: 3, width: cardWidth, cardMessage: "Check in with Moctar we’ll tailor your plan to your goals.",),
+                    child: _StepCard(
+                      stepNumber: 3,
+                      width: cardWidth,
+                      icon: "check-in.png",
+                      isVisible: _cardVisible[2],
+                      highlightWords: ["Moctar"],
+                      cardMessage:
+                          "Check in with Moctar we’ll tailor your plan to your goals.",
+                    ),
                   ),
                 ],
               );
@@ -113,37 +161,78 @@ class _StepCard extends StatelessWidget {
   final int stepNumber;
   final double width;
   final String cardMessage;
+  final List<String> highlightWords;
+  final bool isVisible;
+  final String icon;
 
-  const _StepCard({required this.stepNumber, required this.width, required this.cardMessage});
+  const _StepCard(
+      {required this.stepNumber,
+      required this.width,
+      required this.cardMessage,
+      required this.isVisible,
+      required this.icon,
+      this.highlightWords = const []});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: 100,
-      margin: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    final baseStyle = AppTextStyles.bodyMedium;
+    final highlightStyle = baseStyle.copyWith(
+      color: AppConstants.primaryColor,
+      fontWeight: FontWeight.w600,
+    );
+
+    final normalizedHighlights =
+        highlightWords.map((word) => word.toLowerCase()).toSet();
+
+    final spans = <InlineSpan>[];
+    final words = cardMessage.split(' ');
+
+    for (int i = 0; i < words.length; i++) {
+      final word = words[i];
+      final sanitizedWord = word.replaceAll(RegExp(r'[^A-Za-z0-9]'), '');
+      final isHighlight = sanitizedWord.isNotEmpty &&
+          normalizedHighlights.contains(sanitizedWord.toLowerCase());
+
+      spans.add(
+        TextSpan(
+          text: word,
+          style: isHighlight ? highlightStyle : baseStyle,
+        ),
+      );
+
+      if (isHighlight) {
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 6.0),
+              child: Image.asset(
+                "assets/images/$icon",
+                height: 16,
+              ),
+            ),
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Center(
-          child: Text(
-            cardMessage,
-            textAlign: TextAlign.center,
-            maxLines: 5,
-            style: AppTextStyles.bodySmall,
-            overflow: TextOverflow.ellipsis,
-          ),
+        );
+      }
+
+      if (i != words.length - 1) {
+        spans.add(TextSpan(text: ' ', style: baseStyle));
+      }
+    }
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+      opacity: isVisible ? 1 : 0,
+      child: Container(
+        width: width,
+        height: 100,
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        child: RichText(
+          textAlign: TextAlign.center,
+          maxLines: 5,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(children: spans, style: baseStyle),
         ),
       ),
     );
