@@ -84,7 +84,7 @@ class _OnboardingGenderStepState extends State<OnboardingGenderStep> {
             borderRadius: BorderRadius.circular(AppConstants.radiusM),
             border: Border.all(
               color: isSelected
-                  ? AppConstants.primaryColor
+                  ? AppConstants.borderColor
                   : AppConstants.borderColor,
               width: isSelected ? 2 : 1,
             ),
@@ -121,7 +121,7 @@ class _OnboardingGenderStepState extends State<OnboardingGenderStep> {
               ),
               if (isSelected)
                 const Icon(
-                  Icons.check_circle,
+                  Icons.circle_outlined,
                   color: AppConstants.primaryColor,
                   size: 24,
                 ),

@@ -6,20 +6,20 @@ class OnboardingStepsConfig {
   static List<OnboardingStep> getSteps() {
     return [
       OnboardingStep(
-        title: 'Welcome to Moctar Nutrition',
-        subtitle: 'How to get started.',
-        icon: "arrow.json",
-        showIconColor: false,
-        color: AppConstants.primaryColor,
-        highlightedWords: ['Moctar', 'Nutrition'],
-      ),
-      OnboardingStep(
         title: 'Meet Your Personal Trainer',
         subtitle: 'Discover how Moctar can help you achieve your goals.',
         icon: "user.png",
         color: AppConstants.textSecondary,
         showIconColor: false,
         highlightedWords: ['Moctar'],
+      ),
+      OnboardingStep(
+        title: 'Welcome to Moctar Nutrition',
+        subtitle: 'Time to build your personal program.',
+        icon: "arrow.json",
+        showIconColor: false,
+        color: AppConstants.primaryColor,
+        highlightedWords: ['Moctar', 'Nutrition'],
       ),
       OnboardingStep(
         title: 'Start with You',

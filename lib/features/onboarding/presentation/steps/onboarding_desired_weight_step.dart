@@ -84,16 +84,16 @@ class _OnboardingDesiredWeightStepState
             // Selected Weight Display
             Text(
               '${_currentWeight.toStringAsFixed(1)} kg',
-              style: AppTextStyles.heading3.copyWith(
+              style: AppTextStyles.heading4.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
 
-            const SizedBox(height: AppConstants.spacingXL),
+            const SizedBox(height: AppConstants.spacingM),
 
             // Weight Selector - Ruler-like interface
             Container(
-              height: 120,
+              height: 100,
               margin:
                   const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
               child: Stack(

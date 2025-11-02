@@ -47,9 +47,9 @@ class OnboardingStepBuilder {
   }) {
     switch (stepIndex) {
       case 0:
-        return const OnboardingWelcomeStep();
-      case 1:
         return const OnboardingMoctarIntroStep();
+      case 1:
+        return const OnboardingWelcomeStep();
       case 2:
         return OnboardingGenderStep(
           selectedGender: data.gender,

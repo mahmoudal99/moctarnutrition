@@ -7,7 +7,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/widgets/version_text.dart';
-import '../../../onboarding/presentation/screens/get_started_screen.dart';
+import '../../../onboarding/presentation/screens/welcome_screen.dart';
 import '../widgets/notifications_toggle.dart';
 import '../widgets/reminders_toggle.dart';
 import '../widgets/profile_user_card.dart';

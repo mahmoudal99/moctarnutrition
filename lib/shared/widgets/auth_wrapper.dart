@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import '../providers/auth_provider.dart';
 import '../services/onboarding_service.dart';
-import '../../features/onboarding/presentation/screens/get_started_screen.dart';
+import '../../features/onboarding/presentation/screens/welcome_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});

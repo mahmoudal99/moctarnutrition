@@ -12,7 +12,7 @@ import 'features/profile/presentation/screens/help_center_screen.dart';
 
 import 'features/auth/presentation/screens/auth_screen.dart';
 import 'features/auth/presentation/screens/password_reset_screen.dart';
-import 'features/onboarding/presentation/screens/get_started_screen.dart';
+import 'features/onboarding/presentation/screens/welcome_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/onboarding/presentation/screens/protein_calculation_screen.dart';
 import 'features/subscription/presentation/screens/subscription_screen.dart';

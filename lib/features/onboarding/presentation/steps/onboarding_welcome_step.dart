@@ -65,7 +65,6 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
               final double centerY = (maxH - cardHeight) / 2;
               final double bottomY = maxH - cardHeight / 1;
 
-
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -108,11 +107,11 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                     child: _StepCard(
                       stepNumber: 1,
                       width: cardWidth,
-                      icon: "targeting.png",
+                      icon: "user.png",
                       isVisible: _cardVisible[0],
-                      highlightWords: ['goals'],
+                      highlightWords: ['yourself'],
                       cardMessage:
-                          "Define your goals tell us what success looks like to you.",
+                          "Tell us about yourself this will help us personalise your program based on who you are.",
                     ),
                   ),
                   Positioned(
@@ -120,12 +119,12 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                     top: centerY,
                     child: _StepCard(
                       stepNumber: 2,
-                      icon: "user.png",
+                      icon: "targeting.png",
                       width: cardWidth,
                       isVisible: _cardVisible[1],
-                      highlightWords: ["account"],
+                      highlightWords: ["goals"],
                       cardMessage:
-                          "Create your account it only takes a minute.",
+                          "Define your goals tell us what success looks like to you.",
                     ),
                   ),
                   Positioned(
@@ -138,7 +137,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                       isVisible: _cardVisible[2],
                       highlightWords: ["Moctar"],
                       cardMessage:
-                          "Check in with Moctar we’ll tailor your plan to your goals.",
+                          "Check in with Moctar and select a program that matches your goals.",
                     ),
                   ),
                 ],
