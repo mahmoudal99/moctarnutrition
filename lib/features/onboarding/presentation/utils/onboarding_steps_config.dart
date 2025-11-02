@@ -14,6 +14,14 @@ class OnboardingStepsConfig {
         highlightedWords: ['Moctar', 'Nutrition'],
       ),
       OnboardingStep(
+        title: 'Meet Your Personal Trainer',
+        subtitle: 'Discover how Moctar can help you achieve your goals.',
+        icon: "user.png",
+        color: AppConstants.textSecondary,
+        showIconColor: false,
+        highlightedWords: ['Moctar'],
+      ),
+      OnboardingStep(
         title: 'Start with You',
         subtitle: 'Choose your gender to personalize your fitness journey.',
         icon: "gender.json",

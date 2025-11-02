@@ -36,7 +36,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void initState() {
     super.initState();
     _steps = OnboardingStepsConfig.getSteps();
-    _steps.insert(5, OnboardingStepsConfig.getBMIStep());
+    _steps.insert(6, OnboardingStepsConfig.getBMIStep());
   }
 
   @override
@@ -200,7 +200,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
               onNext: () {
                 HapticFeedback.mediumImpact();
-                if (_currentPage == 17) {
+                if (_currentPage == 18) {
                   // Show rating dialog for rating step
                   _showRatingDialog(context);
                 } else {
@@ -238,13 +238,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   ScrollPhysics _getPageViewPhysics() {
     // Disable page swiping for the desired weight step to allow weight selector interaction
-    if (_currentPage == 4) {
+    if (_currentPage == 5) {
       return const NeverScrollableScrollPhysics();
     }
-    if (_currentPage == 8 && _data.selectedDietaryRestrictions.isEmpty) {
+    if (_currentPage == 9 && _data.selectedDietaryRestrictions.isEmpty) {
       return const NeverScrollableScrollPhysics();
     }
-    if (_currentPage == 10 && _data.selectedWorkoutStyles.isEmpty) {
+    if (_currentPage == 11 && _data.selectedWorkoutStyles.isEmpty) {
       return const NeverScrollableScrollPhysics();
     }
     return const BouncingScrollPhysics();
@@ -323,13 +323,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   bool _isNextEnabled() {
-    final isDietaryStep = _currentPage == 8;
-    final isWorkoutStep = _currentPage == 10;
-    final isWeeklyWorkoutGoalStep = _currentPage == 11;
-    final isFoodPreferencesStep = _currentPage == 12;
-    final isAllergiesStep = _currentPage == 13;
-    final isWorkoutNotificationsStep = _currentPage == 16;
-    final isRatingStep = _currentPage == 17;
+    final isDietaryStep = _currentPage == 9;
+    final isWorkoutStep = _currentPage == 11;
+    final isWeeklyWorkoutGoalStep = _currentPage == 12;
+    final isFoodPreferencesStep = _currentPage == 13;
+    final isAllergiesStep = _currentPage == 14;
+    final isWorkoutNotificationsStep = _currentPage == 17;
+    final isRatingStep = _currentPage == 18;
 
     if (!isDietaryStep &&
         !isWorkoutStep &&

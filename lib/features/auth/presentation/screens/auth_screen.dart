@@ -32,8 +32,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   
   // Animation controllers
   late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -47,22 +45,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
     
     
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.5),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+
     // Start animation with a small delay to ensure it's visible
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {

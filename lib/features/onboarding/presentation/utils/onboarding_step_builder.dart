@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../shared/models/user_model.dart';
 import '../steps/onboarding_welcome_step.dart';
+import '../steps/onboarding_moctar_intro_step.dart';
 import '../steps/onboarding_gender_step.dart';
 import '../steps/onboarding_height_weight_step.dart';
 import '../steps/onboarding_age_step.dart';
@@ -48,6 +49,8 @@ class OnboardingStepBuilder {
       case 0:
         return const OnboardingWelcomeStep();
       case 1:
+        return const OnboardingMoctarIntroStep();
+      case 2:
         return OnboardingGenderStep(
           selectedGender: data.gender,
           onSelect: (gender) {
@@ -55,24 +58,24 @@ class OnboardingStepBuilder {
             data.gender = gender;
           },
         );
-      case 2:
+      case 3:
         return OnboardingHeightWeightStep(
           height: data.height,
           weight: data.weight,
           onHeightChanged: (height) => data.height = height,
           onWeightChanged: (weight) => data.weight = weight,
         );
-      case 3:
+      case 4:
         return OnboardingAgeStep(
           age: data.age,
           onAgeChanged: (age) => data.age = age,
         );
-      case 4:
+      case 5:
         return OnboardingDesiredWeightStep(
           desiredWeight: data.desiredWeight,
           onDesiredWeightChanged: (weight) => data.desiredWeight = weight,
         );
-      case 5:
+      case 6:
         return OnboardingBMIStep(
           bmi: _calculateBMI(data.height, data.weight),
           bmiCategory: _getBMICategory(_calculateBMI(data.height, data.weight)),
@@ -81,17 +84,17 @@ class OnboardingStepBuilder {
           height: data.height,
           weight: data.weight,
         );
-      case 6:
+      case 7:
         return OnboardingFitnessGoalStep(
           selectedFitnessGoal: data.selectedFitnessGoal,
           onSelect: onFitnessGoalChanged,
         );
-      case 7:
+      case 8:
         return OnboardingActivityLevelStep(
           selectedActivityLevel: data.selectedActivityLevel,
           onSelect: onActivityLevelChanged,
         );
-      case 8:
+      case 9:
         return OnboardingDietaryRestrictionsStep(
           selectedDietaryRestrictions: data.selectedDietaryRestrictions,
           restrictions: const [
@@ -106,7 +109,7 @@ class OnboardingStepBuilder {
           ],
           onSelect: onDietaryRestrictionChanged,
         );
-      case 9:
+      case 10:
         return OnboardingWorkoutStylesStep(
           selectedWorkoutStyles: data.selectedWorkoutStyles,
           styles: const [
@@ -117,14 +120,14 @@ class OnboardingStepBuilder {
           ],
           onSelect: onWorkoutStyleChanged,
         );
-      case 10:
+      case 11:
         return OnboardingWeeklyWorkoutGoalStep(
           selectedDaysPerWeek: data.weeklyWorkoutDays,
           selectedSpecificDays: data.specificWorkoutDays,
           onDaysPerWeekChanged: onWeeklyWorkoutDaysChanged,
           onSpecificDaysChanged: onSpecificWorkoutDaysChanged,
         );
-      case 11:
+      case 12:
         return OnboardingFoodPreferencesStep(
           preferredCuisines: data.preferredCuisines,
           onAddCuisine: onAddCuisine,
@@ -139,34 +142,34 @@ class OnboardingStepBuilder {
           avoidController: data.avoidController,
           favoriteController: data.favoriteController,
         );
-      case 12:
+      case 13:
         return OnboardingAllergiesStep(
           selectedAllergies: data.selectedAllergies,
           onAllergiesChanged: onAllergiesChanged,
         );
-      case 13:
+      case 14:
         return OnboardingMealTimingStep(
           selectedPreferences: data.mealTimingPreferences,
           onPreferencesChanged: onMealTimingChanged,
         );
-      case 14:
+      case 15:
         return OnboardingBatchCookingStep(
           selectedPreferences: data.batchCookingPreferences,
           onPreferencesChanged: onBatchCookingChanged,
         );
-      case 15:
+      case 16:
         return OnboardingCheatDayStep(
           selectedCheatDay: data.cheatDay,
           onCheatDayChanged: onCheatDayChanged,
         );
-      case 16:
+      case 17:
         return OnboardingWorkoutNotificationsStep(
           selectedTime: data.workoutNotificationTime,
           notificationsEnabled: data.workoutNotificationsEnabled,
           onTimeChanged: onTimeChanged,
           onNotificationsChanged: onNotificationsChanged,
         );
-      case 17:
+      case 18:
         return const OnboardingRatingStep();
       default:
         return const SizedBox.shrink();

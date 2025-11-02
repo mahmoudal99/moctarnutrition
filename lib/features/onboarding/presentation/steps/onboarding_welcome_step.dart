@@ -65,12 +65,6 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
               final double centerY = (maxH - cardHeight) / 2;
               final double bottomY = maxH - cardHeight / 1;
 
-              final Offset p1 =
-                  Offset(leftX + cardWidth, topY + cardHeight / 2);
-              final Offset p2 =
-                  Offset(centerX + cardWidth / 2, centerY + cardHeight / 2);
-              final Offset p3 =
-                  Offset(leftX + cardWidth, bottomY + cardHeight / 2);
 
               return Stack(
                 clipBehavior: Clip.none,
