@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class OnboardingMoctarIntroStep extends StatefulWidget {
@@ -10,8 +11,7 @@ class OnboardingMoctarIntroStep extends StatefulWidget {
       _OnboardingMoctarIntroStepState();
 }
 
-class _OnboardingMoctarIntroStepState
-    extends State<OnboardingMoctarIntroStep> {
+class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
   final List<bool> _benefitVisible = [false, false, false];
   final List<Timer> _timers = [];
 
@@ -114,7 +114,7 @@ class _OnboardingMoctarIntroStepState
         children: [
           Text(
             'Meet Moctar',
-            style: AppTextStyles.heading2.copyWith(
+            style: AppTextStyles.heading3.copyWith(
               fontWeight: FontWeight.bold,
               color: AppConstants.textPrimary,
             ),
@@ -122,7 +122,7 @@ class _OnboardingMoctarIntroStepState
           ),
           const SizedBox(height: AppConstants.spacingS),
           Text(
-            'Your personal trainer dedicated to helping you achieve your fitness goals through personalized nutrition and training plans.',
+            'I will be your personal trainer dedicated to helping you achieve your fitness goals through personalized nutrition and training plans.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppConstants.textSecondary,
               height: 1.6,
@@ -145,7 +145,8 @@ class _OnboardingMoctarIntroStepState
       _BenefitItem(
         icon: Icons.analytics_outlined,
         title: 'Track Your Progress',
-        description: 'Monitor your journey with detailed analytics and insights',
+        description:
+            'Monitor your journey with detailed analytics and insights',
       ),
       _BenefitItem(
         icon: Icons.support_agent,
@@ -260,4 +261,3 @@ class _BenefitCard extends StatelessWidget {
     );
   }
 }
-
