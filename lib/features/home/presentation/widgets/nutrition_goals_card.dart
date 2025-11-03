@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/calorie_calculation_service.dart';
 import '../../../../shared/models/meal_model.dart';
@@ -161,10 +162,10 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
                   // ),
 
                   // Icon in center
-                  Image.asset(
+                  SvgPicture.asset(
                     "assets/images/${macroData.icon}",
-                    color: macroData.color,
-                    height: 32,
+                    color: Colors.black,
+                    height: 24,
                   ),
                 ],
               ),
@@ -204,21 +205,21 @@ class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
         return MacroData(
           grams: (widget.macros.protein.grams - consumedProtein).round(),
           label: 'Protein left',
-          icon: "fish.png", // Fork and knife icon
+          icon: "fish-food-stroke.svg",
           color: Colors.red,
         );
       case 1:
         return MacroData(
           grams: (widget.macros.carbs.grams - consumedCarbs).round(),
           label: 'Carbs left',
-          icon: "bread.png", // Fork and knife icon
+          icon: "bread-stroke-rounded.svg", // Fork and knife icon
           color: Colors.orange,
         );
       case 2:
         return MacroData(
           grams: (widget.macros.fat.grams - consumedFat).round(),
           label: 'Fat left',
-          icon: "fish.png", // Fork and knife icon
+          icon: "avocado-stroke-rounded.svg", // Fork and knife icon
           color: Colors.blue,
         );
       default:

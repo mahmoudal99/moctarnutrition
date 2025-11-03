@@ -6,7 +6,7 @@ class OnboardingStepsConfig {
   static List<OnboardingStep> getSteps() {
     return [
       OnboardingStep(
-        title: 'Meet Your Personal Trainer',
+        title: 'Hi, I\'m Moctar 👋',
         subtitle: 'Discover how Moctar can help you achieve your goals.',
         icon: "user.png",
         color: AppConstants.textSecondary,

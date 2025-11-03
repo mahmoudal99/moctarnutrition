@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/models/user_model.dart';
@@ -286,19 +287,19 @@ class _MealPlanViewState extends State<MealPlanView>
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildPillNutritionItem(
-            "scale.png",
+            "fire-stroke-rounded.svg",
             '${totalCalories.toInt()}',
             AppConstants.accentColor,
           ),
           const SizedBox(width: AppConstants.spacingM),
           _buildPillNutritionItem(
-            "fish.png",
+            "fish-food-stroke.svg",
             '${totalProtein.toStringAsFixed(1)}g',
             AppConstants.successColor,
           ),
           const SizedBox(width: AppConstants.spacingM),
           _buildPillNutritionItem(
-            "bread.png",
+            "bread-stroke-rounded.svg",
             '${totalCarbs.toStringAsFixed(1)}g',
             AppConstants.warningColor,
           ),
@@ -311,12 +312,12 @@ class _MealPlanViewState extends State<MealPlanView>
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset("assets/images/$icon", height: 28, width: 28, color: color,),
+        SvgPicture.asset("assets/images/$icon", height: 16, width: 16, color: Colors.black,),
         const SizedBox(width: 4),
         Text(
           value,
           style: AppTextStyles.caption.copyWith(
-            color: color,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),

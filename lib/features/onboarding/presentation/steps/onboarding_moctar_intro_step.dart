@@ -112,14 +112,6 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
       padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
       child: Column(
         children: [
-          Text(
-            'Meet Moctar',
-            style: AppTextStyles.heading3.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppConstants.textPrimary,
-            ),
-            textAlign: TextAlign.center,
-          ),
           const SizedBox(height: AppConstants.spacingS),
           Text(
             'I will be your personal trainer dedicated to helping you achieve your fitness goals through personalized nutrition and training plans.',

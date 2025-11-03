@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/meal_model.dart';
@@ -212,19 +213,19 @@ class _MealDetailScreenState extends State<MealDetailScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildPillNutritionItem(
-            Icons.local_fire_department,
+            "fire-stroke-rounded.svg",
             '${meal.nutrition.calories}',
             AppConstants.accentColor,
           ),
           const SizedBox(width: AppConstants.spacingM),
           _buildPillNutritionItem(
-            Icons.fitness_center,
+            "fish-food-stroke.svg",
             '${meal.nutrition.protein.toStringAsFixed(1)}g',
             AppConstants.successColor,
           ),
           const SizedBox(width: AppConstants.spacingM),
           _buildPillNutritionItem(
-            Icons.grain,
+            "bread-stroke-rounded.svg",
             '${meal.nutrition.carbs.toStringAsFixed(1)}g',
             AppConstants.warningColor,
           ),
@@ -233,20 +234,20 @@ class _MealDetailScreenState extends State<MealDetailScreen>
     );
   }
 
-  Widget _buildPillNutritionItem(IconData icon, String value, Color color) {
+  Widget _buildPillNutritionItem(String icon, String value, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: color,
+        SvgPicture.asset(
+          "assets/images/$icon",
+          height: 16,
+          color: Colors.black,
         ),
         const SizedBox(width: 4),
         Text(
           value,
           style: AppTextStyles.caption.copyWith(
-            color: color,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
