@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class ActivityRing extends StatelessWidget {
@@ -41,10 +42,10 @@ class ActivityRing extends StatelessWidget {
           ),
 
           // Center icon
-          const Icon(
-            Icons.local_fire_department,
+          SvgPicture.asset(
+            "assets/images/fire-stroke-rounded.svg",
             color: Colors.black,
-            size: 24,
+            height: 24,
           ),
         ],
       ),
