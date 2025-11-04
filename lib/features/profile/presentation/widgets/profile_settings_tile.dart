@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class ProfileSettingsTile extends StatelessWidget {
@@ -16,10 +17,10 @@ class ProfileSettingsTile extends StatelessWidget {
       child: ListTile(
         tileColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        leading: Icon(
-          item.icon,
+        leading: SvgPicture.asset(
+          "assets/images/${item.icon}",
           color: Colors.black,
-          size: 16,
+          height: 16,
         ),
         title: Text(item.label, style: AppTextStyles.bodyMedium),
         trailing: item.trailing,
@@ -31,7 +32,7 @@ class ProfileSettingsTile extends StatelessWidget {
 
 class SettingsItem {
   final String label;
-  final IconData icon;
+  final String icon;
   final Widget? trailing;
   final VoidCallback? onTap;
 

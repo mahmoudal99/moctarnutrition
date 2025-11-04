@@ -121,7 +121,7 @@ class ProfileScreen extends StatelessWidget {
                   ProfileSettingsTile(
                     item: SettingsItem(
                       label: 'Notifications',
-                      icon: Icons.notifications_outlined,
+                      icon: "notification-01-stroke-rounded.svg",
                       onTap: () => showNotificationsSheet(context),
                     ),
                   ),

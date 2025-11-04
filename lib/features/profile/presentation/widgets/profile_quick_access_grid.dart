@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class ProfileQuickAccessGrid extends StatelessWidget {
@@ -57,7 +58,8 @@ class QuickAccessTile extends StatelessWidget {
       child: ListTile(
         tileColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        leading: Icon(item.icon, color: Colors.black, size: 16),
+        leading: SvgPicture.asset("assets/images/${item.icon}",
+            color: Colors.black, height: 16),
         title: Text(
           item.label,
           style: AppTextStyles.bodyMedium,
@@ -71,7 +73,7 @@ class QuickAccessTile extends StatelessWidget {
 
 class QuickAccessItem {
   final String label;
-  final IconData icon;
+  final String icon;
   final String? badge;
   final VoidCallback? onTap;
   final Widget? trailing;

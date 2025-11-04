@@ -10,12 +10,12 @@ class ProfileDataProvider {
     return [
       QuickAccessItem(
         label: 'Weekly Check-in',
-        icon: Icons.camera_alt,
+        icon: "camera-add-03-stroke-rounded.svg",
         onTap: () => context.push('/checkin'),
       ),
       QuickAccessItem(
         label: 'Progress',
-        icon: Icons.show_chart,
+        icon: "chart-line-data-01-stroke-rounded.svg",
         onTap: () => context.go('/progress'),
       ),
     ];
@@ -25,7 +25,7 @@ class ProfileDataProvider {
     final List<SettingsItem> items = [
       SettingsItem(
         label: 'Account Settings',
-        icon: Icons.settings,
+        icon: "setting-07-stroke-rounded.svg",
         onTap: () => context.push('/account-settings'),
       ),
     ];
@@ -35,22 +35,22 @@ class ProfileDataProvider {
       items.addAll([
         const SettingsItem(
           label: 'Reminders',
-          icon: Icons.alarm,
+          icon: "notification-01-stroke-rounded.svg",
           trailing: Switch(value: false, onChanged: null),
         ),
         SettingsItem(
           label: 'Workout Preferences',
-          icon: Icons.fitness_center,
+          icon: "dumbbell-01-stroke-rounded.svg",
           onTap: () => context.push('/workout-preferences'),
         ),
         SettingsItem(
           label: 'Workout Notifications',
-          icon: Icons.notifications_active,
+          icon: "notification-square-stroke-rounded.svg",
           onTap: () => context.push('/workout-notifications'),
         ),
         SettingsItem(
           label: 'Nutrition Preferences',
-          icon: Icons.restaurant,
+          icon: "tablet-pen-stroke-rounded.svg",
           onTap: () => context.push('/nutrition-preferences'),
         ),
       ]);
@@ -63,12 +63,12 @@ class ProfileDataProvider {
     return [
       SettingsItem(
         label: 'Privacy Policy',
-        icon: Icons.privacy_tip,
+        icon: "police-badge-stroke-rounded.svg",
         onTap: () => context.push('/privacy-policy'),
       ),
       SettingsItem(
         label: 'Delete Account',
-        icon: Icons.delete_forever,
+        icon: "delete-03-stroke-rounded.svg",
         onTap: () {
           ProfileDeleteAccountDialog.show(context);
         },
@@ -80,17 +80,17 @@ class ProfileDataProvider {
     return [
       SettingsItem(
         label: 'Help Center',
-        icon: Icons.help_outline,
+        icon: "help-square-stroke-rounded.svg",
         onTap: () => context.push('/help-center'),
       ),
       SettingsItem(
         label: 'Report a Bug',
-        icon: Icons.bug_report,
+        icon: "bug-02-stroke-rounded.svg",
         onTap: () => context.push('/bug-report'),
       ),
       SettingsItem(
         label: 'Feedback',
-        icon: Icons.feedback,
+        icon: "comment-01-stroke-rounded.svg",
         onTap: () => context.push('/feedback'),
       ),
     ];
