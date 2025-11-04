@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import '../../core/constants/app_constants.dart';
@@ -26,18 +27,18 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
     if (user != null && user.role == UserRole.admin) {
       return [
         const _NavItem(
-          icon: Icons.home,
+          icon: "home-12-stroke-rounded.svg",
           label: 'Home',
           route: '/admin-home',
         ),
         const _NavItem(
-          icon: Icons.group,
+          icon: "user-list-stroke-rounded.svg",
           label: 'Clients',
           route: '/admin-users',
         ),
         const _NavItem(
-          icon: Icons.account_circle,
-          label: 'Profile',
+          icon: "setting-07-stroke-rounded.svg",
+          label: 'Settings',
           route: '/profile',
         ),
       ];
@@ -45,22 +46,22 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
 
     return [
       const _NavItem(
-        icon: Icons.home,
+        icon: "home-12-stroke-rounded.svg",
         label: 'Home',
         route: '/home',
       ),
       const _NavItem(
-        icon: Icons.fitness_center,
+        icon: "dumbbell-01-stroke-rounded.svg",
         label: 'Workouts',
         route: '/workouts',
       ),
       const _NavItem(
-        icon: Icons.restaurant_menu,
+        icon: "file-01-stroke-rounded.svg",
         label: 'Meal Plan',
         route: '/meal-prep',
       ),
       const _NavItem(
-        icon: Icons.settings,
+        icon: "setting-07-stroke-rounded.svg",
         label: 'Settings',
         route: '/profile',
       ),
@@ -138,19 +139,18 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      item.icon,
-                      color: isSelected
-                          ? AppConstants.primaryColor
-                          : AppConstants.textTertiary,
-                      size: 20,
+                    SvgPicture.asset(
+                      "assets/images/${item.icon}",
+                      color:
+                          isSelected ? Colors.black : AppConstants.textTertiary,
+                      height: 20,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.label,
                       style: AppTextStyles.caption.copyWith(
                         color: isSelected
-                            ? AppConstants.primaryColor
+                            ? Colors.black
                             : AppConstants.textTertiary,
                         fontWeight:
                             isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -168,7 +168,7 @@ class _FloatingMainNavigationState extends State<FloatingMainNavigation> {
 }
 
 class _NavItem {
-  final IconData icon;
+  final String icon;
   final String label;
   final String route;
 
