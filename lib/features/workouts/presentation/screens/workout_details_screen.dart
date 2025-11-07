@@ -636,7 +636,7 @@ class _ExerciseItem extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: AppConstants.primaryColor.withOpacity(0.1),
+              color: AppConstants.textTertiary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(AppConstants.radiusXS),
             ),
             child: Center(
@@ -644,7 +644,7 @@ class _ExerciseItem extends StatelessWidget {
                 '${exercise.order}',
                 style: AppTextStyles.caption.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppConstants.primaryColor,
+                  color: Colors.black,
                 ),
               ),
             ),
