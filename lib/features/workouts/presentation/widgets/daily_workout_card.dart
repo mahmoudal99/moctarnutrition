@@ -22,11 +22,15 @@ class DailyWorkoutCard extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
           elevation: 8,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.radiusM),
-          ),
-          color: isToday
-              ? AppConstants.primaryColor.withOpacity(0.10)
-              : AppConstants.surfaceColor,
+              borderRadius: BorderRadius.circular(
+                AppConstants.radiusM,
+              ),
+              side: BorderSide(
+                color: isToday
+                    ? AppConstants.textTertiary.withOpacity(0.8)
+                    : AppConstants.surfaceColor,
+              )),
+          color: Colors.white,
           child: InkWell(
             onTap: () {
               _showWorkoutDetails(context);
@@ -83,20 +87,6 @@ class DailyWorkoutCard extends StatelessWidget {
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppConstants.textSecondary,
                       ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingS),
-                    Row(
-                      children: [
-                        _buildWorkoutInfo(
-                          Icons.fitness_center,
-                          '${dailyWorkout.workouts.length} workout${dailyWorkout.workouts.length != 1 ? 's' : ''}',
-                        ),
-                        const SizedBox(width: AppConstants.spacingM),
-                        _buildWorkoutInfo(
-                          Icons.timer,
-                          '${dailyWorkout.estimatedDuration} min',
-                        ),
-                      ],
                     ),
                   ],
                 ],

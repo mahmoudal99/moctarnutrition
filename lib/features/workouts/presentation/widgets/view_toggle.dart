@@ -30,7 +30,7 @@ class ViewToggle extends StatelessWidget {
         children: [
           _buildToggleOption(
             WorkoutViewType.day,
-            'Day',
+            'Today',
             Icons.view_day,
           ),
           _buildToggleOption(
