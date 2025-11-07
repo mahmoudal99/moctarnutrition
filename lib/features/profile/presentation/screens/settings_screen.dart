@@ -61,7 +61,7 @@ class ProfileScreen extends StatelessWidget {
               Text(
                 'SETTINGS',
                 style: AppTextStyles.caption.copyWith(
-                  color: AppConstants.secondaryColor
+                  color: AppConstants.accentColor
                 ),
               ),
               Text(
