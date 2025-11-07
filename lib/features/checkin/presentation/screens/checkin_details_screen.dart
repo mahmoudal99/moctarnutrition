@@ -33,7 +33,6 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     _currentCheckin = widget.checkin;
   }
 
-
   void _refreshCheckinDataIfNeeded() {
     // Only refresh once to avoid infinite loops
     if (!_isRefreshing) {
@@ -403,20 +402,12 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
           style: AppTextStyles.heading5,
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            if (checkin.mood != null)
-              Expanded(
-                child: _buildMoodCard(checkin),
-              ),
-            if (checkin.mood != null && checkin.energyLevel != null)
-              const SizedBox(width: 12),
-            if (checkin.energyLevel != null)
-              Expanded(
-                child: _buildEnergyCard(checkin),
-              ),
-          ],
-        ),
+        if (checkin.mood != null)
+          _buildMoodCard(checkin),
+        if (checkin.mood != null && checkin.energyLevel != null)
+          const SizedBox(height: 12),
+        if (checkin.energyLevel != null)
+          _buildEnergyCard(checkin),
         if (checkin.motivationLevel != null) ...[
           const SizedBox(height: 12),
           _buildMotivationCard(checkin),
@@ -510,24 +501,22 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppConstants.primaryColor.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppConstants.primaryColor.withOpacity(0.2),
+          color: Colors.grey.withOpacity(0.2),
         ),
       ),
-      child: Column(
+      child: Row(
         children: [
           Text(
             _getMoodEmoji(checkin.mood!),
-            style: const TextStyle(fontSize: 32),
+            style: const TextStyle(fontSize: 20),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(width: 12),
           Text(
             checkin.mood!,
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.bodyMedium
           ),
         ],
       ),
@@ -538,32 +527,36 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppConstants.warningColor.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppConstants.warningColor.withOpacity(0.2),
+          color: Colors.grey.withOpacity(0.2),
         ),
       ),
-      child: Column(
+      child: Row(
         children: [
-          const Icon(
-            Icons.flash_on,
-            color: AppConstants.warningColor,
-            size: 32,
+          SvgPicture.asset(
+            "assets/images/energy-stroke-rounded.svg",
+            color: Colors.black,
+            height: 24,
           ),
-          const SizedBox(height: 8),
-          Text(
-            '${checkin.energyLevel}/10',
-            style: AppTextStyles.heading4.copyWith(
-              color: AppConstants.warningColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            'Energy',
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.textSecondary,
-            ),
+          const SizedBox(width: 12),
+          Column(
+            children: [
+              Text(
+                '${checkin.energyLevel}/10',
+                style: AppTextStyles.heading4.copyWith(
+                  color: AppConstants.warningColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Energy',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -574,18 +567,18 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppConstants.successColor.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppConstants.successColor.withOpacity(0.2),
+          color: Colors.grey.withOpacity(0.2),
         ),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.psychology,
-            color: AppConstants.successColor,
-            size: 24,
+          SvgPicture.asset(
+            "assets/images/workout-stretching-stroke-rounded.svg",
+            color: Colors.black,
+            height: 24,
           ),
           const SizedBox(width: 12),
           Expanded(
