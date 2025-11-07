@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../../../../shared/services/meal_plan_storage_service.dart';
@@ -185,11 +186,8 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
             backgroundColor: AppConstants.backgroundColor,
             appBar: AppBar(
               backgroundColor: AppConstants.backgroundColor,
-              title: Text(
-                'Meal Plan',
-                style: AppTextStyles.heading5.copyWith(
-                  color: AppConstants.textPrimary,
-                ),
+              title: AppBarTitle(
+                title: 'Meal Plan',
               ),
               actions: [
                 IconButton(

@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -26,7 +27,8 @@ class WorkoutDetailsScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppConstants.backgroundColor,
           appBar: AppBar(
-            title: Text(currentDailyWorkout?.title ?? dailyWorkout.title),
+            title: AppBarTitle(
+                title: currentDailyWorkout?.title ?? dailyWorkout.title),
             backgroundColor: AppConstants.surfaceColor,
             elevation: 0,
             iconTheme: const IconThemeData(color: AppConstants.textPrimary),
@@ -59,8 +61,8 @@ class WorkoutDetailsScreen extends StatelessWidget {
                       onPressed: () => _navigateToAddWorkout(context),
                       icon: const Icon(Icons.add),
                       label: const Text('Add Workout'),
-                      backgroundColor: AppConstants.primaryColor,
-                      foregroundColor: AppConstants.surfaceColor,
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
                     )
                   : null,
           extendBody: true, // This might help with the bottom bar issue
@@ -426,7 +428,7 @@ class _WorkoutCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: AppConstants.backgroundColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusM),
         border: Border.all(
           color: AppConstants.textTertiary.withOpacity(0.2),

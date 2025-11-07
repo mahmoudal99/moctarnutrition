@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/workout_plan_model.dart';
@@ -26,6 +27,10 @@ class WeekViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final todayLabel =
+        '${DateFormat('EEEE').format(now)} ${now.day}${_getDaySuffix(now.day)} ${DateFormat('MMMM').format(now)}';
+
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, child) {
         return SafeArea(
@@ -49,7 +54,7 @@ class WeekViewWidget extends StatelessWidget {
                           if (todayWorkout != null &&
                               !workoutProvider.isEditMode) ...[
                             Text(
-                              "Today's Workout",
+                              'Today $todayLabel',
                               style: AppTextStyles.heading5.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -123,5 +128,24 @@ class WeekViewWidget extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _getDaySuffix(int day) {
+    if (day < 1 || day > 31) {
+      return '';
+    }
+    if (day >= 11 && day <= 13) {
+      return 'th';
+    }
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
   }
 }

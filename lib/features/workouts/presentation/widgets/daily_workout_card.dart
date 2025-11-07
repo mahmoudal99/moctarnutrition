@@ -18,15 +18,6 @@ class DailyWorkoutCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          dailyWorkout.dayName,
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w600,
-            color:
-                isToday ? AppConstants.primaryColor : AppConstants.textPrimary,
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingM),
         Card(
           margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
           elevation: 8,

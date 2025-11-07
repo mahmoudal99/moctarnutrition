@@ -1,4 +1,5 @@
 import 'package:champions_gym_app/features/workouts/presentation/widgets/view_toggle.dart';
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -51,6 +52,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: AppConstants.backgroundColor,
+        title: AppBarTitle(
+          title: 'Workout Plan',
+        ),
+      ),
       body: Consumer2<AuthProvider, WorkoutProvider>(
         builder: (context, authProvider, workoutProvider, child) {
           if (WorkoutController.shouldReloadWorkoutPlan(context)) {
@@ -122,7 +129,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
             ),
           ),
           // Floating toggle (only show when not in edit mode and in week view)
-          if (!workoutProvider.isEditMode && _selectedView == WorkoutViewType.week)
+          if (!workoutProvider.isEditMode &&
+              _selectedView == WorkoutViewType.week)
             FloatingToggleWidget(
               selectedView: _selectedView,
               onViewChanged: _onViewChanged,
