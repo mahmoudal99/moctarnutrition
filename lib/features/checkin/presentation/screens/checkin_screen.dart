@@ -48,7 +48,8 @@ class _CheckinScreenState extends State<CheckinScreen> {
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppConstants.textPrimary),
+          icon:
+              const Icon(Icons.arrow_back_ios, color: AppConstants.textPrimary),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -56,30 +57,18 @@ class _CheckinScreenState extends State<CheckinScreen> {
             icon: const Icon(Icons.refresh, color: AppConstants.textPrimary),
             onPressed: _loadData,
           ),
-          // IconButton(
-          //   icon: const Icon(Icons.cleaning_services, color: AppConstants.textPrimary),
-          //   onPressed: _cleanupData,
-          //   tooltip: 'Cleanup duplicates',
-          // ),
         ],
       ),
       body: Consumer2<CheckinProvider, app_auth.AuthProvider>(
         builder: (context, checkinProvider, authProvider, child) {
-          _logger.d('CheckinScreen - isLoading: ${checkinProvider.isLoading}');
-          _logger.d(
-              'CheckinScreen - userCheckins.length: ${checkinProvider.userCheckins.length}');
-          _logger.d('CheckinScreen - error: ${checkinProvider.error}');
-
           if (checkinProvider.isLoading &&
               checkinProvider.userCheckins.isEmpty) {
-            _logger.d('CheckinScreen - Showing loading indicator');
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
           if (checkinProvider.error != null) {
-            _logger.d('CheckinScreen - Showing error state');
             return _buildErrorState(checkinProvider.error!);
           }
 

@@ -20,7 +20,8 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
         ),
         Card(
           elevation: 1,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.radiusM)),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -28,10 +29,6 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
                 _buildStatsGrid(),
-                if (summary.averageWeight != null) ...[
-                  const SizedBox(height: 20),
-                  _buildMetricsSection(),
-                ],
               ],
             ),
           ),
@@ -164,13 +161,6 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Average Metrics',
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 12),
         Row(
           children: [
             if (summary.averageWeight != null)

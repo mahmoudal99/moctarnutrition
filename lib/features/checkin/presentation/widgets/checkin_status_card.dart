@@ -24,54 +24,12 @@ class CheckinStatusCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            const SizedBox(height: 16),
             _buildStatusContent(),
             const SizedBox(height: 20),
             _buildActionButton(),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.black87.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            _getStatusIcon(),
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _getStatusTitle(),
-                style: AppTextStyles.heading4.copyWith(
-                  color: Colors.black87,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                _getStatusSubtitle(),
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.black87.withOpacity(0.9),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -185,7 +143,7 @@ class CheckinStatusCard extends StatelessWidget {
               ? 'Take a progress photo to track your fitness journey'
               : 'Come back on Sunday to submit your weekly check-in.',
           style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.white,
+            color: Colors.black,
           ),
         ),
       ],
