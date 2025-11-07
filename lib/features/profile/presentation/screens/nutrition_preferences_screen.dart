@@ -396,7 +396,10 @@ class _NutritionPreferencesScreenState
     final calculatedTargets = _preferences.calculatedCalorieTargets;
 
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingM,
+        vertical: AppConstants.spacingS,
+      ),
       decoration: BoxDecoration(
         color: AppConstants.surfaceColor,
         borderRadius: BorderRadius.circular(AppConstants.radiusL),
@@ -408,27 +411,11 @@ class _NutritionPreferencesScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Daily Target Calories', style: AppTextStyles.bodySmall),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.spacingM,
-                  vertical: AppConstants.spacingS,
-                ),
-                decoration: BoxDecoration(
-                  color: AppConstants.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                ),
-                child: Text(
-                  '${calculatedTargets?.dailyTarget ?? "Calculating..."} cal',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppConstants.primaryColor,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            '${calculatedTargets?.dailyTarget ?? "Calculating..."} cal',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppConstants.primaryColor,
+            ),
           ),
           const SizedBox(height: AppConstants.spacingM),
           if (calculatedTargets != null) ...[
@@ -583,14 +570,6 @@ class _NutritionPreferencesScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingS),
           TextField(
             controller: controller,
             textInputAction: TextInputAction.done,
@@ -657,19 +636,20 @@ class _NutritionPreferencesScreenState
     return Chip(
       label: Text(label),
       onDeleted: onDeleted,
-      deleteIcon: const Icon(Icons.close_rounded, size: 16),
-      backgroundColor: color.withOpacity(0.08),
-      labelStyle: AppTextStyles.caption.copyWith(
-        color: color,
-        fontWeight: FontWeight.w600,
+      deleteIcon: Icon(
+        Icons.close_rounded,
+        size: 16,
+        color: Colors.grey.withOpacity(0.8),
       ),
+      backgroundColor: Colors.white,
+      labelStyle: AppTextStyles.bodySmall,
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingS,
         vertical: AppConstants.spacingXS,
       ),
       visualDensity: VisualDensity.compact,
       side: BorderSide(
-        color: color.withOpacity(0.18),
+        color: Colors.grey.withOpacity(0.18),
       ),
     );
   }
