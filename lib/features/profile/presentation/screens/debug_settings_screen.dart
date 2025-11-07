@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/notification_service.dart';
 import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/providers/workout_provider.dart';
+import '../../../../shared/widgets/app_bar_title.dart';
 
 class DebugSettingsScreen extends StatefulWidget {
   const DebugSettingsScreen({super.key});
@@ -299,7 +300,7 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen> {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: const Text('Debug Settings'),
+        title: AppBarTitle(title: 'Debug Settings'),
         backgroundColor: AppConstants.surfaceColor,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppConstants.textPrimary),

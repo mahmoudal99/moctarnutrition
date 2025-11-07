@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
@@ -56,11 +57,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: const Text('Send Feedback'),
+        title: AppBarTitle(title: 'Send Feedback'),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -151,8 +152,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           items: _categories.map((String category) {
             return DropdownMenuItem<String>(
@@ -200,8 +200,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           items: _ratings.map((String rating) {
             return DropdownMenuItem<String>(
@@ -250,8 +249,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -290,8 +288,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -330,8 +327,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
