@@ -503,7 +503,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
               children: [
                 Text(
                   ingredient.name,
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -641,32 +641,37 @@ class _MealDetailScreenState extends State<MealDetailScreen>
   }
 
   Widget _buildMealInfo(Meal meal) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.1),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Meal Information',
+          style: AppTextStyles.heading5.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Meal Information',
-            style: AppTextStyles.heading5.copyWith(
-              fontWeight: FontWeight.bold,
+        const SizedBox(height: AppConstants.spacingM),
+        Container(
+          padding: const EdgeInsets.all(AppConstants.spacingM),
+          decoration: BoxDecoration(
+            color: AppConstants.surfaceColor,
+            borderRadius: BorderRadius.circular(AppConstants.radiusM),
+            border: Border.all(
+              color: AppConstants.textTertiary.withOpacity(0.1),
             ),
           ),
-          const SizedBox(height: AppConstants.spacingM),
-          _buildInfoRow('Prep Time', '${meal.prepTime} min', Icons.timer),
-          _buildInfoRow('Cook Time', '${meal.cookTime} min', Icons.restaurant),
-          _buildInfoRow('Servings', '${meal.servings}', Icons.people),
-          if (meal.tags.isNotEmpty)
-            _buildInfoRow('Tags', meal.tags.join(', '), Icons.label),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInfoRow('Prep Time', '${meal.prepTime} min', Icons.timer),
+              _buildInfoRow('Cook Time', '${meal.cookTime} min', Icons.restaurant),
+              _buildInfoRow('Servings', '${meal.servings}', Icons.people),
+              if (meal.tags.isNotEmpty)
+                _buildInfoRow('Tags', meal.tags.join(', '), Icons.label),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -683,7 +688,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
           const SizedBox(width: AppConstants.spacingS),
           Text(
             '$label: ',
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppConstants.textSecondary,
               fontWeight: FontWeight.w500,
             ),
