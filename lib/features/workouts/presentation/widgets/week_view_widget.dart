@@ -111,9 +111,23 @@ class WeekViewWidget extends StatelessWidget {
                           horizontal: AppConstants.spacingM,
                           vertical: AppConstants.spacingS,
                         ),
-                        child: DailyWorkoutCard(
-                          dailyWorkout: dailyWorkout,
-                          isToday: isToday,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${dailyWorkout.dayName}",
+                              style: AppTextStyles.heading5.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(
+                              height: AppConstants.spacingS,
+                            ),
+                            DailyWorkoutCard(
+                              dailyWorkout: dailyWorkout,
+                              isToday: isToday,
+                            ),
+                          ],
                         ),
                       );
                     },

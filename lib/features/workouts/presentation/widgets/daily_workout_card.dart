@@ -49,9 +49,9 @@ class DailyWorkoutCard extends StatelessWidget {
                           children: [
                             Text(
                               dailyWorkout.title,
-                              style: AppTextStyles.heading5.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: AppConstants.textPrimary,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
                               ),
                             ),
                           ],
@@ -59,7 +59,7 @@ class DailyWorkoutCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 0),
+                  const SizedBox(height: AppConstants.spacingS),
                   if (dailyWorkout.isRestDay) ...[
                     Text(
                       dailyWorkout.restDay ?? 'Time to rest and recover!',
@@ -84,7 +84,7 @@ class DailyWorkoutCard extends StatelessWidget {
                   ] else ...[
                     Text(
                       dailyWorkout.description,
-                      style: AppTextStyles.bodySmall.copyWith(
+                      style: AppTextStyles.caption.copyWith(
                         color: AppConstants.textSecondary,
                       ),
                     ),
