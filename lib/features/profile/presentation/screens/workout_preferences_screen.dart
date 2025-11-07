@@ -204,30 +204,13 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
   }
 
   Widget _buildSectionHeader(String title) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title.toUpperCase(),
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.primaryColor,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingXS),
-          Container(
-            width: 32,
-            height: 2,
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor,
-              borderRadius: BorderRadius.circular(1),
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Text(title, style: AppTextStyles.heading5),
+        SizedBox(
+          height: AppConstants.spacingS,
+        )
+      ],
     );
   }
 
@@ -264,75 +247,6 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
   Widget _buildWorkoutStylesSection() {
     return Column(
       children: [
-        // Add custom workout style
-        Container(
-          padding: const EdgeInsets.all(AppConstants.spacingL),
-          decoration: BoxDecoration(
-            color: AppConstants.surfaceColor,
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
-            border: Border.all(
-              color: AppConstants.textTertiary.withOpacity(0.1),
-              width: 1,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Add Custom Style',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppConstants.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppConstants.spacingS),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _workoutStyleController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter workout style name',
-                        hintStyle: AppTextStyles.bodyMedium.copyWith(
-                          color: AppConstants.textTertiary,
-                        ),
-                        filled: true,
-                        fillColor: AppConstants.backgroundColor,
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.radiusM),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppConstants.spacingM,
-                          vertical: AppConstants.spacingM,
-                        ),
-                      ),
-                      onSubmitted: (_) => _addCustomWorkoutStyle(),
-                    ),
-                  ),
-                  const SizedBox(width: AppConstants.spacingM),
-                  ElevatedButton(
-                    onPressed: _addCustomWorkoutStyle,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppConstants.spacingL,
-                        vertical: AppConstants.spacingM,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.radiusM),
-                      ),
-                    ),
-                    child: const Text('Add'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingM),
-
         // Predefined workout styles
         ..._workoutStyles.map((style) {
           final isSelected = _selectedWorkoutStyles.contains(style);
@@ -454,44 +368,24 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
               vertical: AppConstants.spacingM,
             ),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? AppConstants.primaryColor.withOpacity(0.05)
-                  : AppConstants.surfaceColor,
+              color: Colors.white,
               border: Border.all(
                 color: isSelected
                     ? AppConstants.primaryColor
                     : AppConstants.textTertiary.withOpacity(0.1),
-                width: isSelected ? 2 : 1,
+                width: 1,
               ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusL),
+              borderRadius: BorderRadius.circular(AppConstants.radiusS),
             ),
             child: Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : AppConstants.primaryColor.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusL),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isSelected
-                        ? AppConstants.surfaceColor
-                        : AppConstants.primaryColor,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacingM),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: AppTextStyles.bodySmall.copyWith(
                           fontWeight: FontWeight.w600,
                           color: isSelected
                               ? AppConstants.primaryColor
@@ -499,12 +393,7 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
                         ),
                       ),
                       const SizedBox(height: AppConstants.spacingXS),
-                      Text(
-                        subtitle,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppConstants.textSecondary,
-                        ),
-                      ),
+                      Text(subtitle, style: AppTextStyles.caption),
                     ],
                   ),
                 ),

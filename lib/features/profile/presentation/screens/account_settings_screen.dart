@@ -45,7 +45,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppConstants.textPrimary),
+          icon:
+              const Icon(Icons.arrow_back_ios, color: AppConstants.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -60,7 +61,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             );
           }
 
-
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
@@ -71,11 +71,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               const SizedBox(height: 24),
               _SubscriptionSection(user: user),
               const SizedBox(height: 24),
-              // Only show notification and reminder toggles for non-admin users
-              if (user.role != UserRole.admin) ...[
-                _NotificationSection(),
-                const SizedBox(height: 24),
-              ],
               _AccountDetailsSection(user: user, authUser: authUser),
               const SizedBox(height: 24),
               _SecuritySection(authUser: authUser),
@@ -129,8 +124,11 @@ class _PersonalInfoSection extends StatelessWidget {
             _InfoCard(
               title: 'Full Name',
               subtitle: user.name ?? 'Not set',
-              trailing:
-                  const Icon(Icons.edit, color: AppConstants.textTertiary),
+              trailing: const Icon(
+                Icons.edit,
+                color: AppConstants.textTertiary,
+                size: 20,
+              ),
               onTap: () => _showEditNameDialog(context, user),
             ),
             _InfoCard(
@@ -155,7 +153,11 @@ class _PersonalInfoSection extends StatelessWidget {
               title: 'Phone Number',
               subtitle: user.phoneNumber ?? 'Not set',
               trailing: user.phoneNumber != null
-                  ? const Icon(Icons.edit, color: AppConstants.textTertiary)
+                  ? const Icon(
+                      Icons.edit,
+                      color: AppConstants.textTertiary,
+                      size: 20,
+                    )
                   : null,
               onTap: user.phoneNumber != null
                   ? () => _showEditPhoneDialog(context, user)
@@ -316,7 +318,6 @@ class _PersonalInfoSection extends StatelessWidget {
     );
   }
 
-
   void _showEditAgeDialog(BuildContext context, UserModel user) {
     final ageController =
         TextEditingController(text: user.preferences.age.toString());
@@ -399,9 +400,6 @@ class _SubscriptionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trainingProgramStatus = user.trainingProgramStatus;
-    final isBodybuilding = trainingProgramStatus == TrainingProgramStatus.bodybuilding;
-    final isSummer = trainingProgramStatus == TrainingProgramStatus.summer;
-    final isWinter = trainingProgramStatus == TrainingProgramStatus.winter;
     final hasNoProgram = trainingProgramStatus == TrainingProgramStatus.none;
 
     return _SettingsSection(
@@ -411,19 +409,6 @@ class _SubscriptionSection extends StatelessWidget {
         _InfoCard(
           title: 'Current Plan',
           subtitle: _getTrainingProgramName(trainingProgramStatus),
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color:
-                  _getTrainingProgramColor(trainingProgramStatus).withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              _getTrainingProgramIcon(trainingProgramStatus),
-              color: _getTrainingProgramColor(trainingProgramStatus),
-              size: 20,
-            ),
-          ),
           trailing: hasNoProgram
               ? ElevatedButton(
                   onPressed: () => _upgradeSubscription(context),
@@ -529,7 +514,6 @@ class _SubscriptionSection extends StatelessWidget {
     // TODO: Navigate to subscription screen
     context.push('/subscription');
   }
-
 
   void _manageSubscription(BuildContext context) {
     // TODO: Navigate to subscription management
@@ -728,17 +712,18 @@ class _DangerZoneSection extends StatelessWidget {
 
       // Clear all local storage
       await AuthService.clearAllLocalStorage();
-      
+
       // Close loading dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-        
+
         // Show success dialog
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Success'),
-            content: const Text('All local storage has been cleared. Please restart the app to see the changes.'),
+            content: const Text(
+                'All local storage has been cleared. Please restart the app to see the changes.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -752,7 +737,7 @@ class _DangerZoneSection extends StatelessWidget {
       // Close loading dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-        
+
         // Show error dialog
         showDialog(
           context: context,
@@ -845,12 +830,12 @@ class _NotificationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SettingsSection(
+    return const _SettingsSection(
       title: 'Notifications & Reminders',
       icon: Icons.notifications,
       children: [
-        const NotificationsToggle(),
-        const RemindersToggle(),
+        NotificationsToggle(),
+        RemindersToggle(),
       ],
     );
   }
@@ -872,19 +857,7 @@ class _SettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(icon, color: AppConstants.textSecondary, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppConstants.textSecondary,
-              ),
-            ),
-          ],
-        ),
+        Text(title, style: AppTextStyles.heading5),
         const SizedBox(height: 12),
         Card(
           shape:
@@ -918,11 +891,12 @@ class _InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: leading,
-      title: Text(title, style: AppTextStyles.bodyMedium),
-      subtitle: Text(subtitle, style: AppTextStyles.bodySmall),
+      title: Text(title,
+          style: AppTextStyles.bodySmall.copyWith(color: Colors.black)),
+      subtitle: Text(subtitle, style: AppTextStyles.caption),
       trailing: trailing,
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
     );
   }
 }
