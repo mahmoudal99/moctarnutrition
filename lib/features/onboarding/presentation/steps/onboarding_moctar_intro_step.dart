@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
+import 'benefit_card.dart';
+import 'benefit_item.dart';
 
 class OnboardingMoctarIntroStep extends StatefulWidget {
   const OnboardingMoctarIntroStep({super.key});
@@ -128,19 +129,19 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
 
   Widget _buildBenefitsList() {
     final benefits = [
-      _BenefitItem(
+      BenefitItem(
         icon: Icons.fitness_center,
         title: 'Personalized Plans',
         description:
             'Customized nutrition and workout programs tailored to your goals',
       ),
-      _BenefitItem(
+      BenefitItem(
         icon: Icons.analytics_outlined,
         title: 'Track Your Progress',
         description:
             'Monitor your journey with detailed analytics and insights',
       ),
-      _BenefitItem(
+      BenefitItem(
         icon: Icons.support_agent,
         title: 'Expert Guidance',
         description:
@@ -160,7 +161,7 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
             opacity: _benefitVisible[index] ? 1 : 0,
             child: Padding(
               padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-              child: _BenefitCard(
+              child: BenefitCard(
                 icon: benefit.icon,
                 title: benefit.title,
                 description: benefit.description,
@@ -168,87 +169,6 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
             ),
           );
         }).toList(),
-      ),
-    );
-  }
-}
-
-class _BenefitItem {
-  final IconData icon;
-  final String title;
-  final String description;
-
-  _BenefitItem({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-}
-
-class _BenefitCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-
-  const _BenefitCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(
-          color: AppConstants.borderColor,
-          width: 1,
-        ),
-        boxShadow: AppConstants.shadowS,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppConstants.backgroundColor,
-              borderRadius: BorderRadius.circular(AppConstants.radiusS),
-            ),
-            child: Icon(
-              icon,
-              color: AppConstants.textPrimary,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: AppConstants.spacingM),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.heading5.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppConstants.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingXS),
-                Text(
-                  description,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppConstants.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

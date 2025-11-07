@@ -12,59 +12,40 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 20),
-            _buildStatsGrid(),
-            if (summary.averageWeight != null) ...[
-              const SizedBox(height: 20),
-              _buildMetricsSection(),
-            ],
-          ],
+    return Column(
+      children: [
+        _buildHeader(),
+        SizedBox(
+          height: AppConstants.spacingS,
         ),
-      ),
+        Card(
+          elevation: 1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                _buildStatsGrid(),
+                if (summary.averageWeight != null) ...[
+                  const SizedBox(height: 20),
+                  _buildMetricsSection(),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildHeader() {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppConstants.primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(
-            Icons.trending_up,
-            color: AppConstants.primaryColor,
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Progress Summary',
-                style: AppTextStyles.heading4,
-              ),
-              Text(
-                'Your check-in journey so far',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppConstants.textSecondary,
-                ),
-              ),
-            ],
-          ),
+        Text(
+          'Progress Summary',
+          style: AppTextStyles.heading5,
         ),
       ],
     );

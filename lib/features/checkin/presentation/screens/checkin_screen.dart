@@ -183,15 +183,14 @@ class _CheckinScreenState extends State<CheckinScreen> {
           children: [
             Text(
               'Check-in History',
-              style: AppTextStyles.heading4,
+              style: AppTextStyles.heading5,
             ),
             if (checkinProvider.userCheckins.isNotEmpty)
               TextButton(
                 onPressed: () => _viewAllHistory(context),
                 child: Text(
                   'View All',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppConstants.primaryColor,
+                  style: AppTextStyles.caption.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
