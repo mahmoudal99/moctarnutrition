@@ -264,12 +264,6 @@ class _WorkoutNotificationSettingsScreenState
               const SizedBox(height: AppConstants.spacingL),
             ],
 
-            // Notification preview
-            if (_workoutNotificationsEnabled) ...[
-              _buildNotificationPreview(),
-              const SizedBox(height: AppConstants.spacingL),
-            ],
-
             // Info text
             _buildInfoText(),
             const SizedBox(height: 128),
@@ -395,92 +389,14 @@ class _WorkoutNotificationSettingsScreenState
     );
   }
 
-  Widget _buildNotificationPreview() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(
-          color: AppConstants.borderColor,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Example Notification',
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            'This is how your workout notifications will look',
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.textTertiary,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          _buildNotificationCard(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotificationCard() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: Colors.grey[200]!,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        border: Border.all(
-          color: Colors.transparent,
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          // Notification content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  children: [
-                    Text(
-                      'TODAY\'S WORKOUT IS READY',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Push Day: Barbell Bench Press, Dumbbell Shoulder Press, Lateral Raise, and 3 more.',
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildInfoText() {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: AppConstants.primaryColor.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusM),
         border: Border.all(
-          color: AppConstants.primaryColor.withOpacity(0.2),
+          color: Colors.grey.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -488,17 +404,14 @@ class _WorkoutNotificationSettingsScreenState
         children: [
           const Icon(
             Icons.info_outline,
-            color: AppConstants.primaryColor,
+            color: AppConstants.textTertiary,
             size: 20,
           ),
           const SizedBox(width: AppConstants.spacingS),
           Expanded(
             child: Text(
-              'Notifications will be sent daily at ${_notificationTime.format(context)} for days when you have workouts scheduled. Rest days will be skipped automatically.',
-              style: AppTextStyles.caption.copyWith(
-                color: AppConstants.primaryColor,
-              ),
-            ),
+                'Notifications will be sent daily at ${_notificationTime.format(context)} for days when you have workouts scheduled. Rest days will be skipped automatically.',
+                style: AppTextStyles.caption),
           ),
         ],
       ),
