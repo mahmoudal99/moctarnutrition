@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/models/checkin_model.dart';
 
@@ -18,21 +19,7 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
         SizedBox(
           height: AppConstants.spacingS,
         ),
-        Card(
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConstants.radiusM)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                _buildStatsGrid(),
-              ],
-            ),
-          ),
-        ),
+        _buildStatsGrid(),
       ],
     );
   }
@@ -53,36 +40,36 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: 1.0,
+      mainAxisSpacing: 1,
+      crossAxisSpacing: 1,
+      childAspectRatio: 1.4,
       children: [
         _buildStatCard(
           title: 'Completion Rate',
           value: '${(summary.completionRate * 100).toInt()}%',
           subtitle: '${summary.completedCheckins}/${summary.totalCheckins}',
-          icon: Icons.check_circle_outline,
+          icon: "tick-double-03-stroke-rounded.svg",
           color: AppConstants.successColor,
         ),
         _buildStatCard(
           title: 'Current Streak',
           value: '${summary.currentStreak}',
           subtitle: summary.currentStreak == 1 ? 'week' : 'weeks',
-          icon: Icons.local_fire_department,
+          icon: "fire-stroke-rounded.svg",
           color: AppConstants.warningColor,
         ),
         _buildStatCard(
           title: 'Longest Streak',
           value: '${summary.longestStreak}',
           subtitle: summary.longestStreak == 1 ? 'week' : 'weeks',
-          icon: Icons.emoji_events,
+          icon: "champion-stroke-rounded.svg",
           color: AppConstants.primaryColor,
         ),
         _buildStatCard(
           title: 'Missed',
           value: '${summary.missedCheckins}',
           subtitle: summary.missedCheckins == 1 ? 'check-in' : 'check-ins',
-          icon: Icons.schedule,
+          icon: "spam-stroke-rounded.svg",
           color: AppConstants.textSecondary,
         ),
       ],
@@ -93,63 +80,77 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
     required String title,
     required String value,
     required String subtitle,
-    required IconData icon,
+    required String icon,
     required Color color,
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.1),
+          color: Colors.grey.withOpacity(0.1),
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
-          const SizedBox(height: 6),
-          Flexible(
-            child: Text(
-              value,
-              style: AppTextStyles.heading4.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
+          Align(
+            alignment: Alignment.topLeft,
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  "assets/images/${icon}",
+                  color: Colors.black,
+                  height: 20,
+                ),
+                SizedBox(
+                  width: AppConstants.spacingS,
+                ),
+                Flexible(
+                  child: Text(
+                    title,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.textTertiary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 2),
-          Flexible(
-            child: Text(
-              title,
-              style: AppTextStyles.caption.copyWith(
-                color: AppConstants.textSecondary,
-                fontWeight: FontWeight.w500,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(height: 1),
-          Flexible(
-            child: Text(
-              subtitle,
-              style: AppTextStyles.caption.copyWith(
-                color: AppConstants.textTertiary,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    value,
+                    style: AppTextStyles.heading4.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    subtitle,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppConstants.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
