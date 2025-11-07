@@ -152,18 +152,6 @@ class _CheckinScreenState extends State<CheckinScreen> {
   }
 
   Widget _buildHistorySection(CheckinProvider checkinProvider) {
-    _logger.d(
-        '_buildHistorySection - userCheckins.length: ${checkinProvider.userCheckins.length}');
-    _logger.d(
-        '_buildHistorySection - isEmpty: ${checkinProvider.userCheckins.isEmpty}');
-
-    if (checkinProvider.userCheckins.isEmpty) {
-      _logger.d('_buildHistorySection - Building empty history');
-    } else {
-      _logger.d(
-          '_buildHistorySection - Building history list with ${checkinProvider.userCheckins.take(5).length} items');
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

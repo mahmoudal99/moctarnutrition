@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'dart:io'; // Added for File
 import 'dart:async'; // Added for Timer
 import '../../../../core/constants/app_constants.dart';
@@ -31,23 +33,6 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     _currentCheckin = widget.checkin;
   }
 
-  Future<void> _refreshIfPhotoUrlsAvailable() async {
-    if (_currentCheckin?.photoUrl != null) {
-      return; // Already has photo URL, no need to check
-    }
-
-    try {
-      final hasPhotoUrls =
-          await BackgroundUploadService.hasPhotoUrls(_currentCheckin!.id);
-
-      if (hasPhotoUrls) {
-        // Photo URLs are now available, refresh the checkin data
-        await _refreshCheckinData();
-      }
-    } catch (e) {
-      // Ignore errors, just continue checking
-    }
-  }
 
   void _refreshCheckinDataIfNeeded() {
     // Only refresh once to avoid infinite loops
@@ -90,14 +75,15 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
         title: Text(
-          checkin.weekRangeWithYear,
+          _formatCheckinTitleDate(checkin),
           style:
               AppTextStyles.heading4.copyWith(color: AppConstants.textPrimary),
         ),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppConstants.textPrimary),
+          icon:
+              const Icon(Icons.arrow_back_ios, color: AppConstants.textPrimary),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -142,7 +128,6 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
               _buildMoodSection(checkin),
               const SizedBox(height: 24),
             ],
-            _buildTimelineSection(checkin),
           ],
         ),
       ),
@@ -155,7 +140,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       children: [
         Text(
           'Progress Photo',
-          style: AppTextStyles.heading4,
+          style: AppTextStyles.heading5,
         ),
         const SizedBox(height: 12),
         Container(
@@ -244,10 +229,10 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.camera_alt_outlined,
+          SvgPicture.asset(
+            "assets/images/weight-scale-stroke-rounded.svg",
             color: AppConstants.textTertiary,
-            size: 48,
+            height: 48,
           ),
           const SizedBox(height: 8),
           Text(
@@ -291,18 +276,18 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: statusColor.withOpacity(0.2),
+          color: Colors.grey.withOpacity(0.2),
         ),
       ),
       child: Row(
         children: [
-          Icon(
-            statusIcon,
+          SvgPicture.asset(
+            "assets/images/tick-double-03-stroke-rounded.svg",
             color: statusColor,
-            size: 24,
+            height: 24,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -337,7 +322,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       children: [
         Text(
           'Notes',
-          style: AppTextStyles.heading4,
+          style: AppTextStyles.heading5,
         ),
         const SizedBox(height: 12),
         Container(
@@ -365,7 +350,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       children: [
         Text(
           'Metrics',
-          style: AppTextStyles.heading4,
+          style: AppTextStyles.heading5,
         ),
         const SizedBox(height: 12),
         _buildMetricCard(
@@ -384,7 +369,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       children: [
         Text(
           'Measurements',
-          style: AppTextStyles.heading4,
+          style: AppTextStyles.heading5,
         ),
         const SizedBox(height: 12),
         GridView.builder(
@@ -415,7 +400,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
       children: [
         Text(
           'Mood & Energy',
-          style: AppTextStyles.heading4,
+          style: AppTextStyles.heading5,
         ),
         const SizedBox(height: 12),
         Row(
@@ -440,52 +425,6 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     );
   }
 
-  Widget _buildTimelineSection(CheckinModel checkin) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Timeline',
-          style: AppTextStyles.heading4,
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppConstants.surfaceColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: AppConstants.textTertiary.withOpacity(0.2),
-            ),
-          ),
-          child: Column(
-            children: [
-              _buildTimelineItem(
-                label: 'Created',
-                date: checkin.createdAt,
-                icon: Icons.add_circle_outline,
-              ),
-              if (checkin.submittedAt != null) ...[
-                const SizedBox(height: 12),
-                _buildTimelineItem(
-                  label: 'Submitted',
-                  date: checkin.submittedAt!,
-                  icon: Icons.check_circle_outline,
-                ),
-              ],
-              const SizedBox(height: 12),
-              _buildTimelineItem(
-                label: 'Last Updated',
-                date: checkin.updatedAt,
-                icon: Icons.update,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildMetricCard({
     required String label,
     required String value,
@@ -495,10 +434,10 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: Colors.grey.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -506,10 +445,10 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                color: color,
-                size: 20,
+              SvgPicture.asset(
+                "assets/images/weight-scale-stroke-rounded.svg",
+                color: Colors.black,
+                height: 20,
               ),
               const SizedBox(width: 8),
               Text(
@@ -726,6 +665,34 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
         return '😡';
       default:
         return '😐';
+    }
+  }
+
+  String _formatCheckinTitleDate(CheckinModel checkin) {
+    final date = checkin.submittedAt ?? checkin.weekStartDate;
+    return _formatDateWithOrdinal(date);
+  }
+
+  String _formatDateWithOrdinal(DateTime date) {
+    final formatted = DateFormat('EEEE d MMMM yyyy').format(date);
+    final day = date.day;
+    final suffix = _getOrdinalSuffix(day);
+    return formatted.replaceFirst('$day', '$day$suffix');
+  }
+
+  String _getOrdinalSuffix(int day) {
+    if (day >= 11 && day <= 13) {
+      return 'th';
+    }
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
     }
   }
 
