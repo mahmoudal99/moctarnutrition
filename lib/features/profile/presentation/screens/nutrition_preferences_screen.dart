@@ -13,6 +13,33 @@ class NutritionPreferencesScreen extends StatefulWidget {
       _NutritionPreferencesScreenState();
 }
 
+class _AddTagButton extends StatelessWidget {
+  const _AddTagButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppConstants.primaryColor,
+      borderRadius: BorderRadius.circular(AppConstants.radiusS),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: const SizedBox(
+          height: 36,
+          width: 36,
+          child: Icon(
+            Icons.add_rounded,
+            color: AppConstants.surfaceColor,
+            size: 20,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _NutritionPreferencesScreenState
     extends State<NutritionPreferencesScreen> {
   late UserModel _user;
@@ -168,8 +195,9 @@ class _NutritionPreferencesScreenState
       setState(() {
         _preferredCuisines.add(cuisine);
         _cuisineController.clear();
-        _markAsChanged();
       });
+      FocusScope.of(context).unfocus();
+      _markAsChanged();
     }
   }
 
@@ -186,8 +214,9 @@ class _NutritionPreferencesScreenState
       setState(() {
         _foodsToAvoid.add(food);
         _avoidController.clear();
-        _markAsChanged();
       });
+      FocusScope.of(context).unfocus();
+      _markAsChanged();
     }
   }
 
@@ -204,8 +233,9 @@ class _NutritionPreferencesScreenState
       setState(() {
         _favoriteFoods.add(food);
         _favoriteController.clear();
-        _markAsChanged();
       });
+      FocusScope.of(context).unfocus();
+      _markAsChanged();
     }
   }
 
@@ -335,13 +365,15 @@ class _NutritionPreferencesScreenState
   }
 
   Widget _buildSectionHeader(String title) {
-    return Column(
-      children: [
-        Text(title, style: AppTextStyles.heading5),
-        SizedBox(
-          height: AppConstants.spacingS,
-        )
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppConstants.spacingS),
+      child: Text(
+        title,
+        style: AppTextStyles.heading5.copyWith(
+          fontWeight: FontWeight.w700,
+          color: AppConstants.textPrimary,
+        ),
+      ),
     );
   }
 
@@ -379,13 +411,7 @@ class _NutritionPreferencesScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Daily Target Calories',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppConstants.textPrimary,
-                ),
-              ),
+              Text('Daily Target Calories', style: AppTextStyles.bodySmall),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppConstants.spacingM,
@@ -397,8 +423,7 @@ class _NutritionPreferencesScreenState
                 ),
                 child: Text(
                   '${calculatedTargets?.dailyTarget ?? "Calculating..."} cal',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w700,
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: AppConstants.primaryColor,
                   ),
                 ),
@@ -428,11 +453,8 @@ class _NutritionPreferencesScreenState
             ),
             const SizedBox(height: AppConstants.spacingM),
             Text(
-              'Your daily calorie target is automatically calculated based on your metrics, activity level, and fitness goals.',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppConstants.textSecondary,
-              ),
-            ),
+                'Your daily calorie target is automatically calculated based on your metrics, activity level, and fitness goals.',
+                style: AppTextStyles.caption),
           ],
         ],
       ),
@@ -441,130 +463,31 @@ class _NutritionPreferencesScreenState
 
   Widget _buildPreferredCuisinesSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Add new cuisine
-        Container(
-          padding: const EdgeInsets.all(AppConstants.spacingL),
-          decoration: BoxDecoration(
-            color: AppConstants.surfaceColor,
-            borderRadius: BorderRadius.circular(AppConstants.radiusL),
-            border: Border.all(
-              color: AppConstants.textTertiary.withOpacity(0.1),
-              width: 1,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Add Cuisine',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppConstants.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppConstants.spacingS),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _cuisineController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter cuisine name',
-                        hintStyle: AppTextStyles.bodyMedium.copyWith(
-                          color: AppConstants.textTertiary,
-                        ),
-                        filled: true,
-                        fillColor: AppConstants.backgroundColor,
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.radiusM),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppConstants.spacingM,
-                          vertical: AppConstants.spacingM,
-                        ),
-                      ),
-                      onSubmitted: (_) => _addCuisine(),
-                    ),
-                  ),
-                  const SizedBox(width: AppConstants.spacingM),
-                  ElevatedButton(
-                    onPressed: _addCuisine,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppConstants.spacingL,
-                        vertical: AppConstants.spacingM,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.radiusM),
-                      ),
-                    ),
-                    child: const Text('Add'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        _buildTagInputCard(
+          label: 'Add cuisine',
+          hintText: 'Type a cuisine and press enter',
+          controller: _cuisineController,
+          onAdd: _addCuisine,
         ),
-        const SizedBox(height: AppConstants.spacingM),
-        // Selected cuisines
+        const SizedBox(height: AppConstants.spacingS),
         if (_preferredCuisines.isNotEmpty)
           Wrap(
             spacing: AppConstants.spacingS,
             runSpacing: AppConstants.spacingS,
             children: _preferredCuisines.map((cuisine) {
-              return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.spacingM,
-                  vertical: AppConstants.spacingS,
-                ),
-                decoration: BoxDecoration(
-                  color: AppConstants.primaryColor.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                  border: Border.all(
-                    color: AppConstants.primaryColor.withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      cuisine,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppConstants.primaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: AppConstants.spacingS),
-                    InkWell(
-                      onTap: () => _removeCuisine(cuisine),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: AppConstants.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.close,
-                          size: 16,
-                          color: AppConstants.primaryColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              return _buildTagChip(
+                label: cuisine,
+                color: AppConstants.primaryColor,
+                onDeleted: () => _removeCuisine(cuisine),
               );
             }).toList(),
           ),
         if (_preferredCuisines.isEmpty)
           Text(
-            'No preferred cuisines added',
-            style: AppTextStyles.bodySmall.copyWith(
+            'Add the cuisines you enjoy to personalize recommendations.',
+            style: AppTextStyles.caption.copyWith(
               color: AppConstants.textTertiary,
             ),
           ),
@@ -574,58 +497,31 @@ class _NutritionPreferencesScreenState
 
   Widget _buildFoodsToAvoidSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Add new food to avoid
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _avoidController,
-                decoration: InputDecoration(
-                  hintText: 'Enter food to avoid',
-                  hintStyle: AppTextStyles.bodyMedium.copyWith(
-                    color: AppConstants.textTertiary,
-                  ),
-                  filled: true,
-                  fillColor: AppConstants.backgroundColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.spacingM,
-                    vertical: AppConstants.spacingM,
-                  ),
-                ),
-                onSubmitted: (_) => _addFoodToAvoid(),
-              ),
-            ),
-            const SizedBox(width: AppConstants.spacingS),
-            ElevatedButton(
-              onPressed: _addFoodToAvoid,
-              child: const Text('Add'),
-            ),
-          ],
+        _buildTagInputCard(
+          label: 'Add food to avoid',
+          hintText: 'e.g. shellfish',
+          controller: _avoidController,
+          onAdd: _addFoodToAvoid,
         ),
-        const SizedBox(height: AppConstants.spacingM),
-        // Selected foods to avoid
+        const SizedBox(height: AppConstants.spacingS),
         if (_foodsToAvoid.isNotEmpty)
           Wrap(
             spacing: AppConstants.spacingS,
             runSpacing: AppConstants.spacingS,
             children: _foodsToAvoid.map((food) {
-              return Chip(
-                label: Text(food),
+              return _buildTagChip(
+                label: food,
+                color: AppConstants.errorColor,
                 onDeleted: () => _removeFoodToAvoid(food),
-                deleteIcon: const Icon(Icons.close, size: 18),
-                backgroundColor: AppConstants.errorColor.withOpacity(0.1),
               );
             }).toList(),
           ),
         if (_foodsToAvoid.isEmpty)
           Text(
-            'No foods to avoid added',
-            style: AppTextStyles.bodySmall.copyWith(
+            'Highlight ingredients you want us to leave out.',
+            style: AppTextStyles.caption.copyWith(
               color: AppConstants.textTertiary,
             ),
           ),
@@ -635,62 +531,146 @@ class _NutritionPreferencesScreenState
 
   Widget _buildFavoriteFoodsSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Add new favorite food
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _favoriteController,
-                decoration: InputDecoration(
-                  hintText: 'Enter favorite food',
-                  hintStyle: AppTextStyles.bodyMedium.copyWith(
-                    color: AppConstants.textTertiary,
-                  ),
-                  filled: true,
-                  fillColor: AppConstants.backgroundColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.spacingM,
-                    vertical: AppConstants.spacingM,
-                  ),
-                ),
-                onSubmitted: (_) => _addFavoriteFood(),
-              ),
-            ),
-            const SizedBox(width: AppConstants.spacingS),
-            ElevatedButton(
-              onPressed: _addFavoriteFood,
-              child: const Text('Add'),
-            ),
-          ],
+        _buildTagInputCard(
+          label: 'Add favorite food',
+          hintText: 'e.g. salmon, quinoa bowl',
+          controller: _favoriteController,
+          onAdd: _addFavoriteFood,
         ),
-        const SizedBox(height: AppConstants.spacingM),
-        // Selected favorite foods
+        const SizedBox(height: AppConstants.spacingS),
         if (_favoriteFoods.isNotEmpty)
           Wrap(
             spacing: AppConstants.spacingS,
             runSpacing: AppConstants.spacingS,
             children: _favoriteFoods.map((food) {
-              return Chip(
-                label: Text(food),
+              return _buildTagChip(
+                label: food,
+                color: AppConstants.successColor,
                 onDeleted: () => _removeFavoriteFood(food),
-                deleteIcon: const Icon(Icons.close, size: 18),
-                backgroundColor: AppConstants.successColor.withOpacity(0.1),
               );
             }).toList(),
           ),
         if (_favoriteFoods.isEmpty)
           Text(
-            'No favorite foods added',
-            style: AppTextStyles.bodySmall.copyWith(
+            'Save the meals you love so we can surface them more often.',
+            style: AppTextStyles.caption.copyWith(
               color: AppConstants.textTertiary,
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildTagInputCard({
+    required String label,
+    required String hintText,
+    required TextEditingController controller,
+    required VoidCallback onAdd,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      decoration: BoxDecoration(
+        color: AppConstants.surfaceColor,
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        border: Border.all(
+          color: AppConstants.borderColor.withOpacity(0.6),
+        ),
+        boxShadow: AppConstants.shadowS,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: AppConstants.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingS),
+          TextField(
+            controller: controller,
+            textInputAction: TextInputAction.done,
+            decoration: _buildTagInputDecoration(
+              hintText: hintText,
+              onAdd: onAdd,
+            ),
+            onSubmitted: (_) => onAdd(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _buildTagInputDecoration({
+    required String hintText,
+    required VoidCallback onAdd,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: AppTextStyles.bodySmall.copyWith(
+        color: AppConstants.textTertiary,
+      ),
+      filled: true,
+      fillColor: AppConstants.backgroundColor,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingM,
+        vertical: AppConstants.spacingS + 2,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderSide: BorderSide(
+          color: AppConstants.borderColor.withOpacity(0.6),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderSide: BorderSide(
+          color: AppConstants.borderColor.withOpacity(0.4),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        borderSide: const BorderSide(
+          color: AppConstants.primaryColor,
+        ),
+      ),
+      suffixIcon: Padding(
+        padding: const EdgeInsets.only(right: AppConstants.spacingS),
+        child: _AddTagButton(onPressed: onAdd),
+      ),
+      suffixIconConstraints: const BoxConstraints(
+        minHeight: 40,
+        minWidth: 40,
+      ),
+    );
+  }
+
+  Widget _buildTagChip({
+    required String label,
+    required Color color,
+    required VoidCallback onDeleted,
+  }) {
+    return Chip(
+      label: Text(label),
+      onDeleted: onDeleted,
+      deleteIcon: const Icon(Icons.close_rounded, size: 16),
+      backgroundColor: color.withOpacity(0.08),
+      labelStyle: AppTextStyles.caption.copyWith(
+        color: color,
+        fontWeight: FontWeight.w600,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingS,
+        vertical: AppConstants.spacingXS,
+      ),
+      visualDensity: VisualDensity.compact,
+      side: BorderSide(
+        color: color.withOpacity(0.18),
+      ),
     );
   }
 
