@@ -8,7 +8,7 @@ import '../../../../shared/providers/workout_provider.dart';
 import 'add_workout_screen.dart';
 import 'add_exercise_screen.dart';
 
-class WorkoutDetailsScreen extends StatelessWidget {
+class WorkoutDetailsScreen extends StatefulWidget {
   final DailyWorkout dailyWorkout;
 
   const WorkoutDetailsScreen({
@@ -17,18 +17,26 @@ class WorkoutDetailsScreen extends StatelessWidget {
   });
 
   @override
+  State<WorkoutDetailsScreen> createState() => _WorkoutDetailsScreenState();
+}
+
+class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
+  bool _isEditMode = false;
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, child) {
         // Get the current daily workout from the provider to ensure real-time updates
         final currentDailyWorkout =
-            workoutProvider.getWorkoutForDay(dailyWorkout.dayName);
+            workoutProvider.getWorkoutForDay(widget.dailyWorkout.dayName);
 
         return Scaffold(
           backgroundColor: AppConstants.backgroundColor,
           appBar: AppBar(
             title: AppBarTitle(
-                title: currentDailyWorkout?.title ?? dailyWorkout.title),
+                title:
+                    currentDailyWorkout?.title ?? widget.dailyWorkout.title),
             backgroundColor: AppConstants.surfaceColor,
             elevation: 0,
             iconTheme: const IconThemeData(color: AppConstants.textPrimary),
@@ -37,26 +45,31 @@ class WorkoutDetailsScreen extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
             actions: [
-              Text(
-                dailyWorkout.dayName,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppConstants.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isEditMode = !_isEditMode;
+                  });
+                },
+                icon: Icon(_isEditMode ? Icons.check : Icons.edit, size: 20,),
+                tooltip: _isEditMode ? 'Done' : 'Edit',
+                color: AppConstants.textTertiary,
               ),
-              const SizedBox(width: AppConstants.spacingM),
             ],
           ),
-          body: (currentDailyWorkout?.isRestDay ?? dailyWorkout.isRestDay) ||
+          body: (currentDailyWorkout?.isRestDay ?? widget.dailyWorkout.isRestDay) ||
                   (currentDailyWorkout?.workouts.isEmpty ??
-                      dailyWorkout.workouts.isEmpty)
+                      widget.dailyWorkout.workouts.isEmpty)
               ? _buildRestDayContent(context)
               : _buildWorkoutContent(
-                  context, currentDailyWorkout ?? dailyWorkout),
+                  context,
+                  currentDailyWorkout ?? widget.dailyWorkout,
+                  _isEditMode,
+                ),
           floatingActionButton:
-              (!(currentDailyWorkout?.isRestDay ?? dailyWorkout.isRestDay) &&
+              (!(currentDailyWorkout?.isRestDay ?? widget.dailyWorkout.isRestDay) &&
                       !(currentDailyWorkout?.workouts.isEmpty ??
-                          dailyWorkout.workouts.isEmpty))
+                          widget.dailyWorkout.workouts.isEmpty))
                   ? FloatingActionButton.extended(
                       onPressed: () => _navigateToAddWorkout(context),
                       icon: const Icon(Icons.add),
@@ -164,7 +177,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
   }
 
   IconData _getRestDayIcon() {
-    final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
+    final restDayMessage = widget.dailyWorkout.restDay?.toLowerCase() ?? '';
 
     if (restDayMessage.contains('active') || restDayMessage.contains('light')) {
       return Icons.directions_walk;
@@ -180,7 +193,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
   }
 
   String _getRestDayTitle() {
-    final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
+    final restDayMessage = widget.dailyWorkout.restDay?.toLowerCase() ?? '';
 
     if (restDayMessage.contains('active')) {
       return 'Active Recovery';
@@ -194,7 +207,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
   }
 
   List<Widget> _getRestDayBenefits() {
-    final restDayMessage = dailyWorkout.restDay?.toLowerCase() ?? '';
+    final restDayMessage = widget.dailyWorkout.restDay?.toLowerCase() ?? '';
     final benefits = <Widget>[];
 
     if (restDayMessage.contains('active') || restDayMessage.contains('light')) {
@@ -317,10 +330,15 @@ class WorkoutDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkoutContent(
-      BuildContext context, DailyWorkout currentDailyWorkout) {
+  Widget _buildWorkoutContent(BuildContext context,
+      DailyWorkout currentDailyWorkout, bool isEditMode) {
     return ListView.builder(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: const EdgeInsets.fromLTRB(
+        AppConstants.spacingM,
+        AppConstants.spacingM,
+        AppConstants.spacingM,
+        128,
+      ),
       itemCount: currentDailyWorkout.workouts.length,
       itemBuilder: (context, index) {
         final workout = currentDailyWorkout.workouts[index];
@@ -330,6 +348,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
           dailyWorkout: currentDailyWorkout,
           onRemove: () =>
               _removeWorkout(context, workout.id, currentDailyWorkout),
+          isEditMode: isEditMode,
         );
       },
     );
@@ -339,7 +358,8 @@ class WorkoutDetailsScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddWorkoutScreen(dailyWorkout: dailyWorkout),
+        builder: (context) =>
+            AddWorkoutScreen(dailyWorkout: widget.dailyWorkout),
       ),
     ).then((result) {
       // If a workout was successfully added, the UI will automatically update
@@ -414,12 +434,14 @@ class _WorkoutCard extends StatelessWidget {
   final String dayName;
   final VoidCallback? onRemove;
   final DailyWorkout dailyWorkout;
+  final bool isEditMode;
 
   const _WorkoutCard({
     required this.workout,
     required this.dayName,
     required this.dailyWorkout,
     this.onRemove,
+    required this.isEditMode,
   });
 
   @override
@@ -431,7 +453,7 @@ class _WorkoutCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusM),
         border: Border.all(
-          color: AppConstants.textTertiary.withOpacity(0.2),
+          color: Colors.grey.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -447,7 +469,7 @@ class _WorkoutCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (onRemove != null)
+              if (isEditMode && onRemove != null)
                 IconButton(
                   onPressed: onRemove,
                   icon: const Icon(Icons.remove_circle_outline),
@@ -477,6 +499,7 @@ class _WorkoutCard extends StatelessWidget {
                 workoutId: workout.id,
                 onRemove: () => _removeExercise(
                     context, exercise.id, dailyWorkout, workout.id),
+                isEditMode: isEditMode,
               )),
           const SizedBox(height: AppConstants.spacingM),
           // Add exercise button
@@ -488,8 +511,8 @@ class _WorkoutCard extends StatelessWidget {
               icon: const Icon(Icons.add),
               label: const Text('Add Exercise'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppConstants.primaryColor,
-                side: const BorderSide(color: AppConstants.primaryColor),
+                foregroundColor: Colors.black,
+                side: const BorderSide(color: AppConstants.textTertiary),
                 padding: const EdgeInsets.symmetric(
                   vertical: AppConstants.spacingS,
                 ),
@@ -588,12 +611,14 @@ class _ExerciseItem extends StatelessWidget {
   final String dayName;
   final String workoutId;
   final VoidCallback? onRemove;
+  final bool isEditMode;
 
   const _ExerciseItem({
     required this.exercise,
     required this.dayName,
     required this.workoutId,
     this.onRemove,
+    required this.isEditMode,
   });
 
   @override
@@ -661,7 +686,7 @@ class _ExerciseItem extends StatelessWidget {
               ),
             ],
           ),
-          if (onRemove != null) ...[
+          if (isEditMode && onRemove != null) ...[
             const SizedBox(width: AppConstants.spacingS),
             IconButton(
               onPressed: onRemove,
