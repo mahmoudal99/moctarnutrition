@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -307,7 +308,7 @@ class _NutritionPreferencesScreenState
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: const Text('Nutrition Preferences'),
+        title: AppBarTitle(title: 'Nutrition Preferences'),
         backgroundColor: AppConstants.surfaceColor,
         elevation: 0,
         actions: [

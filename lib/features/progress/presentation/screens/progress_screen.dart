@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -309,7 +310,7 @@ class _ProgressScreenState extends State<ProgressScreen>
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: const Text('Progress Tracking'),
+        title: AppBarTitle(title: 'My Progress'),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
         leading: IconButton(

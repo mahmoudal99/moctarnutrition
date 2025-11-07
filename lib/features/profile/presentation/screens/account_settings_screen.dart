@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -41,7 +42,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: const Text('Account Settings'),
+        title: AppBarTitle(title: 'Account Settings'),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
         leading: IconButton(

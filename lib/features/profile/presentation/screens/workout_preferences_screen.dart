@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -93,16 +94,6 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
     });
   }
 
-  void _addCustomWorkoutStyle() {
-    final style = _workoutStyleController.text.trim();
-    if (style.isNotEmpty && !_selectedWorkoutStyles.contains(style)) {
-      setState(() {
-        _selectedWorkoutStyles.add(style);
-        _workoutStyleController.clear();
-        _markAsChanged();
-      });
-    }
-  }
 
   void _removeWorkoutStyle(String style) {
     setState(() {
@@ -166,7 +157,7 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: const Text('Workout Preferences'),
+        title: AppBarTitle(title: 'Workout Preferences'),
         backgroundColor: AppConstants.surfaceColor,
         elevation: 0,
         actions: [

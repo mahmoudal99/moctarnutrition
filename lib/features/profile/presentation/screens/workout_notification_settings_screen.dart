@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -232,7 +233,7 @@ class _WorkoutNotificationSettingsScreenState
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: const Text('Workout Notifications'),
+        title: AppBarTitle(title: 'Workout Notifications'),
         backgroundColor: AppConstants.surfaceColor,
         elevation: 0,
         actions: [
