@@ -135,7 +135,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
             ),
             title: Text(
               currentMeal.name,
-              style: AppTextStyles.heading5.copyWith(
+              style: AppTextStyles.heading4.copyWith(
                 color: AppConstants.textPrimary,
               ),
             ),
@@ -149,7 +149,8 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildMealHeader(currentMeal),
+                    /// MOVE DESCRIPTION INTO A SEPARATE WIDGET
+                    // _buildMealHeader(currentMeal),
                     const SizedBox(height: AppConstants.spacingM),
                     _buildNutritionOverview(currentMeal),
                     const SizedBox(height: AppConstants.spacingM),
@@ -346,23 +347,28 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                   child: Column(
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Expanded(
-                            child: _buildNutritionCard(
-                              'Calories',
-                              '${meal.nutrition.calories}',
-                              'cal',
-                              AppConstants.accentColor,
-                            ),
+                          SvgPicture.asset(
+                            "assets/images/fire-stroke-rounded.svg",
+                            color: Colors.orange,
                           ),
-                          const SizedBox(width: AppConstants.spacingS),
-                          Expanded(
-                            child: _buildNutritionCard(
-                              'Protein',
-                              meal.nutrition.protein.toStringAsFixed(1),
-                              'g',
-                              AppConstants.successColor,
-                            ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            '${meal.nutrition.calories}',
+                            style: AppTextStyles.heading2
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Total Calories',
+                            style: AppTextStyles.caption
+                                .copyWith(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -371,42 +377,29 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                         children: [
                           Expanded(
                             child: _buildNutritionCard(
-                              'Carbs',
-                              meal.nutrition.carbs.toStringAsFixed(1),
-                              'g',
-                              AppConstants.warningColor,
-                            ),
+                                'Protein',
+                                meal.nutrition.protein.toStringAsFixed(1),
+                                'g',
+                                AppConstants.successColor,
+                                "fish-food-stroke.svg"),
                           ),
                           const SizedBox(width: AppConstants.spacingS),
                           Expanded(
                             child: _buildNutritionCard(
-                              'Fat',
-                              meal.nutrition.fat.toStringAsFixed(1),
-                              'g',
-                              AppConstants.errorColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppConstants.spacingS),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildNutritionCard(
-                              'Fiber',
-                              widget.meal.nutrition.fiber.toStringAsFixed(1),
-                              'g',
-                              AppConstants.secondaryColor,
-                            ),
+                                'Carbs',
+                                meal.nutrition.carbs.toStringAsFixed(1),
+                                'g',
+                                AppConstants.warningColor,
+                                "bread-stroke-rounded.svg"),
                           ),
                           const SizedBox(width: AppConstants.spacingS),
                           Expanded(
                             child: _buildNutritionCard(
-                              'Sugar',
-                              widget.meal.nutrition.sugar.toStringAsFixed(1),
-                              'g',
-                              AppConstants.primaryColor,
-                            ),
+                                'Fat',
+                                meal.nutrition.fat.toStringAsFixed(1),
+                                'g',
+                                AppConstants.errorColor,
+                                "avocado-stroke-rounded.svg"),
                           ),
                         ],
                       ),
@@ -422,39 +415,39 @@ class _MealDetailScreenState extends State<MealDetailScreen>
   }
 
   Widget _buildNutritionCard(
-      String label, String value, String unit, Color color) {
+      String label, String value, String unit, Color color, String icon) {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingS),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(AppConstants.radiusS),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-        ),
-      ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: AppTextStyles.heading4.copyWith(
-              color: color,
+            value + " " + unit,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.black,
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
-            unit,
-            style: AppTextStyles.caption.copyWith(
-              color: color.withOpacity(0.7),
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                "assets/images/$icon",
+                height: 14,
+                color: color,
+              ),
+              SizedBox(
+                width: AppConstants.spacingS,
+              ),
+              Text(
+                label,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ],
       ),
