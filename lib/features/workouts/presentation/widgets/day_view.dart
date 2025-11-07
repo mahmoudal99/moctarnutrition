@@ -15,70 +15,11 @@ class DayView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildDayHeader(),
         if (dailyWorkout.isRestDay)
           _buildRestDayContent()
         else
           _buildWorkoutContent(),
       ],
-    );
-  }
-
-  Widget _buildDayHeader() {
-    return Container(
-      margin: const EdgeInsets.all(AppConstants.spacingM),
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceColor,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        boxShadow: AppConstants.shadowS,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                dailyWorkout.dayName,
-                style: AppTextStyles.heading5.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.spacingS,
-                  vertical: AppConstants.spacingXS,
-                ),
-                decoration: BoxDecoration(
-                  color: dailyWorkout.isRestDay
-                      ? AppConstants.primaryColor.withOpacity(0.1)
-                      : AppConstants.primaryColor,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                ),
-                child: Text(
-                  dailyWorkout.isRestDay ? 'Rest Day' : 'Workout Day',
-                  style: AppTextStyles.caption.copyWith(
-                    color: dailyWorkout.isRestDay
-                        ? AppConstants.primaryColor
-                        : AppConstants.surfaceColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (!dailyWorkout.isRestDay) ...[
-            const SizedBox(height: AppConstants.spacingS),
-            Text(
-              '${dailyWorkout.workouts.length} workout${dailyWorkout.workouts.length != 1 ? 's' : ''} • ${dailyWorkout.estimatedDuration} min',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppConstants.textSecondary,
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 
