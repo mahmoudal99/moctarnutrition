@@ -284,7 +284,11 @@ GoRouter createRouter(AuthProvider authProvider) {
         '/admin/user-detail',
         '/profile',
         '/trainers',
-        '/account-settings'
+        '/account-settings',
+        '/privacy-policy',
+        '/help-center',
+        '/bug-report',
+        '/feedback',
       ];
       final currentRoute = state.uri.toString();
 
