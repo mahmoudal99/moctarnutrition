@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../core/constants/app_constants.dart';
 
@@ -142,16 +143,21 @@ class NextMealCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(
-              Icons.restaurant_outlined,
-              size: 24,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No Meals Planned',
-              style: AppTextStyles.heading5,
-              textAlign: TextAlign.center,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  "assets/images/add-to-list-stroke-rounded.svg",
+                  height: 20,
+                  color: Colors.black,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'No Meal Plan Yet',
+                  style: AppTextStyles.heading5
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
