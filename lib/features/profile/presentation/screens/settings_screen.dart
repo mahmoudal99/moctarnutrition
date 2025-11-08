@@ -8,6 +8,7 @@ import '../../../../shared/providers/auth_provider.dart' as app_auth;
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/widgets/version_text.dart';
 import '../../../onboarding/presentation/screens/welcome_screen.dart';
+import '../widgets/notifications_bottom_sheet.dart';
 import '../widgets/notifications_toggle.dart';
 import '../widgets/reminders_toggle.dart';
 import '../widgets/profile_user_card.dart';
@@ -32,50 +33,7 @@ class ProfileScreen extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (sheetContext) {
-        final viewInsets = MediaQuery.of(sheetContext).viewInsets;
-        final padding = MediaQuery.of(sheetContext).padding;
-
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 12,
-            bottom: viewInsets.bottom + padding.bottom + 300,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppConstants.textTertiary.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'SETTINGS',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppConstants.accentColor
-                ),
-              ),
-              Text(
-                'Notifications',
-                style: Theme.of(sheetContext).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              const NotificationsToggle(),
-              const SizedBox(height: 12),
-              const RemindersToggle(),
-            ],
-          ),
-        );
-      },
+      builder: (sheetContext) => const NotificationsBottomSheet(),
     );
   }
 
