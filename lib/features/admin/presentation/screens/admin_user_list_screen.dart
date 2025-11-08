@@ -486,7 +486,7 @@ class _UserCard extends StatelessWidget {
                 photoUrl: user.photoUrl,
                 name: user.name,
                 email: user.email,
-                radius: 24,
+                radius: 20,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -495,13 +495,13 @@ class _UserCard extends StatelessWidget {
                   children: [
                     Text(
                       user.name ?? user.email,
-                      style: AppTextStyles.bodyLarge
+                      style: AppTextStyles.heading5
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       user.email,
-                      style: AppTextStyles.bodySmall
+                      style: AppTextStyles.caption
                           .copyWith(color: AppConstants.textSecondary),
                     ),
                     const SizedBox(height: 8),
