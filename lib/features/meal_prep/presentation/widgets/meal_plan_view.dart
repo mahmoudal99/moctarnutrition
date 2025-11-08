@@ -52,10 +52,10 @@ class _MealPlanViewState extends State<MealPlanView>
   @override
   void initState() {
     super.initState();
-    _currentDayIndex = _getCurrentDayIndex();
     _cheatDayIndex = _convertCheatDayToIndex(widget.cheatDay);
     _planAnchorDate = _determinePlanAnchorDate(widget.mealPlan);
     _weeklyMealDays = _generateWeeklySchedule(widget.mealPlan);
+    _currentDayIndex = _getCurrentDayIndex();
     _currentDayIndex = _ensureValidInitialIndex(_currentDayIndex);
     // Start with the current day index for circular scrolling
     _pageController = PageController(initialPage: _currentDayIndex);
@@ -805,30 +805,42 @@ class _MealPlanViewState extends State<MealPlanView>
   }
 
   int _getCurrentDayIndex() {
-    final now = DateTime.now();
-    // DateTime.weekday returns 1 (Monday) to 7 (Sunday)
-    // We want 0 (Monday) to 6 (Sunday)
-    final currentDayIndex = now.weekday - 1;
+    final anchor = _planAnchorDate;
+    final referenceDate =
+        _normalizeDate(widget.selectedDate ?? DateTime.now());
 
-    // Ensure the day index is within the bounds of available meal days
-    if (currentDayIndex < widget.mealPlan.mealDays.length) {
-      return currentDayIndex;
+    if (anchor == null) {
+      final fallbackIndex = referenceDate.weekday - 1;
+      return (fallbackIndex >= 0 && fallbackIndex < 7) ? fallbackIndex : 0;
     }
 
-    // If current day is beyond available meal days, show the first day
-    return 0;
+    final daysDifference = referenceDate.difference(anchor).inDays;
+    final normalizedDiff = _positiveModulo(daysDifference, 7);
+    final anchorIndex = anchor.weekday - 1;
+    return (anchorIndex + normalizedDiff) % 7;
   }
 
   int _ensureValidInitialIndex(int index) {
     if (_weeklyMealDays.isEmpty) return index;
-    if (_weeklyMealDays[index] != null) return index;
-    for (int i = 1; i < 7; i++) {
-      final candidate = (index + i) % 7;
-      if (_weeklyMealDays[candidate] != null) {
+
+    final normalizedIndex =
+        _positiveModulo(index, _weeklyMealDays.length);
+
+    if (_weeklyMealDays[normalizedIndex] != null ||
+        _isCheatDay(normalizedIndex)) {
+      return normalizedIndex;
+    }
+
+    for (int i = 1; i < _weeklyMealDays.length; i++) {
+      final candidate =
+          (normalizedIndex + i) % _weeklyMealDays.length;
+      if (_weeklyMealDays[candidate] != null ||
+          _isCheatDay(candidate)) {
         return candidate;
       }
     }
-    return index;
+
+    return normalizedIndex;
   }
 
   List<MealDay?> _generateWeeklySchedule(MealPlanModel mealPlan) {
@@ -895,6 +907,11 @@ class _MealPlanViewState extends State<MealPlanView>
 
   DateTime _normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
+  }
+
+  int _positiveModulo(int value, int modulo) {
+    final result = value % modulo;
+    return result < 0 ? result + modulo : result;
   }
 
   DateTime? _dateForIndex(int index) {

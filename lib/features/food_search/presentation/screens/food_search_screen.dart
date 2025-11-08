@@ -1,4 +1,6 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/services/food_search_service.dart';
 import '../widgets/food_search_bar.dart';
@@ -71,7 +73,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       context: context,
       builder: (context) => AddFoodDialog(food: food),
     );
-    
+
     // If food was added successfully, return true to the home screen
     if (result == true) {
       Navigator.of(context).pop(true);
@@ -82,7 +84,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Food Search'),
+        title: AppBarTitle(title: 'Food Search'),
         backgroundColor: AppConstants.backgroundColor,
         elevation: 0,
         actions: [
@@ -109,7 +111,6 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
               onSearch: _searchFoods,
             ),
           ),
-          
           // Search Results
           Expanded(
             child: _isLoading
@@ -122,22 +123,35 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         ),
                       )
                     : _searchResults.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.search,
-                                  size: 64,
-                                  color: AppConstants.textTertiary,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                      "assets/images/search-square-stroke-rounded.svg",
+                                      height: 20,
+                                      color: Colors.black,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Search...',
+                                      style: AppTextStyles.heading4.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        color: Colors.grey[800],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(height: AppConstants.spacingM),
+                                SizedBox(height: AppConstants.spacingS),
                                 Text(
-                                  'Search for foods to add to your daily intake',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: AppConstants.textSecondary,
-                                  ),
+                                  'Search for foods to add\nto your daily intake',
+                                  style: AppTextStyles.bodyMedium
+                                      .copyWith(color: Colors.grey[500]),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
@@ -151,7 +165,8 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                             itemBuilder: (context, index) {
                               final food = _searchResults[index];
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: AppConstants.spacingS),
+                                padding: const EdgeInsets.only(
+                                    bottom: AppConstants.spacingS),
                                 child: FoodProductCard(
                                   food: food,
                                   onTap: () => _onFoodSelected(food),
@@ -161,19 +176,6 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                           ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const BarcodeScannerScreen(),
-            ),
-          );
-        },
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.qr_code_scanner),
-        label: const Text('Scan Barcode'),
       ),
     );
   }
