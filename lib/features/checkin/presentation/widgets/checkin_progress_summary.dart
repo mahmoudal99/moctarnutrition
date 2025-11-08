@@ -110,8 +110,7 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
                   child: Text(
                     title,
                     style: AppTextStyles.caption.copyWith(
-                      color: AppConstants.textTertiary,
-                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                       fontSize: 12,
                     ),
                     textAlign: TextAlign.center,

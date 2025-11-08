@@ -51,79 +51,67 @@ class AdminUserCheckinsScreen extends StatelessWidget {
             user: user,
             title: 'Check-ins',
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Stats section
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        '${checkins.length}',
-                        'Check-ins',
-                        "image-done-02-stroke-rounded.svg",
-                        AppConstants.primaryColor,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildStatCard(
-                        '${_calculateActiveWeeks(checkins)}',
-                        'Active Weeks',
-                        "tick-double-03-stroke-rounded.svg",
-                        Colors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: AppConstants.spacingM),
-
-                // Check-ins list
-                Text('Recent Check-ins', style: AppTextStyles.heading5),
-
-                const SizedBox(height: 16),
-
-                if (checkins.isEmpty)
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          body: checkins.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            "assets/images/image-delete-02-stroke-rounded.svg",
-                            height: 20,
+                      ..._buildStatsSection(checkins),
+                      Expanded(
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    "assets/images/image-delete-02-stroke-rounded.svg",
+                                    height: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'No check-ins yet',
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyles.heading4.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Colors.grey[800],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: AppConstants.spacingS),
+                              Text(
+                                'This user hasn\'t checked in yet',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.bodyMedium
+                                    .copyWith(color: Colors.grey[500]),
+                              ),
+                            ],
                           ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            'No check-ins yet',
-                            style: AppTextStyles.bodyLarge
-                                .copyWith(color: Colors.grey[600]),
-                          ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: AppConstants.spacingS),
-                      Text(
-                        'This user hasn\'t checked in yet',
-                        style: AppTextStyles.bodyMedium
-                            .copyWith(color: Colors.grey[500]),
-                      ),
+                      const SizedBox(height: 96),
                     ],
-                  )
-                else
-                  ...checkins
-                      .map((checkin) => _buildCheckinCard(context, checkin)),
-                const SizedBox(
-                  height: 96,
+                  ),
                 )
-              ],
-            ),
-          ),
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ..._buildStatsSection(checkins),
+                      ...checkins.map(
+                        (checkin) => _buildCheckinCard(context, checkin),
+                      ),
+                      const SizedBox(height: 96),
+                    ],
+                  ),
+                ),
         );
       },
     );
@@ -163,7 +151,38 @@ class AdminUserCheckinsScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildStatCard(String value, String label, String icon, Color color) {
+  List<Widget> _buildStatsSection(List<CheckinModel> checkins) {
+    return [
+      Row(
+        children: [
+          Expanded(
+            child: _buildStatCard(
+              '${checkins.length}',
+              'Check-ins',
+              "image-done-02-stroke-rounded.svg",
+              AppConstants.primaryColor,
+              "uploads"
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: _buildStatCard(
+              '${_calculateActiveWeeks(checkins)}',
+              'Active Weeks',
+              "tick-double-03-stroke-rounded.svg",
+              Colors.orange,
+              "weeks"
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: AppConstants.spacingM),
+      Text('Recent Check-ins', style: AppTextStyles.heading5),
+      const SizedBox(height: 16),
+    ];
+  }
+
+  Widget _buildStatCard(String value, String label, String icon, Color color, String subtitle) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -180,27 +199,44 @@ class AdminUserCheckinsScreen extends StatelessWidget {
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               SvgPicture.asset(
                 "assets/images/$icon",
                 height: 20,
               ),
+              SizedBox(
+                width: AppConstants.spacingS,
+              ),
               Text(
                 label,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.grey[600],
+                style: AppTextStyles.caption.copyWith(
+                  color: Colors.black,
+                  fontSize: 12,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            value,
-            style: AppTextStyles.heading4.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+          const SizedBox(height: AppConstants.spacingM),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                value,
+                style: AppTextStyles.heading4.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textSecondary,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
         ],
       ),
