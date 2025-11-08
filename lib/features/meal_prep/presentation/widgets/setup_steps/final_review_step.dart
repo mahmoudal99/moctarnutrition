@@ -117,8 +117,8 @@ class FinalReviewStep extends StatelessWidget {
               userName: userName,
               title: '{name}\'s Final Review',
               fallbackTitle: 'Final Review',
-              style:
-                  AppTextStyles.heading4.copyWith(fontWeight: FontWeight.bold),
+              style: AppTextStyles.bodyMedium
+                  .copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppConstants.spacingL),
@@ -204,21 +204,6 @@ class FinalReviewStep extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: isFromClient
-                ? AppConstants.successColor.withOpacity(0.08)
-                : AppConstants.primaryColor.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.all(10),
-          child: Icon(icon,
-              color: isFromClient
-                  ? AppConstants.successColor
-                  : AppConstants.primaryColor,
-              size: 20),
-        ),
-        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

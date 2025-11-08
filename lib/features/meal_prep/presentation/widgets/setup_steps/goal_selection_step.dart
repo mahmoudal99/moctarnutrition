@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 import '../../../../../core/constants/app_constants.dart';
 import 'personalized_title.dart';
+import 'goal_selection_note.dart';
 
 // Use the same FitnessGoal enum as the client onboarding
 // This ensures language consistency between client and admin sides
@@ -38,37 +39,10 @@ class GoalSelectionStep extends StatelessWidget {
         // Show client's onboarding choice if available
         if (clientFitnessGoal != null) ...[
           const SizedBox(height: AppConstants.spacingM),
-          DottedBorder(
-            color: AppConstants.carbsColor.withOpacity(0.5),
-            strokeWidth: 1,
-            dashPattern: const [6, 4],
-            borderType: BorderType.RRect,
-            radius: Radius.circular(AppConstants.radiusS),
-            child: Container(
-              padding: const EdgeInsets.all(AppConstants.spacingM),
-              decoration: BoxDecoration(
-                color: AppConstants.carbsColor.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(AppConstants.radiusS),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.info_outline,
-                    color: Colors.black,
-                    size: 20,
-                  ),
-                  const SizedBox(width: AppConstants.spacingS),
-                  Expanded(
-                    child: Text(
-                      'Client selected: ${_getFitnessGoalTitle(clientFitnessGoal!)} during onboarding',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          GoalSelectionNote(
+            message:
+                'Client selected: ${_getFitnessGoalTitle(clientFitnessGoal!)} during onboarding',
+            accentColor: AppConstants.carbsColor,
           ),
         ],
 

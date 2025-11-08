@@ -1,3 +1,5 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
+import 'package:champions_gym_app/shared/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
@@ -162,18 +164,11 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         isValid = _selectedFitnessGoal != null;
         break;
       case 1:
-        isValid = _targetCalories >= 1200 && _targetCalories <= 4000;
+        isValid = _targetCalories >= 1200;
         break;
       case 2:
-        // Plan duration step has default values (_weeklyRotation = true, _remindersEnabled = false)
-        // and both options are always valid, so this step is always complete
-        isValid = true;
-        break;
-      case 3:
         // Final review step - check all required fields
-        isValid = _selectedFitnessGoal != null &&
-            _targetCalories >= 1200 &&
-            _targetCalories <= 4000;
+        isValid = _selectedFitnessGoal != null && _targetCalories >= 1200;
         break;
       default:
         isValid = false;
@@ -184,7 +179,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     _logger.i('Step $_setupStep validation: $isValid');
     if (_setupStep == 0) _logger.d('Fitness goal: $_selectedFitnessGoal');
     if (_setupStep == 1) _logger.d('Target calories: $_targetCalories');
-    if (_setupStep == 3) {
+    if (_setupStep == 2) {
       _logger.i(
           'Final validation - Fitness goal: $_selectedFitnessGoal, Calories: $_targetCalories');
     }
@@ -200,18 +195,13 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       case 1:
         if (_targetCalories < 1200) {
           return 'Calorie target must be at least 1,200 calories';
-        } else if (_targetCalories > 4000) {
-          return 'Calorie target must be no more than 4,000 calories';
         }
-        return 'Please set a valid calorie target';
+        return 'Please set a valid calorie target (minimum 1,200 calories)';
       case 2:
-        // Plan duration step has default values, so this should never be reached
-        return 'Please configure plan duration and reminders';
-      case 3:
         if (_selectedFitnessGoal == null) {
           return 'Please select a nutrition goal';
-        } else if (_targetCalories < 1200 || _targetCalories > 4000) {
-          return 'Please set a valid calorie target (1,200-4,000 calories)';
+        } else if (_targetCalories < 1200) {
+          return 'Please set a valid calorie target (minimum 1,200 calories)';
         }
         return 'Please complete all required fields';
       default:
@@ -514,25 +504,6 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     }
   }
 
-  String _getStepTitle(int step) {
-    switch (step) {
-      case 0:
-        return 'Goal';
-      case 1:
-        return 'Frequency';
-      case 2:
-        return 'Calories';
-      case 3:
-        return 'Cheat Day';
-      case 4:
-        return 'Duration';
-      case 5:
-        return 'Review';
-      default:
-        return '';
-    }
-  }
-
   Widget _buildStepContent(UserPreferences prefs) {
     return Column(
       children: [
@@ -543,19 +514,12 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (i) {
-                  // Use the same colors as user onboarding for first 4 steps, then distinct colors for last 2
+                children: List.generate(4, (i) {
                   final List<Color> stepColors = [
                     AppConstants.primaryColor,
-                    // Step 0: Goal Selection (Green - main goal)
                     AppConstants.accentColor,
-                    // Step 1: Calories (Dark Green - energy/nutrition)
-                    AppConstants.secondaryColor,
-                    // Step 2: Plan Duration (Light Green - commitment)
                     Colors.purple,
-                    // Step 3: Final Review (Purple - completion)
                     Colors.blue,
-                    // Step 4: (Blue - reserved)
                   ];
 
                   // Each dot shows its own color when completed, current step color when current, or gray when not reached
@@ -590,7 +554,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 child: Text(
-                  '${_setupStep + 1} of 5',
+                  '${_setupStep + 1} of 4',
                   key: ValueKey(_setupStep),
                   style: AppTextStyles.caption.copyWith(
                     fontSize: 11,
@@ -683,16 +647,6 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
               : null,
         );
       case 2:
-        return PlanDurationStep(
-          weeklyRotation: _weeklyRotation,
-          onToggleWeeklyRotation: (value) =>
-              setState(() => _weeklyRotation = value),
-          remindersEnabled: _remindersEnabled,
-          onToggleReminders: (value) =>
-              setState(() => _remindersEnabled = value),
-          userName: widget.user.name,
-        );
-      case 3:
         return FinalReviewStep(
           userPreferences: prefs,
           selectedDays: _selectedDays,
@@ -711,16 +665,20 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
       children: [
         if (_setupStep > 0)
           Expanded(
-            child: OutlinedButton(
-              onPressed: _onBackStep,
-              child: const Text('Back'),
+            child: SizedBox(
+              height: 52,
+              child: CustomButton(
+                text: 'Back',
+                type: ButtonType.outline,
+                onPressed: _onBackStep,
+              ),
             ),
           ),
         if (_setupStep > 0) const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
             onPressed: isCurrentStepValid
-                ? (_setupStep == 3 ? _onSavePlan : _onNextStep)
+                ? (_setupStep == 2 ? _onSavePlan : _onNextStep)
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
@@ -728,7 +686,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                   ? AppConstants.surfaceColor
                   : AppConstants.textSecondary,
             ),
-            child: Text(_setupStep == 4 ? 'Generate Plan' : 'Next'),
+            child: Text(_setupStep == 2 ? 'Generate Plan' : 'Next'),
           ),
         ),
       ],
@@ -743,9 +701,12 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     _logger.d('Selected fitness goal: $_selectedFitnessGoal');
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Generate Meal Plan'),
+        title: AppBarTitle(title: 'Generate Meal Plan'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            size: 20,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
