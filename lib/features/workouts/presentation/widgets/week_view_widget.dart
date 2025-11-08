@@ -115,12 +115,12 @@ class WeekViewWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "${dailyWorkout.dayName}",
+                              dailyWorkout.dayName,
                               style: AppTextStyles.heading5.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: AppConstants.spacingS,
                             ),
                             DailyWorkoutCard(
