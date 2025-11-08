@@ -16,8 +16,8 @@ class ProfileLogoutButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppConstants.errorColor.withOpacity(0.12),
-              foregroundColor: AppConstants.errorColor,
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -35,7 +35,10 @@ class ProfileLogoutButton extends StatelessWidget {
                       ),
                     ),
                   )
-                : const Icon(Icons.logout),
+                : const Icon(
+                    Icons.logout,
+                    size: 20,
+                  ),
             label: Text(authProvider.isLoading ? 'Signing out...' : 'Logout'),
             onPressed: authProvider.isLoading
                 ? null

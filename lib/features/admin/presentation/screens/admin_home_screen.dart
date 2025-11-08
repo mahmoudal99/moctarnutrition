@@ -503,7 +503,7 @@ class _SalesCard extends StatelessWidget {
               children: [
                 Text('Total Revenue',
                     style: AppTextStyles.bodyMedium
-                        .copyWith(color: Colors.white70)),
+                        .copyWith(color: Colors.white)),
                 Text(totalBalance,
                     style: AppTextStyles.heading2.copyWith(
                         color: Colors.white, fontWeight: FontWeight.bold)),
