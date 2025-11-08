@@ -1,5 +1,6 @@
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:dotted_border/dotted_border.dart';
 import '../../../../../core/constants/app_constants.dart';
 import 'personalized_title.dart';
 
@@ -37,34 +38,36 @@ class GoalSelectionStep extends StatelessWidget {
         // Show client's onboarding choice if available
         if (clientFitnessGoal != null) ...[
           const SizedBox(height: AppConstants.spacingM),
-          Container(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
-            decoration: BoxDecoration(
-              color: AppConstants.successColor.withOpacity(0.1),
-              border: Border.all(
-                color: AppConstants.successColor.withOpacity(0.3),
-                width: 1,
+          DottedBorder(
+            color: AppConstants.carbsColor.withOpacity(0.5),
+            strokeWidth: 1,
+            dashPattern: const [6, 4],
+            borderType: BorderType.RRect,
+            radius: Radius.circular(AppConstants.radiusS),
+            child: Container(
+              padding: const EdgeInsets.all(AppConstants.spacingM),
+              decoration: BoxDecoration(
+                color: AppConstants.carbsColor.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(AppConstants.radiusS),
               ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.info_outline,
-                  color: AppConstants.successColor,
-                  size: 20,
-                ),
-                const SizedBox(width: AppConstants.spacingS),
-                Expanded(
-                  child: Text(
-                    'Client selected: ${_getFitnessGoalTitle(clientFitnessGoal!)} during onboarding',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppConstants.successColor,
-                      fontWeight: FontWeight.w500,
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    color: Colors.black,
+                    size: 20,
+                  ),
+                  const SizedBox(width: AppConstants.spacingS),
+                  Expanded(
+                    child: Text(
+                      'Client selected: ${_getFitnessGoalTitle(clientFitnessGoal!)} during onboarding',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -117,14 +120,6 @@ class GoalSelectionStep extends StatelessWidget {
               label: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    _getFitnessGoalIcon(goal),
-                    size: 18,
-                    color: isSelected
-                        ? AppConstants.surfaceColor
-                        : AppConstants.primaryColor,
-                  ),
-                  const SizedBox(width: 8),
                   Text(_getFitnessGoalTitle(goal)),
                   if (isClientChoice && selected == null) ...[
                     const SizedBox(width: 4),
@@ -137,14 +132,11 @@ class GoalSelectionStep extends StatelessWidget {
                 ],
               ),
               selected: isSelected,
-              selectedColor: AppConstants.primaryColor,
-              backgroundColor: AppConstants.primaryColor.withOpacity(0.08),
-              labelStyle: AppTextStyles.bodyMedium.copyWith(
-                color: isSelected
-                    ? AppConstants.surfaceColor
-                    : AppConstants.primaryColor,
-                fontWeight: FontWeight.w600,
-              ),
+              selectedColor: AppConstants.primaryColor.withOpacity(0.8),
+              backgroundColor: Colors.white,
+              labelStyle: isSelected
+                  ? AppTextStyles.bodySmall.copyWith(color: Colors.white)
+                  : AppTextStyles.bodySmall.copyWith(color: Colors.black),
               onSelected: (_) => onSelect(goal),
             );
           }).toList(),

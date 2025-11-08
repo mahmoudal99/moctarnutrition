@@ -16,6 +16,7 @@ import '../../../meal_prep/presentation/widgets/setup_steps/final_review_step.da
 
 class AdminMealPlanSetupScreen extends StatefulWidget {
   final UserModel user;
+
   const AdminMealPlanSetupScreen({super.key, required this.user});
 
   @override
@@ -246,7 +247,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
         foodsToAvoid: List<String>.from(prefs.foodsToAvoid),
         favoriteFoods: List<String>.from(prefs.favoriteFoods),
         mealFrequency: _getMealFrequencyFromUserPreferences(),
-        cheatDay: null, // Cheat day is user choice, not admin decision
+        cheatDay: null,
+        // Cheat day is user choice, not admin decision
         weeklyRotation: _weeklyRotation,
         remindersEnabled: _remindersEnabled,
         targetCalories: _targetCalories,
@@ -544,15 +546,16 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                 children: List.generate(5, (i) {
                   // Use the same colors as user onboarding for first 4 steps, then distinct colors for last 2
                   final List<Color> stepColors = [
-                    AppConstants
-                        .primaryColor, // Step 0: Goal Selection (Green - main goal)
-                    AppConstants
-                        .accentColor, // Step 1: Calories (Dark Green - energy/nutrition)
-                    AppConstants
-                        .secondaryColor, // Step 2: Plan Duration (Light Green - commitment)
-                    Colors
-                        .purple, // Step 3: Final Review (Purple - completion)
-                    Colors.blue, // Step 4: (Blue - reserved)
+                    AppConstants.primaryColor,
+                    // Step 0: Goal Selection (Green - main goal)
+                    AppConstants.accentColor,
+                    // Step 1: Calories (Dark Green - energy/nutrition)
+                    AppConstants.secondaryColor,
+                    // Step 2: Plan Duration (Light Green - commitment)
+                    Colors.purple,
+                    // Step 3: Final Review (Purple - completion)
+                    Colors.blue,
+                    // Step 4: (Blue - reserved)
                   ];
 
                   // Each dot shows its own color when completed, current step color when current, or gray when not reached
@@ -616,13 +619,11 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                               const EdgeInsets.only(top: AppConstants.spacingM),
                           padding: const EdgeInsets.all(AppConstants.spacingM),
                           decoration: BoxDecoration(
-                            color:
-                                AppConstants.warningColor.withOpacity(0.1),
+                            color: AppConstants.warningColor.withOpacity(0.1),
                             borderRadius:
                                 BorderRadius.circular(AppConstants.radiusS),
                             border: Border.all(
-                              color:
-                                  AppConstants.warningColor.withOpacity(0.3),
+                              color: AppConstants.warningColor.withOpacity(0.3),
                             ),
                           ),
                           child: Row(
@@ -630,8 +631,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                               const Icon(
                                 Icons.info_outline,
                                 size: 16,
-                                color:
-                                    AppConstants.warningColor,
+                                color: AppConstants.warningColor,
                               ),
                               const SizedBox(width: AppConstants.spacingS),
                               Expanded(
@@ -723,9 +723,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                 ? (_setupStep == 3 ? _onSavePlan : _onNextStep)
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: isCurrentStepValid
-                  ? AppConstants.primaryColor
-                  : AppConstants.textTertiary.withOpacity(0.3),
+              backgroundColor: Colors.black,
               foregroundColor: isCurrentStepValid
                   ? AppConstants.surfaceColor
                   : AppConstants.textSecondary,

@@ -231,22 +231,14 @@ class AdminUserMealPlanScreen extends StatelessWidget {
             title: 'Meal Plan',
             actions: [
               // Debug delete button for testing
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.red.withOpacity(0.3),
-                    width: 1,
-                  ),
+              IconButton(
+                onPressed: () => _showDeleteConfirmation(context, mealPlanId!),
+                icon: SvgPicture.asset(
+                  "assets/images/delete-03-stroke-rounded.svg",
+                  color: AppConstants.textTertiary,
+                  height: 20,
                 ),
-                child: IconButton(
-                  onPressed: () =>
-                      _showDeleteConfirmation(context, mealPlanId!),
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  tooltip: 'Delete Meal Plan (Debug)',
-                ),
+                tooltip: 'Delete Meal Plan (Debug)',
               ),
             ],
           ),
@@ -255,13 +247,6 @@ class AdminUserMealPlanScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 24),
-
-                // Meal plan overview card
-                _buildMealPlanOverviewCard(mealPlan),
-
-                const SizedBox(height: 24),
-
                 // Daily meal cards
                 ...mealPlan.mealDays.asMap().entries.map((entry) {
                   final index = entry.key;
@@ -449,8 +434,6 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   }
 
   Widget _buildMealDayCard(MealDay day, int dayIndex) {
-    final totalCalories = day.totalCalories;
-
     // Group meals by type
     final Map<MealType, List<Meal>> mealsByType = {};
     for (final meal in day.meals) {
@@ -465,84 +448,64 @@ class AdminUserMealPlanScreen extends StatelessWidget {
       MealType.snack,
     ];
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(_getDayName(dayIndex), style: AppTextStyles.heading5),
+        SizedBox(
+          height: AppConstants.spacingS,
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppConstants.radiusS),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  _getDayName(dayIndex),
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppConstants.textPrimary,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${totalCalories.round()} kcal',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: mealTypeOrder
-                  .where((mealType) => mealsByType.containsKey(mealType))
-                  .map((mealType) {
-                final meals = mealsByType[mealType]!;
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: mealTypeOrder
+                      .where((mealType) => mealsByType.containsKey(mealType))
+                      .map((mealType) {
+                    final meals = mealsByType[mealType]!;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Meal type section header
-                    _buildMealTypeSection(mealType, meals),
-                    const SizedBox(height: 8),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Meal type section header
+                        _buildMealTypeSection(mealType, meals),
+                        const SizedBox(height: AppConstants.spacingS),
 
-                    // Meals for this type
-                    ...meals.map((meal) => _buildMealItem(meal)),
+                        // Meals for this type
+                        ...meals.map((meal) => _buildMealItem(meal)),
 
-                    if (mealType != mealTypeOrder.last) ...[
-                      const SizedBox(height: 16),
-                      Divider(
-                        color: Colors.grey.withOpacity(0.2),
-                        height: 1,
-                        thickness: 1,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ],
-                );
-              }).toList(),
-            ),
+                        if (mealType != mealTypeOrder.last) ...[
+                          const SizedBox(height: 16),
+                          Divider(
+                            color: Colors.grey.withOpacity(0.2),
+                            height: 1,
+                            thickness: 1,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -551,22 +514,13 @@ class AdminUserMealPlanScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade400,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   meal.name,
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: AppTextStyles.caption.copyWith(
                     fontWeight: FontWeight.w500,
                     color: Colors.grey[800],
                   ),
@@ -600,16 +554,9 @@ class AdminUserMealPlanScreen extends StatelessWidget {
 
     return Row(
       children: [
-        SvgPicture.asset(
-          "assets/images/${_getMealTypeIcon(mealType)}",
-          colorFilter:
-              ColorFilter.mode(_getMealTypeColor(mealType), BlendMode.srcIn),
-          height: 20,
-        ),
-        const SizedBox(width: 8),
         Text(
           _getMealTypeTitle(mealType),
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
             color: Colors.grey[800],
           ),

@@ -19,7 +19,7 @@ class PersonalizedTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultStyle = style ?? AppTextStyles.bodyLarge;
+    final defaultStyle = style ?? AppTextStyles.bodyMedium;
     final finalStyle = defaultStyle.copyWith(fontWeight: FontWeight.w600);
 
     if (userName != null && userName!.isNotEmpty) {
