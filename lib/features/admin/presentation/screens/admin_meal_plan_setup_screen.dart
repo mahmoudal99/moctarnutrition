@@ -518,7 +518,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                   final List<Color> stepColors = [
                     AppConstants.primaryColor,
                     AppConstants.accentColor,
-                    Colors.purple,
+                    Colors.orange,
                     Colors.blue,
                   ];
 

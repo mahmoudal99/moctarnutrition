@@ -57,12 +57,6 @@ class CaloriesStep extends StatelessWidget {
             }
           },
         ),
-        const SizedBox(height: AppConstants.spacingS),
-        Text(
-          '$targetCalories calories per day',
-          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-        ),
         const SizedBox(height: AppConstants.spacingL),
       ],
     );
