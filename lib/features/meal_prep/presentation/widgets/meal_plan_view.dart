@@ -45,11 +45,18 @@ class _MealPlanViewState extends State<MealPlanView>
   int _currentDayIndex = 0;
   double _scrollOffset = 0.0;
   static const double _scrollThreshold = 50.0;
+  late List<MealDay?> _weeklyMealDays;
+  int? _cheatDayIndex;
+  DateTime? _planAnchorDate;
 
   @override
   void initState() {
     super.initState();
     _currentDayIndex = _getCurrentDayIndex();
+    _cheatDayIndex = _convertCheatDayToIndex(widget.cheatDay);
+    _planAnchorDate = _determinePlanAnchorDate(widget.mealPlan);
+    _weeklyMealDays = _generateWeeklySchedule(widget.mealPlan);
+    _currentDayIndex = _ensureValidInitialIndex(_currentDayIndex);
     // Start with the current day index for circular scrolling
     _pageController = PageController(initialPage: _currentDayIndex);
 
@@ -120,7 +127,19 @@ class _MealPlanViewState extends State<MealPlanView>
 
   /// Load consumption data for the current day and apply it to meals
   Future<void> _loadConsumptionData() async {
-    if (widget.selectedDate == null) return;
+    if (_weeklyMealDays.isEmpty) return;
+
+    final currentMealDay =
+        _weeklyMealDays.length > _currentDayIndex ? _weeklyMealDays[_currentDayIndex] : null;
+    if (currentMealDay == null) {
+      return;
+    }
+
+    final targetDate =
+        widget.selectedDate ?? _dateForIndex(_currentDayIndex);
+    if (targetDate == null) {
+      return;
+    }
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -130,7 +149,7 @@ class _MealPlanViewState extends State<MealPlanView>
         final consumptionData =
             await DailyConsumptionService.getDailyConsumptionSummary(
           userId,
-          widget.selectedDate!,
+          targetDate,
         );
 
         if (consumptionData != null) {
@@ -138,7 +157,6 @@ class _MealPlanViewState extends State<MealPlanView>
               Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
 
           // Apply consumption data to the current day's meals
-          final currentMealDay = widget.mealPlan.mealDays[_currentDayIndex];
           for (final meal in currentMealDay.meals) {
             if (mealConsumption.containsKey(meal.id)) {
               meal.isConsumed = mealConsumption[meal.id]!;
@@ -185,19 +203,30 @@ class _MealPlanViewState extends State<MealPlanView>
               AnimatedBuilder(
                 animation: _nutritionAnimationController,
                 builder: (context, child) {
+                  final mealDay = (_weeklyMealDays.length > _currentDayIndex)
+                      ? _weeklyMealDays[_currentDayIndex]
+                      : null;
                   return Transform.scale(
                     scale: 1.0 - (_nutritionScaleAnimation.value * 0.1),
                     child: Opacity(
                       opacity: _nutritionOpacityAnimation.value,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppConstants.spacingS,
-                            vertical: AppConstants.spacingS),
-                        child: NutritionSummaryCard(
-                          mealDay: widget.mealPlan.mealDays[_currentDayIndex],
-                          dayNumber: _currentDayIndex + 1,
-                        ),
-                      ),
+                      child: mealDay == null
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppConstants.spacingS,
+                                vertical: AppConstants.spacingS,
+                              ),
+                              child: _buildCheatDaySummaryCard(),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppConstants.spacingS,
+                                  vertical: AppConstants.spacingS),
+                              child: NutritionSummaryCard(
+                                mealDay: mealDay,
+                                dayNumber: _currentDayIndex + 1,
+                              ),
+                            ),
                     ),
                   );
                 },
@@ -213,13 +242,14 @@ class _MealPlanViewState extends State<MealPlanView>
                       _currentDayIndex = index;
                     });
                   },
-                  itemCount: widget.mealPlan.mealDays.length,
+                  itemCount: 7,
                   itemBuilder: (context, index) {
-                    final mealDay = widget.mealPlan.mealDays[index];
+                    final mealDay =
+                        index < _weeklyMealDays.length ? _weeklyMealDays[index] : null;
                     return SingleChildScrollView(
                       physics: const NeverScrollableScrollPhysics(),
                       // Disable content scrolling only
-                      child: _buildDayContent(mealDay, index + 1),
+                      child: _buildDayContent(mealDay, index),
                     );
                   },
                 ),
@@ -256,7 +286,50 @@ class _MealPlanViewState extends State<MealPlanView>
   }
 
   Widget _buildPillNutritionSummary() {
-    final mealDay = widget.mealPlan.mealDays[_currentDayIndex];
+    if (_weeklyMealDays.isEmpty) return const SizedBox();
+
+    final mealDay = _weeklyMealDays[_currentDayIndex];
+    if (mealDay == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingM,
+          vertical: AppConstants.spacingS,
+        ),
+        decoration: BoxDecoration(
+          color: AppConstants.surfaceColor,
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: AppConstants.textTertiary.withOpacity(0.1),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.celebration,
+              size: 16,
+              color: AppConstants.warningColor,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Cheat Day',
+              style: AppTextStyles.caption.copyWith(
+                color: AppConstants.warningColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final totalCalories = mealDay.meals
         .fold<double>(0, (sum, meal) => sum + meal.nutrition.calories);
     final totalProtein = mealDay.meals
@@ -342,7 +415,7 @@ class _MealPlanViewState extends State<MealPlanView>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
-              widget.mealPlan.mealDays.length,
+              7,
               (index) => GestureDetector(
                 onTap: () {
                   _pageController.animateToPage(
@@ -409,7 +482,17 @@ class _MealPlanViewState extends State<MealPlanView>
     );
   }
 
-  Widget _buildDayContent(MealDay mealDay, int dayNumber) {
+  Widget _buildDayContent(MealDay? mealDay, int dayIndex) {
+    if (mealDay == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingL,
+          vertical: AppConstants.spacingL,
+        ),
+        child: _buildCheatDayContent(),
+      );
+    }
+
     // Group meals by type
     final Map<MealType, List<Meal>> mealsByType = {};
     for (final meal in mealDay.meals) {
@@ -439,13 +522,13 @@ class _MealPlanViewState extends State<MealPlanView>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Section title
-                _buildMealTypeSection(mealType, meals),
+                  _buildMealTypeSection(mealType, meals, dayIndex),
                 const SizedBox(height: AppConstants.spacingS),
 
                 // Meals for this type
                 ...meals.map((meal) => MealCard(
                       meal: meal,
-                      dayTitle: _getDayTitle(dayNumber - 1),
+                        dayTitle: _getDayTitle(dayIndex),
                       onTap: widget.onMealTap,
                       mealDay: mealDay, // Pass the mealDay
                     )),
@@ -484,7 +567,8 @@ class _MealPlanViewState extends State<MealPlanView>
     return dayLetters[dayIndex % 7];
   }
 
-  Widget _buildMealTypeSection(MealType mealType, List<Meal> meals) {
+  Widget _buildMealTypeSection(
+      MealType mealType, List<Meal> meals, int dayIndex) {
     return Padding(
       padding: const EdgeInsets.only(
         left: AppConstants.spacingS,
@@ -499,19 +583,24 @@ class _MealPlanViewState extends State<MealPlanView>
           ),
           const Spacer(),
           // Mark Eaten button for the entire meal type section
-          _buildMealTypeConsumptionButton(mealType, meals),
+          _buildMealTypeConsumptionButton(mealType, meals, dayIndex),
         ],
       ),
     );
   }
 
-  Widget _buildMealTypeConsumptionButton(MealType mealType, List<Meal> meals) {
+  Widget _buildMealTypeConsumptionButton(
+      MealType mealType, List<Meal> meals, int dayIndex) {
     // Check if all meals of this type are consumed
     final allConsumed = meals.every((meal) => meal.isConsumed);
-    final anyConsumed = meals.any((meal) => meal.isConsumed);
+    final targetDate = widget.selectedDate ?? _dateForIndex(dayIndex);
 
     return GestureDetector(
       onTap: () async {
+        if (targetDate == null) {
+          return;
+        }
+
         // Toggle consumption for all meals of this type
         final newStatus = !allConsumed;
         final mealPlanProvider =
@@ -519,7 +608,7 @@ class _MealPlanViewState extends State<MealPlanView>
 
         for (final meal in meals) {
           mealPlanProvider.updateMealConsumption(
-              meal.id, newStatus, widget.selectedDate);
+              meal.id, newStatus, targetDate);
         }
 
         // Increment streak when marking meals as done (only if not already done)
@@ -598,6 +687,97 @@ class _MealPlanViewState extends State<MealPlanView>
     }
   }
 
+  Widget _buildCheatDaySummaryCard() {
+    final title = widget.cheatDay ?? 'Cheat Day';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppConstants.spacingL),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.celebration,
+                color: AppConstants.warningColor,
+              ),
+              const SizedBox(width: AppConstants.spacingS),
+              Text(
+                title,
+                style: AppTextStyles.heading5.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingS),
+          Text(
+            'Enjoy your planned break. Meals resume tomorrow.',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppConstants.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCheatDayContent() {
+    final title = widget.cheatDay ?? 'Cheat Day';
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingL),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.free_breakfast,
+                color: AppConstants.warningColor,
+              ),
+              const SizedBox(width: AppConstants.spacingS),
+              Text(
+                title,
+                style: AppTextStyles.heading5.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingS),
+          Text(
+            'No prep required today—use this day to recharge.',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppConstants.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Color _getMealTypeColor(MealType mealType) {
     switch (mealType) {
       case MealType.breakfast:
@@ -639,21 +819,99 @@ class _MealPlanViewState extends State<MealPlanView>
     return 0;
   }
 
+  int _ensureValidInitialIndex(int index) {
+    if (_weeklyMealDays.isEmpty) return index;
+    if (_weeklyMealDays[index] != null) return index;
+    for (int i = 1; i < 7; i++) {
+      final candidate = (index + i) % 7;
+      if (_weeklyMealDays[candidate] != null) {
+        return candidate;
+      }
+    }
+    return index;
+  }
+
+  List<MealDay?> _generateWeeklySchedule(MealPlanModel mealPlan) {
+    final schedule = List<MealDay?>.filled(7, null);
+    final sourceDays = mealPlan.mealDays;
+    if (sourceDays.isEmpty) {
+      return schedule;
+    }
+
+    final anchor = _planAnchorDate ?? _normalizeDate(mealPlan.startDate);
+    final startIndex = anchor.weekday - 1;
+    final nonCheatCount = _cheatDayIndex == null ? 7 : 6;
+    final orderedIndices = <int>[];
+    int pointer = startIndex;
+    while (orderedIndices.length < nonCheatCount) {
+      if (_cheatDayIndex == null || pointer != _cheatDayIndex) {
+        if (!orderedIndices.contains(pointer)) {
+          orderedIndices.add(pointer);
+        }
+      }
+      pointer = (pointer + 1) % 7;
+    }
+
+    int sourceIndex = 0;
+    for (final dayIndex in orderedIndices) {
+      schedule[dayIndex] = sourceDays[sourceIndex % sourceDays.length];
+      sourceIndex++;
+    }
+
+    return schedule;
+  }
+
+  int? _convertCheatDayToIndex(String? cheatDay) {
+    if (cheatDay == null) return null;
+    switch (cheatDay.toLowerCase()) {
+      case 'monday':
+        return 0;
+      case 'tuesday':
+        return 1;
+      case 'wednesday':
+        return 2;
+      case 'thursday':
+        return 3;
+      case 'friday':
+        return 4;
+      case 'saturday':
+        return 5;
+      case 'sunday':
+        return 6;
+      default:
+        return null;
+    }
+  }
+
+  DateTime? _determinePlanAnchorDate(MealPlanModel mealPlan) {
+    if (mealPlan.mealDays.isEmpty) return _normalizeDate(mealPlan.startDate);
+
+    final sortedDates = mealPlan.mealDays
+        .map((day) => _normalizeDate(day.date))
+        .toList()
+      ..sort();
+    return sortedDates.first;
+  }
+
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  DateTime? _dateForIndex(int index) {
+    final anchor = _planAnchorDate;
+    if (anchor == null) {
+      return null;
+    }
+    final anchorIndex = anchor.weekday - 1;
+    int diff = (index - anchorIndex) % 7;
+    if (diff < 0) diff += 7;
+    return anchor.add(Duration(days: diff));
+  }
+
   /// Check if a given day index is a cheat day
   bool _isCheatDay(int dayIndex) {
-    if (widget.cheatDay == null) return false;
-
-    final dayNames = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday'
-    ];
-    final currentDayName = dayNames[dayIndex % 7];
-    return widget.cheatDay == currentDayName;
+    if (_cheatDayIndex == null) return false;
+    return (dayIndex % 7) == _cheatDayIndex;
   }
 
   /// Get the cheat day icon widget

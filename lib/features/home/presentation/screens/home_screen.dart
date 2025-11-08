@@ -33,6 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   bool _isLoadingMealPlan = false;
   int _currentStreak = 0; // Add streak tracking
+  String? _cheatDayName;
+  int? _cheatDayIndex;
+  DateTime? _planAnchorDate;
+
+  bool get _isSelectedDateCheatDay {
+    if (_cheatDayIndex == null) {
+      return false;
+    }
+    return (_selectedDate.weekday - 1) == _cheatDayIndex;
+  }
 
   @override
   void initState() {
@@ -69,6 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
           .d('HomeScreen - Is authenticated: ${authProvider.isAuthenticated}');
 
       if (user != null) {
+        _cheatDayName = user.preferences.cheatDay;
+        _cheatDayIndex = _convertCheatDayToIndex(_cheatDayName);
+        _planAnchorDate = _determinePlanAnchorDate(mealPlanProvider.mealPlan);
         _logger.d(
             'HomeScreen - User preferences: age=${user.preferences.age}, weight=${user.preferences.weight}, height=${user.preferences.height}');
 
@@ -76,11 +89,14 @@ class _HomeScreenState extends State<HomeScreen> {
         try {
           if (user.preferences.calculatedCalorieTargets != null) {
             _calorieTargets = user.preferences.calculatedCalorieTargets;
-            _logger.d('HomeScreen - Using stored calorie targets: ${_calorieTargets?.dailyTarget}');
+            _logger.d(
+                'HomeScreen - Using stored calorie targets: ${_calorieTargets?.dailyTarget}');
           } else {
-            _calorieTargets = CalorieCalculationService.calculateCalorieTargets(user);
-            _logger.d('HomeScreen - Calorie targets calculated: ${_calorieTargets?.dailyTarget}');
-            
+            _calorieTargets =
+                CalorieCalculationService.calculateCalorieTargets(user);
+            _logger.d(
+                'HomeScreen - Calorie targets calculated: ${_calorieTargets?.dailyTarget}');
+
             // Update user preferences with new calculations
             final updatedPreferences = user.preferences.copyWith(
               calculatedCalorieTargets: _calorieTargets,
@@ -159,6 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await mealPlanProvider.loadMealPlan(user.id, mealPlanId: user.mealPlanId);
       _logger.d(
           'HomeScreen - Meal plan loaded: ${mealPlanProvider.mealPlan?.title ?? 'null'}');
+      _planAnchorDate = _determinePlanAnchorDate(mealPlanProvider.mealPlan);
     } catch (e) {
       _logger.e('HomeScreen - Error loading meal plan: $e');
     } finally {
@@ -197,26 +214,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (consumptionData != null) {
           // Calculate actual consumed calories from meal plan data
-          MealDay? templateMealDay;
-          
-          if (mealPlanProvider.mealPlan!.mealDays.length <= 7) {
-            // This is likely a batch cooking meal plan with fewer than 7 days
-            // Map the date to the appropriate meal day using modulo
-            final daysSinceStart = date.difference(mealPlanProvider.mealPlan!.startDate).inDays;
-            final mealDayIndex = daysSinceStart % mealPlanProvider.mealPlan!.mealDays.length;
-            
-            if (mealDayIndex >= 0 && mealDayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
-              templateMealDay = mealPlanProvider.mealPlan!.mealDays[mealDayIndex];
-            }
-          } else {
-            // This is a full 7-day meal plan, use weekday indexing
-            final weekdayIndex = date.weekday - 1;
-            if (weekdayIndex >= 0 &&
-                weekdayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
-              templateMealDay = mealPlanProvider.mealPlan!.mealDays[weekdayIndex];
-            }
+          final templateMealDay = _resolveMealDayForDate(
+            mealPlanProvider.mealPlan!,
+            date,
+          );
+
+          if (templateMealDay == null) {
+            // On cheat days we don't map template meals
+            continue;
           }
-          
+
           if (templateMealDay != null) {
             final mealConsumption = Map<String, bool>.from(
                 consumptionData['mealConsumption'] ?? {});
@@ -272,94 +279,78 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       // For batch cooking meal plans, we need to map the selected date to the appropriate meal day
       // instead of using weekday indices
-      MealDay? templateMealDay;
-      
-      if (mealPlan.mealDays.length <= 7) {
-        // This is likely a batch cooking meal plan with fewer than 7 days
-        // Map the selected date to the appropriate meal day using modulo
-        final daysSinceStart = _selectedDate.difference(mealPlan.startDate).inDays;
-        final mealDayIndex = daysSinceStart % mealPlan.mealDays.length;
-        
-        if (mealDayIndex >= 0 && mealDayIndex < mealPlan.mealDays.length) {
-          templateMealDay = mealPlan.mealDays[mealDayIndex];
-          _logger.d('HomeScreen - Using batch cooking meal day index: $mealDayIndex for date: ${_selectedDate.toIso8601String()}');
-        }
-      } else {
-        // This is a full 7-day meal plan, use weekday indexing
-        final weekdayIndex = _selectedDate.weekday - 1;
-        _logger.d('HomeScreen - Loading meals for weekday index: $weekdayIndex (${_selectedDate.weekday})');
-        
-        if (weekdayIndex >= 0 && weekdayIndex < mealPlan.mealDays.length) {
-          templateMealDay = mealPlan.mealDays[weekdayIndex];
-        }
+      final templateMealDay = _resolveMealDayForDate(mealPlan, _selectedDate);
+
+      if (templateMealDay == null) {
+        _logger.d(
+            'HomeScreen - Selected date ${_selectedDate.toIso8601String()} is a cheat day. Skipping meal loading.');
+        setState(() {
+          _currentDayMeals = null;
+        });
+        return;
       }
 
-      if (templateMealDay != null) {
-        _logger.d('HomeScreen - Found template meal day: ${templateMealDay.id}');
+      _logger.d('HomeScreen - Found template meal day: ${templateMealDay.id}');
 
-        // Create a copy of the template meal day for the selected date
-        _currentDayMeals = MealDay(
-          id: '${templateMealDay.id}_${_selectedDate.toIso8601String()}',
-          date: _selectedDate,
-          meals: templateMealDay.meals
-              .map((meal) => meal.copyWith())
-              .toList(), // Keep original meal IDs
-          totalCalories: templateMealDay.totalCalories,
-          totalProtein: templateMealDay.totalProtein,
-          totalCarbs: templateMealDay.totalCarbs,
-          totalFat: templateMealDay.totalFat,
-        );
+      // Create a copy of the template meal day for the selected date
+      _currentDayMeals = MealDay(
+        id: '${templateMealDay.id}_${_selectedDate.toIso8601String()}',
+        date: _selectedDate,
+        meals: templateMealDay.meals.map((meal) => meal.copyWith()).toList(),
+        // Keep original meal IDs
+        totalCalories: templateMealDay.totalCalories,
+        totalProtein: templateMealDay.totalProtein,
+        totalCarbs: templateMealDay.totalCarbs,
+        totalFat: templateMealDay.totalFat,
+      );
 
-        // Load consumption data for the selected date
-        final consumptionData =
-            await DailyConsumptionService.getDailyConsumptionSummary(
-          authProvider.userModel?.id ?? '',
-          _selectedDate,
-        );
+      // Load consumption data for the selected date
+      final consumptionData =
+          await DailyConsumptionService.getDailyConsumptionSummary(
+        authProvider.userModel?.id ?? '',
+        _selectedDate,
+      );
 
-        if (consumptionData != null) {
-          _logger.d(
-              'HomeScreen - Loaded consumption data for ${_selectedDate.toIso8601String()}: ${consumptionData['consumedCalories']} calories');
+      if (consumptionData != null) {
+        _logger.d(
+            'HomeScreen - Loaded consumption data for ${_selectedDate.toIso8601String()}: ${consumptionData['consumedCalories']} calories');
 
-          // Debug: Log the meal consumption data
-          final mealConsumption =
-              Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
-          _logger.d('HomeScreen - Meal consumption data: $mealConsumption');
+        // Debug: Log the meal consumption data
+        final mealConsumption =
+            Map<String, bool>.from(consumptionData['mealConsumption'] ?? {});
+        _logger.d('HomeScreen - Meal consumption data: $mealConsumption');
 
-          // Debug: Log the template meal IDs
-          _logger.d(
-              'HomeScreen - Template meal IDs: ${_currentDayMeals!.meals.map((m) => m.id).toList()}');
+        // Debug: Log the template meal IDs
+        _logger.d(
+            'HomeScreen - Template meal IDs: ${_currentDayMeals!.meals.map((m) => m.id).toList()}');
 
-          // Apply consumption data to meals
-          for (final meal in _currentDayMeals!.meals) {
-            if (mealConsumption.containsKey(meal.id)) {
-              meal.isConsumed = mealConsumption[meal.id]!;
-              _logger.d(
-                  'HomeScreen - Applied consumption ${mealConsumption[meal.id]} to meal: ${meal.name} (${meal.id})');
-            } else {
-              _logger.d(
-                  'HomeScreen - No consumption data for meal: ${meal.name} (${meal.id})');
-            }
+        // Apply consumption data to meals
+        for (final meal in _currentDayMeals!.meals) {
+          if (mealConsumption.containsKey(meal.id)) {
+            meal.isConsumed = mealConsumption[meal.id]!;
+            _logger.d(
+                'HomeScreen - Applied consumption ${mealConsumption[meal.id]} to meal: ${meal.name} (${meal.id})');
+          } else {
+            _logger.d(
+                'HomeScreen - No consumption data for meal: ${meal.name} (${meal.id})');
           }
-
-          // Update consumed nutrition
-          _currentDayMeals!.calculateConsumedNutrition();
-
-          _logger.d(
-              'HomeScreen - Applied consumption data: ${_currentDayMeals!.consumedCalories}/${_currentDayMeals!.totalCalories} calories');
-        } else {
-          _logger.d(
-              'HomeScreen - No consumption data found for ${_selectedDate.toIso8601String()}, using fresh template');
-          // Reset all meals to not consumed for new dates
-          for (final meal in _currentDayMeals!.meals) {
-            meal.isConsumed = false;
-          }
-          _currentDayMeals!.calculateConsumedNutrition();
         }
-        setState(() {});
+
+        // Update consumed nutrition
+        _currentDayMeals!.calculateConsumedNutrition();
+
+        _logger.d(
+            'HomeScreen - Applied consumption data: ${_currentDayMeals!.consumedCalories}/${_currentDayMeals!.totalCalories} calories');
       } else {
-        _logger.w('HomeScreen - No meal day found for date: ${_selectedDate.toIso8601String()}, meal plan has ${mealPlan.mealDays.length} days');
+        _logger.d(
+            'HomeScreen - No consumption data found for ${_selectedDate.toIso8601String()}, using fresh template');
+        // Reset all meals to not consumed for new dates
+        for (final meal in _currentDayMeals!.meals) {
+          meal.isConsumed = false;
+        }
+        _currentDayMeals!.calculateConsumedNutrition();
       }
+      setState(() {});
     } catch (e) {
       _logger.e('HomeScreen - Error loading current day meals: $e');
     }
@@ -426,37 +417,19 @@ class _HomeScreenState extends State<HomeScreen> {
         // Always get the latest meal day data from the provider
         if (mealPlanProvider.mealPlan != null) {
           try {
-            // For batch cooking meal plans, we need to map the selected date to the appropriate meal day
-            // instead of using weekday indices
-            bool foundMealDay = false;
-            
-            if (mealPlanProvider.mealPlan!.mealDays.length <= 7) {
-              // This is likely a batch cooking meal plan with fewer than 7 days
-              // Map the selected date to the appropriate meal day using modulo
-              final daysSinceStart = _selectedDate.difference(mealPlanProvider.mealPlan!.startDate).inDays;
-              final mealDayIndex = daysSinceStart % mealPlanProvider.mealPlan!.mealDays.length;
-              
-              if (mealDayIndex >= 0 && mealDayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
-                foundMealDay = true;
-                _logger.d('HomeScreen - Found batch cooking meal day for index: $mealDayIndex');
-              }
+            final resolvedMealDay = _resolveMealDayForDate(
+                mealPlanProvider.mealPlan!, _selectedDate);
+            if (resolvedMealDay != null) {
+              _logger.d(
+                  'HomeScreen - Mapped date ${_selectedDate.toIso8601String()} to meal day ${resolvedMealDay.id}');
+            } else if (_isSelectedDateCheatDay) {
+              _logger.d(
+                  'HomeScreen - ${_selectedDate.toIso8601String()} is the configured cheat day ($_cheatDayName)');
             } else {
-              // This is a full 7-day meal plan, use weekday indexing
-              final dayOfWeek = _selectedDate.weekday; // 1 = Monday, 7 = Sunday
-              final mealDayIndex = dayOfWeek - 1; // Convert to 0-based index
-
-              if (mealDayIndex >= 0 &&
-                  mealDayIndex < mealPlanProvider.mealPlan!.mealDays.length) {
-                foundMealDay = true;
-                _logger.d('HomeScreen - Found meal day for index: $mealDayIndex');
-              }
-            }
-            
-            if (!foundMealDay) {
-              _logger.w('HomeScreen - No meal day found for date: ${_selectedDate.toIso8601String()}, meal plan has ${mealPlanProvider.mealPlan!.mealDays.length} days');
+              _logger.w(
+                  'HomeScreen - No meal day found for date: ${_selectedDate.toIso8601String()}, meal plan has ${mealPlanProvider.mealPlan!.mealDays.length} days');
             }
           } catch (e) {
-            // No meal day found for this date
             _logger.w('HomeScreen - Error finding meal day: $e');
           }
         } else {
@@ -501,6 +474,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             calorieTargets: _calorieTargets!,
                             selectedDate: _selectedDate,
                             currentDayMeals: _currentDayMeals,
+                            isCheatDay: _isSelectedDateCheatDay,
                           )
                         else
                           _buildNoDataCard('No Calorie Targets',
@@ -513,6 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             macros: _calorieTargets!.macros,
                             selectedDate: _selectedDate,
                             currentDayMeals: _currentDayMeals,
+                            isCheatDay: _isSelectedDateCheatDay,
                           )
                         else
                           _buildNoDataCard('No Nutrition Goals',
@@ -522,6 +497,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         NextMealCard(
                           currentDayMeals: _currentDayMeals,
                           selectedDate: _selectedDate,
+                          isCheatDay: _isSelectedDateCheatDay,
+                          cheatDayName: _cheatDayName,
                         ),
                         const SizedBox(
                             height: 100), // Space for bottom navigation
@@ -628,10 +605,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 10), // Space between streak and search icon
+            const SizedBox(width: 10),
+            // Space between streak and search icon
             IconButton(
               onPressed: () async {
-                final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+                final mealPlanProvider =
+                    Provider.of<MealPlanProvider>(context, listen: false);
                 if (mealPlanProvider.mealPlan == null) {
                   _showMealPlanRequiredMessage();
                   return;
@@ -642,7 +621,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (context) => const FoodSearchScreen(),
                   ),
                 );
-                
+
                 // If food was added, refresh the data
                 if (result == true) {
                   _loadCurrentDayMeals();
@@ -653,10 +632,12 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
-            const SizedBox(width: 8), // Space between search and barcode scanner
+            const SizedBox(width: 8),
+            // Space between search and barcode scanner
             IconButton(
               onPressed: () async {
-                final mealPlanProvider = Provider.of<MealPlanProvider>(context, listen: false);
+                final mealPlanProvider =
+                    Provider.of<MealPlanProvider>(context, listen: false);
                 if (mealPlanProvider.mealPlan == null) {
                   _showMealPlanRequiredMessage();
                   return;
@@ -667,7 +648,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (context) => const BarcodeScannerScreen(),
                   ),
                 );
-                
+
                 // If food was added, refresh the data
                 if (result == true) {
                   _loadCurrentDayMeals();
@@ -682,5 +663,126 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ],
     );
+  }
+
+  int? _convertCheatDayToIndex(String? cheatDay) {
+    if (cheatDay == null) {
+      return null;
+    }
+    switch (cheatDay.toLowerCase()) {
+      case 'monday':
+        return 0;
+      case 'tuesday':
+        return 1;
+      case 'wednesday':
+        return 2;
+      case 'thursday':
+        return 3;
+      case 'friday':
+        return 4;
+      case 'saturday':
+        return 5;
+      case 'sunday':
+        return 6;
+      default:
+        return null;
+    }
+  }
+
+  bool _isCheatDay(DateTime date) {
+    if (_cheatDayIndex == null) {
+      return false;
+    }
+    return (date.weekday - 1) == _cheatDayIndex;
+  }
+
+  DateTime? _determinePlanAnchorDate(MealPlanModel? mealPlan) {
+    if (mealPlan == null) {
+      return null;
+    }
+    final normalizedStart = _normalizeDate(mealPlan.startDate);
+    if (mealPlan.mealDays.isEmpty) {
+      return normalizedStart;
+    }
+
+    final sortedDates = mealPlan.mealDays
+        .map((day) => _normalizeDate(day.date))
+        .toList()
+      ..sort();
+
+    return sortedDates.first;
+  }
+
+  MealDay? _resolveMealDayForDate(MealPlanModel mealPlan, DateTime date) {
+    if (mealPlan.mealDays.isEmpty) {
+      return null;
+    }
+
+    if (_isCheatDay(date)) {
+      return null;
+    }
+
+    _planAnchorDate ??= _determinePlanAnchorDate(mealPlan);
+    final anchor = _planAnchorDate ?? _normalizeDate(mealPlan.startDate);
+
+    final normalizedAnchor = _normalizeDate(anchor);
+    final normalizedTarget = _normalizeDate(date);
+
+    final offset = _calculateNonCheatDayOffset(
+      normalizedAnchor,
+      normalizedTarget,
+      _cheatDayIndex,
+    );
+
+    final mealCount = mealPlan.mealDays.length;
+    int resolvedIndex = offset % mealCount;
+    if (resolvedIndex < 0) {
+      resolvedIndex = (mealCount + resolvedIndex) % mealCount;
+    }
+
+    // Guard against any negative overflow
+    if (resolvedIndex < 0 || resolvedIndex >= mealCount) {
+      resolvedIndex = resolvedIndex.abs() % mealCount;
+    }
+
+    return mealPlan.mealDays[resolvedIndex];
+  }
+
+  int _calculateNonCheatDayOffset(
+    DateTime start,
+    DateTime target,
+    int? cheatDayIndex,
+  ) {
+    final difference = target.difference(start).inDays;
+    if (difference == 0) {
+      return 0;
+    }
+
+    if (cheatDayIndex == null) {
+      return difference;
+    }
+
+    final forward = difference > 0;
+    final absDays = difference.abs();
+
+    int cheatDays = absDays ~/ 7;
+    final remainder = absDays % 7;
+
+    int currentWeekday = start.weekday - 1;
+
+    for (int i = 0; i < remainder; i++) {
+      currentWeekday =
+          forward ? (currentWeekday + 1) % 7 : (currentWeekday - 1 + 7) % 7;
+      if (currentWeekday == cheatDayIndex) {
+        cheatDays += 1;
+      }
+    }
+
+    final nonCheatDays = absDays - cheatDays;
+    return forward ? nonCheatDays : -nonCheatDays;
+  }
+
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 }

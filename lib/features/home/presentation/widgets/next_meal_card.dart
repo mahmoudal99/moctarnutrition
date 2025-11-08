@@ -6,15 +6,19 @@ import '../../../../core/constants/app_constants.dart';
 class NextMealCard extends StatelessWidget {
   final MealDay? currentDayMeals;
   final DateTime selectedDate;
+  final bool isCheatDay;
+  final String? cheatDayName;
 
   const NextMealCard({
     super.key,
     required this.currentDayMeals,
     required this.selectedDate,
+    this.isCheatDay = false,
+    this.cheatDayName,
   });
 
   Meal? _getNextMeal() {
-    if (currentDayMeals == null || currentDayMeals!.meals.isEmpty) {
+    if (isCheatDay || currentDayMeals == null || currentDayMeals!.meals.isEmpty) {
       return null;
     }
 
@@ -125,6 +129,42 @@ class NextMealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nextMeal = _getNextMeal();
+
+    if (isCheatDay) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${cheatDayName ?? 'Cheat Day'}',
+              style: AppTextStyles.heading5.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingS),
+            Text(
+              'Enjoy your break—no meals scheduled today.',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     if (nextMeal == null) {
       return Container(
