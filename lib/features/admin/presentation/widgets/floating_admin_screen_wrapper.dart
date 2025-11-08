@@ -66,9 +66,15 @@ class _FloatingAdminScreenWrapperState
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildBottomNavItem(0, 'Profile', 'assets/images/profile.svg'),
-          _buildBottomNavItem(1, 'Metrics', 'assets/images/weights.png'),
-          _buildBottomNavItem(2, 'Check-ins', 'assets/images/checkin.svg'),
-          _buildBottomNavItem(3, 'Meal Plan', 'assets/images/meal.svg'),
+          _buildBottomNavItem(1, 'Metrics',
+              'assets/images/chart-line-data-03-stroke-rounded.svg'),
+          _buildBottomNavItem(
+            2,
+            'Check-ins',
+            'assets/images/image-done-02-stroke-rounded.svg',
+          ),
+          _buildBottomNavItem(
+              3, 'Meal Plan', 'assets/images/file-01-stroke-rounded.svg'),
         ],
       ),
     );
@@ -77,7 +83,7 @@ class _FloatingAdminScreenWrapperState
   Widget _buildBottomNavItem(int index, String label, String svgPath) {
     final isSelected = widget.currentIndex == index;
     final isPng = svgPath.endsWith('.png');
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -99,7 +105,7 @@ class _FloatingAdminScreenWrapperState
                       width: 20,
                       height: 20,
                       color: isSelected
-                          ? AppConstants.primaryColor
+                          ? Colors.black
                           : AppConstants.textTertiary,
                     )
                   : SvgPicture.asset(
@@ -108,7 +114,7 @@ class _FloatingAdminScreenWrapperState
                       height: 20,
                       colorFilter: ColorFilter.mode(
                         isSelected
-                            ? AppConstants.primaryColor
+                            ? Colors.black
                             : AppConstants.textTertiary,
                         BlendMode.srcIn,
                       ),
@@ -119,7 +125,7 @@ class _FloatingAdminScreenWrapperState
                 textAlign: TextAlign.center,
                 style: AppTextStyles.caption.copyWith(
                   color: isSelected
-                      ? AppConstants.primaryColor
+                      ? Colors.black
                       : AppConstants.textTertiary,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
