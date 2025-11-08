@@ -13,6 +13,7 @@ import '../widgets/day_selector.dart';
 import '../widgets/calorie_summary_card.dart';
 import '../widgets/nutrition_goals_card.dart';
 import '../widgets/next_meal_card.dart';
+import '../widgets/meal_plan_required_bottom_sheet.dart';
 import '../../../food_search/presentation/screens/food_search_screen.dart';
 import '../../../food_search/presentation/screens/barcode_scanner_screen.dart';
 
@@ -536,42 +537,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showMealPlanRequiredMessage() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.restaurant_menu,
-              size: 48,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Meal Plan Required',
-              style: AppTextStyles.heading5,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'You can log food once your meal plan is ready.',
-              style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Got it'),
-              ),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) => const MealPlanRequiredBottomSheet(),
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      useSafeArea: true,
     );
   }
 
