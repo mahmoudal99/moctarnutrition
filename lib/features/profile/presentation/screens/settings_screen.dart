@@ -55,7 +55,8 @@ class ProfileScreen extends StatelessWidget {
 
         // Get data from provider
         final quickAccess = ProfileDataProvider.getQuickAccessItems(context);
-        final settings = ProfileDataProvider.getSettingsItems(context, user: user);
+        final settings =
+            ProfileDataProvider.getSettingsItems(context, user: user);
         final privacy = ProfileDataProvider.getPrivacyItems(context);
         final support = ProfileDataProvider.getSupportItems(context);
 
