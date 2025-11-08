@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:champions_gym_app/shared/services/stripe_analytics_service.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logger/logger.dart';
 
 class AdminHomeScreen extends StatefulWidget {
@@ -204,6 +205,18 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     _logger.i('Updated cached UI data');
   }
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour >= 5 && hour < 12) {
+      return 'Good morning';
+    } else if (hour >= 12 && hour < 17) {
+      return 'Good afternoon';
+    } else {
+      return 'Good evening';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_errorMessage != null && _metrics == null) {
@@ -252,7 +265,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Welcome back, ${widget.adminName}!',
+                  Text('${_getGreeting()}, ${widget.adminName}!',
                       style: AppTextStyles.heading3),
                   IconButton(
                     onPressed: _forceRefreshData,
@@ -322,18 +335,18 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   List<_MetricCardData> _buildMetricsData() {
     if (_metrics == null) {
       return [
-        _MetricCardData(
-            'Active Customers', '0', Icons.group, AppConstants.primaryColor),
-        _MetricCardData('Total Sales', '0', Icons.shopping_cart,
+        _MetricCardData('Active Clients', '0',
+            "user-multiple-stroke-rounded.svg", AppConstants.primaryColor),
+        _MetricCardData('Total Sales', '0', "invoice-02-stroke-rounded.svg",
             AppConstants.secondaryColor),
       ];
     }
 
     return [
-      _MetricCardData('Active Customers', '${_metrics!.activeCustomers}',
-          Icons.group, AppConstants.primaryColor),
+      _MetricCardData('Active Clients', '${_metrics!.activeCustomers}',
+          "user-multiple-stroke-rounded.svg", AppConstants.primaryColor),
       _MetricCardData('Total Sales', '${_metrics!.sales.totalSales}',
-          Icons.shopping_cart, AppConstants.secondaryColor),
+          "invoice-02-stroke-rounded.svg", AppConstants.secondaryColor),
     ];
   }
 
@@ -395,7 +408,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 class _MetricCardData {
   final String label;
   final String value;
-  final IconData icon;
+  final String icon;
   final Color color;
 
   _MetricCardData(this.label, this.value, this.icon, this.color);
@@ -420,13 +433,33 @@ class _MetricCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: data.color.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(8),
+                SvgPicture.asset("assets/images/${data.icon}",
+                    color: Colors.black, height: 20),
+                Text(
+                  data.label,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppConstants.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(data.icon, color: data.color, size: 20),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  data.value,
+                  style: AppTextStyles.heading4.copyWith(
+                    color: data.color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
                 Icon(
                   Icons.trending_up,
@@ -434,28 +467,6 @@ class _MetricCard extends StatelessWidget {
                   size: 16,
                 ),
               ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              data.value,
-              style: AppTextStyles.heading4.copyWith(
-                color: data.color,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              data.label,
-              style: AppTextStyles.caption.copyWith(
-                color: AppConstants.textSecondary,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
             ),
           ],
         ),
@@ -944,7 +955,8 @@ class _TransactionItem extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               Text(
-                transaction.status[0].toUpperCase() + transaction.status.substring(1),
+                transaction.status[0].toUpperCase() +
+                    transaction.status.substring(1),
                 style: AppTextStyles.caption.copyWith(
                   color: transaction.statusColor,
                   fontWeight: FontWeight.w600,

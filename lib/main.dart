@@ -100,8 +100,9 @@ GoRouter createRouter(AuthProvider authProvider) {
 
           // Check training program status - all programs are paid
           final user = authProvider.userModel!;
-          final hasTrainingProgram = user.trainingProgramStatus != TrainingProgramStatus.none;
-          
+          final hasTrainingProgram =
+              user.trainingProgramStatus != TrainingProgramStatus.none;
+
           if (!hasTrainingProgram) {
             return const SubscriptionScreen();
           }
@@ -289,7 +290,8 @@ GoRouter createRouter(AuthProvider authProvider) {
 
       // If admin and authenticated, redirect to /admin-home only if not on an admin route
       if (isAuthenticated && isAdmin && !adminRoutes.contains(currentRoute)) {
-        LoggingService.instance.d('Router redirect - Redirecting admin to /admin-home');
+        LoggingService.instance
+            .d('Router redirect - Redirecting admin to /admin-home');
         return '/admin-home';
       }
       return null;
@@ -299,7 +301,7 @@ GoRouter createRouter(AuthProvider authProvider) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Log app startup
   LoggingService.logAppStart();
 
@@ -308,7 +310,8 @@ void main() async {
     await Firebase.initializeApp();
     LoggingService.instance.i('Firebase initialized successfully');
   } catch (e) {
-    LoggingService.logError('Firebase initialization error', error: e, context: 'Firebase');
+    LoggingService.logError('Firebase initialization error',
+        error: e, context: 'Firebase');
     // Continue without Firebase for development
   }
 
@@ -324,19 +327,25 @@ void main() async {
   // Validate environment configuration
   try {
     ConfigService.validateEnvironment();
-    LoggingService.instance.i('Environment configuration validated successfully');
-    LoggingService.instance.i('Config summary: ${ConfigService.getConfigSummary()}');
+    LoggingService.instance
+        .i('Environment configuration validated successfully');
+    LoggingService.instance
+        .i('Config summary: ${ConfigService.getConfigSummary()}');
   } catch (e) {
-    LoggingService.logError('Environment configuration error', error: e, context: 'Config');
-    LoggingService.instance.e('Please check your .env file and ensure OPENAI_API_KEY is set');
+    LoggingService.logError('Environment configuration error',
+        error: e, context: 'Config');
+    LoggingService.instance
+        .e('Please check your .env file and ensure OPENAI_API_KEY is set');
   }
 
   // Initialize background upload service
   try {
     await BackgroundUploadService.initialize();
-    LoggingService.instance.i('Background upload service initialized successfully');
+    LoggingService.instance
+        .i('Background upload service initialized successfully');
   } catch (e) {
-    LoggingService.logError('Could not initialize background upload service', error: e, context: 'BackgroundUpload');
+    LoggingService.logError('Could not initialize background upload service',
+        error: e, context: 'BackgroundUpload');
     // Continue without background upload service
   }
 
@@ -345,7 +354,8 @@ void main() async {
     await NotificationService.initialize();
     LoggingService.instance.i('Notification service initialized successfully');
   } catch (e) {
-    LoggingService.logError('Could not initialize notification service', error: e, context: 'Notifications');
+    LoggingService.logError('Could not initialize notification service',
+        error: e, context: 'Notifications');
     // Continue without notification service
   }
 
@@ -358,10 +368,12 @@ void main() async {
       );
       LoggingService.instance.i('Stripe service initialized successfully');
     } else {
-      LoggingService.instance.w('Stripe service disabled - configuration not found');
+      LoggingService.instance
+          .w('Stripe service disabled - configuration not found');
     }
   } catch (e) {
-    LoggingService.logError('Could not initialize Stripe service', error: e, context: 'Stripe');
+    LoggingService.logError('Could not initialize Stripe service',
+        error: e, context: 'Stripe');
     // Continue without Stripe service
   }
 
