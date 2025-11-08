@@ -130,19 +130,19 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
   Widget _buildBenefitsList() {
     final benefits = [
       BenefitItem(
-        icon: Icons.fitness_center,
+        icon: "file-01-stroke-rounded.svg",
         title: 'Personalized Plans',
         description:
             'Customized nutrition and workout programs tailored to your goals',
       ),
       BenefitItem(
-        icon: Icons.analytics_outlined,
+        icon: "chart-line-data-01-stroke-rounded.svg",
         title: 'Track Your Progress',
         description:
             'Monitor your journey with detailed analytics and insights',
       ),
       BenefitItem(
-        icon: Icons.support_agent,
+        icon: "comment-01-stroke-rounded.svg",
         title: 'Expert Guidance',
         description:
             'Get professional support and advice throughout your fitness journey',

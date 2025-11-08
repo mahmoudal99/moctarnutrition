@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/constants/app_constants.dart';
 
 class BenefitCard extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final String title;
   final String description;
 
@@ -30,18 +31,10 @@ class BenefitCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppConstants.backgroundColor,
-              borderRadius: BorderRadius.circular(AppConstants.radiusS),
-            ),
-            child: Icon(
-              icon,
-              color: AppConstants.textPrimary,
-              size: 24,
-            ),
+          SvgPicture.asset(
+            "assets/images/${icon}",
+            color: AppConstants.textPrimary,
+            height: 40,
           ),
           const SizedBox(width: AppConstants.spacingM),
           Expanded(

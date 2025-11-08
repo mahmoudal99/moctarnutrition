@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class WaitingForMealPlan extends StatelessWidget {
@@ -18,15 +19,31 @@ class WaitingForMealPlan extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                "assets/images/meal_loading.png",
-                height: 125,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    "assets/images/add-to-list-stroke-rounded.svg",
+                    height: 20,
+                    color: Colors.black,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Your Plan is being prepared!',
+                    style: AppTextStyles.heading4.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(
-                height: 10,
+              SizedBox(
+                height: AppConstants.spacingS,
               ),
               Text(
-                'You will receive an email when your plan is ready.',
+                'You will receive an email when\nyour plan is ready.',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppConstants.textSecondary,
                 ),

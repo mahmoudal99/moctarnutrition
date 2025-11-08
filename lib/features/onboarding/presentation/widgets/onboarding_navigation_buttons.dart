@@ -27,13 +27,11 @@ class OnboardingNavigationButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Hide navigation buttons for final step only (but not rating step)
-    if (currentPage == totalSteps - 1 && currentPage != 17) {
-      return const SizedBox.shrink();
-    }
+    final bool isFinalStep = currentPage == totalSteps - 1;
+    final bool isNotificationStep = currentPage == totalSteps - 2;
 
-    // Show notification-specific buttons for workout notifications step (step 16)
-    if (currentPage == 16) {
+    // Show notification-specific buttons for workout notifications step
+    if (isNotificationStep) {
       return AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(
@@ -67,7 +65,7 @@ class OnboardingNavigationButtons extends StatelessWidget {
                     onNotificationEnable?.call();
                   },
                   text: 'Enable Notifications',
-                  type: ButtonType.primary,
+                  type: ButtonType.auth,
                 ),
               ),
             ),
@@ -109,7 +107,7 @@ class OnboardingNavigationButtons extends StatelessWidget {
                 height: 52,
                 child: CustomButton(
                   type: ButtonType.auth,
-                  text: currentPage == totalSteps - 1 && currentPage != 17
+                  text: isFinalStep
                       ? 'Get Started'
                       : currentPage == 0
                           ? "Let's Begin"
@@ -117,11 +115,7 @@ class OnboardingNavigationButtons extends StatelessWidget {
                   onPressed: isNextEnabled
                       ? () {
                           HapticFeedback.mediumImpact();
-                          if (currentPage == totalSteps - 1 && currentPage != 17) {
-                            onComplete?.call();
-                          } else {
-                            onNext();
-                          }
+                          onNext();
                         }
                       : null,
                 ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:champions_gym_app/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class OnboardingWelcomeStep extends StatefulWidget {
   const OnboardingWelcomeStep({super.key});
@@ -107,7 +108,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                     child: _StepCard(
                       stepNumber: 1,
                       width: cardWidth,
-                      icon: "user.png",
+                      icon: "user-list-stroke-rounded.svg",
                       isVisible: _cardVisible[0],
                       highlightWords: ['yourself'],
                       cardMessage:
@@ -119,7 +120,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                     top: centerY,
                     child: _StepCard(
                       stepNumber: 2,
-                      icon: "targeting.png",
+                      icon: "target-02-stroke-rounded.svg",
                       width: cardWidth,
                       isVisible: _cardVisible[1],
                       highlightWords: ["goals"],
@@ -133,7 +134,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                     child: _StepCard(
                       stepNumber: 3,
                       width: cardWidth,
-                      icon: "check-in.png",
+                      icon: "pay-by-check-stroke-rounded.svg",
                       isVisible: _cardVisible[2],
                       highlightWords: ["Moctar"],
                       cardMessage:
@@ -199,9 +200,9 @@ class _StepCard extends StatelessWidget {
             alignment: PlaceholderAlignment.middle,
             child: Padding(
               padding: const EdgeInsets.only(left: 6.0),
-              child: Image.asset(
+              child: SvgPicture.asset(
                 "assets/images/$icon",
-                height: 16,
+                height: 20,
               ),
             ),
           ),

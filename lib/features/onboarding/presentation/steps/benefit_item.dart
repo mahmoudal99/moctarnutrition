@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 
 class BenefitItem {
-  final IconData icon;
+  final String icon;
   final String title;
   final String description;
 
