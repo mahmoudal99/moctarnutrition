@@ -8,6 +8,7 @@ import 'package:champions_gym_app/features/checkin/presentation/screens/checkin_
 import 'package:champions_gym_app/shared/services/background_upload_service.dart';
 import 'package:champions_gym_app/features/admin/presentation/widgets/admin_user_app_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AdminUserCheckinsScreen extends StatelessWidget {
   final UserModel user;
@@ -55,8 +56,6 @@ class AdminUserCheckinsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 24),
-
                 // Stats section
                 Row(
                   children: [
@@ -64,7 +63,7 @@ class AdminUserCheckinsScreen extends StatelessWidget {
                       child: _buildStatCard(
                         '${checkins.length}',
                         'Check-ins',
-                        Icons.check_circle_outline,
+                        "image-done-02-stroke-rounded.svg",
                         AppConstants.primaryColor,
                       ),
                     ),
@@ -73,46 +72,48 @@ class AdminUserCheckinsScreen extends StatelessWidget {
                       child: _buildStatCard(
                         '${_calculateActiveWeeks(checkins)}',
                         'Active Weeks',
-                        Icons.calendar_today_outlined,
+                        "tick-double-03-stroke-rounded.svg",
                         Colors.orange,
                       ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: AppConstants.spacingM),
 
                 // Check-ins list
-                Text(
-                  'Recent Check-ins',
-                  style: AppTextStyles.heading4.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
-                ),
+                Text('Recent Check-ins', style: AppTextStyles.heading5),
 
                 const SizedBox(height: 16),
 
                 if (checkins.isEmpty)
-                  Center(
-                    child: Column(
-                      children: [
-                        Icon(Icons.fitness_center_outlined,
-                            size: 32, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No check-ins yet',
-                          style: AppTextStyles.bodyLarge
-                              .copyWith(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'This user hasn\'t checked in yet',
-                          style: AppTextStyles.bodyMedium
-                              .copyWith(color: Colors.grey[500]),
-                        ),
-                      ],
-                    ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            "assets/images/image-delete-02-stroke-rounded.svg",
+                            height: 20,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'No check-ins yet',
+                            style: AppTextStyles.bodyLarge
+                                .copyWith(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppConstants.spacingS),
+                      Text(
+                        'This user hasn\'t checked in yet',
+                        style: AppTextStyles.bodyMedium
+                            .copyWith(color: Colors.grey[500]),
+                      ),
+                    ],
                   )
                 else
                   ...checkins
@@ -162,13 +163,12 @@ class AdminUserCheckinsScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildStatCard(
-      String value, String label, IconData icon, Color color) {
+  Widget _buildStatCard(String value, String label, String icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppConstants.radiusS),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -179,18 +179,27 @@ class AdminUserCheckinsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SvgPicture.asset(
+                "assets/images/$icon",
+                height: 20,
+              ),
+              Text(
+                label,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingS),
           Text(
             value,
             style: AppTextStyles.heading4.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: Colors.grey[600],
             ),
           ),
         ],

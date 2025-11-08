@@ -24,13 +24,10 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _logger.i('AdminUserMealPlanScreen - Building screen for user: ${user.id}');
-    _logger.i('AdminUserMealPlanScreen - User email: ${user.email}');
-    _logger.i('AdminUserMealPlanScreen - User name: ${user.name}');
-    _logger.i('AdminUserMealPlanScreen - User mealPlanId from model: ${user.mealPlanId}');
-    _logger.i('AdminUserMealPlanScreen - Provided mealPlanId parameter: ${mealPlanId ?? 'null'}');
-    
+    _logger.i(
+        'AdminUserMealPlanScreen - User mealPlanId from model: ${user.mealPlanId}');
+
     if (mealPlanId == null) {
-      _logger.w('AdminUserMealPlanScreen - No meal plan ID provided, showing create meal plan screen');
       return Scaffold(
         appBar: AdminUserAppBar(
           user: user,
@@ -40,37 +37,40 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 32),
-
               // No meal plan content
               Expanded(
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.restaurant_menu_outlined,
-                        size: 32,
-                        color: Colors.grey[400],
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            "assets/images/add-to-list-stroke-rounded.svg",
+                            height: 20,
+                            color: Colors.black,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'No Meal Plan Yet',
+                            style: AppTextStyles.heading4.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppConstants.spacingS),
                       Text(
-                        'No Meal Plan Yet',
-                        style: AppTextStyles.heading4.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Create a personalized meal plan for ${user.name?.split(' ').first ?? 'this user'} to help them achieve their fitness goals',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
+                          'Create a personalized meal plan for ${user.name?.split(' ').first ?? 'this user'}\nto get started.',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.bodySmall),
+                      const SizedBox(height: AppConstants.spacingS + 5),
                       ElevatedButton.icon(
                         onPressed: () async {
                           final result = await Navigator.of(context).push(
@@ -86,7 +86,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
                         icon: const Icon(Icons.add),
                         label: const Text('Create Meal Plan'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstants.primaryColor,
+                          backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 12),
@@ -105,13 +105,15 @@ class AdminUserMealPlanScreen extends StatelessWidget {
       );
     }
 
-    _logger.i('AdminUserMealPlanScreen - Fetching meal plan with ID: $mealPlanId');
-    
+    _logger
+        .i('AdminUserMealPlanScreen - Fetching meal plan with ID: $mealPlanId');
+
     return FutureBuilder<MealPlanModel?>(
       future: _fetchMealPlan(mealPlanId!),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          _logger.e('AdminUserMealPlanScreen - Error loading meal plan: ${snapshot.error}');
+          _logger.e(
+              'AdminUserMealPlanScreen - Error loading meal plan: ${snapshot.error}');
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -134,7 +136,8 @@ class AdminUserMealPlanScreen extends StatelessWidget {
 
         final mealPlan = snapshot.data;
         if (mealPlan == null) {
-          _logger.w('AdminUserMealPlanScreen - Meal plan is null after fetch, showing create screen');
+          _logger.w(
+              'AdminUserMealPlanScreen - Meal plan is null after fetch, showing create screen');
           return Scaffold(
             appBar: AdminUserAppBar(
               user: user,
@@ -209,14 +212,19 @@ class AdminUserMealPlanScreen extends StatelessWidget {
           );
         }
 
-        _logger.i('AdminUserMealPlanScreen - Successfully loaded meal plan: ${mealPlan.title}');
+        _logger.i(
+            'AdminUserMealPlanScreen - Successfully loaded meal plan: ${mealPlan.title}');
         _logger.i('AdminUserMealPlanScreen - Meal plan ID: ${mealPlan.id}');
-        _logger.i('AdminUserMealPlanScreen - Meal plan userId: ${mealPlan.userId}');
+        _logger.i(
+            'AdminUserMealPlanScreen - Meal plan userId: ${mealPlan.userId}');
         _logger.i('AdminUserMealPlanScreen - Current user ID: ${user.id}');
-        _logger.i('AdminUserMealPlanScreen - User IDs match: ${mealPlan.userId == user.id}');
-        _logger.i('AdminUserMealPlanScreen - Meal plan created: ${mealPlan.createdAt}');
-        _logger.i('AdminUserMealPlanScreen - Number of meal days: ${mealPlan.mealDays.length}');
-        
+        _logger.i(
+            'AdminUserMealPlanScreen - User IDs match: ${mealPlan.userId == user.id}');
+        _logger.i(
+            'AdminUserMealPlanScreen - Meal plan created: ${mealPlan.createdAt}');
+        _logger.i(
+            'AdminUserMealPlanScreen - Number of meal days: ${mealPlan.mealDays.length}');
+
         return Scaffold(
           appBar: AdminUserAppBar(
             user: user,
@@ -275,85 +283,105 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   }
 
   Future<MealPlanModel?> _fetchMealPlan(String mealPlanId) async {
-    _logger.d('AdminUserMealPlanScreen - _fetchMealPlan called with ID: $mealPlanId');
-    
+    _logger.d(
+        'AdminUserMealPlanScreen - _fetchMealPlan called with ID: $mealPlanId');
+
     try {
-      _logger.d('AdminUserMealPlanScreen - Starting Firestore fetch for document: $mealPlanId');
-      
+      _logger.d(
+          'AdminUserMealPlanScreen - Starting Firestore fetch for document: $mealPlanId');
+
       // Test Firestore connection first
       _logger.d('AdminUserMealPlanScreen - Testing Firestore connection...');
       final testQuery = await FirebaseFirestore.instance
           .collection('meal_plans')
           .limit(1)
           .get();
-      _logger.d('AdminUserMealPlanScreen - Firestore connection test: ${testQuery.docs.length} documents found');
-      
+      _logger.d(
+          'AdminUserMealPlanScreen - Firestore connection test: ${testQuery.docs.length} documents found');
+
       final doc = await FirebaseFirestore.instance
           .collection('meal_plans')
           .doc(mealPlanId)
           .get();
-      
+
       _logger.d('AdminUserMealPlanScreen - Document fetch completed');
 
       _logger.d('AdminUserMealPlanScreen - Document exists: ${doc.exists}');
-      
+
       if (doc.exists) {
         final data = doc.data()!;
-        _logger.d('AdminUserMealPlanScreen - Document data keys: ${data.keys.toList()}');
-        _logger.d('AdminUserMealPlanScreen - Document userId: ${data['userId']}');
+        _logger.d(
+            'AdminUserMealPlanScreen - Document data keys: ${data.keys.toList()}');
+        _logger
+            .d('AdminUserMealPlanScreen - Document userId: ${data['userId']}');
         _logger.d('AdminUserMealPlanScreen - Document title: ${data['title']}');
-        _logger.d('AdminUserMealPlanScreen - Document createdAt: ${data['createdAt']}');
-        
+        _logger.d(
+            'AdminUserMealPlanScreen - Document createdAt: ${data['createdAt']}');
+
         final mealPlan = MealPlanModel.fromJson(data, documentId: doc.id);
-        _logger.i('AdminUserMealPlanScreen - Successfully parsed meal plan: ${mealPlan.title}');
-        
+        _logger.i(
+            'AdminUserMealPlanScreen - Successfully parsed meal plan: ${mealPlan.title}');
+
         // Additional debug: Check if this user actually has this mealPlanId in their user document
-        _logger.d('AdminUserMealPlanScreen - Verifying user document has this mealPlanId...');
+        _logger.d(
+            'AdminUserMealPlanScreen - Verifying user document has this mealPlanId...');
         try {
           final userDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(user.id)
               .get();
-          
+
           if (userDoc.exists) {
             final userData = userDoc.data()!;
             final userMealPlanId = userData['mealPlanId'];
-            _logger.d('AdminUserMealPlanScreen - User document mealPlanId: $userMealPlanId');
-            _logger.d('AdminUserMealPlanScreen - Fetched mealPlanId: $mealPlanId');
-            _logger.d('AdminUserMealPlanScreen - IDs match: ${userMealPlanId == mealPlanId}');
-            
+            _logger.d(
+                'AdminUserMealPlanScreen - User document mealPlanId: $userMealPlanId');
+            _logger
+                .d('AdminUserMealPlanScreen - Fetched mealPlanId: $mealPlanId');
+            _logger.d(
+                'AdminUserMealPlanScreen - IDs match: ${userMealPlanId == mealPlanId}');
+
             if (userMealPlanId != mealPlanId) {
-              _logger.w('AdminUserMealPlanScreen - ⚠️ MISMATCH: User document has different mealPlanId!');
-              _logger.w('AdminUserMealPlanScreen - This could be why the user app can\'t find the meal plan');
+              _logger.w(
+                  'AdminUserMealPlanScreen - ⚠️ MISMATCH: User document has different mealPlanId!');
+              _logger.w(
+                  'AdminUserMealPlanScreen - This could be why the user app can\'t find the meal plan');
             }
           } else {
-            _logger.e('AdminUserMealPlanScreen - User document not found: ${user.id}');
+            _logger.e(
+                'AdminUserMealPlanScreen - User document not found: ${user.id}');
           }
         } catch (userDocError) {
-          _logger.e('AdminUserMealPlanScreen - Error checking user document: $userDocError');
+          _logger.e(
+              'AdminUserMealPlanScreen - Error checking user document: $userDocError');
         }
-        
+
         return mealPlan;
       } else {
-        _logger.w('AdminUserMealPlanScreen - Meal plan document does not exist: $mealPlanId');
-        
+        _logger.w(
+            'AdminUserMealPlanScreen - Meal plan document does not exist: $mealPlanId');
+
         // Additional debug: Search for meal plans by userId
-        _logger.d('AdminUserMealPlanScreen - Searching for meal plans by userId: ${user.id}');
+        _logger.d(
+            'AdminUserMealPlanScreen - Searching for meal plans by userId: ${user.id}');
         try {
           final querySnapshot = await FirebaseFirestore.instance
               .collection('meal_plans')
               .where('userId', isEqualTo: user.id)
               .get();
-          
-          _logger.d('AdminUserMealPlanScreen - Found ${querySnapshot.docs.length} meal plans for user ${user.id}');
+
+          _logger.d(
+              'AdminUserMealPlanScreen - Found ${querySnapshot.docs.length} meal plans for user ${user.id}');
           for (var doc in querySnapshot.docs) {
             final data = doc.data();
-            _logger.d('AdminUserMealPlanScreen - Found plan: ${doc.id}, title: ${data['title']}, userId: ${data['userId']}');
+            _logger.d(
+                'AdminUserMealPlanScreen - Found plan: ${doc.id}, title: ${data['title']}, userId: ${data['userId']}');
           }
         } catch (searchError) {
-          _logger.e('AdminUserMealPlanScreen - Error searching meal plans by userId: $searchError');
+          _logger.e(
+              'AdminUserMealPlanScreen - Error searching meal plans by userId: $searchError');
         }
-        
+
         return null;
       }
     } catch (e, stackTrace) {

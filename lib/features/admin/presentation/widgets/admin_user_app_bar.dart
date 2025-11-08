@@ -1,3 +1,4 @@
+import 'package:champions_gym_app/shared/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:champions_gym_app/shared/models/user_model.dart';
 import 'package:champions_gym_app/core/constants/app_constants.dart';
@@ -31,15 +32,7 @@ class AdminUserAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: AppTextStyles.heading4.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-            ),
-          )
-        ],
+        children: [AppBarTitle(title: title)],
       ),
       actions: actions,
       bottom: PreferredSize(

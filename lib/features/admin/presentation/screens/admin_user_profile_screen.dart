@@ -74,32 +74,22 @@ class AdminUserProfileScreen extends StatelessWidget {
 
                   // Account Status
                   AdminInfoCard(
-                    title: 'Account Status',
+                    title: 'Physical Information',
                     children: [
                       AdminInfoRow(
-                        label: 'Account Created',
-                        value: _formatDate(user.createdAt),
-                      ),
+                          label: 'Age', value: '${user.preferences.age} years'),
                       AdminInfoRow(
-                        label: 'Last Updated',
-                        value: _formatDate(user.updatedAt),
-                      ),
+                          label: 'Weight',
+                          value: '${user.preferences.weight} kg'),
                       AdminInfoRow(
-                        label: 'Onboarding Completed',
-                        value: user.hasSeenOnboarding ? 'Yes' : 'No',
-                        valueColor: user.hasSeenOnboarding
-                            ? AppConstants.successColor
-                            : AppConstants.warningColor,
+                          label: 'Height',
+                          value: '${user.preferences.height} cm'),
+                      AdminInfoRow(
+                          label: 'Gender', value: user.preferences.gender),
+                      AdminInfoRow(
+                        label: 'Desired Weight',
+                        value: '${user.preferences.desiredWeight} kg',
                       ),
-                      if (user.phoneNumber != null &&
-                          user.phoneNumber!.isNotEmpty)
-                        AdminInfoRow(
-                          label: 'Phone Number',
-                          value: user.phoneNumber!,
-                          valueColor: AppConstants.primaryColor,
-                          onTap: () =>
-                              _sharePhoneNumber(context, user.phoneNumber!),
-                        ),
                     ],
                   ),
 
@@ -131,22 +121,32 @@ class AdminUserProfileScreen extends StatelessWidget {
 
                   // Physical Information
                   AdminInfoCard(
-                    title: 'Physical Information',
+                    title: 'Account Status',
                     children: [
                       AdminInfoRow(
-                          label: 'Age', value: '${user.preferences.age} years'),
-                      AdminInfoRow(
-                          label: 'Weight',
-                          value: '${user.preferences.weight} kg'),
-                      AdminInfoRow(
-                          label: 'Height',
-                          value: '${user.preferences.height} cm'),
-                      AdminInfoRow(
-                          label: 'Gender', value: user.preferences.gender),
-                      AdminInfoRow(
-                        label: 'Desired Weight',
-                        value: '${user.preferences.desiredWeight} kg',
+                        label: 'Account Created',
+                        value: _formatDate(user.createdAt),
                       ),
+                      AdminInfoRow(
+                        label: 'Last Updated',
+                        value: _formatDate(user.updatedAt),
+                      ),
+                      AdminInfoRow(
+                        label: 'Onboarding Completed',
+                        value: user.hasSeenOnboarding ? 'Yes' : 'No',
+                        valueColor: user.hasSeenOnboarding
+                            ? AppConstants.successColor
+                            : AppConstants.warningColor,
+                      ),
+                      if (user.phoneNumber != null &&
+                          user.phoneNumber!.isNotEmpty)
+                        AdminInfoRow(
+                          label: 'Phone Number',
+                          value: user.phoneNumber!,
+                          valueColor: AppConstants.primaryColor,
+                          onTap: () =>
+                              _sharePhoneNumber(context, user.phoneNumber!),
+                        ),
                     ],
                   ),
 

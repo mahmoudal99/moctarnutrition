@@ -38,6 +38,9 @@ class AdminUserHeader extends StatelessWidget {
               fontSize: 18,
             ),
           ),
+          SizedBox(
+            height: AppConstants.spacingS,
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
