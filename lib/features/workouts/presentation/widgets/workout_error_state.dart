@@ -19,16 +19,10 @@ class WorkoutErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppConstants.errorColor,
-            ),
-            const SizedBox(height: AppConstants.spacingM),
             Text(
               'Oops!',
               style: AppTextStyles.heading3.copyWith(
-                color: AppConstants.errorColor,
+                color: AppConstants.textTertiary,
               ),
             ),
             const SizedBox(height: AppConstants.spacingS),
@@ -41,7 +35,7 @@ class WorkoutErrorState extends StatelessWidget {
             ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppConstants.primaryColor,
+                backgroundColor: Colors.black,
                 foregroundColor: AppConstants.surfaceColor,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppConstants.spacingL,

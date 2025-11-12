@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum WorkoutDifficulty { beginner, intermediate, advanced }
 
 enum WorkoutCategory { strength, cardio, flexibility, hiit, yoga, pilates }
@@ -72,8 +74,8 @@ class WorkoutModel {
       viewCount: json['viewCount'] as int? ?? 0,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       ratingCount: json['ratingCount'] as int? ?? 0,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: _extractDateTimeFromField(json['createdAt']),
+      updatedAt: _extractDateTimeFromField(json['updatedAt']),
     );
   }
 
@@ -143,6 +145,17 @@ class WorkoutModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  /// Helper method to extract DateTime from field that might be Timestamp or String
+  static DateTime _extractDateTimeFromField(dynamic field) {
+    if (field is Timestamp) {
+      return field.toDate();
+    } else if (field is String) {
+      return DateTime.parse(field);
+    } else {
+      throw Exception('Invalid date field type: ${field.runtimeType}');
+    }
   }
 }
 

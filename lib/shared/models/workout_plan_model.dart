@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'workout_model.dart';
 
 enum WorkoutPlanType {
@@ -61,15 +62,15 @@ class WorkoutPlanModel {
       dailyWorkouts: (json['dailyWorkouts'] as List<dynamic>)
           .map((e) => DailyWorkout.fromJson(e as Map<String, dynamic>))
           .toList(),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: _extractDateTimeFromField(json['createdAt']),
+      updatedAt: _extractDateTimeFromField(json['updatedAt']),
       isActive: json['isActive'] as bool? ?? true,
       approvalStatus: WorkoutPlanApprovalStatus.values.firstWhere(
         (e) => e.toString() == 'WorkoutPlanApprovalStatus.${json['approvalStatus']}',
         orElse: () => WorkoutPlanApprovalStatus.pending,
       ),
       approvedBy: json['approvedBy'] as String?,
-      approvedAt: json['approvedAt'] != null ? DateTime.parse(json['approvedAt'] as String) : null,
+      approvedAt: json['approvedAt'] != null ? _extractDateTimeFromField(json['approvedAt']) : null,
       rejectionReason: json['rejectionReason'] as String?,
       approvedByTrainerName: json['approvedByTrainerName'] as String?,
     );
@@ -132,6 +133,17 @@ class WorkoutPlanModel {
   bool get isApproved => approvalStatus == WorkoutPlanApprovalStatus.approved;
   bool get isPending => approvalStatus == WorkoutPlanApprovalStatus.pending;
   bool get isRejected => approvalStatus == WorkoutPlanApprovalStatus.rejected;
+
+  /// Helper method to extract DateTime from field that might be Timestamp or String
+  static DateTime _extractDateTimeFromField(dynamic field) {
+    if (field is Timestamp) {
+      return field.toDate();
+    } else if (field is String) {
+      return DateTime.parse(field);
+    } else {
+      throw Exception('Invalid date field type: ${field.runtimeType}');
+    }
+  }
 }
 
 class DailyWorkout {
