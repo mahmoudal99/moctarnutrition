@@ -53,8 +53,12 @@ class _MealPlanViewState extends State<MealPlanView>
   void initState() {
     super.initState();
     _cheatDayIndex = _convertCheatDayToIndex(widget.cheatDay);
+    debugPrint(
+        'MealPlanView - cheatDay: ${widget.cheatDay}, _cheatDayIndex: $_cheatDayIndex');
     _planAnchorDate = _determinePlanAnchorDate(widget.mealPlan);
     _weeklyMealDays = _generateWeeklySchedule(widget.mealPlan);
+    debugPrint(
+        'MealPlanView - Generated schedule: ${_weeklyMealDays.map((day) => day != null ? "hasMeals" : "null").toList()}');
     _currentDayIndex = _getCurrentDayIndex();
     _currentDayIndex = _ensureValidInitialIndex(_currentDayIndex);
     // Start with the current day index for circular scrolling
@@ -118,6 +122,22 @@ class _MealPlanViewState extends State<MealPlanView>
   }
 
   @override
+  void didUpdateWidget(MealPlanView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update cheat day if it changed
+    if (oldWidget.cheatDay != widget.cheatDay) {
+      _cheatDayIndex = _convertCheatDayToIndex(widget.cheatDay);
+      debugPrint(
+          'MealPlanView - cheatDay updated: ${widget.cheatDay}, _cheatDayIndex: $_cheatDayIndex');
+      // Regenerate schedule with new cheat day
+      _weeklyMealDays = _generateWeeklySchedule(widget.mealPlan);
+      debugPrint(
+          'MealPlanView - Regenerated schedule: ${_weeklyMealDays.map((day) => day != null ? "hasMeals" : "null").toList()}');
+      setState(() {});
+    }
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
     _scrollController.dispose();
@@ -129,14 +149,14 @@ class _MealPlanViewState extends State<MealPlanView>
   Future<void> _loadConsumptionData() async {
     if (_weeklyMealDays.isEmpty) return;
 
-    final currentMealDay =
-        _weeklyMealDays.length > _currentDayIndex ? _weeklyMealDays[_currentDayIndex] : null;
+    final currentMealDay = _weeklyMealDays.length > _currentDayIndex
+        ? _weeklyMealDays[_currentDayIndex]
+        : null;
     if (currentMealDay == null) {
       return;
     }
 
-    final targetDate =
-        widget.selectedDate ?? _dateForIndex(_currentDayIndex);
+    final targetDate = widget.selectedDate ?? _dateForIndex(_currentDayIndex);
     if (targetDate == null) {
       return;
     }
@@ -206,27 +226,24 @@ class _MealPlanViewState extends State<MealPlanView>
                   final mealDay = (_weeklyMealDays.length > _currentDayIndex)
                       ? _weeklyMealDays[_currentDayIndex]
                       : null;
+                  // Don't show nutrition summary on cheat days
+                  final isCheatDay = _isCheatDay(_currentDayIndex);
+                  if (isCheatDay || mealDay == null) {
+                    return const SizedBox.shrink();
+                  }
                   return Transform.scale(
                     scale: 1.0 - (_nutritionScaleAnimation.value * 0.1),
                     child: Opacity(
                       opacity: _nutritionOpacityAnimation.value,
-                      child: mealDay == null
-                          ? Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppConstants.spacingS,
-                                vertical: AppConstants.spacingS,
-                              ),
-                              child: _buildCheatDaySummaryCard(),
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: AppConstants.spacingS,
-                                  vertical: AppConstants.spacingS),
-                              child: NutritionSummaryCard(
-                                mealDay: mealDay,
-                                dayNumber: _currentDayIndex + 1,
-                              ),
-                            ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppConstants.spacingS,
+                            vertical: AppConstants.spacingS),
+                        child: NutritionSummaryCard(
+                          mealDay: mealDay,
+                          dayNumber: _currentDayIndex + 1,
+                        ),
+                      ),
                     ),
                   );
                 },
@@ -244,8 +261,9 @@ class _MealPlanViewState extends State<MealPlanView>
                   },
                   itemCount: 7,
                   itemBuilder: (context, index) {
-                    final mealDay =
-                        index < _weeklyMealDays.length ? _weeklyMealDays[index] : null;
+                    final mealDay = index < _weeklyMealDays.length
+                        ? _weeklyMealDays[index]
+                        : null;
                     return SingleChildScrollView(
                       physics: const NeverScrollableScrollPhysics(),
                       // Disable content scrolling only
@@ -289,7 +307,8 @@ class _MealPlanViewState extends State<MealPlanView>
     if (_weeklyMealDays.isEmpty) return const SizedBox();
 
     final mealDay = _weeklyMealDays[_currentDayIndex];
-    if (mealDay == null) {
+    // Show cheat day pill if this is a cheat day, regardless of mealDay
+    if (_isCheatDay(_currentDayIndex) || mealDay == null) {
       return Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppConstants.spacingM,
@@ -385,7 +404,12 @@ class _MealPlanViewState extends State<MealPlanView>
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SvgPicture.asset("assets/images/$icon", height: 16, width: 16, color: Colors.black,),
+        SvgPicture.asset(
+          "assets/images/$icon",
+          height: 16,
+          width: 16,
+          color: Colors.black,
+        ),
         const SizedBox(width: 4),
         Text(
           value,
@@ -428,25 +452,18 @@ class _MealPlanViewState extends State<MealPlanView>
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Column(
                     children: [
-                      // Day letter with cheat day icon
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _getDayLetter(index),
-                            style: AppTextStyles.caption.copyWith(
-                              color: index == _currentDayIndex
-                                  ? AppConstants.primaryColor
-                                  : AppConstants.textSecondary,
-                              fontWeight: index == _currentDayIndex
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                          ),
-                          // Show cheat day icon if this day is a cheat day
-                          if (_isCheatDay(index)) _buildCheatDayIcon(),
-                        ],
+                      // Day letter
+                      Text(
+                        _getDayLetter(index),
+                        style: AppTextStyles.caption.copyWith(
+                          color: index == _currentDayIndex
+                              ? AppConstants.primaryColor
+                              : AppConstants.textSecondary,
+                          fontWeight: index == _currentDayIndex
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       // Enhanced dot
@@ -483,7 +500,8 @@ class _MealPlanViewState extends State<MealPlanView>
   }
 
   Widget _buildDayContent(MealDay? mealDay, int dayIndex) {
-    if (mealDay == null) {
+    // Show cheat day content if this is a cheat day, regardless of mealDay
+    if (_isCheatDay(dayIndex) || mealDay == null) {
       return Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppConstants.spacingL,
@@ -522,13 +540,13 @@ class _MealPlanViewState extends State<MealPlanView>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Section title
-                  _buildMealTypeSection(mealType, meals, dayIndex),
+                _buildMealTypeSection(mealType, meals, dayIndex),
                 const SizedBox(height: AppConstants.spacingS),
 
                 // Meals for this type
                 ...meals.map((meal) => MealCard(
                       meal: meal,
-                        dayTitle: _getDayTitle(dayIndex),
+                      dayTitle: _getDayTitle(dayIndex),
                       onTap: widget.onMealTap,
                       mealDay: mealDay, // Pass the mealDay
                     )),
@@ -687,94 +705,35 @@ class _MealPlanViewState extends State<MealPlanView>
     }
   }
 
-  Widget _buildCheatDaySummaryCard() {
-    final title = widget.cheatDay ?? 'Cheat Day';
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.celebration,
-                color: AppConstants.warningColor,
-              ),
-              const SizedBox(width: AppConstants.spacingS),
-              Text(
-                title,
-                style: AppTextStyles.heading5.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            'Enjoy your planned break. Meals resume tomorrow.',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppConstants.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCheatDayContent() {
-    final title = widget.cheatDay ?? 'Cheat Day';
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingL),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.free_breakfast,
-                color: AppConstants.warningColor,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset("assets/images/pizza-02-stroke-rounded.svg"),
+            const SizedBox(width: 10),
+            Text(
+              'Cheat Day',
+              style: AppTextStyles.heading4.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.grey[800],
               ),
-              const SizedBox(width: AppConstants.spacingS),
-              Text(
-                title,
-                style: AppTextStyles.heading5.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            'No prep required today—use this day to recharge.',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppConstants.textSecondary,
             ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        Text(
+          'You’ve earned this enjoy your favorites guilt-free. Tomorrow, we get back on track stronger than ever!',
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppConstants.textSecondary,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -806,8 +765,7 @@ class _MealPlanViewState extends State<MealPlanView>
 
   int _getCurrentDayIndex() {
     final anchor = _planAnchorDate;
-    final referenceDate =
-        _normalizeDate(widget.selectedDate ?? DateTime.now());
+    final referenceDate = _normalizeDate(widget.selectedDate ?? DateTime.now());
 
     if (anchor == null) {
       final fallbackIndex = referenceDate.weekday - 1;
@@ -823,8 +781,7 @@ class _MealPlanViewState extends State<MealPlanView>
   int _ensureValidInitialIndex(int index) {
     if (_weeklyMealDays.isEmpty) return index;
 
-    final normalizedIndex =
-        _positiveModulo(index, _weeklyMealDays.length);
+    final normalizedIndex = _positiveModulo(index, _weeklyMealDays.length);
 
     if (_weeklyMealDays[normalizedIndex] != null ||
         _isCheatDay(normalizedIndex)) {
@@ -832,10 +789,8 @@ class _MealPlanViewState extends State<MealPlanView>
     }
 
     for (int i = 1; i < _weeklyMealDays.length; i++) {
-      final candidate =
-          (normalizedIndex + i) % _weeklyMealDays.length;
-      if (_weeklyMealDays[candidate] != null ||
-          _isCheatDay(candidate)) {
+      final candidate = (normalizedIndex + i) % _weeklyMealDays.length;
+      if (_weeklyMealDays[candidate] != null || _isCheatDay(candidate)) {
         return candidate;
       }
     }
@@ -868,6 +823,11 @@ class _MealPlanViewState extends State<MealPlanView>
     for (final dayIndex in orderedIndices) {
       schedule[dayIndex] = sourceDays[sourceIndex % sourceDays.length];
       sourceIndex++;
+    }
+
+    // Explicitly ensure cheat day index is null
+    if (_cheatDayIndex != null && _cheatDayIndex! >= 0 && _cheatDayIndex! < 7) {
+      schedule[_cheatDayIndex!] = null;
     }
 
     return schedule;
@@ -928,7 +888,13 @@ class _MealPlanViewState extends State<MealPlanView>
   /// Check if a given day index is a cheat day
   bool _isCheatDay(int dayIndex) {
     if (_cheatDayIndex == null) return false;
-    return (dayIndex % 7) == _cheatDayIndex;
+    final normalizedIndex = dayIndex % 7;
+    final isCheat = normalizedIndex == _cheatDayIndex;
+    if (isCheat) {
+      debugPrint(
+          'MealPlanView - Day index $dayIndex (normalized: $normalizedIndex) is a cheat day (cheatDayIndex: $_cheatDayIndex)');
+    }
+    return isCheat;
   }
 
   /// Get the cheat day icon widget

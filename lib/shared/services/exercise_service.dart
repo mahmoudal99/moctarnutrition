@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import '../models/workout_model.dart';
 
-class FreeExerciseService {
+class ExerciseService {
   static final _logger = Logger();
 
   static const String _baseUrl =

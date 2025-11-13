@@ -7,7 +7,7 @@ import '../services/exercise_local_storage_service.dart';
 class ExerciseProvider extends ChangeNotifier {
   static final _logger = Logger();
 
-  final FreeExerciseService _exerciseService = FreeExerciseService();
+  final ExerciseService _exerciseService = ExerciseService();
   final ExerciseLocalStorageService _localStorage =
       ExerciseLocalStorageService();
 

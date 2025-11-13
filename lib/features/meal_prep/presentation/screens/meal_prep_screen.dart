@@ -20,7 +20,6 @@ class MealPrepScreen extends StatefulWidget {
 
 class _MealPrepScreenState extends State<MealPrepScreen> {
   static final _logger = Logger();
-  String? _cheatDay;
   bool _isLoadingMealPlan = false;
   bool _hasAttemptedLoad = false; // Track if we've attempted to load
 
@@ -83,8 +82,6 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
         if (currentMealPlan.userId == authProvider.userModel!.id) {
           _logger.d(
               'Meal plan already loaded for current user, skipping API call');
-          // Load cheat day from diet preferences
-          await _loadCheatDay(authProvider.userModel!.id);
           return;
         } else {
           _logger
@@ -98,9 +95,6 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       _logger.d('Loading meal plan for user ${user.id}');
       _logger.d('User mealPlanId: ${user.mealPlanId ?? 'null'}');
       await mealPlanProvider.loadMealPlan(user.id, mealPlanId: user.mealPlanId);
-
-      // Load cheat day from diet preferences
-      await _loadCheatDay(authProvider.userModel!.id);
     } finally {
       // Always reset loading flag
       if (mounted) {
@@ -121,26 +115,14 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
       _logger.d(
           'Force refreshing meal plan for user ${authProvider.userModel!.id}');
       await mealPlanProvider.refreshMealPlan(authProvider.userModel!.id);
-
-      // Load cheat day from diet preferences
-      await _loadCheatDay(authProvider.userModel!.id);
     }
   }
 
-  /// Load cheat day from diet preferences
+  /// Load cheat day from diet preferences (deprecated - now using user.preferences.cheatDay directly)
+  @Deprecated('Use user.preferences.cheatDay directly instead')
   Future<void> _loadCheatDay(String userId) async {
-    try {
-      final dietPreferences =
-          await MealPlanStorageService.loadDietPreferences(userId);
-      if (dietPreferences != null) {
-        setState(() {
-          _cheatDay = dietPreferences.cheatDay;
-        });
-        _logger.i('Loaded cheat day: $_cheatDay');
-      }
-    } catch (e) {
-      _logger.e('Error loading cheat day: $e');
-    }
+    // This method is no longer needed as we use user.preferences.cheatDay directly
+    // Keeping for backward compatibility but not using it
   }
 
   @override
@@ -209,7 +191,7 @@ class _MealPrepScreenState extends State<MealPrepScreen> {
               child: MealPlanView(
                 mealPlan: mealPlanProvider.mealPlan!,
                 user: authProvider.userModel,
-                cheatDay: _cheatDay,
+                cheatDay: authProvider.userModel?.preferences.cheatDay,
                 selectedDate: DateTime
                     .now(), // Pass current date for consumption tracking
               ),
