@@ -151,10 +151,9 @@ class NextMealCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Enjoy your break no meals scheduled today.',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: Colors.grey[600],
-              ),
+              'Enjoy your break, no meals scheduled today.',
+              style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey[600]),
+              textAlign: TextAlign.left,
             ),
           ],
         ),

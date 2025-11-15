@@ -38,7 +38,7 @@ class _ProgressScreenState extends State<ProgressScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _overviewScrollController = ScrollController();
     _loadData();
   }
@@ -325,7 +325,6 @@ class _ProgressScreenState extends State<ProgressScreen>
           isScrollable: true,
           tabs: const [
             Tab(text: 'Overview'),
-            Tab(text: 'Weight'),
             Tab(text: 'Mood'),
             Tab(text: 'Measurements'),
           ],
@@ -344,7 +343,6 @@ class _ProgressScreenState extends State<ProgressScreen>
                   selectedWeekOffset: _selectedWeekOffset,
                   scrollController: _overviewScrollController,
                 ),
-                WeightTab(dataFuture: _weightDataFuture),
                 MoodTab(dataFuture: _moodDataFuture),
                 MeasurementsTab(
                   typesFuture: _measurementTypesFuture,
