@@ -474,7 +474,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             calorieTargets: _calorieTargets!,
                             selectedDate: _selectedDate,
                             currentDayMeals: _currentDayMeals,
-                            isCheatDay: _isSelectedDateCheatDay,
                           )
                         else
                           _buildNoDataCard('No Calorie Targets',
@@ -487,7 +486,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             macros: _calorieTargets!.macros,
                             selectedDate: _selectedDate,
                             currentDayMeals: _currentDayMeals,
-                            isCheatDay: _isSelectedDateCheatDay,
                           )
                         else
                           _buildNoDataCard('No Nutrition Goals',

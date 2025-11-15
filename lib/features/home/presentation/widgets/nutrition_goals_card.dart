@@ -9,14 +9,12 @@ class NutritionGoalsCard extends StatefulWidget {
   final MacroBreakdown macros;
   final DateTime selectedDate;
   final MealDay? currentDayMeals;
-  final bool isCheatDay;
 
   const NutritionGoalsCard({
     super.key,
     required this.macros,
     required this.selectedDate,
     this.currentDayMeals,
-    this.isCheatDay = false,
   });
 
   @override
@@ -26,45 +24,6 @@ class NutritionGoalsCard extends StatefulWidget {
 class _NutritionGoalsCardState extends State<NutritionGoalsCard> {
   @override
   Widget build(BuildContext context) {
-    if (widget.isCheatDay) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppConstants.spacingL),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              'Nutrition Goals',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: AppConstants.spacingS),
-            Text(
-              'Today is your cheat day. Macros tracking resumes tomorrow.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

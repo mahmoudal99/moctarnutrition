@@ -18,7 +18,9 @@ class NextMealCard extends StatelessWidget {
   });
 
   Meal? _getNextMeal() {
-    if (isCheatDay || currentDayMeals == null || currentDayMeals!.meals.isEmpty) {
+    if (isCheatDay ||
+        currentDayMeals == null ||
+        currentDayMeals!.meals.isEmpty) {
       return null;
     }
 
@@ -109,7 +111,7 @@ class NextMealCard extends StatelessWidget {
     if (currentTime >= 22 * 60 && breakfastMeals.isNotEmpty) {
       nextMeal = breakfastMeals.first;
     }
-    
+
     return nextMeal;
   }
 
@@ -149,14 +151,7 @@ class NextMealCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${cheatDayName ?? 'Cheat Day'}',
-              style: AppTextStyles.heading5.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingS),
-            Text(
-              'Enjoy your break—no meals scheduled today.',
+              'Enjoy your break no meals scheduled today.',
               style: AppTextStyles.bodyMedium.copyWith(
                 color: Colors.grey[600],
               ),
@@ -193,10 +188,7 @@ class NextMealCard extends StatelessWidget {
                   color: Colors.black,
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  'No Meal Plan Yet',
-                  style: AppTextStyles.heading5
-                ),
+                Text('No Meal Plan Yet', style: AppTextStyles.heading5),
               ],
             ),
             const SizedBox(height: 8),
