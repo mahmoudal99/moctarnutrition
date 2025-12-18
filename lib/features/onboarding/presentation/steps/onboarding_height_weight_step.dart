@@ -54,7 +54,7 @@ class _OnboardingHeightWeightStepState
 
     // Ensure values are within reasonable bounds
     _feet = _feet.clamp(2, 8);
-    _inches = _inches.clamp(3, 10);
+    _inches = _inches.clamp(0, 11);
     _pounds = _pounds.clamp(80, 500);
     _centimeters = _centimeters.clamp(120.0, 220.0);
     _kilograms = _kilograms.clamp(36.0, 200.5);
@@ -433,16 +433,16 @@ class _OnboardingHeightWeightStepState
                   useMagnifier: true,
                   overAndUnderCenterOpacity: 0.5,
                   controller:
-                      FixedExtentScrollController(initialItem: _inches - 3),
+                      FixedExtentScrollController(initialItem: _inches.clamp(0, 11)),
                   onSelectedItemChanged: (index) {
                     HapticFeedback.lightImpact();
                     setState(() {
-                      _inches = 3 + index;
+                      _inches = index;
                     });
                     _updateHeight();
                   },
-                  children: List.generate(8, (index) {
-                    final inches = 3 + index;
+                  children: List.generate(12, (index) {
+                    final inches = index;
                     final isSelected = _inches == inches;
                     return Center(
                       child: Container(
