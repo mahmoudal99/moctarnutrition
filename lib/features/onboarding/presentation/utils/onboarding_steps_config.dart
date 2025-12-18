@@ -6,6 +6,14 @@ class OnboardingStepsConfig {
   static List<OnboardingStep> getSteps() {
     return [
       OnboardingStep(
+        title: 'New First Step',
+        subtitle: 'This is a placeholder step.',
+        icon: "arrow.json",
+        color: AppConstants.primaryColor,
+        showIconColor: false,
+        highlightedWords: [],
+      ),
+      OnboardingStep(
         title: 'Hi, I\'m Moctar 👋',
         subtitle: 'Discover how Moctar can help you achieve your goals.',
         icon: "user.png",

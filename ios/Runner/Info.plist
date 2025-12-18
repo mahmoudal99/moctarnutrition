@@ -22,6 +22,8 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>NSLocalNetworkUsageDescription</key>
+    <string>This app requires access to the local network to connect to nearby devices and services.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
