@@ -4,6 +4,7 @@ import '../../../../shared/models/user_model.dart';
 import '../steps/onboarding_new_first_step.dart';
 import '../steps/onboarding_welcome_step.dart';
 import '../steps/onboarding_moctar_intro_step.dart';
+import '../steps/onboarding_generic_fitness_intro_step.dart';
 import '../steps/onboarding_gender_step.dart';
 import '../steps/onboarding_height_weight_step.dart';
 import '../steps/onboarding_age_step.dart';
@@ -54,7 +55,12 @@ class OnboardingStepBuilder {
           onSelect: onBodybuilderChanged,
         );
       case 1:
-        return const OnboardingMoctarIntroStep();
+        // Show bodybuilder-specific intro if they selected "Yes", otherwise show generic fitness intro
+        if (data.isBodybuilder == true) {
+          return const OnboardingMoctarIntroStep();
+        } else {
+          return const OnboardingGenericFitnessIntroStep();
+        }
       case 2:
         return const OnboardingWelcomeStep();
       case 3:

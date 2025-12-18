@@ -7,12 +7,14 @@ class OnboardingStepPage extends StatelessWidget {
   final OnboardingStep step;
   final int stepIndex;
   final Widget content;
+  final String? contentKey;
 
   const OnboardingStepPage({
     super.key,
     required this.step,
     required this.stepIndex,
     required this.content,
+    this.contentKey,
   });
 
   @override
@@ -40,7 +42,7 @@ class OnboardingStepPage extends StatelessWidget {
           );
         },
         child: Column(
-          key: ValueKey(stepIndex),
+          key: ValueKey(contentKey ?? stepIndex),
           children: [
             OnboardingStepHeader(step: step),
             const SizedBox(height: AppConstants.spacingM),

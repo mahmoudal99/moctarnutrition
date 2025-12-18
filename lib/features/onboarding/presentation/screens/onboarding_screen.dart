@@ -75,15 +75,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 },
                 itemCount: _steps.length,
                 itemBuilder: (context, index) {
+                  // Use a key that includes bodybuilder selection for step 1 to force rebuild
+                  final contentKey = index == 1 
+                      ? 'step_${index}_bodybuilder_${_data.isBodybuilder}'
+                      : null;
                   return OnboardingStepPage(
+                    key: ValueKey(contentKey ?? 'step_$index'),
                     step: _steps[index],
                     stepIndex: index,
+                    contentKey: contentKey,
                     content: OnboardingStepBuilder.buildStepContent(
                       stepIndex: index,
                       data: _data,
                       onBodybuilderChanged: (isBodybuilder) {
                         setState(() {
                           _data.isBodybuilder = isBodybuilder;
+                          // Update step 1 (index 1) based on selection
+                          if (_steps.length > 1) {
+                            if (isBodybuilder == true) {
+                              // Bodybuilder intro
+                              _steps[1] = OnboardingStep(
+                                title: 'Hi, I\'m Moctar 👋',
+                                subtitle: 'Discover how Moctar can help you achieve your bodybuilding goals.',
+                                icon: "user.png",
+                                color: AppConstants.textSecondary,
+                                showIconColor: false,
+                                highlightedWords: ['Moctar'],
+                              );
+                            } else {
+                              // Generic fitness intro
+                              _steps[1] = OnboardingStep(
+                                title: 'Welcome to Your Fitness Journey',
+                                subtitle: 'Let\'s build a healthier lifestyle together.',
+                                icon: "arrow.json",
+                                color: AppConstants.primaryColor,
+                                showIconColor: false,
+                                highlightedWords: [],
+                              );
+                            }
+                          }
                         });
                       },
                       onFitnessGoalChanged: (goal) {

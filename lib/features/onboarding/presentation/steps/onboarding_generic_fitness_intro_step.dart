@@ -4,15 +4,16 @@ import '../../../../core/constants/app_constants.dart';
 import 'benefit_card.dart';
 import 'benefit_item.dart';
 
-class OnboardingMoctarIntroStep extends StatefulWidget {
-  const OnboardingMoctarIntroStep({super.key});
+class OnboardingGenericFitnessIntroStep extends StatefulWidget {
+  const OnboardingGenericFitnessIntroStep({super.key});
 
   @override
-  State<OnboardingMoctarIntroStep> createState() =>
-      _OnboardingMoctarIntroStepState();
+  State<OnboardingGenericFitnessIntroStep> createState() =>
+      _OnboardingGenericFitnessIntroStepState();
 }
 
-class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
+class _OnboardingGenericFitnessIntroStepState
+    extends State<OnboardingGenericFitnessIntroStep> {
   final List<bool> _benefitVisible = [false, false, false];
   final List<Timer> _timers = [];
 
@@ -53,10 +54,6 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Moctar Image
-                _buildMoctarImage(),
-                const SizedBox(height: AppConstants.spacingXL),
-
                 // Introduction Text
                 _buildIntroductionText(),
                 const SizedBox(height: AppConstants.spacingXL),
@@ -71,43 +68,6 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
     );
   }
 
-  Widget _buildMoctarImage() {
-    return Container(
-      width: 160,
-      height: 160,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppConstants.textTertiary.withOpacity(0.1),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(80),
-        child: Image.asset(
-          'assets/images/moc_one.jpg',
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              decoration: BoxDecoration(
-                color: AppConstants.textTertiary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.person,
-                size: 80,
-                color: AppConstants.textSecondary,
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   Widget _buildIntroductionText() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
@@ -115,7 +75,7 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
         children: [
           const SizedBox(height: AppConstants.spacingS),
           Text(
-            'I will be your personal bodybuilding coach, dedicated to helping you achieve your physique goals through advanced nutrition strategies and specialized training programs designed for muscle growth and definition.',
+            'Welcome to your personalized fitness journey! Get ready to build a healthier lifestyle through balanced nutrition and effective workout routines that fit into your daily life.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppConstants.textSecondary,
               height: 1.6,
@@ -131,21 +91,21 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
     final benefits = [
       BenefitItem(
         icon: "file-01-stroke-rounded.svg",
-        title: 'Bodybuilding Programs',
+        title: 'Fitness Plans for Everyone',
         description:
-            'Advanced training splits, hypertrophy-focused workouts, and competition prep plans',
+            'Flexible workout routines and nutrition guidance that adapt to your schedule and lifestyle',
       ),
       BenefitItem(
         icon: "chart-line-data-01-stroke-rounded.svg",
-        title: 'Muscle Growth Tracking',
+        title: 'Simple Progress Tracking',
         description:
-            'Monitor muscle mass, body composition, and strength gains with precision metrics',
+            'Easy-to-understand metrics to help you see improvements in your health and fitness',
       ),
       BenefitItem(
         icon: "comment-01-stroke-rounded.svg",
-        title: 'Bodybuilding Expertise',
+        title: 'Friendly Support',
         description:
-            'Get specialized guidance on nutrition timing, supplementation, and physique development',
+            'Get practical tips, motivation, and encouragement to help you build healthy habits',
       ),
     ];
 
