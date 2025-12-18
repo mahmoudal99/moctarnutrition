@@ -57,6 +57,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             OnboardingProgressIndicator(
               steps: _steps,
               currentPage: _currentPage,
+              onBack: () {
+                HapticFeedback.mediumImpact();
+                _pageController.previousPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              },
             ),
             Expanded(
               child: PageView.builder(
@@ -197,11 +204,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               totalSteps: _steps.length,
               isNextEnabled: _isNextEnabled(),
               onBack: () {
-                HapticFeedback.mediumImpact();
-                _pageController.previousPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
+                // Back button removed - handled by progress indicator
               },
               onNext: () {
                 HapticFeedback.mediumImpact();

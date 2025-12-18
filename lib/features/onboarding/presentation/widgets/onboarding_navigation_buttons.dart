@@ -74,7 +74,7 @@ class OnboardingNavigationButtons extends StatelessWidget {
       );
     }
 
-    // Default navigation buttons (Back & Next)
+    // Default navigation buttons (Next only)
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(
@@ -83,22 +83,6 @@ class OnboardingNavigationButtons extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (currentPage > 0)
-            Expanded(
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: currentPage > 0 ? 1.0 : 0.0,
-                child: SizedBox(
-                  height: 52,
-                  child: CustomButton(
-                    text: 'Back',
-                    type: ButtonType.outline,
-                    onPressed: onBack,
-                  ),
-                ),
-              ),
-            ),
-          if (currentPage > 0) const SizedBox(width: AppConstants.spacingS),
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
