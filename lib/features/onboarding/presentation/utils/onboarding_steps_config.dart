@@ -6,12 +6,12 @@ class OnboardingStepsConfig {
   static List<OnboardingStep> getSteps() {
     return [
       OnboardingStep(
-        title: 'New First Step',
-        subtitle: 'This is a placeholder step.',
-        icon: "arrow.json",
+        title: 'Are you a bodybuilder?',
+        subtitle: 'Or do you want to get into bodybuilding?',
+        icon: "dumbbell-01-stroke-rounded.svg",
         color: AppConstants.primaryColor,
         showIconColor: false,
-        highlightedWords: [],
+        highlightedWords: ['bodybuilder'],
       ),
       OnboardingStep(
         title: 'Hi, I\'m Moctar 👋',

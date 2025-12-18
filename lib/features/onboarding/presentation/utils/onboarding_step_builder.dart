@@ -26,6 +26,7 @@ class OnboardingStepBuilder {
   static Widget buildStepContent({
     required int stepIndex,
     required OnboardingData data,
+    required Function(bool) onBodybuilderChanged,
     required Function(FitnessGoal) onFitnessGoalChanged,
     required Function(ActivityLevel) onActivityLevelChanged,
     required Function(String) onDietaryRestrictionChanged,
@@ -48,7 +49,10 @@ class OnboardingStepBuilder {
   }) {
     switch (stepIndex) {
       case 0:
-        return const OnboardingNewFirstStep();
+        return OnboardingNewFirstStep(
+          isBodybuilder: data.isBodybuilder,
+          onSelect: onBodybuilderChanged,
+        );
       case 1:
         return const OnboardingMoctarIntroStep();
       case 2:
@@ -208,6 +212,7 @@ class OnboardingStepBuilder {
 }
 
 class OnboardingData {
+  bool? isBodybuilder;
   FitnessGoal selectedFitnessGoal = FitnessGoal.maintenance;
   ActivityLevel selectedActivityLevel = ActivityLevel.moderatelyActive;
   List<String> selectedDietaryRestrictions = [];

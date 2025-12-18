@@ -74,6 +74,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     content: OnboardingStepBuilder.buildStepContent(
                       stepIndex: index,
                       data: _data,
+                      onBodybuilderChanged: (isBodybuilder) {
+                        setState(() {
+                          _data.isBodybuilder = isBodybuilder;
+                        });
+                      },
                       onFitnessGoalChanged: (goal) {
                         setState(() {
                           _data.selectedFitnessGoal = goal;
@@ -323,6 +328,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   bool _isNextEnabled() {
+    final isBodybuilderStep = _currentPage == 0;
     final isDietaryStep = _currentPage == 10;
     final isWorkoutStep = _currentPage == 12;
     final isWeeklyWorkoutGoalStep = _currentPage == 13;
@@ -330,6 +336,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isAllergiesStep = _currentPage == 15;
     final isWorkoutNotificationsStep = _currentPage == 18;
     final isRatingStep = _currentPage == 19;
+
+    if (isBodybuilderStep) {
+      return _data.isBodybuilder != null;
+    }
 
     if (!isDietaryStep &&
         !isWorkoutStep &&
