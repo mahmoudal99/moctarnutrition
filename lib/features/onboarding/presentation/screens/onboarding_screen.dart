@@ -583,6 +583,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       case FitnessGoal.weightLoss:
         tdee -= 500; // 500 kcal deficit for 0.5 kg/week loss
         break;
+      case FitnessGoal.weightGain:
+        tdee += 500; // 500 kcal surplus for weight gain
+        break;
       case FitnessGoal.muscleGain:
         tdee += 300; // 300 kcal surplus for moderate gain
         break;

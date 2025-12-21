@@ -99,11 +99,6 @@ class OnboardingStepBuilder {
           onAgeChanged: (age) => data.age = age,
         );
       case 6:
-        return OnboardingDesiredWeightStep(
-          desiredWeight: data.desiredWeight,
-          onDesiredWeightChanged: (weight) => data.desiredWeight = weight,
-        );
-      case 7:
         return OnboardingBMIStep(
           bmi: _calculateBMI(data.height, data.weight),
           bmiCategory: _getBMICategory(_calculateBMI(data.height, data.weight)),
@@ -112,10 +107,17 @@ class OnboardingStepBuilder {
           height: data.height,
           weight: data.weight,
         );
-      case 8:
+      case 7:
         return OnboardingFitnessGoalStep(
           selectedFitnessGoal: data.selectedFitnessGoal,
           onSelect: onFitnessGoalChanged,
+        );
+      case 8:
+        return OnboardingDesiredWeightStep(
+          desiredWeight: data.desiredWeight,
+          currentWeight: data.weight,
+          fitnessGoal: data.selectedFitnessGoal,
+          onDesiredWeightChanged: (weight) => data.desiredWeight = weight,
         );
       case 9:
         return OnboardingActivityLevelStep(

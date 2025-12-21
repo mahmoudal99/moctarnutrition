@@ -124,6 +124,8 @@ class GoalSelectionStep extends StatelessWidget {
     switch (goal) {
       case FitnessGoal.weightLoss:
         return 'Weight Loss';
+      case FitnessGoal.weightGain:
+        return 'Gain Weight';
       case FitnessGoal.muscleGain:
         return 'Muscle Gain';
       case FitnessGoal.maintenance:
@@ -139,6 +141,8 @@ class GoalSelectionStep extends StatelessWidget {
     switch (goal) {
       case FitnessGoal.weightLoss:
         return 'Lose weight and improve body composition';
+      case FitnessGoal.weightGain:
+        return 'Gain weight and increase body mass';
       case FitnessGoal.muscleGain:
         return 'Build muscle mass and strength';
       case FitnessGoal.maintenance:
@@ -154,6 +158,8 @@ class GoalSelectionStep extends StatelessWidget {
     switch (goal) {
       case FitnessGoal.weightLoss:
         return Icons.trending_down;
+      case FitnessGoal.weightGain:
+        return Icons.trending_up;
       case FitnessGoal.muscleGain:
         return Icons.fitness_center;
       case FitnessGoal.maintenance:

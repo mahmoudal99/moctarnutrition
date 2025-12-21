@@ -75,6 +75,8 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
     switch (goal) {
       case FitnessGoal.weightLoss:
         return 'Weight Loss';
+      case FitnessGoal.weightGain:
+        return 'Gain Weight';
       case FitnessGoal.muscleGain:
         return 'Muscle Gain';
       case FitnessGoal.maintenance:

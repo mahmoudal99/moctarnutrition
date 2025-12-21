@@ -37,6 +37,10 @@ class ProteinCalculationService {
         targets = _calculateFatLossTargets(
             weight, leanBodyMass, bodyFatPercentage, isVegan, preferences);
         break;
+      case FitnessGoal.weightGain:
+        targets = _calculateMuscleGrowthTargets(
+            weight, leanBodyMass, bodyFatPercentage, isVegan, preferences);
+        break;
       case FitnessGoal.maintenance:
         targets = _calculateMaintenanceTargets(
             weight, leanBodyMass, bodyFatPercentage, isVegan, preferences);

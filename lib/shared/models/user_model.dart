@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum UserRole { user, trainer, admin }
 
-enum FitnessGoal { weightLoss, muscleGain, maintenance, endurance, strength }
+enum FitnessGoal { weightLoss, weightGain, muscleGain, maintenance, endurance, strength }
 
 enum ActivityLevel {
   sedentary,

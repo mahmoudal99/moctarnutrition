@@ -79,6 +79,11 @@ class CalorieCalculationService {
         targetCalories = tdee - 500;
         break;
 
+      case FitnessGoal.weightGain:
+        // Weight gain: add 500 kcal surplus for general weight gain
+        targetCalories = tdee + 500;
+        break;
+
       case FitnessGoal.muscleGain:
         // Muscle gain: add 300-500 kcal surplus
         // Start with 300 kcal surplus for moderate gain
@@ -214,6 +219,9 @@ class CalorieCalculationService {
       case FitnessGoal.weightLoss:
         proteinPerKg = isVegan ? 2.4 : 2.2; // Higher to preserve muscle mass
         break;
+      case FitnessGoal.weightGain:
+        proteinPerKg = isVegan ? 1.8 : 1.5; // Moderate protein for weight gain
+        break;
       case FitnessGoal.maintenance:
         proteinPerKg = isVegan ? 1.8 : 1.4; // Standard recommendations
         break;
@@ -270,6 +278,8 @@ class CalorieCalculationService {
     switch (goal) {
       case FitnessGoal.weightLoss:
         return 'Fat Loss';
+      case FitnessGoal.weightGain:
+        return 'Weight Gain';
       case FitnessGoal.muscleGain:
         return 'Muscle Growth';
       case FitnessGoal.maintenance:
@@ -316,6 +326,19 @@ class CalorieCalculationService {
         ]);
         if (isVegan) {
           recommendations.add('Ensure adequate protein from plant sources');
+        }
+        break;
+
+      case FitnessGoal.weightGain:
+        recommendations.addAll([
+          'Consume a calorie surplus of 10-20%',
+          'Prioritize nutrient-dense foods',
+          'Include regular strength training to build muscle',
+          'Monitor weight changes weekly',
+          'Adjust calories based on progress',
+        ]);
+        if (isVegan) {
+          recommendations.add('Ensure adequate protein and healthy fats from plant sources');
         }
         break;
 

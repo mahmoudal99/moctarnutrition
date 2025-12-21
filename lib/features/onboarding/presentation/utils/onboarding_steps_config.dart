@@ -54,20 +54,20 @@ class OnboardingStepsConfig {
         highlightedWords: ['Age'],
       ),
       OnboardingStep(
-        title: 'Desired Weight',
-        subtitle: 'What is your target weight?',
-        icon: "target.json",
-        color: AppConstants.proteinColor,
-        showIconColor: false,
-        highlightedWords: ['Desired'],
-      ),
-      OnboardingStep(
         title: 'What is your primary objective?',
         subtitle: 'Choose your fitness goal',
         icon: "target.json",
         color: AppConstants.carbsColor,
         showIconColor: false,
         highlightedWords: ['objective'],
+      ),
+      OnboardingStep(
+        title: 'Desired Weight',
+        subtitle: 'What is your target weight?',
+        icon: "target.json",
+        color: AppConstants.proteinColor,
+        showIconColor: false,
+        highlightedWords: ['Desired'],
       ),
       OnboardingStep(
         title: 'How active are you?',

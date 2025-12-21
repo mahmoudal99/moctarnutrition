@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../../shared/models/user_model.dart';
 
 class OnboardingDesiredWeightStep extends StatefulWidget {
   final double desiredWeight;
+  final double currentWeight;
+  final FitnessGoal fitnessGoal;
   final ValueChanged<double> onDesiredWeightChanged;
 
   const OnboardingDesiredWeightStep({
     super.key,
     required this.desiredWeight,
+    required this.currentWeight,
+    required this.fitnessGoal,
     required this.onDesiredWeightChanged,
   });
 
@@ -35,17 +40,67 @@ class _OnboardingDesiredWeightStepState
   }
 
   void _initializeValues() {
-    // Clamp the initial value to ensure it's within the picker's range
-    _currentWeight = _currentWeight.clamp(36.0, 100.5);
+    // Get min and max weight based on fitness goal
+    final (minWeight, maxWeight) = _getWeightRange();
+    
+    // If desired weight is outside the allowed range, set a sensible default
+    if (_currentWeight < minWeight || _currentWeight > maxWeight) {
+      switch (widget.fitnessGoal) {
+        case FitnessGoal.weightLoss:
+          // Set to 5kg less than current weight, but not below minimum
+          _currentWeight = (widget.currentWeight - 5.0).clamp(minWeight, maxWeight);
+          break;
+        case FitnessGoal.weightGain:
+          // Set to 5kg more than current weight, but not above maximum
+          _currentWeight = (widget.currentWeight + 5.0).clamp(minWeight, maxWeight);
+          break;
+        default:
+          // Clamp to allowed range
+          _currentWeight = _currentWeight.clamp(minWeight, maxWeight);
+      }
+      // Update the desired weight in the parent
+      widget.onDesiredWeightChanged(_currentWeight);
+    } else {
+      // Clamp the initial value to ensure it's within the allowed range
+      _currentWeight = _currentWeight.clamp(minWeight, maxWeight);
+    }
 
     _weightController = ScrollController(
       initialScrollOffset: _getInitialScrollOffset(),
     );
   }
 
+  (double, double) _getWeightRange() {
+    switch (widget.fitnessGoal) {
+      case FitnessGoal.weightLoss:
+        // For weight loss, only allow weights lower than current weight
+        final maxWeight = widget.currentWeight - 0.5;
+        // Ensure we have a valid range (at least 0.5kg difference)
+        if (maxWeight < 36.0) {
+          // If current weight is too low, allow a small range around minimum
+          return (36.0, 36.5);
+        }
+        return (36.0, maxWeight);
+      case FitnessGoal.weightGain:
+        // For weight gain, only allow weights higher than current weight
+        final minWeight = widget.currentWeight + 0.5;
+        // Ensure we have a valid range
+        if (minWeight > 100.5) {
+          // If current weight is too high, allow a small range around maximum
+          return (100.0, 100.5);
+        }
+        return (minWeight, 100.5);
+      default:
+        // For other goals, allow full range
+        return (36.0, 100.5);
+    }
+  }
+
   double _getInitialScrollOffset() {
+    // Get min weight for calculation
+    final (minWeight, _) = _getWeightRange();
     // Calculate the initial scroll offset to center the current weight
-    int initialIndex = ((_currentWeight - 36.0) * 2).round();
+    int initialIndex = ((_currentWeight - minWeight) * 2).round();
     return initialIndex * 60.0; // 60 is the width of each item
   }
 
@@ -56,11 +111,20 @@ class _OnboardingDesiredWeightStepState
   }
 
   void _onWeightChanged(double offset) {
+    // Get weight range based on fitness goal
+    final (minWeight, maxWeight) = _getWeightRange();
+    
     // Calculate which weight is currently centered
     int index = (offset / 60.0).round(); // 60 is the width of each item
-    index = index.clamp(0, 129); // Ensure index is within bounds
+    
+    // Calculate total possible items in the allowed range
+    int totalItems = ((maxWeight - minWeight) * 2).round() + 1;
+    index = index.clamp(0, totalItems - 1); // Ensure index is within bounds
 
-    double newWeight = 36.0 + (index * 0.5);
+    double newWeight = minWeight + (index * 0.5);
+    
+    // Clamp to ensure it's within the allowed range
+    newWeight = newWeight.clamp(minWeight, maxWeight);
 
     if (newWeight != _currentWeight) {
       setState(() {
@@ -114,18 +178,21 @@ class _OnboardingDesiredWeightStepState
                     },
                     child: LayoutBuilder(
                       builder: (context, constraints) {
+                        final (minWeight, maxWeight) = _getWeightRange();
+                        final itemCount = ((maxWeight - minWeight) * 2).round() + 1;
+                        
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
                           controller: _weightController,
                           padding: EdgeInsets.symmetric(
                               horizontal: constraints.maxWidth / 2 - 30),
                           // Half container width minus half item width
-                          itemCount: 130,
-                          // (100.5-36)*2 + 1
+                          itemCount: itemCount,
                           itemBuilder: (context, index) {
-                            double weight = 36.0 + (index * 0.5);
+                            double weight = minWeight + (index * 0.5);
                             bool isSelected = (weight == _currentWeight);
-                            return _buildWeightItem(weight, isSelected);
+                            bool isDisabled = _isWeightDisabled(weight);
+                            return _buildWeightItem(weight, isSelected, isDisabled);
                           },
                         );
                       },
@@ -165,16 +232,29 @@ class _OnboardingDesiredWeightStepState
     );
   }
 
-  Widget _buildWeightItem(double weight, bool isSelected) {
+  bool _isWeightDisabled(double weight) {
+    switch (widget.fitnessGoal) {
+      case FitnessGoal.weightLoss:
+        return weight >= widget.currentWeight;
+      case FitnessGoal.weightGain:
+        return weight <= widget.currentWeight;
+      default:
+        return false;
+    }
+  }
+
+  Widget _buildWeightItem(double weight, bool isSelected, bool isDisabled) {
     return Container(
       width: 60,
       alignment: Alignment.center,
       child: Text(
         '${weight.toStringAsFixed(1)}',
         style: AppTextStyles.bodyLarge.copyWith(
-          color: isSelected
-              ? AppConstants.textPrimary
-              : AppConstants.textSecondary.withOpacity(0.4),
+          color: isDisabled
+              ? AppConstants.textTertiary.withOpacity(0.2)
+              : (isSelected
+                  ? AppConstants.textPrimary
+                  : AppConstants.textSecondary.withOpacity(0.4)),
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),

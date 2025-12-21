@@ -706,6 +706,8 @@ Respond with JSON only. No commentary.
     switch (goal) {
       case FitnessGoal.weightLoss:
         return 'Weight Loss';
+      case FitnessGoal.weightGain:
+        return 'Weight Gain';
       case FitnessGoal.muscleGain:
         return 'Muscle Building';
       case FitnessGoal.maintenance:
