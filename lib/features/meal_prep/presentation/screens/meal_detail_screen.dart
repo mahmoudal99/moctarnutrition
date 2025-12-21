@@ -228,7 +228,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
           _buildPillNutritionItem(
             "bread-stroke-rounded.svg",
             '${meal.nutrition.carbs.toStringAsFixed(1)}g',
-            AppConstants.warningColor,
+            AppConstants.copperwoodColor,
           ),
         ],
       ),
@@ -389,7 +389,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
                                 'Carbs',
                                 meal.nutrition.carbs.toStringAsFixed(1),
                                 'g',
-                                AppConstants.warningColor,
+                                AppConstants.copperwoodColor,
                                 "bread-stroke-rounded.svg"),
                           ),
                           const SizedBox(width: AppConstants.spacingS),
@@ -712,7 +712,7 @@ class _MealDetailScreenState extends State<MealDetailScreen>
   Color _getMealTypeColor(MealType type) {
     switch (type) {
       case MealType.breakfast:
-        return AppConstants.warningColor;
+        return AppConstants.copperwoodColor;
       case MealType.lunch:
         return AppConstants.accentColor;
       case MealType.dinner:

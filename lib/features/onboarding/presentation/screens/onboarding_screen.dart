@@ -37,6 +37,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.initState();
     _steps = OnboardingStepsConfig.getSteps();
     _steps.insert(7, OnboardingStepsConfig.getBMIStep());
+    _updateStepsForBodybuilder();
+  }
+
+  void _updateStepsForBodybuilder() {
+    // Find and remove workout styles step if user is a bodybuilder
+    if (_data.isBodybuilder == true) {
+      // Workout styles step is at index 11 (after BMI insertion at index 7)
+      // Original index 10 becomes 11 after BMI insertion
+      if (_steps.length > 11 && _steps[11].title == 'Preferred workout styles') {
+        _steps.removeAt(11);
+      }
+    } else {
+      // If not a bodybuilder, ensure workout styles step exists
+      // Rebuild steps if needed
+      final hasWorkoutStylesStep = _steps.any((step) => step.title == 'Preferred workout styles');
+      if (!hasWorkoutStylesStep) {
+        // Rebuild steps to include workout styles
+        _steps = OnboardingStepsConfig.getSteps();
+        _steps.insert(7, OnboardingStepsConfig.getBMIStep());
+      }
+    }
   }
 
   @override
@@ -114,6 +135,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               );
                             }
                           }
+                          // Update steps list to skip workout styles if bodybuilder
+                          _updateStepsForBodybuilder();
                         });
                       },
                       onFitnessGoalChanged: (goal) {
@@ -238,7 +261,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
               onNext: () {
                 HapticFeedback.mediumImpact();
-                if (_currentPage == 19) {
+                // Rating step index shifts if workout styles is removed
+                final ratingStepIndex = _data.isBodybuilder == true ? 18 : 19;
+                if (_currentPage == ratingStepIndex) {
                   // Show rating dialog for rating step
                   _showRatingDialog(context);
                 } else {
@@ -282,7 +307,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_currentPage == 10 && _data.selectedDietaryRestrictions.isEmpty) {
       return const NeverScrollableScrollPhysics();
     }
-    if (_currentPage == 12 && _data.selectedWorkoutStyles.isEmpty) {
+    // Workout styles step is skipped for bodybuilders, so only check if not bodybuilder
+    if (_data.isBodybuilder != true && _currentPage == 11 && _data.selectedWorkoutStyles.isEmpty) {
       return const NeverScrollableScrollPhysics();
     }
     return const BouncingScrollPhysics();
@@ -363,12 +389,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _isNextEnabled() {
     final isBodybuilderStep = _currentPage == 0;
     final isDietaryStep = _currentPage == 10;
-    final isWorkoutStep = _currentPage == 12;
-    final isWeeklyWorkoutGoalStep = _currentPage == 13;
-    final isFoodPreferencesStep = _currentPage == 14;
-    final isAllergiesStep = _currentPage == 15;
-    final isWorkoutNotificationsStep = _currentPage == 18;
-    final isRatingStep = _currentPage == 19;
+    // Workout styles step is skipped for bodybuilders, so adjust indices
+    final workoutStylesStepIndex = _data.isBodybuilder == true ? -1 : 11;
+    final isWorkoutStep = _currentPage == workoutStylesStepIndex;
+    // Weekly workout goal step index shifts if workout styles is removed
+    final weeklyWorkoutGoalStepIndex = _data.isBodybuilder == true ? 11 : 12;
+    final isWeeklyWorkoutGoalStep = _currentPage == weeklyWorkoutGoalStepIndex;
+    // Food preferences step index shifts if workout styles is removed
+    final foodPreferencesStepIndex = _data.isBodybuilder == true ? 12 : 13;
+    final isFoodPreferencesStep = _currentPage == foodPreferencesStepIndex;
+    // Allergies step index shifts if workout styles is removed
+    final allergiesStepIndex = _data.isBodybuilder == true ? 13 : 14;
+    final isAllergiesStep = _currentPage == allergiesStepIndex;
+    // Workout notifications step index shifts if workout styles is removed
+    final workoutNotificationsStepIndex = _data.isBodybuilder == true ? 17 : 18;
+    final isWorkoutNotificationsStep = _currentPage == workoutNotificationsStepIndex;
+    // Rating step index shifts if workout styles is removed
+    final ratingStepIndex = _data.isBodybuilder == true ? 18 : 19;
+    final isRatingStep = _currentPage == ratingStepIndex;
 
     if (isBodybuilderStep) {
       return _data.isBodybuilder != null;

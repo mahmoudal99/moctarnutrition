@@ -56,7 +56,7 @@ class CheckinProgressSummaryWidget extends StatelessWidget {
           value: '${summary.currentStreak}',
           subtitle: summary.currentStreak == 1 ? 'week' : 'weeks',
           icon: "fire-stroke-rounded.svg",
-          color: AppConstants.warningColor,
+          color: AppConstants.copperwoodColor,
         ),
         _buildStatCard(
           title: 'Longest Streak',

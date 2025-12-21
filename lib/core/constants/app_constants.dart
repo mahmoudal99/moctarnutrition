@@ -4,18 +4,18 @@ import 'package:logger/logger.dart';
 
 class AppConstants {
   // App Colors
-  static const Color primaryColor = Color(0xFF10B981);
-  static const Color secondaryColor = Color(0xFF34D399);
-  static const Color accentColor = Color(0xFF059669);
+  static const Color primaryColor = Color(0xFF283618);
+  static const Color secondaryColor = Color(0xFF606c38);
+  static const Color accentColor = Color(0xFFfefae0);
   static const Color backgroundColor = Color(0xFFfafafa);
   static const Color surfaceColor = Color(0xFFFFFFFF);
-  static const Color errorColor = Color(0xFFEF4444);
-  static const Color warningColor = Color(0xFFF59E0B);
-  static const Color successColor = Color(0xFF10B981);
+  static const Color errorColor = Color(0xFFbc4749);
+  static const Color copperwoodColor = Color(0xFFbc6c25);
+  static const Color successColor = Color(0xFFa7c957);
 
   // Macronutrient Colors
   static const Color proteinColor = Color(0xFF3B82F6); // Blue
-  static const Color carbsColor = Color(0xFFF59E0B); // Orange
+  static const Color carbsColor = Color(0xFFbc6c25); // Orange
   static const Color fatColor = Color(0xFF8B5A2B); // Brown
 
   // Text Colors

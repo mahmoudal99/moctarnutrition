@@ -30,7 +30,7 @@ class NutritionSummaryCard extends StatelessWidget {
                   'Calories',
                   '${mealDay.totalCalories}',
                   Icons.local_fire_department,
-                  AppConstants.warningColor,
+                  AppConstants.copperwoodColor,
                 ),
               ),
               const SizedBox(width: AppConstants.spacingS),

@@ -266,7 +266,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
         statusText = 'Missed';
         break;
       case CheckinStatus.pending:
-        statusColor = AppConstants.warningColor;
+        statusColor = AppConstants.copperwoodColor;
         statusIcon = Icons.schedule;
         statusText = 'Pending';
         break;
@@ -546,7 +546,7 @@ class _CheckinDetailsScreenState extends State<CheckinDetailsScreen> {
               Text(
                 '${checkin.energyLevel}/10',
                 style: AppTextStyles.heading4.copyWith(
-                  color: AppConstants.warningColor,
+                  color: AppConstants.copperwoodColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),

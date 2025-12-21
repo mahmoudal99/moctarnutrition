@@ -49,7 +49,7 @@ class OnboardingStepsConfig {
         title: 'Your Age',
         subtitle: 'Tell us your age to build workouts that matches your energy.',
         icon: "weight.json",
-        color: AppConstants.warningColor,
+        color: AppConstants.copperwoodColor,
         showIconColor: false,
         highlightedWords: ['Age'],
       ),
@@ -123,7 +123,7 @@ class OnboardingStepsConfig {
         title: 'Batch Cooking Preferences',
         subtitle: 'Your meal preparation habits',
         icon: "diet.json",
-        color: AppConstants.warningColor,
+        color: AppConstants.copperwoodColor,
         highlightedWords: ['Cooking'],
       ),
       OnboardingStep(
@@ -157,7 +157,7 @@ class OnboardingStepsConfig {
       subtitle:
           'Calculated from your height and weight to tailor your experience.',
       icon: "heartbeat.json",
-      color: AppConstants.warningColor,
+      color: AppConstants.copperwoodColor,
       highlightedWords: ['BMI'],
     );
   }

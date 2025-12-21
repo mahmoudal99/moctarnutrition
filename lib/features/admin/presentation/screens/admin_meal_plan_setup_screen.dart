@@ -327,7 +327,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
             const SnackBar(
               content: Text(
                   'Meal plan generated using backup recipes due to high demand. All required meals are included!'),
-              backgroundColor: AppConstants.warningColor,
+              backgroundColor: AppConstants.copperwoodColor,
               duration: Duration(seconds: 4),
             ),
           );
@@ -531,7 +531,7 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                     // Current step shows warning color if invalid, or its own color if valid
                     color = _isCurrentStepValid()
                         ? stepColors[i]
-                        : (AppConstants.warningColor);
+                        : (AppConstants.copperwoodColor);
                   } else {
                     // Future steps show gray
                     color = AppConstants.textTertiary.withOpacity(0.2);
@@ -583,11 +583,11 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                               const EdgeInsets.only(top: AppConstants.spacingM),
                           padding: const EdgeInsets.all(AppConstants.spacingM),
                           decoration: BoxDecoration(
-                            color: AppConstants.warningColor.withOpacity(0.1),
+                            color: AppConstants.copperwoodColor.withOpacity(0.1),
                             borderRadius:
                                 BorderRadius.circular(AppConstants.radiusS),
                             border: Border.all(
-                              color: AppConstants.warningColor.withOpacity(0.3),
+                              color: AppConstants.copperwoodColor.withOpacity(0.3),
                             ),
                           ),
                           child: Row(
@@ -595,14 +595,14 @@ class _AdminMealPlanSetupScreenState extends State<AdminMealPlanSetupScreen> {
                               const Icon(
                                 Icons.info_outline,
                                 size: 16,
-                                color: AppConstants.warningColor,
+                                color: AppConstants.copperwoodColor,
                               ),
                               const SizedBox(width: AppConstants.spacingS),
                               Expanded(
                                 child: Text(
                                   _getValidationMessage(),
                                   style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppConstants.warningColor,
+                                    color: AppConstants.copperwoodColor,
                                   ),
                                 ),
                               ),

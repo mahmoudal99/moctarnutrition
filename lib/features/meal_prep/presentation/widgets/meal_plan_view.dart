@@ -334,13 +334,13 @@ class _MealPlanViewState extends State<MealPlanView>
             const Icon(
               Icons.celebration,
               size: 16,
-              color: AppConstants.warningColor,
+              color: AppConstants.copperwoodColor,
             ),
             const SizedBox(width: 8),
             Text(
               'Cheat Day',
               style: AppTextStyles.caption.copyWith(
-                color: AppConstants.warningColor,
+                color: AppConstants.copperwoodColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -393,7 +393,7 @@ class _MealPlanViewState extends State<MealPlanView>
           _buildPillNutritionItem(
             "bread-stroke-rounded.svg",
             '${totalCarbs.toStringAsFixed(1)}g',
-            AppConstants.warningColor,
+            AppConstants.copperwoodColor,
           ),
         ],
       ),
@@ -656,12 +656,12 @@ class _MealPlanViewState extends State<MealPlanView>
         decoration: BoxDecoration(
           color: allConsumed
               ? AppConstants.successColor.withOpacity(0.1)
-              : AppConstants.warningColor.withOpacity(0.1),
+              : AppConstants.copperwoodColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: allConsumed
                 ? AppConstants.successColor.withOpacity(0.3)
-                : AppConstants.warningColor.withOpacity(0.3),
+                : AppConstants.copperwoodColor.withOpacity(0.3),
             width: 1,
           ),
         ),
@@ -673,7 +673,7 @@ class _MealPlanViewState extends State<MealPlanView>
               size: 12,
               color: allConsumed
                   ? AppConstants.successColor
-                  : AppConstants.warningColor,
+                  : AppConstants.copperwoodColor,
             ),
             const SizedBox(width: 4),
             Text(
@@ -681,7 +681,7 @@ class _MealPlanViewState extends State<MealPlanView>
               style: AppTextStyles.caption.copyWith(
                 color: allConsumed
                     ? AppConstants.successColor
-                    : AppConstants.warningColor,
+                    : AppConstants.copperwoodColor,
                 fontWeight: FontWeight.w600,
                 fontSize: 10,
               ),
@@ -740,7 +740,7 @@ class _MealPlanViewState extends State<MealPlanView>
   Color _getMealTypeColor(MealType mealType) {
     switch (mealType) {
       case MealType.breakfast:
-        return AppConstants.warningColor;
+        return AppConstants.copperwoodColor;
       case MealType.lunch:
         return AppConstants.accentColor;
       case MealType.dinner:
@@ -905,17 +905,17 @@ class _MealPlanViewState extends State<MealPlanView>
         margin: const EdgeInsets.only(left: 8),
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: AppConstants.warningColor.withOpacity(0.1),
+          color: AppConstants.copperwoodColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppConstants.warningColor.withOpacity(0.3),
+            color: AppConstants.copperwoodColor.withOpacity(0.3),
             width: 1,
           ),
         ),
         child: const Icon(
           Icons.celebration,
           size: 16,
-          color: AppConstants.warningColor,
+          color: AppConstants.copperwoodColor,
         ),
       ),
     );

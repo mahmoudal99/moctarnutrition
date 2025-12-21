@@ -4,11 +4,13 @@ import '../../../../core/constants/app_constants.dart';
 class OnboardingCheatDayStep extends StatefulWidget {
   final String? selectedCheatDay; // e.g., "Monday"
   final ValueChanged<String?> onCheatDayChanged;
+  final bool? isBodybuilder;
 
   const OnboardingCheatDayStep({
     super.key,
     required this.selectedCheatDay,
     required this.onCheatDayChanged,
+    this.isBodybuilder,
   });
 
   @override
@@ -16,7 +18,7 @@ class OnboardingCheatDayStep extends StatefulWidget {
 }
 
 class _OnboardingCheatDayStepState extends State<OnboardingCheatDayStep> {
-  static const List<String> _days = [
+  static const List<String> _allDays = [
     'Monday',
     'Tuesday',
     'Wednesday',
@@ -26,12 +28,48 @@ class _OnboardingCheatDayStepState extends State<OnboardingCheatDayStep> {
     'Sunday',
   ];
 
+  static const List<String> _weekendDays = [
+    'Saturday',
+    'Sunday',
+  ];
+
   String? _selectedDay;
+
+  List<String> get _availableDays {
+    // If user is a bodybuilder, only show Saturday and Sunday
+    if (widget.isBodybuilder == true) {
+      return _weekendDays;
+    }
+    return _allDays;
+  }
 
   @override
   void initState() {
     super.initState();
     _selectedDay = widget.selectedCheatDay;
+    // If bodybuilder and selected day is not weekend, clear selection
+    if (widget.isBodybuilder == true && 
+        _selectedDay != null && 
+        !_weekendDays.contains(_selectedDay)) {
+      _selectedDay = null;
+      widget.onCheatDayChanged(null);
+    }
+  }
+
+  @override
+  void didUpdateWidget(OnboardingCheatDayStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If bodybuilder status changed and selected day is not valid, clear selection
+    if (oldWidget.isBodybuilder != widget.isBodybuilder) {
+      if (widget.isBodybuilder == true && 
+          _selectedDay != null && 
+          !_weekendDays.contains(_selectedDay)) {
+        setState(() {
+          _selectedDay = null;
+          widget.onCheatDayChanged(null);
+        });
+      }
+    }
   }
 
   @override
@@ -41,7 +79,7 @@ class _OnboardingCheatDayStepState extends State<OnboardingCheatDayStep> {
       children: [
         _buildNoneOption(),
         const SizedBox(height: AppConstants.spacingS),
-        ..._days.map(_buildDayOption),
+        ..._availableDays.map(_buildDayOption),
       ],
     );
   }

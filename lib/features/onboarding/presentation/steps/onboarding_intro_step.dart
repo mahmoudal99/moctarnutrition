@@ -4,15 +4,15 @@ import '../../../../core/constants/app_constants.dart';
 import 'benefit_card.dart';
 import 'benefit_item.dart';
 
-class OnboardingMoctarIntroStep extends StatefulWidget {
-  const OnboardingMoctarIntroStep({super.key});
+class OnboardingIntroStep extends StatefulWidget {
+  const OnboardingIntroStep({super.key});
 
   @override
-  State<OnboardingMoctarIntroStep> createState() =>
-      _OnboardingMoctarIntroStepState();
+  State<OnboardingIntroStep> createState() =>
+      _OnboardingIntroStepState();
 }
 
-class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
+class _OnboardingIntroStepState extends State<OnboardingIntroStep> {
   final List<bool> _benefitVisible = [false, false, false];
   final List<Timer> _timers = [];
 
@@ -56,11 +56,6 @@ class _OnboardingMoctarIntroStepState extends State<OnboardingMoctarIntroStep> {
                 // Moctar Image
                 _buildMoctarImage(),
                 const SizedBox(height: AppConstants.spacingXL),
-
-                // Introduction Text
-                _buildIntroductionText(),
-                const SizedBox(height: AppConstants.spacingXL),
-
                 // Benefits List
                 _buildBenefitsList(),
               ],

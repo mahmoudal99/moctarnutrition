@@ -193,7 +193,7 @@ class _MealCardState extends State<MealCard> {
   Color _getMealTypeColor(MealType type) {
     switch (type) {
       case MealType.breakfast:
-        return AppConstants.warningColor;
+        return AppConstants.copperwoodColor;
       case MealType.lunch:
         return AppConstants.accentColor;
       case MealType.dinner:

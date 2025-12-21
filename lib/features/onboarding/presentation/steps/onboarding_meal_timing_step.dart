@@ -645,11 +645,11 @@ class _FastingChip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppConstants.warningColor.withOpacity(0.1)
+                ? AppConstants.copperwoodColor.withOpacity(0.1)
                 : AppConstants.surfaceColor,
             border: Border.all(
               color: isSelected
-                  ? AppConstants.warningColor
+                  ? AppConstants.copperwoodColor
                   : AppConstants.textTertiary.withOpacity(0.3),
               width: 1,
             ),
@@ -659,7 +659,7 @@ class _FastingChip extends StatelessWidget {
             label,
             style: AppTextStyles.caption.copyWith(
               color: isSelected
-                  ? AppConstants.warningColor
+                  ? AppConstants.copperwoodColor
                   : AppConstants.textPrimary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),

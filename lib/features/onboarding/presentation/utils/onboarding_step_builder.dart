@@ -1,9 +1,9 @@
+import 'package:champions_gym_app/features/onboarding/presentation/steps/onboarding_intro_step.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../shared/models/user_model.dart';
 import '../steps/onboarding_new_first_step.dart';
 import '../steps/onboarding_welcome_step.dart';
-import '../steps/onboarding_moctar_intro_step.dart';
 import '../steps/onboarding_generic_fitness_intro_step.dart';
 import '../steps/onboarding_gender_step.dart';
 import '../steps/onboarding_height_weight_step.dart';
@@ -24,6 +24,17 @@ import '../steps/onboarding_rating_step.dart';
 import '../steps/onboarding_cheat_day_step.dart';
 
 class OnboardingStepBuilder {
+  /// Maps the actual step index to the content builder case.
+  /// When bodybuilder is true, workout styles step (case 11) is skipped,
+  /// so indices after 10 need to be shifted by 1.
+  static int _mapStepIndexToContentCase(int stepIndex, bool isBodybuilder) {
+    if (isBodybuilder == true && stepIndex > 10) {
+      // Skip workout styles step (case 11), shift by 1
+      return stepIndex + 1;
+    }
+    return stepIndex;
+  }
+
   static Widget buildStepContent({
     required int stepIndex,
     required OnboardingData data,
@@ -48,7 +59,11 @@ class OnboardingStepBuilder {
     required Function(bool) onNotificationsChanged,
     required VoidCallback onComplete,
   }) {
-    switch (stepIndex) {
+    // Map step index to content case (accounts for skipped workout styles step)
+    final contentCase =
+        _mapStepIndexToContentCase(stepIndex, data.isBodybuilder == true);
+
+    switch (contentCase) {
       case 0:
         return OnboardingNewFirstStep(
           isBodybuilder: data.isBodybuilder,
@@ -57,7 +72,7 @@ class OnboardingStepBuilder {
       case 1:
         // Show bodybuilder-specific intro if they selected "Yes", otherwise show generic fitness intro
         if (data.isBodybuilder == true) {
-          return const OnboardingMoctarIntroStep();
+          return const OnboardingIntroStep();
         } else {
           return const OnboardingGenericFitnessIntroStep();
         }
@@ -174,6 +189,7 @@ class OnboardingStepBuilder {
         return OnboardingCheatDayStep(
           selectedCheatDay: data.cheatDay,
           onCheatDayChanged: onCheatDayChanged,
+          isBodybuilder: data.isBodybuilder,
         );
       case 18:
         return OnboardingWorkoutNotificationsStep(

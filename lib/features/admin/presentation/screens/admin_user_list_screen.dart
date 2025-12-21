@@ -318,11 +318,11 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
       onSelected: (selected) {
         setState(() => _sortByNameAZ = selected);
       },
-      selectedColor: AppConstants.warningColor.withOpacity(0.12),
-      checkmarkColor: AppConstants.warningColor,
+      selectedColor: AppConstants.copperwoodColor.withOpacity(0.12),
+      checkmarkColor: AppConstants.copperwoodColor,
       labelStyle: AppTextStyles.bodySmall.copyWith(
         color: _sortByNameAZ 
-            ? AppConstants.warningColor 
+            ? AppConstants.copperwoodColor
             : AppConstants.textSecondary,
         fontWeight: _sortByNameAZ ? FontWeight.w600 : FontWeight.normal,
       ),

@@ -510,7 +510,7 @@ class _ProgressDots extends StatelessWidget {
     // Step 0: Goal Selection (Green - main goal)
     AppConstants.secondaryColor,
     // Step 1: Calories (Light Green - energy/nutrition)
-    AppConstants.warningColor,
+    AppConstants.copperwoodColor,
     // Step 2: Cheat Day (Orange - indulgence)
     Colors.purple,
     // Step 3: Plan Duration (Purple - commitment)

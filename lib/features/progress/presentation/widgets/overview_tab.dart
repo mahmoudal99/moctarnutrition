@@ -162,7 +162,7 @@ class StreakCard extends StatelessWidget {
                   ),
                   const Icon(
                     Icons.local_fire_department,
-                    color: AppConstants.warningColor,
+                    color: AppConstants.copperwoodColor,
                     size: 32,
                   ),
                 ],
@@ -172,7 +172,7 @@ class StreakCard extends StatelessWidget {
               Text(
                 '$currentStreak',
                 style: AppTextStyles.heading1.copyWith(
-                  color: AppConstants.warningColor,
+                  color: AppConstants.copperwoodColor,
                 ),
               ),
               Text(
@@ -256,7 +256,7 @@ class WeekProgressIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isCompleted
-                  ? AppConstants.warningColor
+                  ? AppConstants.copperwoodColor
                   : AppConstants.borderColor,
             ),
             child: Center(

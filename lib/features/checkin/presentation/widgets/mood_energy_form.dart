@@ -164,7 +164,7 @@ class MoodEnergyForm extends StatelessWidget {
           divisions: 9,
           onChanged: (value) => onEnergyLevelChanged(value.toInt()),
           onChangeEnd: (value) => onEnergyLevelChanged(value.toInt()),
-          activeColor: AppConstants.warningColor,
+          activeColor: AppConstants.copperwoodColor,
           thumbIcon: Icons.flash_on,
         ),
         const SizedBox(height: 8),

@@ -417,7 +417,7 @@ class _AllergyCard extends StatelessWidget {
       case AllergySeverity.mild:
         return AppConstants.successColor;
       case AllergySeverity.moderate:
-        return AppConstants.warningColor;
+        return AppConstants.copperwoodColor;
       case AllergySeverity.severe:
         return AppConstants.errorColor;
       case AllergySeverity.anaphylaxis:

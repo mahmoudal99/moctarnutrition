@@ -54,10 +54,6 @@ class _OnboardingGenericFitnessIntroStepState
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Introduction Text
-                _buildIntroductionText(),
-                const SizedBox(height: AppConstants.spacingXL),
-
                 // Benefits List
                 _buildBenefitsList(),
               ],

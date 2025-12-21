@@ -601,7 +601,7 @@ class AdminUserMealPlanScreen extends StatelessWidget {
   Color _getMealTypeColor(MealType mealType) {
     switch (mealType) {
       case MealType.breakfast:
-        return AppConstants.warningColor.withOpacity(0.6);
+        return AppConstants.copperwoodColor.withOpacity(0.6);
       case MealType.lunch:
         return AppConstants.proteinColor.withOpacity(0.6);
       case MealType.dinner:

@@ -136,7 +136,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                         value: user.hasSeenOnboarding ? 'Yes' : 'No',
                         valueColor: user.hasSeenOnboarding
                             ? AppConstants.successColor
-                            : AppConstants.warningColor,
+                            : AppConstants.copperwoodColor,
                       ),
                       if (user.phoneNumber != null &&
                           user.phoneNumber!.isNotEmpty)
@@ -700,7 +700,7 @@ class AdminUserProfileScreen extends StatelessWidget {
       case 'mild':
         return AppConstants.successColor;
       case 'moderate':
-        return AppConstants.warningColor;
+        return AppConstants.copperwoodColor;
       case 'severe':
         return AppConstants.errorColor;
       case 'anaphylaxis':
@@ -948,7 +948,7 @@ class AdminUserProfileScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppConstants.warningColor.withOpacity(0.05),
+                  color: AppConstants.copperwoodColor.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
@@ -962,7 +962,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                     Text(
                       '${calorieTargets['rmr']} kcal',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppConstants.warningColor,
+                        color: AppConstants.copperwoodColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -975,7 +975,7 @@ class AdminUserProfileScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppConstants.warningColor.withOpacity(0.05),
+                  color: AppConstants.copperwoodColor.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
@@ -989,7 +989,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                     Text(
                       '${calorieTargets['tdee']} kcal',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppConstants.warningColor,
+                        color: AppConstants.copperwoodColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1085,7 +1085,7 @@ class AdminUserProfileScreen extends StatelessWidget {
         _buildMacroRow(
           'Carbs',
           macros['carbs'] as Map<String, dynamic>?,
-          AppConstants.warningColor,
+          AppConstants.copperwoodColor,
           Icons.grain,
         ),
         const SizedBox(height: 4),
@@ -1261,7 +1261,7 @@ class AdminUserProfileScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppConstants.warningColor.withOpacity(0.05),
+                  color: AppConstants.copperwoodColor.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
@@ -1275,7 +1275,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                     Text(
                       '${calculatedTargets.rmr} kcal',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppConstants.warningColor,
+                        color: AppConstants.copperwoodColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1288,7 +1288,7 @@ class AdminUserProfileScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppConstants.warningColor.withOpacity(0.05),
+                  color: AppConstants.copperwoodColor.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
@@ -1302,7 +1302,7 @@ class AdminUserProfileScreen extends StatelessWidget {
                     Text(
                       '${calculatedTargets.tdee} kcal',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppConstants.warningColor,
+                        color: AppConstants.copperwoodColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
