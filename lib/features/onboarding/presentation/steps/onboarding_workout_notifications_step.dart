@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../shared/services/notification_service.dart';
 
 class OnboardingWorkoutNotificationsStep extends StatefulWidget {
   final TimeOfDay? selectedTime;
@@ -203,19 +204,89 @@ class _OnboardingWorkoutNotificationsStepState
               ),
             ),
           ),
-          Switch(
-            value: _notificationsEnabled,
-            onChanged: (value) {
-              setState(() {
-                _notificationsEnabled = value;
-              });
-              widget.onNotificationsChanged(value);
-            },
-            activeColor: AppConstants.primaryColor,
-          ),
+          if (_isLoading)
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            )
+          else
+            Switch(
+              value: _notificationsEnabled,
+              onChanged: _handleToggleChange,
+              activeColor: AppConstants.primaryColor,
+            ),
         ],
       ),
     );
+  }
+
+  Future<void> _handleToggleChange(bool value) async {
+    if (value) {
+      // User wants to enable notifications - request permission
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final permissionResult =
+            await NotificationService.requestNotificationPermission();
+
+        if (permissionResult.isGranted) {
+          setState(() {
+            _notificationsEnabled = true;
+            _isLoading = false;
+          });
+          widget.onNotificationsChanged(true);
+          // Optionally show a test notification
+          await NotificationService.showTestNotification();
+        } else {
+          // Permission denied - revert toggle
+          setState(() {
+            _notificationsEnabled = false;
+            _isLoading = false;
+          });
+          widget.onNotificationsChanged(false);
+
+          // Show message to user if permission was denied
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  permissionResult.isPermanentlyDenied
+                      ? 'Notification permission is required. Please enable it in settings.'
+                      : 'Notification permission was denied.',
+                ),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        setState(() {
+          _notificationsEnabled = false;
+          _isLoading = false;
+        });
+        widget.onNotificationsChanged(false);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to request notification permission.'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } else {
+      // User wants to disable notifications
+      setState(() {
+        _notificationsEnabled = false;
+      });
+      widget.onNotificationsChanged(false);
+    }
   }
 
   Widget _buildHelperText() {

@@ -28,51 +28,6 @@ class OnboardingNavigationButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isFinalStep = currentPage == totalSteps - 1;
-    final bool isNotificationStep = currentPage == totalSteps - 2;
-
-    // Show notification-specific buttons for workout notifications step
-    if (isNotificationStep) {
-      return AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.spacingL,
-          vertical: AppConstants.spacingM,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: SizedBox(
-                height: 52,
-                child: CustomButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    onNotificationSkip?.call();
-                  },
-                  text: 'Not Now',
-                  type: ButtonType.outline,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppConstants.spacingM),
-            Expanded(
-              flex: 2,
-              child: SizedBox(
-                height: 52,
-                child: CustomButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    onNotificationEnable?.call();
-                  },
-                  text: 'Enable Notifications',
-                  type: ButtonType.auth,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
 
     // Default navigation buttons (Next only)
     return AnimatedContainer(
