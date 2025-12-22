@@ -42,9 +42,12 @@ class OnboardingStepPage extends StatelessWidget {
           );
         },
         child: Column(
-          key: ValueKey(contentKey ?? stepIndex),
+          key: ValueKey(contentKey ?? 'step_${stepIndex}_${step.title}'),
           children: [
-            OnboardingStepHeader(step: step),
+            OnboardingStepHeader(
+              key: ValueKey('header_${step.title}_${step.subtitle}'),
+              step: step,
+            ),
             const SizedBox(height: AppConstants.spacingM),
             content,
             const SizedBox(height: AppConstants.spacingL),

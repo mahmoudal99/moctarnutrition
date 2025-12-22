@@ -111,7 +111,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onBodybuilderChanged: (isBodybuilder) {
                         setState(() {
                           _data.isBodybuilder = isBodybuilder;
-                          // Update step 1 (index 1) based on selection
+                          // Always update step 1 (index 1) based on selection
                           if (_steps.length > 1) {
                             if (isBodybuilder == true) {
                               // Bodybuilder intro
@@ -124,7 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 highlightedWords: ['Moctar'],
                               );
                             } else {
-                              // Generic fitness intro
+                              // Generic fitness intro (for false or null)
                               _steps[1] = OnboardingStep(
                                 title: 'Welcome to Your Fitness Journey',
                                 subtitle: 'Let\'s build a healthier lifestyle together.',
