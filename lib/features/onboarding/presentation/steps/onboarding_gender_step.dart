@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../../shared/widgets/onboarding_option_button.dart';
 
 class OnboardingGenderStep extends StatefulWidget {
   final String? selectedGender;
@@ -51,17 +52,69 @@ class _OnboardingGenderStepState extends State<OnboardingGenderStep> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildGenderOption('Male', Icons.male, _selectedGender == 'Male',
-                    () {
-                  HapticFeedback.lightImpact();
-                  _handleGenderSelection('Male');
-                }),
+                OnboardingOptionButton(
+                  label: 'Male',
+                  isSelected: _selectedGender == 'Male',
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _handleGenderSelection('Male');
+                  },
+                  leading: Container(
+                    padding: const EdgeInsets.all(AppConstants.spacingS),
+                    decoration: BoxDecoration(
+                      color: _selectedGender == 'Male'
+                          ? AppConstants.primaryColor
+                          : AppConstants.surfaceColor,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                    ),
+                    child: Icon(
+                      Icons.male,
+                      color: _selectedGender == 'Male'
+                          ? AppConstants.surfaceColor
+                          : AppConstants.textSecondary,
+                      size: 20,
+                    ),
+                  ),
+                  trailing: _selectedGender == 'Male'
+                      ? const Icon(
+                          Icons.circle_outlined,
+                          color: AppConstants.primaryColor,
+                          size: 24,
+                        )
+                      : null,
+                ),
                 const SizedBox(height: AppConstants.spacingM),
-                _buildGenderOption(
-                    'Female', Icons.female, _selectedGender == 'Female', () {
-                  HapticFeedback.lightImpact();
-                  _handleGenderSelection('Female');
-                }),
+                OnboardingOptionButton(
+                  label: 'Female',
+                  isSelected: _selectedGender == 'Female',
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _handleGenderSelection('Female');
+                  },
+                  leading: Container(
+                    padding: const EdgeInsets.all(AppConstants.spacingS),
+                    decoration: BoxDecoration(
+                      color: _selectedGender == 'Female'
+                          ? AppConstants.primaryColor
+                          : AppConstants.surfaceColor,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                    ),
+                    child: Icon(
+                      Icons.female,
+                      color: _selectedGender == 'Female'
+                          ? AppConstants.surfaceColor
+                          : AppConstants.textSecondary,
+                      size: 20,
+                    ),
+                  ),
+                  trailing: _selectedGender == 'Female'
+                      ? const Icon(
+                          Icons.circle_outlined,
+                          color: AppConstants.primaryColor,
+                          size: 24,
+                        )
+                      : null,
+                ),
               ],
             ),
           ),
@@ -70,65 +123,4 @@ class _OnboardingGenderStepState extends State<OnboardingGenderStep> {
     );
   }
 
-  Widget _buildGenderOption(
-      String gender, IconData icon, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppConstants.spacingM),
-          decoration: BoxDecoration(
-            color: AppConstants.surfaceColor,
-            borderRadius: BorderRadius.circular(AppConstants.radiusM),
-            border: Border.all(
-              color: isSelected
-                  ? AppConstants.borderColor
-                  : AppConstants.borderColor,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppConstants.spacingS),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppConstants.primaryColor
-                      : AppConstants.surfaceColor,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusS),
-                ),
-                child: Icon(
-                  icon,
-                  color: isSelected
-                      ? AppConstants.surfaceColor
-                      : AppConstants.textSecondary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingM),
-              Expanded(
-                child: Text(
-                  gender,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : AppConstants.textPrimary,
-                  ),
-                ),
-              ),
-              if (isSelected)
-                const Icon(
-                  Icons.circle_outlined,
-                  color: AppConstants.primaryColor,
-                  size: 24,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

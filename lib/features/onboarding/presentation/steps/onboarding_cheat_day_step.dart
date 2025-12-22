@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../../shared/widgets/onboarding_option_button.dart';
 
 class OnboardingCheatDayStep extends StatefulWidget {
   final String? selectedCheatDay; // e.g., "Monday"
@@ -78,7 +79,7 @@ class _OnboardingCheatDayStepState extends State<OnboardingCheatDayStep> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildNoneOption(),
-        const SizedBox(height: AppConstants.spacingS),
+        const SizedBox(height: AppConstants.spacingM),
         ..._availableDays.map(_buildDayOption),
       ],
     );
@@ -98,16 +99,13 @@ class _OnboardingCheatDayStepState extends State<OnboardingCheatDayStep> {
 
   Widget _buildDayOption(String day) {
     final bool isSelected = _selectedDay == day;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppConstants.spacingXS),
-      child: _buildOptionTile(
-        title: day,
-        isSelected: isSelected,
-        onTap: () {
-          setState(() => _selectedDay = isSelected ? null : day);
-          widget.onCheatDayChanged(isSelected ? null : day);
-        },
-      ),
+    return _buildOptionTile(
+      title: day,
+      isSelected: isSelected,
+      onTap: () {
+        setState(() => _selectedDay = isSelected ? null : day);
+        widget.onCheatDayChanged(isSelected ? null : day);
+      },
     );
   }
 
@@ -116,68 +114,41 @@ class _OnboardingCheatDayStepState extends State<OnboardingCheatDayStep> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppConstants.spacingXS),
+      child: OnboardingOptionButton(
+        label: title,
+        isSelected: isSelected,
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        child: Container(
-          padding: const EdgeInsets.all(AppConstants.spacingM),
+        trailing: Container(
+          width: 20,
+          height: 20,
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppConstants.primaryColor.withOpacity(0.08)
-                : AppConstants.surfaceColor,
+            shape: BoxShape.circle,
             border: Border.all(
               color: isSelected
-                  ? AppConstants.primaryColor.withOpacity(0.3)
-                  : AppConstants.borderColor,
-              width: isSelected ? 1.5 : 1,
+                  ? AppConstants.primaryColor
+                  : AppConstants.textTertiary,
+              width: 2,
             ),
-            borderRadius: BorderRadius.circular(AppConstants.radiusM),
+            color: isSelected
+                ? AppConstants.primaryColor
+                : Colors.transparent,
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : AppConstants.textPrimary,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                ),
-              ),
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : AppConstants.textTertiary,
-                    width: 2,
-                  ),
-                  color: isSelected
-                      ? AppConstants.primaryColor
-                      : Colors.transparent,
-                ),
-                child: isSelected
-                    ? const Icon(
-                        Icons.check,
-                        size: 14,
-                        color: AppConstants.surfaceColor,
-                      )
-                    : null,
-              ),
-            ],
-          ),
+          child: isSelected
+              ? const Icon(
+                  Icons.check,
+                  size: 14,
+                  color: AppConstants.surfaceColor,
+                )
+              : null,
         ),
       ),
     );
   }
 }
+
+
+
 
 

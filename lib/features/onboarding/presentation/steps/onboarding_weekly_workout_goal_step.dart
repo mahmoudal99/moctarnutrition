@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../../shared/widgets/onboarding_option_button.dart';
 
 class OnboardingWeeklyWorkoutGoalStep extends StatefulWidget {
   final int? selectedDaysPerWeek;
@@ -146,73 +147,40 @@ class _OnboardingWeeklyWorkoutGoalStepState
   }
 
   Widget _buildDayOption(int days, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingXS),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            setState(() {
-              _selectedDaysPerWeek = days;
-            });
-            widget.onDaysPerWeekChanged(days);
-          },
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
-          child: Container(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
-            decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppConstants.spacingXS),
+      child: OnboardingOptionButton(
+        label: _getDayOptionText(days),
+        isSelected: isSelected,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          setState(() {
+            _selectedDaysPerWeek = days;
+          });
+          widget.onDaysPerWeekChanged(days);
+        },
+        trailing: Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
               color: isSelected
-                  ? AppConstants.primaryColor.withOpacity(0.08)
-                  : AppConstants.surfaceColor,
-              border: Border.all(
-                color: isSelected
-                    ? AppConstants.primaryColor.withOpacity(0.3)
-                    : AppConstants.borderColor,
-                width: isSelected ? 1.5 : 1,
-              ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                  ? AppConstants.primaryColor
+                  : AppConstants.textTertiary,
+              width: 2,
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _getDayOptionText(days),
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: isSelected
-                          ? AppConstants.primaryColor
-                          : AppConstants.textPrimary,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected
-                          ? AppConstants.primaryColor
-                          : AppConstants.textTertiary,
-                      width: 2,
-                    ),
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : Colors.transparent,
-                  ),
-                  child: isSelected
-                      ? const Icon(
-                          Icons.check,
-                          size: 14,
-                          color: AppConstants.surfaceColor,
-                        )
-                      : null,
-                ),
-              ],
-            ),
+            color: isSelected
+                ? AppConstants.primaryColor
+                : Colors.transparent,
           ),
+          child: isSelected
+              ? const Icon(
+                  Icons.check,
+                  size: 14,
+                  color: AppConstants.surfaceColor,
+                )
+              : null,
         ),
       ),
     );
@@ -229,77 +197,44 @@ class _OnboardingWeeklyWorkoutGoalStepState
   }
 
   Widget _buildSpecificDayOption(int dayIndex, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingXS),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            setState(() {
-              if (isSelected) {
-                _selectedSpecificDays.remove(dayIndex);
-              } else {
-                _selectedSpecificDays.add(dayIndex);
-              }
-            });
-            widget.onSpecificDaysChanged(_selectedSpecificDays);
-          },
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
-          child: Container(
-            padding: const EdgeInsets.all(AppConstants.spacingM),
-            decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppConstants.spacingXS),
+      child: OnboardingOptionButton(
+        label: _dayNames[dayIndex - 1],
+        isSelected: isSelected,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          setState(() {
+            if (isSelected) {
+              _selectedSpecificDays.remove(dayIndex);
+            } else {
+              _selectedSpecificDays.add(dayIndex);
+            }
+          });
+          widget.onSpecificDaysChanged(_selectedSpecificDays);
+        },
+        trailing: Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
               color: isSelected
-                  ? AppConstants.primaryColor.withOpacity(0.08)
-                  : AppConstants.surfaceColor,
-              border: Border.all(
-                color: isSelected
-                    ? AppConstants.primaryColor.withOpacity(0.3)
-                    : AppConstants.borderColor,
-                width: isSelected ? 1.5 : 1,
-              ),
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
+                  ? AppConstants.primaryColor
+                  : AppConstants.textTertiary,
+              width: 2,
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _dayNames[dayIndex - 1],
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: isSelected
-                          ? AppConstants.primaryColor
-                          : AppConstants.textPrimary,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected
-                          ? AppConstants.primaryColor
-                          : AppConstants.textTertiary,
-                      width: 2,
-                    ),
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : Colors.transparent,
-                  ),
-                  child: isSelected
-                      ? const Icon(
-                          Icons.check,
-                          size: 14,
-                          color: AppConstants.surfaceColor,
-                        )
-                      : null,
-                ),
-              ],
-            ),
+            color: isSelected
+                ? AppConstants.primaryColor
+                : Colors.transparent,
           ),
+          child: isSelected
+              ? const Icon(
+                  Icons.check,
+                  size: 14,
+                  color: AppConstants.surfaceColor,
+                )
+              : null,
         ),
       ),
     );

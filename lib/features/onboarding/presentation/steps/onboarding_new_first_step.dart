@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../../shared/widgets/onboarding_option_button.dart';
 
 class OnboardingNewFirstStep extends StatefulWidget {
   final bool? isBodybuilder;
@@ -68,15 +69,25 @@ class _OnboardingNewFirstStepState extends State<OnboardingNewFirstStep> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildOption('Yes', _selectedValue == true, _yesButtonVisible, () {
-                  HapticFeedback.lightImpact();
-                  _handleSelection(true);
-                }),
+                OnboardingOptionButton(
+                  label: 'Yes',
+                  isSelected: _selectedValue == true,
+                  isVisible: _yesButtonVisible,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _handleSelection(true);
+                  },
+                ),
                 const SizedBox(height: AppConstants.spacingM),
-                _buildOption('No', _selectedValue == false, _noButtonVisible, () {
-                  HapticFeedback.lightImpact();
-                  _handleSelection(false);
-                }),
+                OnboardingOptionButton(
+                  label: 'No',
+                  isSelected: _selectedValue == false,
+                  isVisible: _noButtonVisible,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _handleSelection(false);
+                  },
+                ),
               ],
             ),
           ),
@@ -85,45 +96,4 @@ class _OnboardingNewFirstStepState extends State<OnboardingNewFirstStep> {
     );
   }
 
-  Widget _buildOption(String label, bool isSelected, bool isVisible, VoidCallback onTap) {
-    return AnimatedOpacity(
-      opacity: isVisible ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
-      child: GestureDetector(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppConstants.spacingM),
-            decoration: BoxDecoration(
-              color: AppConstants.surfaceColor,
-              borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              border: Border.all(
-                color: isSelected
-                    ? AppConstants.primaryColor
-                    : AppConstants.borderColor,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected
-                        ? AppConstants.primaryColor
-                        : AppConstants.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

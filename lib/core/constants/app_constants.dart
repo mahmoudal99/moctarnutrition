@@ -9,6 +9,7 @@ class AppConstants {
   static const Color accentColor = Color(0xFFfefae0);
   static const Color backgroundColor = Color(0xFFfafafa);
   static const Color surfaceColor = Color(0xFFFFFFFF);
+  static const Color containerColor = Color(0xfff9f7f6);
   static const Color errorColor = Color(0xFFbc4749);
   static const Color copperwoodColor = Color(0xFFbc6c25);
   static const Color successColor = Color(0xFFa7c957);
@@ -24,7 +25,7 @@ class AppConstants {
   static const Color textTertiary = Color(0xFF9CA3AF);
 
   // Border Colors
-  static const Color borderColor = Color(0xFFE5E7EB);
+  static const Color borderColor = Color(0xFFebe9e6);
   static const Color buttonGrey = Color(0xffE0E0E0);
 
   // Gradient Colors
