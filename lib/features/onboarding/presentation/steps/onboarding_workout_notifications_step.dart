@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class OnboardingWorkoutNotificationsStep extends StatefulWidget {
@@ -29,166 +30,214 @@ class _OnboardingWorkoutNotificationsStepState
   @override
   void initState() {
     super.initState();
-    _selectedTime = widget.selectedTime ?? const TimeOfDay(hour: 9, minute: 0);
+    _selectedTime = widget.selectedTime ?? const TimeOfDay(hour: 18, minute: 0);
     _notificationsEnabled = widget.notificationsEnabled;
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final availableHeight =
-        screenHeight * 0.5; // Use 50% of screen for centering
-
-    return SizedBox(
-      height: availableHeight,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Notification preview card
-          _buildNotificationPreview(),
-          const SizedBox(height: AppConstants.spacingL),
-
-          // Time selection
-          _buildTimeSelection(),
+          // Main Heading
+          _buildMainHeading(),
           const SizedBox(height: AppConstants.spacingM),
 
-          // Hint text
-          Text(
-            'You can easily change this later in the app',
-            style: AppTextStyles.caption.copyWith(
-              color: AppConstants.textTertiary,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          // Supporting Text
+          _buildSupportingText(),
+          const SizedBox(height: AppConstants.spacingM),
+
+          // Notification Preview Card
+          _buildNotificationPreview(),
+          const SizedBox(height: AppConstants.spacingXL),
+
+          // Notification Toggle
+          _buildNotificationToggle(),
+          const SizedBox(height: AppConstants.spacingL),
+
+          // Helper Text with Arrow
+          _buildHelperText(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMainHeading() {
+    return Text(
+      'Build a habit easily.',
+      textAlign: TextAlign.center,
+      style: GoogleFonts.merriweather(
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+        color: AppConstants.textPrimary,
+        height: 1.2,
+      ),
+    );
+  }
+
+  Widget _buildSupportingText() {
+    return Text(
+      'Turn on notifications to never miss a workout!',
+      textAlign: TextAlign.center,
+      style: AppTextStyles.bodySmall.copyWith(
+        color: AppConstants.textSecondary,
       ),
     );
   }
 
   Widget _buildNotificationPreview() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingS),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        color: Colors.grey[200]!,
+        borderRadius: BorderRadius.circular(AppConstants.radiusL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Example:',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppConstants.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
+          // TIME SENSITIVE label and timestamp row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'TIME SENSITIVE',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textTertiary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Text(
+                _selectedTime.format(context),
+                style: AppTextStyles.caption.copyWith(
+                  fontSize: 10,
+                  color: AppConstants.textTertiary,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppConstants.spacingS),
-          _buildNotificationCard(),
+          // Notification content with icon
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Icon - green square with white feather/dumbbell
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                ),
+                child: const Icon(
+                  Icons.fitness_center,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacingM),
+              // Notification text content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Your Daily Workout Awaits',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        // Small decorative icon
+                        const Icon(
+                          Icons.star_outline,
+                          size: 16,
+                          color: Colors.amber,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacingXS),
+                    Text(
+                      'Consistency is the key to achieving your fitness goals.',
+                      style: AppTextStyles.caption.copyWith(
+                        color: Colors.black87,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNotificationCard() {
+  Widget _buildNotificationToggle() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: const EdgeInsets.all(AppConstants.spacingS),
       decoration: BoxDecoration(
-        color: Colors.grey[200]!,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        color: AppConstants.surfaceColor,
+        borderRadius: BorderRadius.circular(AppConstants.radiusL),
         border: Border.all(
-          color: Colors.transparent,
+          color: AppConstants.borderColor,
           width: 1,
         ),
       ),
       child: Row(
         children: [
-          // Notification content
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  children: [
-                    Text(
-                      'TODAY\'S WORKOUT IS READY',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Push Day: Barbell Bench Press, Dumbbell Shoulder Press, Lateral Raise, and 3 more.',
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
+            child: Text(
+              'Turn on notifications',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
+          ),
+          Switch(
+            value: _notificationsEnabled,
+            onChanged: (value) {
+              setState(() {
+                _notificationsEnabled = value;
+              });
+              widget.onNotificationsChanged(value);
+            },
+            activeColor: AppConstants.primaryColor,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTimeSelection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHelperText() {
+    return Stack(
+      clipBehavior: Clip.none,
       children: [
-        Text(
-          'Choose a time to receive your preview:',
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingS),
-        Row(
-          children: [
-            Text(
-              'Time',
-              style: AppTextStyles.bodyMedium.copyWith(
+        // Helper text
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: AppConstants.spacingM),
+            child: Text(
+              "We'll remind you\naround the time you\nusually do workouts",
+              textAlign: TextAlign.right,
+              style: GoogleFonts.caveat(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
                 color: AppConstants.textSecondary,
+                height: 1.3,
               ),
             ),
-            const Spacer(),
-            GestureDetector(
-              onTap: _selectTime,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.spacingM,
-                  vertical: AppConstants.spacingS,
-                ),
-                decoration: BoxDecoration(
-                  color: AppConstants.surfaceColor,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusM),
-                  border: Border.all(
-                    color: AppConstants.borderColor,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _selectedTime.format(context),
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: AppConstants.spacingS),
-                    const Icon(
-                      Icons.access_time,
-                      size: 16,
-                      color: AppConstants.textSecondary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ],
     );
@@ -225,4 +274,39 @@ class _OnboardingWorkoutNotificationsStepState
       widget.onTimeChanged(picked);
     }
   }
+}
+
+// Custom painter for curved arrow
+class CurvedArrowPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppConstants.textSecondary.withOpacity(0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final path = Path();
+    // Draw curved line from bottom-right to top-left
+    path.moveTo(size.width * 0.8, size.height * 0.9);
+    path.quadraticBezierTo(
+      size.width * 0.4,
+      size.height * 0.5,
+      size.width * 0.1,
+      size.height * 0.1,
+    );
+
+    canvas.drawPath(path, paint);
+
+    // Draw arrowhead
+    final arrowPath = Path();
+    arrowPath.moveTo(size.width * 0.1, size.height * 0.1);
+    arrowPath.lineTo(size.width * 0.15, size.height * 0.15);
+    arrowPath.lineTo(size.width * 0.05, size.height * 0.15);
+    arrowPath.close();
+
+    canvas.drawPath(arrowPath, paint..style = PaintingStyle.fill);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

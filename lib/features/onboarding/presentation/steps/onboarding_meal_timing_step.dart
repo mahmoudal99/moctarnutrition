@@ -152,19 +152,6 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Meal Count & Timing',
-            style: AppTextStyles.heading4,
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-          Text(
-            'Tell us about your eating schedule and preferences',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppConstants.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacingL),
-
           // Meal Frequency Section
           _buildMealFrequencySection(),
           const SizedBox(height: AppConstants.spacingL),
@@ -196,6 +183,26 @@ class _OnboardingMealTimingStepState extends State<OnboardingMealTimingStep> {
           style: AppTextStyles.bodyMedium.copyWith(
             fontWeight: FontWeight.w600,
           ),
+        ),
+        const SizedBox(height: AppConstants.spacingS),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 16,
+              color: AppConstants.textSecondary,
+            ),
+            const SizedBox(width: AppConstants.spacingS),
+            Expanded(
+              child: Text(
+                'Note: This count does not include breakfast.',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppConstants.textSecondary,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: AppConstants.spacingM),
         Wrap(

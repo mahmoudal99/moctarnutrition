@@ -36,6 +36,10 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
     'Cardio',
     'HIIT',
     'Running',
+    'Boxing',
+    'Swimming',
+    'Bodyweight',
+    'Walking',
   ];
 
   @override
@@ -517,6 +521,14 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
         return 'High-intensity interval training';
       case 'Running':
         return 'Endurance and cardiovascular';
+      case 'Boxing':
+        return 'Full-body conditioning and agility';
+      case 'Swimming':
+        return 'Low-impact full-body workout';
+      case 'Bodyweight':
+        return 'Strength training using your own body';
+      case 'Walking':
+        return 'Low-intensity steady-state cardio';
       default:
         return 'Custom workout style';
     }
@@ -534,10 +546,16 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen> {
         return Icons.timer;
       case 'Running':
         return Icons.directions_run;
-      case 'CrossFit':
-        return Icons.sports_martial_arts;
+      case 'Boxing':
+        return Icons.sports_mma;
       case 'Swimming':
         return Icons.pool;
+      case 'Bodyweight':
+        return Icons.accessibility_new;
+      case 'Walking':
+        return Icons.directions_walk;
+      case 'CrossFit':
+        return Icons.sports_martial_arts;
       default:
         return Icons.fitness_center;
     }

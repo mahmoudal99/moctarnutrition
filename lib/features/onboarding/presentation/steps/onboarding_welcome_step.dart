@@ -29,9 +29,9 @@ class OnboardingWelcomeStep extends StatelessWidget {
                 Row(
                   children: [
                     // Avatar with light green background
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 20,
-                      backgroundColor: const Color(0xFFE8F5E9), // Light green
+                      backgroundColor: Color(0xFFE8F5E9), // Light green
                       child: Icon(
                         Icons.person,
                         color: AppConstants.primaryColor,
@@ -52,7 +52,7 @@ class OnboardingWelcomeStep extends StatelessWidget {
                     Row(
                       children: List.generate(
                         5,
-                        (index) => Icon(
+                        (index) => const Icon(
                           Icons.star,
                           color: Colors.black87,
                           size: 16,

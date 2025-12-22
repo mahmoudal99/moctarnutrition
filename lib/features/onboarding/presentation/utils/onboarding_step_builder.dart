@@ -147,6 +147,10 @@ class OnboardingStepBuilder {
             'Cardio',
             'HIIT',
             'Running',
+            'Boxing',
+            'Swimming',
+            'Bodyweight',
+            'Walking',
           ],
           onSelect: onWorkoutStyleChanged,
         );

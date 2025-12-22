@@ -47,7 +47,8 @@ class OnboardingStepsConfig {
       ),
       OnboardingStep(
         title: 'Your Age',
-        subtitle: 'Tell us your age to build workouts that matches your energy.',
+        subtitle:
+            'Tell us your age to build workouts that matches your energy.',
         icon: "weight.json",
         color: AppConstants.copperwoodColor,
         showIconColor: false,
@@ -115,7 +116,7 @@ class OnboardingStepsConfig {
         title: 'Meal Count & Timing',
         subtitle: 'Your eating schedule',
         icon: "recipes.json",
-        color: AppConstants.accentColor,
+        color: AppConstants.secondaryColor,
         showIconColor: false,
         highlightedWords: ['Timing'],
       ),
