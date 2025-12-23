@@ -13,7 +13,7 @@ enum ActivityLevel {
   extremelyActive
 }
 
-enum TrainingProgramStatus { none, winter, summer, bodybuilding }
+enum TrainingProgramStatus { none, winter, summer, bodybuilding, essential }
 
 class UserModel {
   final String id;
@@ -220,6 +220,9 @@ class UserPreferences {
   // Calorie Targets
   final Map<String, dynamic>? calorieTargets;
 
+  // Is Bodybuilder (from onboarding)
+  final bool isBodybuilder;
+
   UserPreferences({
     required this.fitnessGoal,
     required this.activityLevel,
@@ -247,6 +250,7 @@ class UserPreferences {
     this.cheatDay,
     this.proteinTargets,
     this.calorieTargets,
+    this.isBodybuilder = true,
   });
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
@@ -291,6 +295,7 @@ class UserPreferences {
       cheatDay: json['cheatDay'] as String?,
       proteinTargets: json['proteinTargets'] as Map<String, dynamic>?,
       calorieTargets: json['calorieTargets'] as Map<String, dynamic>?,
+      isBodybuilder: json['isBodybuilder'] as bool? ?? true,
     );
   }
 
@@ -322,6 +327,7 @@ class UserPreferences {
       'cheatDay': cheatDay,
       'proteinTargets': proteinTargets,
       'calorieTargets': calorieTargets,
+      'isBodybuilder': isBodybuilder,
     };
   }
 
@@ -352,6 +358,7 @@ class UserPreferences {
     String? cheatDay,
     Map<String, dynamic>? proteinTargets,
     Map<String, dynamic>? calorieTargets,
+    bool? isBodybuilder,
   }) {
     return UserPreferences(
       fitnessGoal: fitnessGoal ?? this.fitnessGoal,
@@ -385,6 +392,7 @@ class UserPreferences {
       cheatDay: cheatDay ?? this.cheatDay,
       proteinTargets: proteinTargets ?? this.proteinTargets,
       calorieTargets: calorieTargets ?? this.calorieTargets,
+      isBodybuilder: isBodybuilder ?? this.isBodybuilder,
     );
   }
 
@@ -413,6 +421,7 @@ class UserPreferences {
       cheatDay: null,
       proteinTargets: null,
       calorieTargets: null,
+      isBodybuilder: true,
     );
   }
 }

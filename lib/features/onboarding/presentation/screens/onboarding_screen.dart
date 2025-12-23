@@ -521,6 +521,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       mealTimingPreferences: mealTimingJson,
       batchCookingPreferences: batchCookingJson,
       cheatDay: _data.cheatDay,
+      isBodybuilder: _data.isBodybuilder ?? true,
     );
 
     final user = UserModel(

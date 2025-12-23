@@ -262,12 +262,24 @@ class _OnboardingRatingStepState extends State<OnboardingRatingStep> {
 
                             const SizedBox(height: AppConstants.spacingM),
 
-                            // Testimonial text
-                            Text(
-                              testimonial.message,
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppConstants.textSecondary,
-                              ),
+                            // Testimonial text with quotes
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.format_quote,
+                                  color: AppConstants.textTertiary.withOpacity(0.3),
+                                  size: 24,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    '"${testimonial.message}"',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: AppConstants.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

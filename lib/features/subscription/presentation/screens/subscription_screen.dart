@@ -200,7 +200,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                   children: [
                     TextSpan(
                       text: 'Choose Your ',
-                      style: AppTextStyles.heading4.copyWith(color: Colors.white),
+                      style:
+                          AppTextStyles.heading4.copyWith(color: Colors.white),
                     ),
                     TextSpan(
                       text: 'Plan',
@@ -281,7 +282,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: tier.features.map((feature) {
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: AppConstants.spacingXS),
+                      padding:
+                          const EdgeInsets.only(bottom: AppConstants.spacingXS),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -322,7 +324,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                         horizontal: AppConstants.spacingL,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.radiusL),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusL),
                       ),
                       elevation: 0,
                     ),
@@ -393,7 +396,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         return 'assets/images/moc_two.jpg';
       case TrainingProgram.bodybuilding:
         return 'assets/images/moc_three.jpg';
-      default:
+      case TrainingProgram.essential:
         return 'assets/images/moc_one.jpg';
     }
   }
@@ -419,7 +422,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         return 'assets/images/summer_plan.png';
       case TrainingProgram.bodybuilding:
         return 'assets/images/transform.png';
-      default:
+      case TrainingProgram.essential:
         return 'assets/images/winter.png';
     }
   }
@@ -449,32 +452,35 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
 
     // Check if Stripe is configured
     if (!ConfigService.isStripeEnabled) {
-      _showErrorDialog('Payment system not configured. Please contact support.');
+      _showErrorDialog(
+          'Payment system not configured. Please contact support.');
       return;
     }
 
     // Get current user
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     // Debug: Show current auth state
 
     // Check if user data is still loading
     if (authProvider.isLoading) {
-      _showErrorDialog('Loading user data... Please wait a moment and try again.');
+      _showErrorDialog(
+          'Loading user data... Please wait a moment and try again.');
       return;
     }
-    
+
     if (authProvider.userModel == null) {
       // Try to refresh user data automatically
       await authProvider.refreshUser();
-      
+
       // Check again after refresh
       if (authProvider.userModel == null) {
-        _showErrorDialog('User data not found. Please sign out and sign in again.');
+        _showErrorDialog(
+            'User data not found. Please sign out and sign in again.');
         return;
       }
     }
-    
+
     final user = authProvider.userModel!;
 
     // Show loading dialog
@@ -485,12 +491,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
       final priceId = _getPriceIdForProgram(program);
       if (priceId == null) {
         Navigator.of(context).pop(); // Close loading dialog
-        _showErrorDialog('Training program not available. Please contact support.');
+        _showErrorDialog(
+            'Training program not available. Please contact support.');
         return;
       }
 
       // Create checkout session
-      final checkoutResult = await StripeSubscriptionService.createCheckoutSession(
+      final checkoutResult =
+          await StripeSubscriptionService.createCheckoutSession(
         priceId: priceId,
         userId: user.id,
         successUrl: 'moctarnutrition://subscription-success',
@@ -510,43 +518,47 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         if (paymentResult.isSuccess) {
           // Wait longer for webhook to process the payment
           await Future.delayed(const Duration(seconds: 3));
-          
+
           // Try to refresh user data multiple times with retry logic
           bool statusUpdated = false;
           int retryCount = 0;
           const maxRetries = 5;
-          
-          while (!statusUpdated && retryCount < maxRetries) {
 
+          while (!statusUpdated && retryCount < maxRetries) {
             // Force refresh user data to get updated training program status
             await authProvider.refreshUser();
-            
+
             // Wait a moment for the refresh to complete
             await Future.delayed(const Duration(milliseconds: 1000));
-            
+
             // Check if training program status was updated
             final updatedUser = authProvider.userModel;
 
-            if (updatedUser != null && updatedUser.trainingProgramStatus != TrainingProgramStatus.none) {
+            if (updatedUser != null &&
+                updatedUser.trainingProgramStatus !=
+                    TrainingProgramStatus.none) {
               statusUpdated = true;
               _showSuccessDialog('Training program activated successfully!');
               break;
             }
-            
+
             retryCount++;
             if (retryCount < maxRetries) {
               await Future.delayed(const Duration(seconds: 2));
             }
           }
-          
+
           if (!statusUpdated) {
-            _showErrorDialog('Payment successful but training program status not updated. Please refresh the app or contact support.');
+            _showErrorDialog(
+                'Payment successful but training program status not updated. Please refresh the app or contact support.');
           }
         } else {
-          _showErrorDialog(paymentResult.errorMessage ?? 'Payment failed. Please try again.');
+          _showErrorDialog(paymentResult.errorMessage ??
+              'Payment failed. Please try again.');
         }
       } else {
-        _showErrorDialog(checkoutResult.errorMessage ?? 'Failed to create checkout session. Please try again.');
+        _showErrorDialog(checkoutResult.errorMessage ??
+            'Failed to create checkout session. Please try again.');
       }
     } catch (e) {
       Navigator.of(context).pop(); // Close loading dialog
@@ -563,6 +575,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         return 'price_1SGzfcBa6NGVc5lJwmTNs2xk'; // Summer Plan - $600 one-time
       case TrainingProgram.bodybuilding:
         return 'price_1SHG5NBa6NGVc5lJdOEVEhZv'; // Body Building - $1000 one-time (replace with actual price ID)
+      case TrainingProgram.essential:
+        return 'price_1ShW3jBa6NGVc5lJ3Tgxi0tD'; // Essential - €30/month subscription
     }
   }
 

@@ -459,6 +459,8 @@ class _SubscriptionSection extends StatelessWidget {
         return 'Summer Plan';
       case TrainingProgramStatus.bodybuilding:
         return 'Body Building';
+      case TrainingProgramStatus.essential:
+        return 'Essential';
       case TrainingProgramStatus.none:
       default:
         return 'No Program';
@@ -473,6 +475,8 @@ class _SubscriptionSection extends StatelessWidget {
         return AppConstants.secondaryColor;
       case TrainingProgramStatus.bodybuilding:
         return AppConstants.accentColor;
+      case TrainingProgramStatus.essential:
+        return const Color(0xFF4ECDC4);
       case TrainingProgramStatus.none:
       default:
         return AppConstants.textTertiary;
@@ -487,6 +491,8 @@ class _SubscriptionSection extends StatelessWidget {
         return Icons.star;
       case TrainingProgramStatus.bodybuilding:
         return Icons.diamond;
+      case TrainingProgramStatus.essential:
+        return Icons.spa;
       case TrainingProgramStatus.none:
       default:
         return Icons.cancel;

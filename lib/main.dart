@@ -17,6 +17,7 @@ import 'features/onboarding/presentation/screens/welcome_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/onboarding/presentation/screens/protein_calculation_screen.dart';
 import 'features/subscription/presentation/screens/subscription_screen.dart';
+import 'features/subscription/presentation/screens/essential_subscription_screen.dart';
 import 'features/meal_prep/presentation/screens/meal_prep_screen.dart';
 import 'features/profile/presentation/screens/settings_screen.dart';
 import 'features/checkin/presentation/screens/checkin_screen.dart';
@@ -99,13 +100,25 @@ GoRouter createRouter(AuthProvider authProvider) {
             return const SizedBox.shrink();
           }
 
-          // Check training program status - all programs are paid
+          // Check if user has completed onboarding
           final user = authProvider.userModel!;
+          if (!user.hasSeenOnboarding) {
+            // User hasn't completed onboarding, send them to onboarding
+            return const OnboardingScreen();
+          }
+
+          // Check training program status - all programs are paid
           final hasTrainingProgram =
               user.trainingProgramStatus != TrainingProgramStatus.none;
 
           if (!hasTrainingProgram) {
-            return const SubscriptionScreen();
+            // Check if user is a bodybuilder from onboarding to show appropriate subscription screen
+            final isBodybuilder = user.preferences.isBodybuilder;
+            if (isBodybuilder) {
+              return const SubscriptionScreen();
+            } else {
+              return const EssentialSubscriptionScreen();
+            }
           }
 
           return const FloatingMainNavigation(child: HomeScreen());
@@ -164,6 +177,12 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/subscription',
         builder: (context, state) => const SubscriptionScreen(),
+      ),
+
+      // Essential Subscription Route (for non-bodybuilding users)
+      GoRoute(
+        path: '/essential-subscription',
+        builder: (context, state) => const EssentialSubscriptionScreen(),
       ),
 
       // Main App Routes (protected)

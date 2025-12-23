@@ -116,6 +116,13 @@ class TrainingProgramFeatures {
       'Exclusive content',
       'Bodybuilding nutrition guide',
     ],
+    TrainingProgram.essential: [
+      'Personalized nutrition plans',
+      'Customized daily rhythm',
+      'Sustainable meal guidance',
+      'Progress tracking',
+      'Monthly subscription',
+    ],
   };
 
   static List<String> getFeaturesForProgram(TrainingProgram program) {
@@ -125,6 +132,7 @@ class TrainingProgramFeatures {
   static bool hasFeature(
       TrainingProgram userProgram, TrainingProgram requiredProgram) {
     final programOrder = {
+      TrainingProgram.essential: 0,
       TrainingProgram.winter: 1,
       TrainingProgram.summer: 2,
       TrainingProgram.bodybuilding: 3,
@@ -182,5 +190,17 @@ class TrainingProgramTier {
             TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.bodybuilding),
       ),
     ];
+  }
+
+  /// Get the Essential tier for non-bodybuilding users
+  static TrainingProgramTier getEssentialTier() {
+    return TrainingProgramTier(
+      program: TrainingProgram.essential,
+      name: 'Essential',
+      description: 'Essential is designed for those who value clarity over clutter. We\'ve stripped away the noise to give you exactly what you need to thrive: personalized plans, nutrition, and a sustainable daily rhythm. It\'s not a diet or a boot camp — it\'s the blueprint for your new everyday.',
+      price: 30.00,
+      features: TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.essential),
+      isRecommended: true,
+    );
   }
 }

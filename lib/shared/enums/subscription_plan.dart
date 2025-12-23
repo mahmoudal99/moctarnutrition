@@ -1,1 +1,1 @@
-enum TrainingProgram { winter, summer, bodybuilding }
+enum TrainingProgram { winter, summer, bodybuilding, essential }

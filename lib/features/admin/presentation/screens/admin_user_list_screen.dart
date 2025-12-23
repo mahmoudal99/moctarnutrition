@@ -304,6 +304,8 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
         return 'Summer Plan';
       case TrainingProgramStatus.bodybuilding:
         return 'Body Building';
+      case TrainingProgramStatus.essential:
+        return 'Essential';
       case TrainingProgramStatus.none:
         return 'No Program';
     }
@@ -448,6 +450,8 @@ class _UserCard extends StatelessWidget {
         return AppConstants.secondaryColor;
       case TrainingProgramStatus.winter:
         return AppConstants.primaryColor;
+      case TrainingProgramStatus.essential:
+        return const Color(0xFF4ECDC4);
       case TrainingProgramStatus.none:
       default:
         return AppConstants.textTertiary;
@@ -462,6 +466,8 @@ class _UserCard extends StatelessWidget {
         return 'Summer Plan';
       case TrainingProgramStatus.winter:
         return 'Winter Plan';
+      case TrainingProgramStatus.essential:
+        return 'Essential';
       case TrainingProgramStatus.none:
       default:
         return 'No Program';

@@ -110,7 +110,6 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
 
   Future<void> _performCalculations() async {
     try {
-
       // Get onboarding data from the onboarding service
       final onboardingData = await _getOnboardingData();
 
@@ -150,7 +149,6 @@ class _ProteinCalculationScreenState extends State<ProteinCalculationScreen>
         }
       }
     } catch (e, stackTrace) {
-
       // Even if there's an error, we should still show something
       if (mounted) {
         setState(() {
