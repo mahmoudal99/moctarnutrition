@@ -11,6 +11,7 @@ import 'features/profile/presentation/screens/feedback_screen.dart';
 import 'features/profile/presentation/screens/help_center_screen.dart';
 
 import 'features/auth/presentation/screens/auth_screen.dart';
+import 'features/auth/presentation/screens/email_auth_screen.dart';
 import 'features/auth/presentation/screens/password_reset_screen.dart';
 import 'features/onboarding/presentation/screens/welcome_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -127,6 +128,18 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/auth-signup',
         builder: (context, state) => const AuthScreen(isSignUp: true),
+      ),
+
+      // Email Auth Route (for sign in - email form)
+      GoRoute(
+        path: '/email-auth',
+        builder: (context, state) => const EmailAuthScreen(),
+      ),
+
+      // Email Auth Route (for sign up - email form)
+      GoRoute(
+        path: '/email-auth-signup',
+        builder: (context, state) => const EmailAuthScreen(isSignUp: true),
       ),
 
       // Password Reset Route
