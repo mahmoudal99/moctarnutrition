@@ -47,7 +47,7 @@ class OnboardingNavigationButtons extends StatelessWidget {
                 child: CustomButton(
                   type: ButtonType.auth,
                   text: isFinalStep
-                      ? 'Get Started'
+                      ? 'Support Regimen'
                       : currentPage == 0
                           ? "Let's Begin"
                           : 'Next',
