@@ -12,6 +12,7 @@ import '../../../../shared/services/onboarding_service.dart';
 import '../../../../shared/services/user_local_storage_service.dart';
 import '../../../../shared/services/notification_service.dart';
 import '../models/onboarding_step.dart';
+import '../steps/onboarding_bodybuilding_goal_step.dart';
 import '../widgets/onboarding_progress_indicator.dart';
 import '../widgets/onboarding_step_page.dart';
 import '../widgets/onboarding_navigation_buttons.dart';
@@ -42,20 +43,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _updateStepsForBodybuilder() {
-    // Find and remove workout styles step if user is a bodybuilder
+    // Remove or add bodybuilding goal step (index 1) based on selection
     if (_data.isBodybuilder == true) {
-      // Workout styles step is at index 12 (after BMI insertion at index 6)
-      // Original index 11 becomes 12 after BMI insertion
-      if (_steps.length > 12 && _steps[12].title == 'Preferred workout styles') {
-        _steps.removeAt(12);
+      // Ensure bodybuilding goal step exists at index 1
+      final hasBBGoalStep = _steps.length > 1 && 
+          _steps[1].title == 'What do you want from bodybuilding?';
+      if (!hasBBGoalStep) {
+        // Rebuild steps to include bodybuilding goal
+        _steps = OnboardingStepsConfig.getSteps();
+        _steps.insert(6, OnboardingStepsConfig.getBMIStep());
       }
-    } else {
-      // If not a bodybuilder, ensure workout styles step exists
-      // Rebuild steps if needed
-      final hasWorkoutStylesStep = _steps.any((step) => step.title == 'Preferred workout styles');
+      
+      // Remove workout styles step for bodybuilders
+      // After bodybuilding goal insertion, workout styles is at index 13
+      final workoutStylesIndex = _steps.indexWhere(
+        (step) => step.title == 'Preferred workout styles'
+      );
+      if (workoutStylesIndex != -1) {
+        _steps.removeAt(workoutStylesIndex);
+      }
+    } else if (_data.isBodybuilder == false) {
+      // Remove bodybuilding goal step for non-bodybuilders
+      if (_steps.length > 1 && 
+          _steps[1].title == 'What do you want from bodybuilding?') {
+        _steps.removeAt(1);
+      }
+      
+      // Ensure workout styles step exists for non-bodybuilders
+      final hasWorkoutStylesStep = _steps.any(
+        (step) => step.title == 'Preferred workout styles'
+      );
       if (!hasWorkoutStylesStep) {
         // Rebuild steps to include workout styles
         _steps = OnboardingStepsConfig.getSteps();
+        _steps.removeAt(1); // Remove bodybuilding goal step
         _steps.insert(6, OnboardingStepsConfig.getBMIStep());
       }
     }
@@ -138,6 +159,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           }
                           // Update steps list to skip workout styles if bodybuilder
                           _updateStepsForBodybuilder();
+                        });
+                      },
+                      onBodybuildingGoalChanged: (goal) {
+                        setState(() {
+                          _data.bodybuildingGoal = goal;
                         });
                       },
                       onFitnessGoalChanged: (goal) {
@@ -301,6 +327,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   ScrollPhysics _getPageViewPhysics() {
+    // Disable page swiping for the bodybuilding goal step if no selection made
+    if (_currentPage == 1 && _data.isBodybuilder == true && _data.bodybuildingGoal == null) {
+      return const NeverScrollableScrollPhysics();
+    }
     // Disable page swiping for the desired weight step to allow weight selector interaction
     if (_currentPage == 9) {
       return const NeverScrollableScrollPhysics();
@@ -389,6 +419,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   bool _isNextEnabled() {
     final isBodybuilderStep = _currentPage == 0;
+    // Bodybuilding goal step is at index 1 (only shown for bodybuilders)
+    final isBodybuildingGoalStep = _currentPage == 1 && _data.isBodybuilder == true;
     final isDietaryStep = _currentPage == 11;
     // Workout styles step is skipped for bodybuilders, so adjust indices
     final workoutStylesStepIndex = _data.isBodybuilder == true ? -1 : 12;
@@ -411,6 +443,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     if (isBodybuilderStep) {
       return _data.isBodybuilder != null;
+    }
+
+    if (isBodybuildingGoalStep) {
+      return _data.bodybuildingGoal != null;
     }
 
     if (!isDietaryStep &&

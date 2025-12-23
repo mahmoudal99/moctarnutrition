@@ -13,6 +13,14 @@ class OnboardingStepsConfig {
         highlightedWords: ['bodybuilder'],
       ),
       OnboardingStep(
+        title: 'What do you want from bodybuilding?',
+        subtitle: 'Choose your goal to personalize your journey',
+        icon: "target.json",
+        color: AppConstants.primaryColor,
+        showIconColor: false,
+        highlightedWords: ['goal'],
+      ),
+      OnboardingStep(
         title: 'Hi, I\'m Regimen 👋',
         subtitle: 'Discover how Regimen can help you achieve your goals.',
         icon: "user.png",

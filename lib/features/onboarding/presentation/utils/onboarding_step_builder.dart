@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../shared/models/user_model.dart';
 import '../steps/onboarding_new_first_step.dart';
+import '../steps/onboarding_bodybuilding_goal_step.dart';
 import '../steps/onboarding_welcome_step.dart';
 import '../steps/onboarding_generic_fitness_intro_step.dart';
 import '../steps/onboarding_gender_step.dart';
@@ -26,12 +27,21 @@ import '../steps/onboarding_cheat_day_step.dart';
 
 class OnboardingStepBuilder {
   /// Maps the actual step index to the content builder case.
-  /// When bodybuilder is true, workout styles step (case 12) is skipped,
-  /// so indices after 11 need to be shifted by 1.
+  /// When bodybuilder is true, an additional step (bodybuilding goal) is inserted at index 1,
+  /// and workout styles step (case 13) is skipped.
   static int _mapStepIndexToContentCase(int stepIndex, bool isBodybuilder) {
-    if (isBodybuilder == true && stepIndex > 11) {
-      // Skip workout styles step (case 12), shift by 1
-      return stepIndex + 1;
+    if (isBodybuilder == true) {
+      // Bodybuilding goal step is inserted at index 1
+      if (stepIndex == 1) {
+        return 1; // Bodybuilding goal step
+      } else if (stepIndex > 1) {
+        // After bodybuilding goal, shift by 1 for the intro step
+        // Then skip workout styles (case 13), shift by additional 1
+        if (stepIndex > 12) {
+          return stepIndex + 1; // Skip workout styles
+        }
+        return stepIndex;
+      }
     }
     return stepIndex;
   }
@@ -40,6 +50,7 @@ class OnboardingStepBuilder {
     required int stepIndex,
     required OnboardingData data,
     required Function(bool) onBodybuilderChanged,
+    required Function(BodybuildingGoal) onBodybuildingGoalChanged,
     required Function(FitnessGoal) onFitnessGoalChanged,
     required Function(ActivityLevel) onActivityLevelChanged,
     required Function(String) onDietaryRestrictionChanged,
@@ -71,17 +82,29 @@ class OnboardingStepBuilder {
           onSelect: onBodybuilderChanged,
         );
       case 1:
-        // Show bodybuilder-specific intro if they selected "Yes", otherwise show generic fitness intro
+        // Show bodybuilding goal selection only for bodybuilders
         if (data.isBodybuilder == true) {
-          return const OnboardingIntroStep();
+          return OnboardingBodybuildingGoalStep(
+            selectedGoal: data.bodybuildingGoal,
+            onSelect: onBodybuildingGoalChanged,
+          );
         } else {
+          // For non-bodybuilders, show generic fitness intro
           return const OnboardingGenericFitnessIntroStep();
         }
       case 2:
+        // Show bodybuilder intro after goal selection
+        if (data.isBodybuilder == true) {
+          return const OnboardingIntroStep();
+        } else {
+          // This shouldn't be reached for non-bodybuilders
+          return const SizedBox.shrink();
+        }
+      case 3:
         return OnboardingWelcomeStep(
           isBodybuilder: data.isBodybuilder,
         );
-      case 3:
+      case 4:
         return OnboardingGenderStep(
           selectedGender: data.gender,
           onSelect: (gender) {
@@ -89,19 +112,19 @@ class OnboardingStepBuilder {
             data.gender = gender;
           },
         );
-      case 4:
+      case 5:
         return OnboardingHeightWeightStep(
           height: data.height,
           weight: data.weight,
           onHeightChanged: (height) => data.height = height,
           onWeightChanged: (weight) => data.weight = weight,
         );
-      case 5:
+      case 6:
         return OnboardingAgeStep(
           age: data.age,
           onAgeChanged: (age) => data.age = age,
         );
-      case 6:
+      case 7:
         return OnboardingBMIStep(
           bmi: _calculateBMI(data.height, data.weight),
           bmiCategory: _getBMICategory(_calculateBMI(data.height, data.weight)),
@@ -110,26 +133,26 @@ class OnboardingStepBuilder {
           height: data.height,
           weight: data.weight,
         );
-      case 7:
-        return const OnboardingHowWeDoThisStep();
       case 8:
+        return const OnboardingHowWeDoThisStep();
+      case 9:
         return OnboardingFitnessGoalStep(
           selectedFitnessGoal: data.selectedFitnessGoal,
           onSelect: onFitnessGoalChanged,
         );
-      case 9:
+      case 10:
         return OnboardingDesiredWeightStep(
           desiredWeight: data.desiredWeight,
           currentWeight: data.weight,
           fitnessGoal: data.selectedFitnessGoal,
           onDesiredWeightChanged: (weight) => data.desiredWeight = weight,
         );
-      case 10:
+      case 11:
         return OnboardingActivityLevelStep(
           selectedActivityLevel: data.selectedActivityLevel,
           onSelect: onActivityLevelChanged,
         );
-      case 11:
+      case 12:
         return OnboardingDietaryRestrictionsStep(
           selectedDietaryRestrictions: data.selectedDietaryRestrictions,
           restrictions: const [
@@ -144,7 +167,7 @@ class OnboardingStepBuilder {
           ],
           onSelect: onDietaryRestrictionChanged,
         );
-      case 12:
+      case 13:
         return OnboardingWorkoutStylesStep(
           selectedWorkoutStyles: data.selectedWorkoutStyles,
           styles: const [
@@ -159,14 +182,14 @@ class OnboardingStepBuilder {
           ],
           onSelect: onWorkoutStyleChanged,
         );
-      case 13:
+      case 14:
         return OnboardingWeeklyWorkoutGoalStep(
           selectedDaysPerWeek: data.weeklyWorkoutDays,
           selectedSpecificDays: data.specificWorkoutDays,
           onDaysPerWeekChanged: onWeeklyWorkoutDaysChanged,
           onSpecificDaysChanged: onSpecificWorkoutDaysChanged,
         );
-      case 14:
+      case 15:
         return OnboardingFoodPreferencesStep(
           preferredCuisines: data.preferredCuisines,
           onAddCuisine: onAddCuisine,
@@ -181,35 +204,35 @@ class OnboardingStepBuilder {
           avoidController: data.avoidController,
           favoriteController: data.favoriteController,
         );
-      case 15:
+      case 16:
         return OnboardingAllergiesStep(
           selectedAllergies: data.selectedAllergies,
           onAllergiesChanged: onAllergiesChanged,
         );
-      case 16:
+      case 17:
         return OnboardingMealTimingStep(
           selectedPreferences: data.mealTimingPreferences,
           onPreferencesChanged: onMealTimingChanged,
         );
-      case 17:
+      case 18:
         return OnboardingBatchCookingStep(
           selectedPreferences: data.batchCookingPreferences,
           onPreferencesChanged: onBatchCookingChanged,
         );
-      case 18:
+      case 19:
         return OnboardingCheatDayStep(
           selectedCheatDay: data.cheatDay,
           onCheatDayChanged: onCheatDayChanged,
           isBodybuilder: data.isBodybuilder,
         );
-      case 19:
+      case 20:
         return OnboardingWorkoutNotificationsStep(
           selectedTime: data.workoutNotificationTime,
           notificationsEnabled: data.workoutNotificationsEnabled,
           onTimeChanged: onTimeChanged,
           onNotificationsChanged: onNotificationsChanged,
         );
-      case 20:
+      case 21:
         return const OnboardingRatingStep();
       default:
         return const SizedBox.shrink();
@@ -246,6 +269,7 @@ class OnboardingStepBuilder {
 
 class OnboardingData {
   bool? isBodybuilder;
+  BodybuildingGoal? bodybuildingGoal;
   FitnessGoal selectedFitnessGoal = FitnessGoal.maintenance;
   ActivityLevel selectedActivityLevel = ActivityLevel.moderatelyActive;
   List<String> selectedDietaryRestrictions = [];
