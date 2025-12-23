@@ -414,7 +414,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         ),
         content: SingleChildScrollView(
           child: Text(
-            'By using Moctar Nutrition, you agree to:\n\n'
+            'By using Regimen, you agree to:\n\n'
             '• Provide accurate information\n'
             '• Not share your account credentials with others\n'
             '• Respect the privacy and rights of other users\n'

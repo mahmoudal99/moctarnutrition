@@ -25,7 +25,7 @@ class LoggingService {
   /// Main application logger
   static Logger get instance {
     _instance ??= _createLogger(
-      name: 'MoctarNutrition',
+      name: 'Regimen',
       level: kDebugMode ? Level.debug : Level.warning,
     );
     return _instance!;

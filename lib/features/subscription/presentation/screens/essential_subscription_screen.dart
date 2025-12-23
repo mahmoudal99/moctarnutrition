@@ -59,7 +59,7 @@ class _EssentialSubscriptionScreenState
                         width: 1,
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.close,
                       color: AppConstants.textSecondary,
                       size: 20,
@@ -67,7 +67,7 @@ class _EssentialSubscriptionScreenState
                   ),
                 ),
               ),
-              
+
               // Main content area
               Expanded(
                 child: Column(
@@ -81,7 +81,8 @@ class _EssentialSubscriptionScreenState
                       ),
                       decoration: BoxDecoration(
                         color: AppConstants.copperwoodColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppConstants.radiusXL),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusXL),
                       ),
                       child: Text(
                         '✨ ESSENTIAL PLAN',
@@ -92,9 +93,9 @@ class _EssentialSubscriptionScreenState
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: AppConstants.spacingM),
-                    
+
                     // Headline
                     Text(
                       'Your Blueprint for',
@@ -117,9 +118,9 @@ class _EssentialSubscriptionScreenState
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    
+
                     const SizedBox(height: AppConstants.spacingS),
-                    
+
                     Text(
                       'Personalized nutrition • Sustainable rhythm\nNo clutter, no gimmicks',
                       style: AppTextStyles.bodySmall.copyWith(
@@ -128,14 +129,14 @@ class _EssentialSubscriptionScreenState
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    
+
                     const SizedBox(height: AppConstants.spacingL),
-                    
+
                     // Social proof with avatars
                     _buildSocialProof(),
-                    
+
                     const SizedBox(height: AppConstants.spacingL),
-                    
+
                     // Benefits row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -148,7 +149,7 @@ class _EssentialSubscriptionScreenState
                   ],
                 ),
               ),
-              
+
               // Bottom CTA section
               Container(
                 padding: const EdgeInsets.all(AppConstants.spacingL),
@@ -176,7 +177,7 @@ class _EssentialSubscriptionScreenState
                           children: [
                             Text(
                               '€${essentialTier.price.toStringAsFixed(0)}',
-                              style: GoogleFonts.nunitoSans(
+                              style: GoogleFonts.plusJakartaSans(
                                 fontSize: 40,
                                 fontWeight: FontWeight.bold,
                                 color: AppConstants.textPrimary,
@@ -186,7 +187,7 @@ class _EssentialSubscriptionScreenState
                             Padding(
                               padding: const EdgeInsets.only(bottom: 6),
                               child: Text(
-                                '/mo',
+                                '/month',
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   color: AppConstants.textSecondary,
                                 ),
@@ -202,7 +203,8 @@ class _EssentialSubscriptionScreenState
                           ),
                           decoration: BoxDecoration(
                             color: AppConstants.successColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusS),
                           ),
                           child: Row(
                             children: [
@@ -224,9 +226,9 @@ class _EssentialSubscriptionScreenState
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: AppConstants.spacingM),
-                    
+
                     // CTA Button
                     SizedBox(
                       width: double.infinity,
@@ -242,7 +244,8 @@ class _EssentialSubscriptionScreenState
                             vertical: AppConstants.spacingM,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppConstants.radiusL),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusL),
                           ),
                           elevation: 0,
                         ),
@@ -255,9 +258,9 @@ class _EssentialSubscriptionScreenState
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: AppConstants.spacingS),
-                    
+
                     // Trust indicators
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -484,8 +487,8 @@ class _EssentialSubscriptionScreenState
                 'Payment successful but status not updated. Please refresh the app.');
           }
         } else {
-          _showErrorDialog(
-              paymentResult.errorMessage ?? 'Payment failed. Please try again.');
+          _showErrorDialog(paymentResult.errorMessage ??
+              'Payment failed. Please try again.');
         }
       } else {
         _showErrorDialog(checkoutResult.errorMessage ??
@@ -506,7 +509,8 @@ class _EssentialSubscriptionScreenState
         content: Row(
           children: [
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(AppConstants.primaryColor),
             ),
             const SizedBox(width: 16),
             Text('Processing...', style: AppTextStyles.bodyMedium),

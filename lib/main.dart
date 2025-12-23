@@ -445,7 +445,7 @@ class ChampionsGymApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Moctar Nutrition',
+      title: 'Regimen',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: _router,

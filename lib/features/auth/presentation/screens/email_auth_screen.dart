@@ -162,7 +162,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> with TickerProviderSt
                       color: Colors.black87),
                 ),
                 TextSpan(
-                  text: 'Moctar Nutrition',
+                  text: 'Regimen',
                   style:
                       GoogleFonts.ptSerif(fontSize: 24, color: Colors.black87),
                 ),
@@ -533,7 +533,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> with TickerProviderSt
         ),
         content: SingleChildScrollView(
           child: Text(
-            'By using Moctar Nutrition, you agree to:\n\n'
+            'By using Regimen, you agree to:\n\n'
             '• Provide accurate information\n'
             '• Not share your account credentials with others\n'
             '• Respect the privacy and rights of other users\n'

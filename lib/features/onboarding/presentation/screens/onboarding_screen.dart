@@ -117,7 +117,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             if (isBodybuilder == true) {
                               // Bodybuilder intro
                               _steps[1] = OnboardingStep(
-                                title: 'Hi, I\'m Moctar 👋',
+                                title: 'Hi, I\'m Regimen 👋',
                                 subtitle: 'Discover how Moctar can help you achieve your bodybuilding goals.',
                                 icon: "user.png",
                                 color: AppConstants.textSecondary,
@@ -325,7 +325,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text(
-            'Rate Moctar Nutrition',
+            'Rate Regimen',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -336,7 +336,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Enjoying Moctar Nutrition? Please take a moment to rate us!',
+                'Enjoying Regimen? Please take a moment to rate us!',
                 style: TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),

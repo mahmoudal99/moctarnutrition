@@ -178,7 +178,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'This Privacy Policy explains how Moctar Nutrition collects, uses, and protects your personal information when you use our mobile application.',
+              'This Privacy Policy explains how Regimen collects, uses, and protects your personal information when you use our mobile application.',
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppConstants.textSecondary,
               ),

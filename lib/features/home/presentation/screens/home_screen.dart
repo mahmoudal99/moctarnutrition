@@ -567,7 +567,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // App Logo and Name
             Text(
-              'Moctar Nutrition',
+              'Regimen',
               style: AppTextStyles.heading4.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
