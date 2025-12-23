@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../models/onboarding_step.dart';
 
@@ -53,6 +52,14 @@ class OnboardingStepsConfig {
         color: AppConstants.copperwoodColor,
         showIconColor: false,
         highlightedWords: ['Age'],
+      ),
+      OnboardingStep(
+        title: 'Fun & heatlhy meals',
+        subtitle: 'Simple, healthy meal plans you’ll love following.',
+        icon: "file-01-stroke-rounded.svg",
+        color: AppConstants.primaryColor,
+        showIconColor: false,
+        highlightedWords: ['Fun', 'engaging'],
       ),
       OnboardingStep(
         title: 'What is your primary objective?',

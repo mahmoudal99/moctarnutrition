@@ -36,17 +36,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void initState() {
     super.initState();
     _steps = OnboardingStepsConfig.getSteps();
-    _steps.insert(7, OnboardingStepsConfig.getBMIStep());
+    // Insert BMI step after Age (index 5), before HowWeDoThis (which shifts to index 7)
+    _steps.insert(6, OnboardingStepsConfig.getBMIStep());
     _updateStepsForBodybuilder();
   }
 
   void _updateStepsForBodybuilder() {
     // Find and remove workout styles step if user is a bodybuilder
     if (_data.isBodybuilder == true) {
-      // Workout styles step is at index 11 (after BMI insertion at index 7)
-      // Original index 10 becomes 11 after BMI insertion
-      if (_steps.length > 11 && _steps[11].title == 'Preferred workout styles') {
-        _steps.removeAt(11);
+      // Workout styles step is at index 12 (after BMI insertion at index 6)
+      // Original index 11 becomes 12 after BMI insertion
+      if (_steps.length > 12 && _steps[12].title == 'Preferred workout styles') {
+        _steps.removeAt(12);
       }
     } else {
       // If not a bodybuilder, ensure workout styles step exists
@@ -55,7 +56,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (!hasWorkoutStylesStep) {
         // Rebuild steps to include workout styles
         _steps = OnboardingStepsConfig.getSteps();
-        _steps.insert(7, OnboardingStepsConfig.getBMIStep());
+        _steps.insert(6, OnboardingStepsConfig.getBMIStep());
       }
     }
   }
@@ -262,7 +263,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               onNext: () {
                 HapticFeedback.mediumImpact();
                 // Rating step index shifts if workout styles is removed
-                final ratingStepIndex = _data.isBodybuilder == true ? 18 : 19;
+                final ratingStepIndex = _data.isBodybuilder == true ? 19 : 20;
                 if (_currentPage == ratingStepIndex) {
                   // Show rating dialog for rating step
                   _showRatingDialog(context);
@@ -301,14 +302,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   ScrollPhysics _getPageViewPhysics() {
     // Disable page swiping for the desired weight step to allow weight selector interaction
-    if (_currentPage == 6) {
+    if (_currentPage == 9) {
       return const NeverScrollableScrollPhysics();
     }
-    if (_currentPage == 10 && _data.selectedDietaryRestrictions.isEmpty) {
+    if (_currentPage == 11 && _data.selectedDietaryRestrictions.isEmpty) {
       return const NeverScrollableScrollPhysics();
     }
     // Workout styles step is skipped for bodybuilders, so only check if not bodybuilder
-    if (_data.isBodybuilder != true && _currentPage == 11 && _data.selectedWorkoutStyles.isEmpty) {
+    if (_data.isBodybuilder != true && _currentPage == 12 && _data.selectedWorkoutStyles.isEmpty) {
       return const NeverScrollableScrollPhysics();
     }
     return const BouncingScrollPhysics();
@@ -388,24 +389,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   bool _isNextEnabled() {
     final isBodybuilderStep = _currentPage == 0;
-    final isDietaryStep = _currentPage == 10;
+    final isDietaryStep = _currentPage == 11;
     // Workout styles step is skipped for bodybuilders, so adjust indices
-    final workoutStylesStepIndex = _data.isBodybuilder == true ? -1 : 11;
+    final workoutStylesStepIndex = _data.isBodybuilder == true ? -1 : 12;
     final isWorkoutStep = _currentPage == workoutStylesStepIndex;
     // Weekly workout goal step index shifts if workout styles is removed
-    final weeklyWorkoutGoalStepIndex = _data.isBodybuilder == true ? 11 : 12;
+    final weeklyWorkoutGoalStepIndex = _data.isBodybuilder == true ? 12 : 13;
     final isWeeklyWorkoutGoalStep = _currentPage == weeklyWorkoutGoalStepIndex;
     // Food preferences step index shifts if workout styles is removed
-    final foodPreferencesStepIndex = _data.isBodybuilder == true ? 12 : 13;
+    final foodPreferencesStepIndex = _data.isBodybuilder == true ? 13 : 14;
     final isFoodPreferencesStep = _currentPage == foodPreferencesStepIndex;
     // Allergies step index shifts if workout styles is removed
-    final allergiesStepIndex = _data.isBodybuilder == true ? 13 : 14;
+    final allergiesStepIndex = _data.isBodybuilder == true ? 14 : 15;
     final isAllergiesStep = _currentPage == allergiesStepIndex;
     // Workout notifications step index shifts if workout styles is removed
-    final workoutNotificationsStepIndex = _data.isBodybuilder == true ? 17 : 18;
+    final workoutNotificationsStepIndex = _data.isBodybuilder == true ? 18 : 19;
     final isWorkoutNotificationsStep = _currentPage == workoutNotificationsStepIndex;
     // Rating step index shifts if workout styles is removed
-    final ratingStepIndex = _data.isBodybuilder == true ? 18 : 19;
+    final ratingStepIndex = _data.isBodybuilder == true ? 19 : 20;
     final isRatingStep = _currentPage == ratingStepIndex;
 
     if (isBodybuilderStep) {
