@@ -77,7 +77,9 @@ class OnboardingStepBuilder {
           return const OnboardingGenericFitnessIntroStep();
         }
       case 2:
-        return const OnboardingWelcomeStep();
+        return OnboardingWelcomeStep(
+          isBodybuilder: data.isBodybuilder,
+        );
       case 3:
         return OnboardingGenderStep(
           selectedGender: data.gender,

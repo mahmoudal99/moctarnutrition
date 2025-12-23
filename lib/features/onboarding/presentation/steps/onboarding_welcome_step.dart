@@ -3,7 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class OnboardingWelcomeStep extends StatelessWidget {
-  const OnboardingWelcomeStep({super.key});
+  final bool? isBodybuilder;
+  
+  const OnboardingWelcomeStep({
+    super.key,
+    this.isBodybuilder,
+  });
+
+  String get _reviewText {
+    if (isBodybuilder == true) {
+      return "As a competitive bodybuilder, I've struggled to find an app that understands the nuances of hypertrophy training and precise nutrition timing. This platform changed everything the advanced meal planning, macro tracking, and workout splits have taken my physique to the next level.";
+    } else {
+      return "I've tried many fitness apps, but nothing compares to this. The workouts are clear, the meal plans are practical, everything feels tailored to help you stay consistent. This is the first time I've felt genuinely motivated to stick to my goals.";
+    }
+  }
+
+  String get _reviewerName {
+    if (isBodybuilder == true) {
+      return 'Marcus Stone';
+    } else {
+      return 'James Finn';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +63,7 @@ class OnboardingWelcomeStep extends StatelessWidget {
                     // Name
                     Expanded(
                       child: Text(
-                        'James Finn',
+                        _reviewerName,
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -64,7 +85,7 @@ class OnboardingWelcomeStep extends StatelessWidget {
                 const SizedBox(height: AppConstants.spacingM),
                 // Review text in serif font
                 Text(
-                  "I’ve tried many fitness apps, but nothing compares to this. The workouts are clear, the meal plans are practical, everything feels tailored to help you stay consistent. This is the first time I’ve felt genuinely motivated to stick to my goals.",
+                  _reviewText,
                   style: GoogleFonts.merriweather(
                     fontSize: 16,
                     fontWeight: FontWeight.normal,
