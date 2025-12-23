@@ -150,7 +150,7 @@ class OnboardingStepsConfig {
       ),
       OnboardingStep(
         title: 'Help Us Grow!',
-        subtitle: 'Help us improve with your feedback',
+        subtitle: 'Regimen was made for you!',
         icon: "rating.json",
         color: AppConstants.successColor,
         showIconColor: false,
