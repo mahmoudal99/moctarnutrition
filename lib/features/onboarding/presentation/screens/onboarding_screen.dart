@@ -129,6 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     contentKey: contentKey,
                     content: OnboardingStepBuilder.buildStepContent(
                       stepIndex: index,
+                      stepTitle: _steps[index].title,
                       data: _data,
                       onBodybuilderChanged: (isBodybuilder) {
                         setState(() {

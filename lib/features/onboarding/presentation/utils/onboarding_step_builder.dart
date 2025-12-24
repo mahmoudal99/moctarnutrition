@@ -29,6 +29,24 @@ class OnboardingStepBuilder {
   /// Maps the actual step index to the content builder case.
   /// When bodybuilder is true, an additional step (bodybuilding goal) is inserted at index 1,
   /// and workout styles step (case 13) is skipped.
+  /// When bodybuilder is false, the bodybuilding goal step (case 1) and intro step (case 2) are skipped.
+  /// 
+  /// For non-bodybuilders, after removing bodybuilding goal step at index 1:
+  /// - Step 0 → case 0 (bodybuilder question)
+  /// - Step 1 → case 1 (generic fitness intro, replaces bodybuilding goal)
+  /// - Step 2 → case 3 (welcome, skip case 2 which is bodybuilder intro)
+  /// - Step 3 → case 4 (gender)
+  /// - Step 4 → case 5 (height/weight)
+  /// - Step 5 → case 6 (age)
+  /// - Step 6 → case 7 (BMI)
+  /// - Step 7 → case 8 (how we do this)
+  /// - Step 8 → case 9 (fitness goal)
+  /// - Step 9 → case 10 (desired weight)
+  /// - Step 10 → case 11 (activity level)
+  /// - Step 11 → case 12 (dietary restrictions)
+  /// - Step 12 → case 13 (workout styles)
+  /// - Step 13 → case 14 (weekly workout goal)
+  /// - etc.
   static int _mapStepIndexToContentCase(int stepIndex, bool isBodybuilder) {
     if (isBodybuilder == true) {
       // Bodybuilding goal step is inserted at index 1
@@ -42,12 +60,83 @@ class OnboardingStepBuilder {
         }
         return stepIndex;
       }
+    } else {
+      // For non-bodybuilders:
+      // - Step 0 → case 0
+      // - Step 1 → case 1 (generic fitness intro)
+      // - Steps 2+ → skip case 2 (bodybuilder intro), so shift by 1
+      if (stepIndex == 0) {
+        return 0;
+      } else if (stepIndex == 1) {
+        return 1; // Generic fitness intro
+      } else {
+        // Skip case 2 (bodybuilder intro), so shift by 1
+        return stepIndex + 1;
+      }
     }
     return stepIndex;
   }
 
+  /// Maps step title to content case for non-bodybuilders
+  /// This is more reliable than using step indices which can shift
+  static int _mapStepTitleToContentCase(String stepTitle, bool isBodybuilder) {
+    if (isBodybuilder) {
+      // For bodybuilders, use index-based mapping (existing logic)
+      return -1; // Not used for bodybuilders
+    }
+    
+    // Map step titles to content cases for non-bodybuilders
+    switch (stepTitle) {
+      case 'Are you a bodybuilder?':
+        return 0;
+      case 'Hi, I\'m Regimen 👋':
+        return 1; // Generic fitness intro for non-bodybuilders
+      case 'Welcome to Regimen!':
+        return 3;
+      case 'Start with You':
+        return 4;
+      case 'Height & Weight':
+        return 5;
+      case 'Your Age':
+        return 6;
+      case 'Your BMI':
+        return 7;
+      case 'Fun & heatlhy meals':
+        return 8;
+      case 'What is your primary objective?':
+        return 9;
+      case 'Desired Weight':
+        return 10;
+      case 'How active are you?':
+        return 11;
+      case 'Any dietary restrictions?':
+        return 12;
+      case 'Preferred workout styles':
+        return 13;
+      case 'Weekly Workout Goal':
+        return 14;
+      case 'Food preferences':
+        return 15;
+      case 'Allergies & Intolerances':
+        return 16;
+      case 'Meal Count & Timing':
+        return 17;
+      case 'Batch Cooking Preferences':
+        return 18;
+      case 'Cheat Day':
+        return 19;
+      case 'Workout Previews':
+        return 20;
+      case 'Help Us Grow!':
+        return 21;
+      default:
+        return -1; // Fallback to index-based mapping
+    }
+  }
+
   static Widget buildStepContent({
     required int stepIndex,
+    required String stepTitle,
     required OnboardingData data,
     required Function(bool) onBodybuilderChanged,
     required Function(BodybuildingGoal) onBodybuildingGoalChanged,
@@ -72,8 +161,19 @@ class OnboardingStepBuilder {
     required VoidCallback onComplete,
   }) {
     // Map step index to content case (accounts for skipped workout styles step)
-    final contentCase =
-        _mapStepIndexToContentCase(stepIndex, data.isBodybuilder == true);
+    // For non-bodybuilders, use step title mapping which is more reliable
+    int contentCase;
+    if (data.isBodybuilder == true) {
+      contentCase = _mapStepIndexToContentCase(stepIndex, true);
+    } else {
+      final titleBasedCase = _mapStepTitleToContentCase(stepTitle, false);
+      if (titleBasedCase != -1) {
+        contentCase = titleBasedCase;
+      } else {
+        // Fallback to index-based mapping
+        contentCase = _mapStepIndexToContentCase(stepIndex, false);
+      }
+    }
 
     switch (contentCase) {
       case 0:

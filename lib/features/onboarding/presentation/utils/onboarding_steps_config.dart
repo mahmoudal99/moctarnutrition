@@ -40,7 +40,7 @@ class OnboardingStepsConfig {
         title: 'Start with You',
         subtitle: 'Choose your gender to personalize your fitness journey.',
         icon: "gender.json",
-        color: AppConstants.accentColor,
+        color: AppConstants.primaryColor,
         showIconColor: false,
         highlightedWords: ['You'],
       ),
