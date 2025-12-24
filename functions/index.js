@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const stripe = require('stripe')(functions.config().stripe.secret_key);
-const cors = require('cors')({origin: true});
+const cors = require('cors')({ origin: true });
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -10,19 +10,19 @@ admin.initializeApp();
 exports.createCheckoutSession = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'POST') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
       const { priceId, userId, successUrl, cancelUrl, customerEmail } = req.body;
 
       if (!priceId || !userId) {
-        return res.status(400).json({error: 'Missing required fields'});
+        return res.status(400).json({ error: 'Missing required fields' });
       }
 
       // First, get the price details from Stripe
       const price = await stripe.prices.retrieve(priceId);
-      
+
       // Create or get customer
       let customer;
       if (customerEmail) {
@@ -30,7 +30,7 @@ exports.createCheckoutSession = functions.https.onRequest(async (req, res) => {
           email: customerEmail,
           limit: 1,
         });
-        
+
         if (existingCustomers.data.length > 0) {
           customer = existingCustomers.data[0];
         } else {
@@ -64,14 +64,14 @@ exports.createCheckoutSession = functions.https.onRequest(async (req, res) => {
         console.log(`Stored Stripe customer ID ${customer.id} for user ${userId}`);
       }
 
-      res.json({ 
+      res.json({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
         customerId: customer?.id
       });
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -80,14 +80,14 @@ exports.createCheckoutSession = functions.https.onRequest(async (req, res) => {
 exports.createPortalSession = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'POST') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
       const { customerId, returnUrl } = req.body;
 
       if (!customerId) {
-        return res.status(400).json({error: 'Missing customerId'});
+        return res.status(400).json({ error: 'Missing customerId' });
       }
 
       const session = await stripe.billingPortal.sessions.create({
@@ -98,7 +98,7 @@ exports.createPortalSession = functions.https.onRequest(async (req, res) => {
       res.json({ url: session.url });
     } catch (error) {
       console.error('Error creating portal session:', error);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -107,21 +107,21 @@ exports.createPortalSession = functions.https.onRequest(async (req, res) => {
 exports.getSubscriptionStatus = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'GET') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
       const userId = req.query.userId;
-      
+
       if (!userId) {
-        return res.status(400).json({error: 'Missing userId'});
+        return res.status(400).json({ error: 'Missing userId' });
       }
 
       // Get user from Firestore
       const userDoc = await admin.firestore().collection('users').doc(userId).get();
-      
+
       if (!userDoc.exists) {
-        return res.status(404).json({error: 'User not found'});
+        return res.status(404).json({ error: 'User not found' });
       }
 
       const userData = userDoc.data();
@@ -157,21 +157,21 @@ exports.getSubscriptionStatus = functions.https.onRequest(async (req, res) => {
       }
 
       const subscription = subscriptions.data[0];
-      
+
       res.json({
         subscriptionId: subscription.id,
         customerId: customerId,
         status: subscription.status,
-        currentPeriodEnd: subscription.current_period_end ? 
+        currentPeriodEnd: subscription.current_period_end ?
           new Date(subscription.current_period_end * 1000).toISOString() : null,
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        canceledAt: subscription.canceled_at ? 
+        canceledAt: subscription.canceled_at ?
           new Date(subscription.canceled_at * 1000).toISOString() : null,
         metadata: subscription.metadata,
       });
     } catch (error) {
       console.error('Error getting subscription status:', error);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -180,14 +180,14 @@ exports.getSubscriptionStatus = functions.https.onRequest(async (req, res) => {
 exports.cancelSubscription = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'POST') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
       const { subscriptionId, immediately } = req.body;
 
       if (!subscriptionId) {
-        return res.status(400).json({error: 'Missing subscriptionId'});
+        return res.status(400).json({ error: 'Missing subscriptionId' });
       }
 
       let subscription;
@@ -200,12 +200,12 @@ exports.cancelSubscription = functions.https.onRequest(async (req, res) => {
       }
 
       res.json({
-        cancelledAt: subscription.canceled_at ? 
+        cancelledAt: subscription.canceled_at ?
           new Date(subscription.canceled_at * 1000).toISOString() : null,
       });
     } catch (error) {
       console.error('Error canceling subscription:', error);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -238,29 +238,29 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
       case 'checkout.session.completed':
         await handleCheckoutCompleted(event.data.object);
         break;
-      
+
       // One-time payment events
       case 'invoice.payment_succeeded':
         await handlePaymentSucceeded(event.data.object);
         break;
-      
+
       case 'invoice.payment_failed':
         await handlePaymentFailed(event.data.object);
         break;
-      
+
       case 'payment_intent.succeeded':
         console.log('Processing payment_intent.succeeded event');
         await handlePaymentIntentSucceeded(event.data.object);
         break;
-      
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
 
-    res.json({received: true});
+    res.json({ received: true });
   } catch (error) {
     console.error('Error handling webhook:', error);
-    res.status(500).json({error: error.message});
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -268,17 +268,17 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 async function handlePaymentIntentSucceeded(paymentIntent) {
   console.log(`Payment succeeded for payment intent: ${paymentIntent.id}`);
   console.log('Payment intent metadata:', paymentIntent.metadata);
-  
+
   const userId = paymentIntent.metadata?.userId;
   const priceId = paymentIntent.metadata?.priceId;
-  
+
   console.log(`Extracted userId: ${userId}, priceId: ${priceId}`);
-  
+
   if (!userId) {
     console.error('No userId found in payment intent metadata');
     return;
   }
-  
+
   try {
     // Determine training program based on priceId
     let trainingProgramStatus = 'none';
@@ -298,15 +298,19 @@ async function handlePaymentIntentSucceeded(paymentIntent) {
         // This should be your Body Building price ID ($1000) - replace with actual ID
         trainingProgramStatus = 'bodybuilding';
         console.log('Matched Body Building Plan');
+      } else if (priceId === 'price_1ShW3jBa6NGVc5lJ3Tgxi0tD') {
+        // Essential Plan price ID
+        trainingProgramStatus = 'essential';
+        console.log('Matched Essential Plan');
       } else {
         console.log(`No match found for priceId: ${priceId}`);
       }
     } else {
       console.log('No priceId found in metadata');
     }
-    
+
     console.log(`Setting trainingProgramStatus to: ${trainingProgramStatus}`);
-    
+
     // Create training program record first to get the document ID
     const programRef = await admin.firestore().collection('training_programs').add({
       userId: userId,
@@ -319,10 +323,10 @@ async function handlePaymentIntentSucceeded(paymentIntent) {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
-    
+
     const programId = programRef.id;
     console.log(`Created training program with ID: ${programId}`);
-    
+
     // Update user training program status in Firebase with program reference
     await admin.firestore().collection('users').doc(userId).update({
       trainingProgramStatus: trainingProgramStatus,
@@ -330,7 +334,7 @@ async function handlePaymentIntentSucceeded(paymentIntent) {
       programPurchaseDate: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
-    
+
     console.log(`Successfully updated user ${userId} with trainingProgramStatus: ${trainingProgramStatus}`);
   } catch (error) {
     console.error('Error updating user training program:', error);
@@ -340,28 +344,28 @@ async function handlePaymentIntentSucceeded(paymentIntent) {
 async function handleCheckoutCompleted(session) {
   const userId = session.client_reference_id;
   const customerId = session.customer;
-  
+
   console.log(`Checkout completed for user: ${userId}, customer: ${customerId}`);
-  
+
   if (!userId) {
     console.error('No userId found in checkout session');
     return;
   }
-  
+
   try {
     // For one-time payments, we'll handle this in the payment intent succeeded handler
     // This is mainly for storing customer ID
     const updateData = {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
-    
+
     // Add customer ID if available
     if (customerId) {
       updateData.stripeCustomerId = customerId;
     }
-    
+
     await admin.firestore().collection('users').doc(userId).update(updateData);
-    
+
     console.log(`Updated user ${userId} with customer ID: ${customerId}`);
   } catch (error) {
     console.error('Error updating user:', error);
@@ -373,7 +377,7 @@ async function handleCheckoutCompleted(session) {
 async function handlePaymentSucceeded(invoice) {
   const customerId = invoice.customer;
   console.log(`Payment succeeded for customer: ${customerId}`);
-  
+
   // For one-time payments, this is handled by payment_intent.succeeded
   // This handler is kept for compatibility but mainly logs the event
   console.log(`Invoice payment succeeded for customer: ${customerId}`);
@@ -382,7 +386,7 @@ async function handlePaymentSucceeded(invoice) {
 async function handlePaymentFailed(invoice) {
   const customerId = invoice.customer;
   console.log(`Payment failed for customer: ${customerId}`);
-  
+
   // You might want to send a notification to the user here
   // For now, just log the event
 }
@@ -391,7 +395,7 @@ async function handlePaymentFailed(invoice) {
 exports.getRevenueMetrics = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'GET') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
@@ -452,7 +456,7 @@ exports.getRevenueMetrics = functions.https.onRequest(async (req, res) => {
       });
     } catch (error) {
       console.error('Error getting revenue metrics:', error);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -461,7 +465,7 @@ exports.getRevenueMetrics = functions.https.onRequest(async (req, res) => {
 exports.getSalesMetrics = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'GET') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
@@ -492,7 +496,7 @@ exports.getSalesMetrics = functions.https.onRequest(async (req, res) => {
       // Count sales by product (based on priceId in metadata)
       const productSales = {};
       const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
-      
+
       successfulPayments.forEach(pi => {
         const priceId = pi.metadata?.priceId;
         if (priceId) {
@@ -504,8 +508,10 @@ exports.getSalesMetrics = functions.https.onRequest(async (req, res) => {
             productName = 'Summer Plan';
           } else if (priceId === 'price_1SHG5NBa6NGVc5lJdOEVEhZv') {
             productName = 'Body Building Plan';
+          } else if (priceId === 'price_1ShW3jBa6NGVc5lJ3Tgxi0tD') {
+            productName = 'Essential Plan';
           }
-          
+
           productSales[productName] = (productSales[productName] || 0) + 1;
         }
       });
@@ -528,7 +534,7 @@ exports.getSalesMetrics = functions.https.onRequest(async (req, res) => {
       });
     } catch (error) {
       console.error('Error getting sales metrics:', error);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -537,7 +543,7 @@ exports.getSalesMetrics = functions.https.onRequest(async (req, res) => {
 exports.getTransactionMetrics = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'GET') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
@@ -572,14 +578,14 @@ exports.getTransactionMetrics = functions.https.onRequest(async (req, res) => {
       const successRate = totalTransactions > 0 ? (successfulTransactions / totalTransactions) * 100 : 0;
 
       const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
-      const averageTransactionValue = successfulPayments.length > 0 
+      const averageTransactionValue = successfulPayments.length > 0
         ? successfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / successfulPayments.length / 100
         : 0;
 
       // Previous period metrics
       const previousTotalTransactions = previousPaymentIntents.data.length;
-      const transactionGrowth = previousTotalTransactions > 0 
-        ? ((totalTransactions - previousTotalTransactions) / previousTotalTransactions) * 100 
+      const transactionGrowth = previousTotalTransactions > 0
+        ? ((totalTransactions - previousTotalTransactions) / previousTotalTransactions) * 100
         : 0;
 
       res.json({
@@ -594,7 +600,7 @@ exports.getTransactionMetrics = functions.https.onRequest(async (req, res) => {
       });
     } catch (error) {
       console.error('Error getting transaction metrics:', error);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -603,14 +609,14 @@ exports.getTransactionMetrics = functions.https.onRequest(async (req, res) => {
 exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'GET') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
       console.log('Getting dashboard metrics...');
       const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
       const endDate = req.query.endDate ? new Date(req.query.endDate) : null;
-      
+
       console.log('Date range:', { startDate, endDate });
 
       // Get all metrics in parallel
@@ -627,7 +633,7 @@ exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
       console.log('Fetching user data from Firestore...');
       const usersSnapshot = await admin.firestore().collection('users').get();
       console.log(`Found ${usersSnapshot.docs.length} users`);
-      
+
       const activeCustomers = usersSnapshot.docs.filter(doc => {
         const data = doc.data();
         return data.trainingProgramStatus && data.trainingProgramStatus !== 'none';
@@ -636,7 +642,7 @@ exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
       const newCustomers = usersSnapshot.docs.filter(doc => {
         const data = doc.data();
         let createdAt;
-        
+
         // Handle different timestamp formats
         if (data.createdAt && typeof data.createdAt.toDate === 'function') {
           createdAt = data.createdAt.toDate();
@@ -647,7 +653,7 @@ exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
           // Handle string or other date formats
           createdAt = new Date(data.createdAt);
         }
-        
+
         return createdAt && startDate && createdAt >= startDate && (!endDate || createdAt <= endDate);
       }).length;
 
@@ -675,7 +681,7 @@ exports.getDashboardMetrics = functions.https.onRequest(async (req, res) => {
     } catch (error) {
       console.error('Error getting dashboard metrics:', error);
       console.error('Stack trace:', error.stack);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -753,7 +759,7 @@ async function getSalesMetricsData(startDate, endDate) {
 
   const productSales = {};
   const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
-  
+
   successfulPayments.forEach(pi => {
     const priceId = pi.metadata?.priceId;
     if (priceId) {
@@ -764,8 +770,10 @@ async function getSalesMetricsData(startDate, endDate) {
         productName = 'Summer Plan';
       } else if (priceId === 'price_1SHG5NBa6NGVc5lJdOEVEhZv') {
         productName = 'Body Building Plan';
+      } else if (priceId === 'price_1ShW3jBa6NGVc5lJ3Tgxi0tD') {
+        productName = 'Essential Plan';
       }
-      
+
       productSales[productName] = (productSales[productName] || 0) + 1;
     }
   });
@@ -813,13 +821,13 @@ async function getTransactionMetricsData(startDate, endDate) {
   const successRate = totalTransactions > 0 ? (successfulTransactions / totalTransactions) * 100 : 0;
 
   const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
-  const averageTransactionValue = successfulPayments.length > 0 
+  const averageTransactionValue = successfulPayments.length > 0
     ? successfulPayments.reduce((sum, pi) => sum + pi.amount, 0) / successfulPayments.length / 100
     : 0;
 
   const previousTotalTransactions = previousPaymentIntents.data.length;
-  const transactionGrowth = previousTotalTransactions > 0 
-    ? ((totalTransactions - previousTotalTransactions) / previousTotalTransactions) * 100 
+  const transactionGrowth = previousTotalTransactions > 0
+    ? ((totalTransactions - previousTotalTransactions) / previousTotalTransactions) * 100
     : 0;
 
   return {
@@ -838,7 +846,7 @@ async function getTransactionMetricsData(startDate, endDate) {
 exports.getRecentTransactions = functions.https.onRequest(async (req, res) => {
   return cors(req, res, async () => {
     if (req.method !== 'GET') {
-      return res.status(405).json({error: 'Method not allowed'});
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
@@ -861,7 +869,7 @@ exports.getRecentTransactions = functions.https.onRequest(async (req, res) => {
       const transactions = paymentIntents.data.map(intent => {
         const priceId = intent.metadata?.priceId;
         let productName = 'Unknown Product';
-        
+
         // Map price IDs to product names
         if (priceId === 'price_1SGzgzBa6NGVc5lJvVOssWsG') {
           productName = 'Winter Plan';
@@ -893,7 +901,7 @@ exports.getRecentTransactions = functions.https.onRequest(async (req, res) => {
       });
     } catch (error) {
       console.error('Error getting recent transactions:', error);
-      res.status(500).json({error: error.message});
+      res.status(500).json({ error: error.message });
     }
   });
 });
@@ -902,9 +910,9 @@ exports.getRecentTransactions = functions.https.onRequest(async (req, res) => {
 async function getRecentTransactionsData(limit = 10) {
   try {
     console.log('Getting recent transactions data with limit:', limit);
-    
+
     const stripe = require('stripe')(functions.config().stripe.secret_key);
-    
+
     // Get payment intents from Stripe
     const paymentIntents = await stripe.paymentIntents.list({
       limit: limit,
@@ -914,7 +922,7 @@ async function getRecentTransactionsData(limit = 10) {
     const transactions = paymentIntents.data.map(intent => {
       const priceId = intent.metadata?.priceId;
       let productName = 'Unknown Product';
-      
+
       // Map price IDs to product names
       if (priceId === 'price_1SGzgzBa6NGVc5lJvVOssWsG') {
         productName = 'Winter Plan';
@@ -952,9 +960,9 @@ async function getRecentTransactionsData(limit = 10) {
 async function getHistoricalRevenueData(startDate, endDate) {
   try {
     console.log('Getting historical revenue data from', startDate, 'to', endDate);
-    
+
     const stripe = require('stripe')(functions.config().stripe.secret_key);
-    
+
     // Get payment intents for the period
     const paymentIntents = await stripe.paymentIntents.list({
       created: {
@@ -967,7 +975,7 @@ async function getHistoricalRevenueData(startDate, endDate) {
     // Group by day
     const dailyRevenue = {};
     const oneDay = 24 * 60 * 60 * 1000; // milliseconds in a day
-    
+
     // Initialize all days in the range with 0
     for (let d = new Date(startDate); d <= endDate; d.setTime(d.getTime() + oneDay)) {
       const dayKey = d.toISOString().split('T')[0];

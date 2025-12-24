@@ -222,6 +222,9 @@ class UserPreferences {
 
   // Is Bodybuilder (from onboarding)
   final bool isBodybuilder;
+  
+  // Bodybuilding Goal (from onboarding) - stored as string to avoid import cycles
+  final String? bodybuildingGoal; // Matches BodybuildingGoal enum values
 
   UserPreferences({
     required this.fitnessGoal,
@@ -251,6 +254,7 @@ class UserPreferences {
     this.proteinTargets,
     this.calorieTargets,
     this.isBodybuilder = true,
+    this.bodybuildingGoal,
   });
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
@@ -296,6 +300,7 @@ class UserPreferences {
       proteinTargets: json['proteinTargets'] as Map<String, dynamic>?,
       calorieTargets: json['calorieTargets'] as Map<String, dynamic>?,
       isBodybuilder: json['isBodybuilder'] as bool? ?? true,
+      bodybuildingGoal: json['bodybuildingGoal'] as String?,
     );
   }
 
@@ -328,6 +333,7 @@ class UserPreferences {
       'proteinTargets': proteinTargets,
       'calorieTargets': calorieTargets,
       'isBodybuilder': isBodybuilder,
+      'bodybuildingGoal': bodybuildingGoal,
     };
   }
 
@@ -359,6 +365,7 @@ class UserPreferences {
     Map<String, dynamic>? proteinTargets,
     Map<String, dynamic>? calorieTargets,
     bool? isBodybuilder,
+    String? bodybuildingGoal,
   }) {
     return UserPreferences(
       fitnessGoal: fitnessGoal ?? this.fitnessGoal,
@@ -393,6 +400,7 @@ class UserPreferences {
       proteinTargets: proteinTargets ?? this.proteinTargets,
       calorieTargets: calorieTargets ?? this.calorieTargets,
       isBodybuilder: isBodybuilder ?? this.isBodybuilder,
+      bodybuildingGoal: bodybuildingGoal ?? this.bodybuildingGoal,
     );
   }
 

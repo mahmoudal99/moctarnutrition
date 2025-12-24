@@ -123,6 +123,33 @@ class TrainingProgramFeatures {
       'Progress tracking',
       'Monthly subscription',
     ],
+    TrainingProgram.photoshoot: [
+      '6-month photoshoot prep program',
+      'Peak week strategy',
+      'Cutting & conditioning workouts',
+      'Detailed posing guide',
+      'Stage-ready meal plans',
+      'Water manipulation tactics',
+      'Professional photography tips',
+    ],
+    TrainingProgram.beginner: [
+      'Beginner-friendly workouts',
+      'Form & technique videos',
+      'Progressive overload system',
+      'Foundation nutrition guide',
+      'Supplement basics',
+      'Weekly check-ins',
+      'Beginner transformation guide',
+    ],
+    TrainingProgram.couple: [
+      'Partner workout routines',
+      'Couples meal plans',
+      'Dual progress tracking',
+      'Synchronized training schedules',
+      'Relationship accountability',
+      'Couples motivation system',
+      'Joint transformation guide',
+    ],
   };
 
   static List<String> getFeaturesForProgram(TrainingProgram program) {
@@ -133,9 +160,12 @@ class TrainingProgramFeatures {
       TrainingProgram userProgram, TrainingProgram requiredProgram) {
     final programOrder = {
       TrainingProgram.essential: 0,
-      TrainingProgram.winter: 1,
-      TrainingProgram.summer: 2,
-      TrainingProgram.bodybuilding: 3,
+      TrainingProgram.beginner: 1,
+      TrainingProgram.winter: 2,
+      TrainingProgram.summer: 3,
+      TrainingProgram.photoshoot: 4,
+      TrainingProgram.couple: 5,
+      TrainingProgram.bodybuilding: 6,
     };
 
     return programOrder[userProgram]! >= programOrder[requiredProgram]!;
@@ -164,13 +194,30 @@ class TrainingProgramTier {
   static List<TrainingProgramTier> getTrainingProgramTiers() {
     return [
       TrainingProgramTier(
+        program: TrainingProgram.beginner,
+        name: 'Beginner Plan',
+        description: 'Perfect start for bodybuilding newcomers',
+        price: 240.00,
+        features:
+            TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.beginner),
+        isRecommended: true,
+      ),
+      TrainingProgramTier(
+        program: TrainingProgram.photoshoot,
+        name: 'Photoshoot Prep',
+        description: '6-month program to get stage-ready',
+        price: 650.00,
+        features:
+            TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.photoshoot),
+        isPopular: true,
+      ),
+      TrainingProgramTier(
         program: TrainingProgram.winter,
         name: 'Winter Plan',
         description: 'Perfect for winter training',
         price: 340.00,
         features:
             TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.winter),
-        isRecommended: true,
       ),
       TrainingProgramTier(
         program: TrainingProgram.summer,
@@ -179,6 +226,14 @@ class TrainingProgramTier {
         price: 510.00,
         features:
             TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.summer),
+      ),
+      TrainingProgramTier(
+        program: TrainingProgram.couple,
+        name: 'Couple Plan',
+        description: 'Transform together with your partner',
+        price: 720.00,
+        features:
+            TrainingProgramFeatures.getFeaturesForProgram(TrainingProgram.couple),
         isPopular: true,
       ),
       TrainingProgramTier(

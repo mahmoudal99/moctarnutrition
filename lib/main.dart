@@ -115,7 +115,33 @@ GoRouter createRouter(AuthProvider authProvider) {
             // Check if user is a bodybuilder from onboarding to show appropriate subscription screen
             final isBodybuilder = user.preferences.isBodybuilder;
             if (isBodybuilder) {
-              return const SubscriptionScreen();
+              // Get the recommended program index based on user's bodybuilding goal
+              int? initialPage;
+              if (user.preferences.bodybuildingGoal != null) {
+                // Import the mapper inline to avoid dependency issues
+                final goalString = user.preferences.bodybuildingGoal;
+                
+                // Map goal string to index
+                switch (goalString) {
+                  case 'newToBodybuilding':
+                    initialPage = 0; // Beginner Plan
+                    break;
+                  case 'photoshootPrep':
+                    initialPage = 1; // Photoshoot Prep
+                    break;
+                  case 'winterTransformation':
+                    initialPage = 2; // Winter Plan
+                    break;
+                  case 'sixMonthPlan':
+                    initialPage = 3; // Summer Plan
+                    break;
+                  case 'couplePlan':
+                    initialPage = 4; // Couple Plan
+                    break;
+                }
+              }
+              
+              return SubscriptionScreen(initialPage: initialPage);
             } else {
               return const EssentialSubscriptionScreen();
             }

@@ -11,7 +11,12 @@ import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/services/config_service.dart';
 
 class SubscriptionScreen extends StatefulWidget {
-  const SubscriptionScreen({super.key});
+  final int? initialPage;
+  
+  const SubscriptionScreen({
+    super.key,
+    this.initialPage,
+  });
 
   @override
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();
@@ -19,13 +24,18 @@ class SubscriptionScreen extends StatefulWidget {
 
 class _SubscriptionScreenState extends State<SubscriptionScreen>
     with SingleTickerProviderStateMixin {
-  final PageController _pageController = PageController(viewportFraction: 0.85);
+  late PageController _pageController;
   int _currentPageIndex = 0;
   double _imageOpacity = 0.0;
 
   @override
   void initState() {
     super.initState();
+    _currentPageIndex = widget.initialPage ?? 0;
+    _pageController = PageController(
+      viewportFraction: 0.85,
+      initialPage: _currentPageIndex,
+    );
     _startImageFadeIn();
   }
 
@@ -390,9 +400,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
 
   String _getTierImage(TrainingProgramTier tier) {
     switch (tier.program) {
+      case TrainingProgram.beginner:
+        return 'assets/images/moc_one.jpg';
+      case TrainingProgram.photoshoot:
+        return 'assets/images/moc_three.jpg';
       case TrainingProgram.winter:
         return 'assets/images/moc_one.jpg';
       case TrainingProgram.summer:
+        return 'assets/images/moc_two.jpg';
+      case TrainingProgram.couple:
         return 'assets/images/moc_two.jpg';
       case TrainingProgram.bodybuilding:
         return 'assets/images/moc_three.jpg';
@@ -416,9 +432,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
 
   String _getTierBackgroundImage(TrainingProgramTier tier) {
     switch (tier.program) {
+      case TrainingProgram.beginner:
+        return 'assets/images/winter.png';
+      case TrainingProgram.photoshoot:
+        return 'assets/images/transform.png';
       case TrainingProgram.winter:
         return 'assets/images/winter.png';
       case TrainingProgram.summer:
+        return 'assets/images/summer_plan.png';
+      case TrainingProgram.couple:
         return 'assets/images/summer_plan.png';
       case TrainingProgram.bodybuilding:
         return 'assets/images/transform.png';
@@ -569,12 +591,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
   String? _getPriceIdForProgram(TrainingProgram program) {
     // These should match your Stripe Dashboard price IDs for one-time payments
     switch (program) {
+      case TrainingProgram.beginner:
+        return 'price_BEGINNER_PLACEHOLDER'; // Beginner Plan - €240 one-time (replace with actual price ID)
+      case TrainingProgram.photoshoot:
+        return 'price_PHOTOSHOOT_PLACEHOLDER'; // Photoshoot Prep - €650 one-time (replace with actual price ID)
       case TrainingProgram.winter:
-        return 'price_1SGzgzBa6NGVc5lJvVOssWsG'; // Winter Plan - $400 one-time (replace with actual price ID)
+        return 'price_1SGzgzBa6NGVc5lJvVOssWsG'; // Winter Plan - €340 one-time
       case TrainingProgram.summer:
-        return 'price_1SGzfcBa6NGVc5lJwmTNs2xk'; // Summer Plan - $600 one-time
+        return 'price_1SGzfcBa6NGVc5lJwmTNs2xk'; // Summer Plan - €510 one-time
+      case TrainingProgram.couple:
+        return 'price_COUPLE_PLACEHOLDER'; // Couple Plan - €720 one-time (replace with actual price ID)
       case TrainingProgram.bodybuilding:
-        return 'price_1SHG5NBa6NGVc5lJdOEVEhZv'; // Body Building - $1000 one-time (replace with actual price ID)
+        return 'price_1SHG5NBa6NGVc5lJdOEVEhZv'; // Body Building - €850 one-time
       case TrainingProgram.essential:
         return 'price_1ShW3jBa6NGVc5lJ3Tgxi0tD'; // Essential - €30/month subscription
     }
