@@ -27,21 +27,26 @@ class AIWorkoutService {
       final workoutPlan = await _generateWorkoutPlanWithRetry(user, userId);
       _logger.i('Successfully generated workout plan: ${workoutPlan.title}');
       
-      // Send notifications for pending approval
-      await WorkoutApprovalNotificationService.notifyWorkoutPlanPending(
-        userId,
-        workoutPlan.title,
-      );
-      
-      await WorkoutApprovalNotificationService.notifyTrainersNewWorkoutPlan(
-        userId,
-        workoutPlan.title,
-      );
-      
-      await WorkoutApprovalNotificationService.notifyAdminsNewWorkoutPlan(
-        userId,
-        workoutPlan.title,
-      );
+      // Only send approval notifications for bodybuilders who need trainer approval
+      // Non-bodybuilders get auto-approved, so no need for approval notifications
+      if (user.preferences.isBodybuilder) {
+        await WorkoutApprovalNotificationService.notifyWorkoutPlanPending(
+          userId,
+          workoutPlan.title,
+        );
+        
+        await WorkoutApprovalNotificationService.notifyTrainersNewWorkoutPlan(
+          userId,
+          workoutPlan.title,
+        );
+        
+        await WorkoutApprovalNotificationService.notifyAdminsNewWorkoutPlan(
+          userId,
+          workoutPlan.title,
+        );
+      } else {
+        _logger.i('Non-bodybuilder user - workout plan auto-approved, skipping approval notifications');
+      }
       
       return workoutPlan;
     } catch (e) {
@@ -135,6 +140,50 @@ class AIWorkoutService {
   static String _buildWorkoutPlanPrompt(UserModel user) {
     final prefs = user.preferences;
 
+    // Determine workout schedule based on user preferences
+    final int workoutDays = prefs.weeklyWorkoutDays;
+    final List<int>? specificDays = prefs.specificWorkoutDays;
+    
+    // Build workout schedule description
+    String workoutScheduleDescription;
+    String restDayInstructions;
+    
+    if (specificDays != null && specificDays.isNotEmpty) {
+      // User has selected specific days
+      final dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      final selectedDayNames = specificDays.map((d) => dayNames[d - 1]).toList();
+      final restDays = List.generate(7, (i) => i + 1)
+          .where((d) => !specificDays.contains(d))
+          .map((d) => dayNames[d - 1])
+          .toList();
+      
+      workoutScheduleDescription = '''
+- **Workout Days**: ${selectedDayNames.join(', ')} (${specificDays.length} days total)
+- **Rest Days**: ${restDays.join(', ')} (${restDays.length} days total)''';
+      
+      restDayInstructions = '''
+WORKOUT SCHEDULE (MUST FOLLOW EXACTLY):
+- The user wants to workout on these specific days: ${selectedDayNames.join(', ')}
+- The following days MUST be rest/recovery days: ${restDays.join(', ')}
+- For rest days, set "restDay" to a string describing the recovery activities (e.g., "Active recovery day for muscle repair and growth")
+- For workout days, set "restDay" to null
+- Do NOT include workouts in the workouts array on rest days''';
+    } else {
+      // User has selected number of days per week
+      final restDaysCount = 7 - workoutDays;
+      workoutScheduleDescription = '''
+- **Workout Days Per Week**: $workoutDays days
+- **Rest Days Per Week**: $restDaysCount days''';
+      
+      restDayInstructions = '''
+WORKOUT SCHEDULE (MUST FOLLOW EXACTLY):
+- Generate a 7-day plan with exactly $workoutDays workout days and $restDaysCount rest/recovery days
+- Distribute workout days evenly throughout the week for optimal recovery
+- For rest days, set "restDay" to a string describing the recovery activities (e.g., "Active recovery day for muscle repair and growth")
+- For workout days, set "restDay" to null
+- Do NOT include workouts in the workouts array on rest days''';
+    }
+
     return '''
 Generate a personalized 7-day workout plan based on the following user preferences:
 
@@ -146,6 +195,9 @@ User Profile:
 - Activity Level: ${_getActivityLevelDescription(prefs.activityLevel)}
 - Fitness Goal: ${_getFitnessGoalDescription(prefs.fitnessGoal)}
 - Preferred Workout Styles: ${prefs.preferredWorkoutStyles.join(', ')}
+$workoutScheduleDescription
+
+$restDayInstructions
 
 CRITICAL PROGRAMMING REQUIREMENTS (MUST FOLLOW EXACTLY):
 1. Each major muscle group MUST be trained at least 2× per week - NO EXCEPTIONS
@@ -197,6 +249,7 @@ Please generate the workout plan in the following JSON format. IMPORTANT: All nu
       "title": "Workout Title",
       "description": "Workout description with target muscle groups and training focus",
       "estimatedDuration": 45,
+      "restDay": null,
       "workouts": [
         {
           "id": "workout_1",
@@ -222,17 +275,27 @@ Please generate the workout plan in the following JSON format. IMPORTANT: All nu
           ]
         }
       ]
+    },
+    {
+      "id": "day_2",
+      "dayName": "Tuesday",
+      "title": "Rest & Recovery",
+      "description": "Active recovery day - light stretching, walking, or mobility work",
+      "estimatedDuration": 20,
+      "restDay": "Active recovery day for muscle repair and growth. Recommended activities: light stretching, walking, or mobility work.",
+      "workouts": []
     }
   ]
 }
 
 VALIDATION CHECKLIST (MUST VERIFY BEFORE RESPONDING):
+✓ CRITICAL: The plan has exactly $workoutDays workout days and ${7 - workoutDays} rest days as specified by the user
 ✓ Each major muscle group appears in at least 2 different workout days
 ✓ Each muscle group has 2-3 different exercises per session
 ✓ Each exercise has 3-4 sets minimum
 ✓ Total weekly sets per muscle group: 8-20 sets
 ✓ Each workout includes warm-up and cool-down
-✓ Rest days are included (1-2 days per week)
+✓ Rest days have "restDay" set to a descriptive string and empty workouts array
 ✓ Every exercise includes tempo, rest time, and form cues
 ✓ CRITICAL: All numeric fields (sets, reps, estimatedDuration, restTime, order) are integers, NOT strings
 ✓ CRITICAL: JSON is valid and properly formatted
@@ -385,9 +448,15 @@ Safety first:
           return _convertJsonToWorkoutModel(workoutJson);
         }).toList(),
         estimatedDuration: _parseIntRequired(dailyJson['estimatedDuration'], 'estimatedDuration'),
-        restDay: dailyJson['restDay'] as String?,
+        restDay: _parseRestDay(dailyJson['restDay']),
       );
     }).toList();
+
+    // Determine approval status based on user type
+    // Non-bodybuilders get auto-approved, bodybuilders need trainer approval
+    final approvalStatus = user.preferences.isBodybuilder
+        ? WorkoutPlanApprovalStatus.pending
+        : WorkoutPlanApprovalStatus.approved;
 
     return WorkoutPlanModel(
       id: const Uuid().v4(),
@@ -398,7 +467,8 @@ Safety first:
       dailyWorkouts: dailyWorkouts,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      approvalStatus: WorkoutPlanApprovalStatus.pending, // AI plans need approval
+      approvalStatus: approvalStatus,
+      approvedAt: user.preferences.isBodybuilder ? null : DateTime.now(),
     );
   }
 
@@ -486,6 +556,24 @@ Safety first:
     }
     
     throw ValidationException('Field "$fieldName" has unexpected type ${value.runtimeType} with value "$value" - must be integer');
+  }
+
+  /// Parse restDay field - handles both string and boolean values
+  /// Returns a string description for rest days, or null for workout days
+  static String? _parseRestDay(dynamic value) {
+    if (value == null) return null;
+    
+    if (value is String) return value;
+    
+    // Handle case where AI returns a boolean instead of a string
+    if (value is bool) {
+      if (value) {
+        return 'Rest and recovery day';
+      }
+      return null;
+    }
+    
+    return null;
   }
 
   /// Parse difficulty string to enum
